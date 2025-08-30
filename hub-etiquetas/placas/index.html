@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Etiquetas – Placas</title>
+  <link rel="stylesheet" href="busca.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <img src="pm.png" alt="Pague Menos" class="brand-logo">
+      <img src="logo.png" alt="Danilo Pires" class="brand-logo secondary-logo">
+      <div class="brand-text">
+        <strong>Pague Menos</strong><span>Etiquetas&nbsp;•&nbsp;Produto</span>
+      </div>
+    </div>
+    <div class="actions">
+      <span id="status" class="status chip">Carregando base…</span>
+      <label class="btn btn-ghost file-btn">
+        Carregar base
+        <input id="fileLoad" type="file" accept=".json,.txt,application/json" hidden>
+      </label>
+      <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="btn btn-ghost">Ajuda</a>
+    </div>
+  </header>
+
+  <section class="panel search">
+    <div class="field full">
+      <label for="q">Busque por Códico Interno, Barras ou Descrição</label>
+      <div class="search-row">
+        <input id="q" autocomplete="off" placeholder="Ex.: 68697 • 7897076911070 • Dipirona 500mg" />
+        <button id="btnClear" class="icon-btn" title="Limpar">🧹</button>
+      </div>
+      <div id="noResults" class="no-results" hidden>Nenhuma correspondência encontrada.</div>
+      <div id="matchInfo" class="match-info" hidden></div>
+      <div id="hints" class="hints" hidden></div>
+    </div>
+  </section>
+
+  <main class="content">
+    <article id="card" class="card" hidden>
+      <header class="card-head">
+        <div class="title">
+          <h1 id="desc">—</h1>
+          <p id="meta">—</p>
+        </div>
+        <div class="logos"><!-- logos escondidos no CSS --></div>
+      </header>
+
+      <section class="barcode-zone">
+        <svg id="barcodeSvg" class="barcode" aria-label="Código de barras"></svg>
+      </section>
+
+      <footer class="legend" id="legend">—</footer>
+
+      <div class="card-actions">
+        <div class="print-controls">
+          <label>Largura (mm)<input id="wmm" type="number" min="40" max="65" step="1"></label>
+          <label>Altura (mm)<input id="hmm" type="number" min="12" max="30" step="1"></label>
+          <label>Margem Esq. (mm)<input id="lmm" type="number" min="0" max="10" step="1"></label>
+          <label>Espaço barras<input id="space" type="range" min="1.0" max="1.8" step="0.05"></label>
+        </div>
+        <div class="spacer"></div>
+        <button id="btnCopyBarras" class="btn">Copiar BARRAS</button>
+        <button id="btnCopyCod" class="btn">Copiar COD</button>
+        <button id="btnPrint" class="btn primary">Imprimir</button>
+      </div>
+    </article>
+  </main>
+
+  <footer class="app-footer">
+    <small>Etiqueta com código de barras – Desenvolvido por Danilo Pires.</small>
+  </footer>
+
+  <script>window.BARRAS_JSON_PATH = "base_barras_index.json";</script>
+  <script src="busca.js"></script>
+</body>
+</html>
