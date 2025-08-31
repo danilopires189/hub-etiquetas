@@ -88,7 +88,6 @@
     /* ===== MODO COMPACTO APÓS ESCOLHER ===== */
     body.is-compact header.app{ padding:4px 8px; }
     body.is-compact #bar{ padding:4px 8px; }
-    body.is-compact .brand{ display:none; }          /* some o título e a linha “Caixa • …” */
     body.is-compact #status{ font-size:11px; }
     body.is-compact #openNew{ width:38px; padding:0; justify-content:center; }
     body.is-compact #openNew .txt{ display:none; }   /* fica só o ícone ↗ */
@@ -97,7 +96,7 @@
 </head>
 <body>
   <header class="app" id="hdr">
-    <div class="brand">
+    <div class="brand" id="brand">
       <div class="t">
         <strong>Impressão de Etiquetas</strong>
         <span>Caixa • Endereçamento • Produto • Volume Avulso</span>
@@ -166,6 +165,7 @@
     const $empty   = document.getElementById('empty');
     const $chooser = document.getElementById('chooser');
     const $switcherBtn = document.getElementById('switcherBtn');
+    const $brand   = document.getElementById('brand');   // << bloco do texto inicial
 
     function resizeFrame(){
       const h = window.innerHeight - $hdr.offsetHeight - $bar.offsetHeight;
@@ -175,11 +175,17 @@
     window.addEventListener('orientationchange', resizeFrame);
 
     function enterCompactMode(){
-      document.body.classList.add('is-compact');   // reduz header/bar e esconde o bloco .brand
-      // transforma o seletor em popover e mostra só o ícone
+      document.body.classList.add('is-compact');
+
+      // esconde seletor grande -> vira popover
       $chooser.classList.add('popover');
       $chooser.style.display = 'none';
       $switcherBtn.style.display = 'flex';
+
+      // REMOVE definitivamente o texto inicial do header
+      if ($brand && $brand.parentNode) {
+        $brand.parentNode.removeChild($brand);
+      }
     }
 
     function openPopover(){
@@ -217,7 +223,7 @@
       $frame.src = app.path;
 
       $openNew.disabled = false;
-      enterCompactMode();
+      enterCompactMode();  // <- ativa modo compacto e remove o título inicial
       closePopover();
     }
 
@@ -249,3 +255,4 @@
   </script>
 </body>
 </html>
+
