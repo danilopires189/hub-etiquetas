@@ -20,13 +20,24 @@
     header.app{
       position:sticky; top:0; z-index:40; display:flex; align-items:center; gap:16px;
       padding:10px 16px; background:var(--card); border-bottom:1px solid #00000015;
+      transition: padding .15s ease;
     }
     .brand .t{ display:flex; flex-direction:column; }
-    .brand .t strong{ font-weight:700; letter-spacing:.2px; }
+    .brand .t strong{ font-weight:700; letter-spacing:.2px; transition:font-size .15s ease; }
     .brand .t span{ font-size:12px; color:var(--muted); }
 
-    /* Seleção no topo - visual integrado, sem sombra forte */
-    .tools{ margin-left:auto; display:flex; align-items:center; gap:10px; }
+    .tools{ margin-left:auto; display:flex; align-items:center; gap:10px; position:relative; }
+
+    /* Botão de ícone (compacto) */
+    .icon-btn{
+      width:38px; height:38px; border-radius:9999px;
+      display:none; align-items:center; justify-content:center;
+      background:var(--card); border:1px solid #00000014; color:var(--muted);
+    }
+    .icon-btn:hover{ border-color:#00000033; color:inherit; }
+    .icon-btn:focus-visible{ outline:none; box-shadow:0 0 0 4px var(--ring); }
+
+    /* Seletor grande (modo inicial) */
     .chooser{
       display:flex; align-items:center; gap:10px; padding:6px 10px; border-radius:14px;
       border:1px solid #00000014; background:var(--card);
@@ -38,24 +49,52 @@
       border:1px solid #00000014; background:transparent; color:inherit;
       padding:0 12px; font-size:14px;
     }
+
+    /* Popover do seletor (modo compacto) */
+    .chooser.popover{
+      display:none;
+      position:absolute; right:40px; top:48px;
+      box-shadow:0 12px 30px rgba(0,0,0,.15);
+      border:1px solid #00000020; border-radius:14px; padding:8px; z-index:50;
+      background:var(--card);
+    }
+    .chooser.popover.open{ display:flex; }
+
+    /* Botão abrir nova aba (vira ícone no modo compacto) */
     #openNew{
       height:40px; padding:0 14px; border-radius:var(--radius);
       background:transparent; border:1px solid #00000014; color:var(--muted);
+      display:flex; align-items:center; gap:8px;
     }
+    #openNew svg{ width:16px; height:16px; }
     #openNew:hover{ border-color:#00000033; color:inherit; }
+    #openNew:disabled{ opacity:.5; cursor:not-allowed; }
 
-    /* Barra do app + área do app */
+    /* Barra abaixo (título + status) */
     #bar{
       display:flex; gap:8px; align-items:center; padding:10px 16px;
       background:var(--card); border-bottom:1px solid #00000015;
+      transition: padding .15s ease;
     }
-    #status{ font-size:12px; color:var(--muted); margin-left:auto; }
+    #status{ font-size:12px; color:var(--muted); margin-left:auto; transition:font-size .15s ease; }
 
-    /* O iframe vai ter altura calculada via JS (100% do viewport - header - bar) */
+    /* Iframe */
     #appFrame{ width:100%; border:0; display:none; background:#0a0c10; }
 
     /* Placeholder inicial */
     #empty{ display:grid; place-items:center; color:#6b7280; font-size:15px; height:50vh; }
+
+    /* ===== MODO COMPACTO APÓS ESCOLHER ===== */
+    body.is-compact header.app{ padding:6px 10px; }
+    body.is-compact .brand .t span{ display:none; }             /* some a linha “Caixa • …” */
+    body.is-compact .brand .t strong{ font-size:13px; }
+    body.is-compact #bar{ padding:6px 10px; }
+    body.is-compact #status{ font-size:11px; }
+
+    body.is-compact #openNew{ width:38px; padding:0; justify-content:center; }
+    body.is-compact #openNew .txt{ display:none; }              /* esconde o texto; fica só o ícone ↗ */
+
+    body.is-compact #switcherBtn{ display:flex; }               /* mostra o botão de ícone */
   </style>
 </head>
 <body>
@@ -63,25 +102,41 @@
     <div class="brand">
       <div class="t">
         <strong>Impressão de Etiquetas</strong>
-        <span>Produto • Caixa • Volume Avulso</span>
+        <span>Caixa • Endereçamento • Produto • Volume Avulso</span>
       </div>
     </div>
+
     <div class="tools">
-      <div class="chooser" role="group" aria-label="Escolha da aplicação">
+      <!-- botão compacto (só aparece depois que escolher um app) -->
+      <button id="switcherBtn" class="icon-btn" title="Trocar aplicação (Ctrl+1/2/3/4)" aria-label="Trocar aplicação">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+          <path d="M4 5h4v4H4V5zm6 0h4v4h-4V5zm6 0h4v4h-4V5zM4 11h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 17h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z"/>
+        </svg>
+      </button>
+
+      <!-- seletor grande (inicial; depois funciona como popover) -->
+      <div class="chooser" id="chooser" role="group" aria-label="Escolha da aplicação">
         <span class="label">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M4 5h4v4H4V5zm6 0h4v4h-4V5zm6 0h4v4h-4V5zM4 11h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 17h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z"/>
           </svg>
           Escolha a aplicação:
         </span>
-        <select id="appSelect" title="Escolha a aplicação (Ctrl+1/2/3)">
+        <select id="appSelect" title="Escolha a aplicação (Ctrl+1/2/3/4)">
           <option value="" selected>Selecione…</option>
-          <option value="placas">Produto</option>
           <option value="caixa">Caixa</option>
+          <option value="enderec">Endereçamento</option>
+          <option value="placas">Produto</option>
           <option value="avulso">Volume Avulso</option>
         </select>
       </div>
-      <button id="openNew" title="Abrir a aplicação em nova aba">Abrir em nova aba</button>
+
+      <button id="openNew" title="Abrir a aplicação em nova aba" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"/>
+        </svg>
+        <span class="txt">Abrir em nova aba</span>
+      </button>
     </div>
   </header>
 
@@ -95,23 +150,25 @@
   <iframe id="appFrame" src="about:blank" title="Aplicação selecionada" referrerpolicy="no-referrer"></iframe>
 
   <script>
-    // Caminhos mantidos
+    // Apps e atalhos (Ctrl+1/2/3/4)
     const APPS = {
-      placas: { id:'placas', name:'Etiquetas de Produto', path:'./placas/index.html', hotkey:'1' },
-      caixa:  { id:'caixa',  name:'Etiquetas de Caixa', path:'./caixa/index.html',  hotkey:'2' },
-      avulso: { id:'avulso', name:'Etiquetas Volume Avulso',       path:'./avulso/index.html', hotkey:'3' }
+      placas:  { id:'placas',  name:'Etiquetas de Produto',        path:'./placas/index.html',  hotkey:'1' },
+      caixa:   { id:'caixa',   name:'Etiquetas de Caixa',          path:'./caixa/index.html',   hotkey:'2' },
+      avulso:  { id:'avulso',  name:'Etiquetas Volume Avulso',     path:'./avulso/index.html',  hotkey:'3' },
+      enderec: { id:'enderec', name:'Etiquetas – Endereçamento',   path:'./enderec/index.html', hotkey:'4' }
     };
 
-    const $hdr    = document.getElementById('hdr');
-    const $bar    = document.getElementById('bar');
-    const $frame  = document.getElementById('appFrame');
-    const $title  = document.getElementById('appTitle');
-    const $status = document.getElementById('status');
-    const $select = document.getElementById('appSelect');
-    const $openNew= document.getElementById('openNew');
-    const $empty  = document.getElementById('empty');
+    const $hdr     = document.getElementById('hdr');
+    const $bar     = document.getElementById('bar');
+    const $frame   = document.getElementById('appFrame');
+    const $title   = document.getElementById('appTitle');
+    const $status  = document.getElementById('status');
+    const $select  = document.getElementById('appSelect');
+    const $openNew = document.getElementById('openNew');
+    const $empty   = document.getElementById('empty');
+    const $chooser = document.getElementById('chooser');
+    const $switcherBtn = document.getElementById('switcherBtn');
 
-    // ajusta a altura do iframe para ocupar todo o viewport restante
     function resizeFrame(){
       const h = window.innerHeight - $hdr.offsetHeight - $bar.offsetHeight;
       $frame.style.height = Math.max(200, h) + 'px';
@@ -119,41 +176,70 @@
     window.addEventListener('resize', resizeFrame);
     window.addEventListener('orientationchange', resizeFrame);
 
+    function enterCompactMode(){
+      document.body.classList.add('is-compact');  // ↓ reduz header/bar e esconde a linha “Caixa • …”
+      // transforma o seletor em popover e mostra só o ícone
+      $chooser.classList.add('popover');
+      $chooser.style.display = 'none';
+      $switcherBtn.style.display = 'flex';
+    }
+
+    function openPopover(){
+      $chooser.classList.add('open');
+      $chooser.style.display = 'flex';
+      setTimeout(()=> $select.focus(), 0);
+      document.addEventListener('mousedown', onDocDown);
+      document.addEventListener('keydown', onEsc);
+    }
+    function closePopover(){
+      $chooser.classList.remove('open');
+      $chooser.style.display = 'none';
+      document.removeEventListener('mousedown', onDocDown);
+      document.removeEventListener('keydown', onEsc);
+    }
+    function onDocDown(e){
+      if(!$chooser.contains(e.target) && e.target !== $switcherBtn) closePopover();
+    }
+    function onEsc(e){ if(e.key === 'Escape') closePopover(); }
+
     function loadApp(appId){
       const app = APPS[appId];
       if(!app) return;
 
-      // Cabeçalho
       $title.textContent = app.name;
       $status.textContent = 'Carregando…';
       $select.value = app.id;
 
-      // Remove placeholder e mostra apenas o iframe
       if($empty) $empty.remove();
       $frame.style.display = 'block';
       resizeFrame();
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'auto' });
 
-      // Carrega app
       $frame.onload = () => { $status.textContent = 'Pronto'; };
       $frame.src = app.path;
 
-      // Nova aba apenas se clicar
-      $openNew.onclick = () => window.open(app.path, '_blank', 'noopener');
+      $openNew.disabled = false;
+      enterCompactMode();
+      closePopover();
     }
 
-    // Dropdown
-    $select.addEventListener('change', e => loadApp(e.target.value));
+    $select.addEventListener('change', (e) => loadApp(e.target.value));
+    $switcherBtn.addEventListener('click', () => {
+      const isOpen = $chooser.classList.contains('open');
+      isOpen ? closePopover() : openPopover();
+    });
+    $openNew.addEventListener('click', () => {
+      const app = APPS[$select.value];
+      if(app) window.open(app.path, '_blank', 'noopener');
+    });
 
-    // Atalhos Ctrl+1/2/3
-    document.addEventListener('keydown', (ev)=>{
+    document.addEventListener('keydown', (ev) => {
       const isCtrl = ev.ctrlKey || ev.metaKey;
       if(!isCtrl) return;
       const app = Object.values(APPS).find(a => a.hotkey === ev.key);
       if(app){ ev.preventDefault(); loadApp(app.id); }
     });
 
-    // Inicializa a altura correta do placeholder e iframe
     resizeFrame();
   </script>
 </body>
