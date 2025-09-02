@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pague Menos • Transferência CD → CD</title>
+  <link rel="icon" href="assets/pm.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="left">
+      <div class="logo-pill"><img src="assets/pm.png" alt="Pague Menos"></div>
+      <div class="logo-pill"><img src="assets/danilopires.png" alt="Danilo Pires"></div>
+      <div class="brand">
+        <div class="brand-name">Pague Menos</div>
+        <div class="brand-sub">Transferência • CD → CD</div>
+      </div>
+    </div>
+    <div class="right">
+      <button id="btnPrint" class="pill-btn"><span class="ico">🖨️</span> Imprimir</button>
+      <button id="btnAjuda" class="pill-btn ghost">Ajuda</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="search-card">
+      <div class="grid">
+        <div class="field">
+          <label for="origem">Depósito origem *</label>
+          <select id="origem"></select>
+        </div>
+        <div class="field">
+          <label for="destino">Depósito destino *</label>
+          <select id="destino"></select>
+        </div>
+        <div class="field">
+          <label for="nf">Nota Fiscal *</label>
+          <input id="nf" type="number" inputmode="numeric" placeholder="Ex.: 2301" />
+        </div>
+        <div class="field">
+          <label for="serie">Série *</label>
+          <input id="serie" type="text" placeholder="Ex.: 46" />
+        </div>
+        <div class="field">
+          <label for="qtd">Quantidade de volumes *</label>
+          <input id="qtd" type="number" min="1" max="99" value="1" />
+        </div>
+        <div class="field">
+          <label for="fragil">Selo Frágil</label>
+<select id="fragil">
+  <option value="on" selected>Exibir</option>
+  <option value="off">Não exibir</option>
+</select>
+        </div>
+      </div>
+      <div class="actions-row">
+        <button id="btnGerar" class="cta">Gerar documento</button>
+      </div>
+    </div>
+    <p class="byline">Gerador de documento A4 — Desenvolvido por Danilo Pires.</p>
+  </section>
+
+  <main id="preview" class="preview"></main>
+
+  <template id="pageTpl">
+    <section class="page a4 landscape">
+      <div class="page-inner">
+        <header class="doc-header">
+          <h1>TRANSFERÊNCIA CD - CD</h1>
+          <img src="assets/pm.png" alt="PM" class="logo" />
+        </header>
+
+        <div class="two-cols">
+          <div class="col col-left">
+            <section class="bloc bloc-destino">
+              <div class="bloc-title">DESTINATÁRIO:</div>
+              <div class="bloc-body">
+                <div class="line"><span class="lbl">DEPÓSITO:</span> <span class="val js-dest-nome"></span></div>
+                <div class="line"><span class="lbl">ENDEREÇO:</span> <span class="val js-dest-end"></span></div>
+                <div class="line"><span class="lbl">CEP.:</span> <span class="val js-dest-cep"></span></div>
+                <div class="line"><span class="lbl">CNPJ:</span> <span class="val js-dest-cnpj"></span></div>
+              </div>
+            </section>
+
+            <section class="bloc bloc-remet">
+              <div class="bloc-title">REMETENTE.:</div>
+              <div class="bloc-body">
+                <div class="line"><span class="lbl">DEPÓSITO:</span> <span class="val js-orig-nome"></span></div>
+                <div class="line"><span class="lbl">ENDEREÇO:</span> <span class="val js-orig-end"></span></div>
+                <div class="line"><span class="lbl">CEP.:</span> <span class="val js-orig-cep"></span></div>
+                <div class="line"><span class="lbl">CNPJ:</span> <span class="val js-orig-cnpj"></span></div>
+              </div>
+            </section>
+
+            <div class="line meta">
+              <span class="lbl">DT CRIAÇÃO:</span>
+              <span class="val js-dt-criacao"></span>
+            </div>
+          </div>
+
+          <aside class="col col-right">
+            <div class="fragil">
+              <img src="assets/fragil.svg" alt="Cuidado Frágil" />
+            </div>
+
+            <section class="volume-card">
+              <div class="title">VOLUME</div>
+              <div class="big js-vol"></div>
+              <div class="tag js-tag-fracionado" hidden>VOLUME FRACIONADO</div>
+            </section>
+
+            <section class="nf-card">
+              <div class="nf-title">NOTA FISCAL</div>
+              <div class="nf-body">
+                <div class="nf-linha">N°: <span class="js-nf"></span></div>
+                <div class="nf-linha">Série: <span class="js-serie"></span></div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('btnPrint').addEventListener('click', () => window.print());
+      document.getElementById('btnAjuda').addEventListener('click', () => {
+        alert('1) Selecione Origem e Destino (devem ser diferentes)\n2) Informe NF, Série e Quantidade\n3) Clique Gerar documento e depois Imprimir.');
+      });
+    });
+  </script>
+</body>
+</html>
