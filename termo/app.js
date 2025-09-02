@@ -116,8 +116,8 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
   const logos = document.createElement('div');
   logos.className = 'logos';
   const img1 = document.createElement('img'); img1.src = 'pm.png'; img1.alt = 'Pague Menos'; img1.className='brand-logo pm';
-  const img2 = document.createElement('img'); img2.src = 'logo.png'; img2.alt = 'Danilo Pires'; img2.className='brand-logo dp';
-  logos.append(img1, img2);
+  // Removido o logo .logo (DP) da área de impressão/preview
+  logos.append(img1);
   header.append(leftTitle, logos);
   el.appendChild(header);
 
@@ -193,17 +193,17 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
 
   const vb = document.createElement('div');
   vb.className='big';
-  vb.textContent=`${volAtual}/${volTotal}`;
+  vb.textContent = `${volAtual}/${volTotal}`;
 
   vbox.append(vt, vb);
 
-  // NÚMERO sempre exibido como inteiro (sem zeros à esquerda)
-  const vn = document.createElement('div');
-  vn.className='mini';
-  vn.textContent = `NÚMERO: ${toIntStr(numeroVolumeStr, volAtual)}`;
-  vbox.appendChild(vn);
+  // Exibir "NÚMERO:" apenas quando houver fracionamento (mais de 1 volume)
+  if(Number(volTotal) > 1){
+    const vn = document.createElement('div');
+    vn.className='mini';
+    vn.textContent = `NÚMERO: ${toIntStr(numeroVolumeStr, volAtual)}`;
+    vbox.appendChild(vn);
 
-  if(Number(volTotal)>1){
     const vf = document.createElement('div');
     vf.className='mini';
     vf.textContent = 'VOLUME FRACIONADO';
@@ -228,12 +228,12 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
   const hh = pad(now.getHours(),2), mi = pad(now.getMinutes(),2);
   meta.innerHTML = `<span>CD: <strong>${Number(cd||0)}</strong></span>` +
                    (matricula ? `<span>MATRÍCULA: <strong>${matricula}</strong></span>` : '') +
-                   `<span>SEPARAÇÃO EM: <strong>${dd}/${mm}/${aa} ${hh}:${mi}</strong></span>`;
+                   `<span>SEPARADO EM: <strong>${dd}/${mm}/${aa} ${hh}:${mi}</strong></span>`;
   el.appendChild(meta);
 
   // render barcode
   if(window.JsBarcode){
-    JsBarcode(svg, id, {format:'CODE128', displayValue:false, margin:0, width: 2, height: 42});
+    JsBarcode(svg, id, {format:'CODE128', displayValue:false, margin:0, width: 1, height: 42});
   }else{
     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
     t.setAttribute('x','0'); t.setAttribute('y','20'); t.textContent = id;
@@ -253,7 +253,7 @@ function setManualEnabled(enabled){
 
 function onCdChange(){
   const cdVal = $('#cd').value.trim();
-  const ok = cdVal !== '' && !isNaN(Number(cdVal));
+  const ok = /^[1-9]$/.test(cdVal);
   setManualEnabled(ok);
 
   const c = String(Number(cdVal||0));
@@ -276,25 +276,19 @@ function gerar(){
     const usaId = $('#modoId').checked;
     const totalVol = Math.max(1, parseInt($('#qtdVolumes').value||'1',10));
     const mat = $('#matricula').value.trim();
-    const numVolInput = document.getElementById('numeroVolume') ? onlyDigits(document.getElementById('numeroVolume').value) : '';
+    const numVolInput = onlyDigits(document.getElementById('numeroVolume') ? document.getElementById('numeroVolume').value : '');
     const etiquetas = [];
 
     if(usaId){
       const idRaw = onlyDigits($('#idEtiqueta').value);
-      const parsed = parseId(idRaw);
+      const parsed = parseId(idRaw); // valida e já quebra campos
+      const idFixo = idRaw;          // ID permanece fixo em todas as etiquetas
+
+      // Base para mostrar NÚMERO (somente exibição)
+      const base4 = numVolInput ? Number(String(numVolInput).slice(-4)) : Number(String(parsed.vol).slice(-4));
 
       for(let v=1; v<=totalVol; v++){
-        const start5 = Number(String(parsed.vol).slice(-5));
-        const num5 = pad((start5 + (v-1)), 5);
-
-        const start4 = Number(String(parsed.vol).slice(-4));
-        const num4 = pad((start4 + (v-1)), 4);
-
-        const novoId = buildId({
-          cd: parsed.cd, pedido: parsed.pedido, seq: parsed.seq,
-          loja: parsed.loja, rota: parsed.rota, vol: num5
-        });
-
+        const num4 = pad(base4, 4);
         const etq = montarEtiqueta({
           cd: parsed.cd,
           loja: parsed.loja,
@@ -304,15 +298,14 @@ function gerar(){
           volAtual: v,
           volTotal: totalVol,
           matricula: mat,
-          id: novoId,
-          // Exibir como inteiro (sem zeros) na etiqueta; manter zeros no ID
-          numeroVolumeStr: num4
+          id: idFixo,                 // código/ID fixo
+          numeroVolumeStr: num4       // apenas para exibição
         });
         etiquetas.push(etq);
       }
     }else{
       const cd = $('#cd').value;
-      if(cd === '' || isNaN(Number(cd))) throw new Error('Informe o CD para liberar os demais campos.');
+      if(!/^[1-9]$/.test(cd)) throw new Error('Informe o CD (1 a 9) para liberar os demais campos.');
 
       const loja = $('#loja').value;
       const pedido = $('#pedido').value;
@@ -321,17 +314,19 @@ function gerar(){
 
       if(!pedidoToDateStr(pedido)) throw new Error('PEDIDO (AAAADDD) inválido. Ex.: 2024269');
 
+      const baseNum5 = numVolInput ? pad(Number(numVolInput), 5) : '00001';
+      const idFixo = buildId({cd, pedido, seq, loja, rota, vol: baseNum5}); // ID fixo
+
+      const base4 = Number(baseNum5.slice(-4)); // para exibição
       for(let v=1; v<=totalVol; v++){
-        const num5 = (numVolInput ? pad(Number(numVolInput) + (v-1), 5) : pad(v,5));
-        const id = buildId({cd, pedido, seq, loja, rota, vol:num5});
+        const num4 = pad(base4, 4);
         const etq = montarEtiqueta({
           cd, loja, pedido, seq, rota,
           volAtual: v,
           volTotal: totalVol,
           matricula: mat,
-          id,
-          // Em manual, usamos o num5 (padded) para ID, mas exibimos sem zeros
-          numeroVolumeStr: num5
+          id: idFixo,                 // ID fixo
+          numeroVolumeStr: num4       // exibição
         });
         etiquetas.push(etq);
       }
@@ -342,6 +337,7 @@ function gerar(){
     alert('Erro: ' + e.message);
   }
 }
+
 
 document.addEventListener('DOMContentLoaded', async ()=>{
   await loadBase();

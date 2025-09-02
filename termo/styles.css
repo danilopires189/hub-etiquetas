@@ -33,7 +33,7 @@ body{
 .btn-primary:hover{ filter:brightness(1.05); }
 .btn-ghost{ background: #ffffffaa; color: var(--brand-blue); border-color:#e6ecff; }
 .btn-ghost:hover{ background:#fff; }
-.btn.large{ width:100%; padding:16px 22px; font-size:17px; border-radius:14px; }
+.btn.large{ width:100%; padding:5px 22px; font-size:17px; border-radius:14px; }
 
 .panel.controls{
   max-width:1200px; margin:24px auto;

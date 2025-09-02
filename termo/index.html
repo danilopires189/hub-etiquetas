@@ -12,9 +12,7 @@
   <header class="app-header">
     <div class="brand">
       <div class="brand-logos">
-        <img src="pm.png" alt="Pague Menos" class="brand-logo pm">
-        <img src="logo.png" alt="Danilo Pires" class="brand-logo dp">
-      </div>
+        <img src="pm.png" alt="Pague Menos" class="brand-logo pm"></div>
       <div class="brand-text">
         <strong>Pague Menos</strong><span>Etiquetas • Termolábeis</span>
       </div>
@@ -43,15 +41,15 @@
 
     <div id="blocoCampos" class="blocohide">
       <div class="field span2">
-        <label for="cd">CD</label>
-        <input id="cd" type="number" min="0" max="9" list="listCD" placeholder="ex.: 2" />
+        <label for="cd">Informe o CD.</label>
+        <input id="cd" type="number" min="1" max="9" list="listCD" placeholder="ex.: 2" step="1" />
         <datalist id="listCD"></datalist>
-        <small class="hint">Informe o CD.</small>
+        <small class="hint"></small>
       
 <div class="field">
   <label for="numeroVolume">N° do volume </label>
   <input id="numeroVolume" type="text" inputmode="numeric" pattern="\d{1,5}" placeholder="ex.: 9" disabled />
-  <small class="hint">Se usar ID, o número será os 4 últimos dígitos do volume do ID. Em manual, informe aqui.</small>
+  <small class="hint"></small>
 </div>
     </div>
 
@@ -73,14 +71,14 @@
 
       <div class="field">
         <label for="rota">N° Rota</label>
-        <input id="rota" type="number" min="0" max="999" list="listRota" placeholder="ex.: 4" disabled />
+        <input id="rota" type="number" min="0" max="999" list="listRota" placeholder="ex.: 201" disabled />
         <datalist id="listRota"></datalist>
       </div>
     </div>
 
     <div class="field">
       <label for="qtdVolumes">Quantidade de volumes</label>
-      <input id="qtdVolumes" type="number" min="1" value="1" />
+      <input id="qtdVolumes" type="number" min="1" value="2" />
     </div>
 
     <div class="field">
