@@ -34,7 +34,7 @@ const DEPOSITOS = [
 ];
 
 /* ====== Util ====== */
-const $ = (sel, root=document) => root.querySelector(sel);
+const $  = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 const fmt2 = n => String(n).padStart(2,'0');
 const nowStr = () => {
@@ -45,8 +45,9 @@ const byId = id => DEPOSITOS.find(d => d.id === Number(id));
 
 /* ====== UI ====== */
 function mountSelects(){
+  // AJUSTE: exibir somente "CDxx - Nome" (sem o ID à esquerda).
   const opts = [`<option value="" disabled selected>Selecione...</option>`]
-    .concat(DEPOSITOS.map(d => `<option value="${d.id}">${d.id} — ${d.nome}</option>`))
+    .concat(DEPOSITOS.map(d => `<option value="${d.id}">${d.nome}</option>`))
     .join("");
   $("#origem").innerHTML = opts;
   $("#destino").innerHTML = opts;
@@ -91,34 +92,35 @@ function generate(){
 
     // Lado esquerdo (destino e remetente)
     $(".js-dest-nome", root).textContent = `${d.nome}`;
-    $(".js-dest-end", root).textContent = `${d.endereco}`;
-    $(".js-dest-cep", root).textContent = d.cep;
+    $(".js-dest-end", root).textContent  = `${d.endereco}`;
+    $(".js-dest-cep", root).textContent  = d.cep;
     $(".js-dest-cnpj", root).textContent = d.cnpj;
 
     $(".js-orig-nome", root).textContent = `${o.nome}`;
-    $(".js-orig-end", root).textContent = `${o.endereco}`;
-    $(".js-orig-cep", root).textContent = o.cep;
+    $(".js-orig-end", root).textContent  = `${o.endereco}`;
+    $(".js-orig-cep", root).textContent  = o.cep;
     $(".js-orig-cnpj", root).textContent = o.cnpj;
 
     $(".js-dt-criacao", root).textContent = nowStr();
 
     // Lado direito
-    $(".js-vol", root).textContent = `${i}/${v.qtd}`;
-    $(".js-nf", root).textContent = v.nf;
+    $(".js-vol", root).textContent   = `${i}/${v.qtd}`;
+    $(".js-nf", root).textContent    = v.nf;
     $(".js-serie", root).textContent = v.serie;
 
-    const tag = $(".js-tag-fracionado", root);
+    const tag       = $(".js-tag-fracionado", root);
     const fragilBox = $(".fragil", root);
     const showFragil = (fragilPref === 'on');
-tag.hidden = !fracionado;
-    tag.style.display = fracionado ? "inline-block" : "none";
+
+    tag.hidden = v.qtd <= 1;
+    tag.style.display = v.qtd > 1 ? "inline-block" : "none";
     fragilBox.style.display = showFragil ? "flex" : "none";
 
     preview.appendChild(page);
   }
 
   // scroll to preview
-  window.scrollTo({top: $("#preview").offsetTop - 10, behavior:'smooth'});
+  window.scrollTo({ top: $("#preview").offsetTop - 10, behavior:'smooth' });
 }
 
 function setup(){
