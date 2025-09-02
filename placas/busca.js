@@ -186,7 +186,7 @@ function renderCard(r){
   $('#meta').textContent = `COD: ${r.COD}   DV: ${r.DV}`;
   const legend = `
     <span><span class="tag">BARRAS:</span> <span class="mono">${r.BARRAS}</span> <small class="muted">(${tipoBarras((r.BARRAS||'').trim().length)})</small></span>
-    <span><span class="tag">Criado em:</span> ${nowStr()}</span>`;
+   /*  <span><span class="tag">Criado em:</span> ${nowStr()}</span>`; */
   $('#legend').innerHTML = legend;
 
   const barras = String(r.BARRAS||'').trim();
