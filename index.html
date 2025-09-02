@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="pt-br">
 <head>
@@ -169,6 +168,10 @@
     const btnNewTab = $('#btnNewTab');
     let currentApp = null;
 
+    // ===================== NOVO: Sempre iniciar no Hub =====================
+    const ALWAYS_START_IN_HUB = true; // deixe true para sempre abrir no Hub
+    // =======================================================================
+
     function tileHTML(app){
       const icon = ICONS[app.icon] || ICONS.box;
       return (
@@ -198,8 +201,7 @@
       chooser.classList.add('hidden');
       viewer.classList.remove('hidden');
       btnHome.hidden = false;
-      localStorage.setItem('hub:lastApp', id);
-      location.hash = '#/' + encodeURIComponent(id);
+      // Mantemos o hash e o lastApp, mas o boot() pode ignorá-los se ALWAYS_START_IN_HUB=true
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setTimeout(()=> frame.focus(), 80);
     }
@@ -215,7 +217,6 @@
       viewer.classList.add('hidden');
       chooser.classList.remove('hidden');
       btnHome.hidden = true;
-      location.hash = '';
       currentApp = null;
     });
 
@@ -236,11 +237,17 @@
 
     function boot(){
       renderTiles();
-      let id = '';
-      const hash = location.hash || '';
-      if(hash.startsWith('#/')) id = decodeURIComponent(hash.slice(2));
-      if(!id){ id = localStorage.getItem('hub:lastApp') || ''; }
-      if(id) openById(id);
+      // =================== AJUSTE: SEMPRE INICIAR NO HUB ===================
+      if (ALWAYS_START_IN_HUB) {
+        // Ignora hash e último app salvo, mantendo só o Hub visível
+        btnHome.hidden = true;
+        viewer.classList.add('hidden');
+        chooser.classList.remove('hidden');
+        frame.src = '';
+        return;
+      }
+      // (Sem histórico): não lemos hash nem localStorage; sempre inicia no Hub.
+
     }
     boot();
   </script>
