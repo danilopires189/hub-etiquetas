@@ -102,13 +102,13 @@
     <div class="brand">
       <div class="t">
         <strong>Impressão de Etiquetas</strong>
-        <span>Caixa • Endereçamento • Produto • Volume Avulso • Transferência CD-CD</span>
+        <span>Caixa • Endereçamento • Produto • Volume Avulso • Transferência CD-CD • Termolábeis</span>
       </div>
     </div>
 
     <div class="tools">
       <!-- botão compacto (só aparece depois que escolher um app) -->
-      <button id="switcherBtn" class="icon-btn" title="Trocar aplicação (Ctrl+1/2/3/4/5)" aria-label="Trocar aplicação">
+      <button id="switcherBtn" class="icon-btn" title="Trocar aplicação (Ctrl+1/2/3/4/5/6)" aria-label="Trocar aplicação">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
           <path d="M4 5h4v4H4V5zm6 0h4v4h-4V5zm6 0h4v4h-4V5zM4 11h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 17h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4z"/>
         </svg>
@@ -122,13 +122,14 @@
           </svg>
           Escolha a aplicação:
         </span>
-        <select id="appSelect" title="Escolha a aplicação (Ctrl+1/2/3/4/5)">
+        <select id="appSelect" title="Escolha a aplicação (Ctrl+1/2/3/4/5/6)">
           <option value="" selected>Selecione…</option>
           <option value="caixa">Caixa</option>
           <option value="enderec">Endereçamento</option>
           <option value="placas">Produto</option>
           <option value="avulso">Volume Avulso</option>
           <option value="transferencia">Transferência CD-CD</option>
+          <option value="termo">Termolábeis</option>
         </select>
       </div>
 
@@ -151,13 +152,14 @@
   <iframe id="appFrame" src="about:blank" title="Aplicação selecionada" referrerpolicy="no-referrer"></iframe>
 
   <script>
-    // Apps e atalhos (Ctrl+1/2/3/4/5)
+    // Apps e atalhos (Ctrl+1/2/3/4/5/6)
     const APPS = {
-placas:  { id:'placas',  name:'Etiquetas de Produto',        path:'./placas/index.html',  hotkey:'1' },
-      caixa:   { id:'caixa',   name:'Etiquetas de Caixa',          path:'./caixa/index.html',   hotkey:'2' },
-      avulso:  { id:'avulso',  name:'Etiquetas Volume Avulso',     path:'./avulso/index.html',  hotkey:'3' },
-      enderec: { id:'enderec', name:'Etiquetas – Endereçamento',   path:'./enderec/index.html', hotkey:'4' },
-      transferencia: { id:'transferencia', name:'Transferência CD → CD', path:'./transferencia/index.html', hotkey:'5' }
+      placas:  { id:'placas',  name:'Etiquetas de Produto',        path:'./placas/index.html',        hotkey:'1' },
+      caixa:   { id:'caixa',   name:'Etiquetas de Caixa',          path:'./caixa/index.html',         hotkey:'2' },
+      avulso:  { id:'avulso',  name:'Etiquetas Volume Avulso',     path:'./avulso/index.html',        hotkey:'3' },
+      enderec: { id:'enderec', name:'Etiquetas – Endereçamento',   path:'./enderec/index.html',       hotkey:'4' },
+      transferencia: { id:'transferencia', name:'Transferência CD → CD', path:'./transferencia/index.html', hotkey:'5' },
+      termo:   { id:'termo',   name:'Etiquetas – Termolábeis',     path:'./termo/index.html',         hotkey:'6' }
     };
 
     const $hdr     = document.getElementById('hdr');
@@ -246,4 +248,3 @@ placas:  { id:'placas',  name:'Etiquetas de Produto',        path:'./placas/inde
   </script>
 </body>
 </html>
-
