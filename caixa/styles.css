@@ -168,7 +168,7 @@ svg.barcode{ width:100%; height: calc(var(--bar-height) * (var(--label-h-mm) * 1
 .label.internal .bar-left{ display:none; }
 .label.internal .text-right{ width:100%; }
 .label.internal .legend{
-  font-size: 80pt;
+  font-size: 85pt;
   font-weight: 800;
   letter-spacing: 2px;
   writing-mode: horizontal-tb !important;
