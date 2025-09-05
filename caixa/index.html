@@ -18,7 +18,7 @@
       </div>
     </div>
     <div class="actions">
-      <button id="imprimir" class="btn btn-ghost" title="Ctrl/Cmd+P">Imprimir</button>
+      <button id="imprimir" type="button" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()" onclick="event.preventDefault(); window.print();" aria-label="Imprimir" onclick="window.print()">Imprimir</button>
       <a href="https://wa.me/5562981020272" id="ajuda" class="btn btn-ghost" target="_blank" rel="noopener">Ajuda</a>
     </div>
   </header>
@@ -91,8 +91,16 @@
       </div>
     </div>
 
+    <div class="field">
+  <label for="intflag">Incluir etiqueta interna</label>
+  <label class="switch">
+    <input type="checkbox" id="intflag">
+    <span>Gerar +2 cópias com os 4 últimos dígitos</span>
+  </label>
+</div>
+
     <div class="field full">
-      <button id="gerar" class="btn btn-primary">Gerar etiquetas</button>
+      <button id="gerar" class="btn btn-primary" onclick="gerar()">Gerar etiquetas</button>
     </div>
   </section>
 
@@ -103,5 +111,9 @@
   </footer>
 
   <script src="app.js"></script>
+
+  <button id="fab-print" class="fab" type="button" title="Imprimir">🖨️</button>
+
+  <button id="imprimirFab" class="fab-print" title="Imprimir" aria-label="Imprimir">🖨️</button>
 </body>
 </html>

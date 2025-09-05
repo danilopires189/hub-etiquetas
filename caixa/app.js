@@ -87,22 +87,28 @@ function renderITF(svg, payload){
 }
 
 /* ===== UI ===== */
-function buildLabel({numeroBase, dv, orient, showLogo, showSafeIcon}){
-  const label = document.createElement('div');
-  label.className = `label ${orient}`;
+function buildLabel({numeroBase, dv, orient, showLogo, showSafeIcon, mode='normal'}){
+  const isInternal = mode === 'internal';
 
-  const left = document.createElement('div');
-  left.className = 'bar-left';
-  const svgwrap = document.createElement('div');
-  svgwrap.className = 'svgwrap';
-  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svgwrap.appendChild(svg);
-  left.appendChild(svgwrap);
+  const label = document.createElement('div');
+  label.className = `label ${isInternal ? 'internal ' : ''}${orient}`;
+
+  let svg;
+  if(!isInternal){
+    const left = document.createElement('div');
+    left.className = 'bar-left';
+    const svgwrap = document.createElement('div');
+    svgwrap.className = 'svgwrap';
+    svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svgwrap.appendChild(svg);
+    left.appendChild(svgwrap);
+    label.appendChild(left);
+  }
 
   const right = document.createElement('div');
   right.className = 'text-right';
 
-  if(showLogo){
+  if(showLogo && !isInternal){
     const imgPM = document.createElement('img');
     imgPM.src = 'pm.png';
     imgPM.alt = 'Pague Menos';
@@ -112,7 +118,7 @@ function buildLabel({numeroBase, dv, orient, showLogo, showSafeIcon}){
 
   const legend = document.createElement('div');
   legend.className = 'legend';
-  legend.textContent = `${numeroBase}-${dv}`;
+  legend.textContent = (mode === 'internal') ? `${numeroBase}` : `${numeroBase}-${dv}`;
   right.appendChild(legend);
 
   if(showSafeIcon){
@@ -121,11 +127,12 @@ function buildLabel({numeroBase, dv, orient, showLogo, showSafeIcon}){
     right.appendChild(mark);
   }
 
-  label.appendChild(left);
   label.appendChild(right);
 
-  const payload = `${numeroBase}`; // DV somente na legenda
-  renderITF(svg, payload);
+  if(!isInternal){
+    const payload = `${numeroBase}`; // DV somente na legenda
+    renderITF(svg, payload);
+  }
   return label;
 }
 
@@ -143,6 +150,7 @@ function gerar(){
     const orient = $('#orient').value;
     const showLogo = $('#logo').checked;
     const showSafeIcon = $('#safeicon').checked;
+    const internalFlag = (document.getElementById('intflag')||{}).checked || false;
 
     const out = $('#preview');
     out.innerHTML = '';
@@ -155,6 +163,13 @@ function gerar(){
       for(let c=0;c<copias;c++){
         const el = buildLabel({numeroBase: payloadBase, dv, orient, showLogo, showSafeIcon});
         out.appendChild(el);
+      }
+      if(internalFlag){
+        const last4 = atual.slice(-4);
+        for(let k=0;k<2;k++){
+          const elInt = buildLabel({ numeroBase: last4, dv: null, orient: 'h', showLogo: false, showSafeIcon: false, mode: 'internal' });
+          out.appendChild(elInt);
+        }
       }
     }
   }catch(e){
@@ -178,3 +193,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   setVars();
 });
+
+// Botão flutuante de impressão
+const _fab = document.getElementById('fab-print'); if(_fab){ _fab.addEventListener('click', ()=>window.print()); }
+
+// Botão flutuante de impressão
+document.addEventListener('DOMContentLoaded', ()=>{
+  const fab = document.getElementById('imprimirFab');
+  if(fab){ fab.addEventListener('click', ()=> window.print()); }
+});
+
+window.gerar = gerar;
