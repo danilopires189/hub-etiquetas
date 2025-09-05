@@ -1,20 +1,22 @@
-:root{
-  --label-w-mm: 75;
-  --label-h-mm: 35;
-  --margin-mm: 2;
-  --textcol-mm: 12;
-  --font-pt: 14;
-  --bar-height: 1;
-  --brand-blue: #062e6f;
-  --brand-red: #e0002b;
-  --ink: #0f172a;
-  --muted: #64748b;
-  --panel: #f3f6fb;
-  --ring: #b9cdfd;
-  --logo-mm: 10;
-  --logo-opacity: .6;
-  --transp-opacity: .3;
-}
+  :root{
+      --internal-font-pt: 200; /* padrão da etiqueta interna */
+    
+      --label-w-mm: 75;
+      --label-h-mm: 35;
+      --margin-mm: 2;      /* (não usado, opcional) */
+      --textcol-mm: 12;
+      --font-pt: 14;
+      --bar-height: 1;     /* (não usado, opcional) */
+      --brand-blue: #062e6f;
+      --brand-red: #e0002b;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --panel: #f3f6fb;
+      --ring: #b9cdfd;
+      --logo-mm: 10;
+      --logo-opacity: .6;
+      --transp-op: .3;     /* <<< nome correto que o app usa */
+    }
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
