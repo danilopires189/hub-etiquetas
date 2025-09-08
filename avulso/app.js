@@ -1,15 +1,15 @@
 /* ===== Util ===== */
-const $ = (sel)=>document.querySelector(sel);
-const padLeft = (numStr, len) => (Array(len+1).join('0') + numStr).slice(-len);
+const $ = (sel) => document.querySelector(sel);
+const padLeft = (numStr, len) => (Array(len + 1).join('0') + numStr).slice(-len);
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
 const DEPOSITO_MAP = {
-  '1':'0124','2':'0579','3':'0633','4':'0875','5':'1198','6':'0342','7':'0351','8':'0536','9':'0252'
+  '1': '0124', '2': '0579', '3': '0633', '4': '0875', '5': '1198', '6': '0342', '7': '0351', '8': '0536', '9': '0252'
 };
 
-function setVars(){
-  const logoPct = clamp(parseInt($('#logoop').value||'100',10), 0, 100);
-  const transPct = clamp(parseInt($('#transpop').value||'0',10), 0, 100);
+function setVars() {
+  const logoPct = clamp(parseInt($('#logoop').value || '100', 10), 0, 100);
+  const transPct = clamp(parseInt($('#transpop').value || '0', 10), 0, 100);
   $('#logoop').value = logoPct;
   $('#transpop').value = transPct;
 
@@ -18,42 +18,42 @@ function setVars(){
   document.documentElement.style.setProperty('--textcol-mm', $('#colmm').value);
   document.documentElement.style.setProperty('--font-pt', $('#tpt').value);
   document.documentElement.style.setProperty('--logo-mm', $('#logomm').value);
-  document.documentElement.style.setProperty('--logo-opacity', (logoPct/100).toFixed(2));
-  document.documentElement.style.setProperty('--transp-opacity', (transPct/100).toFixed(2));
+  document.documentElement.style.setProperty('--logo-opacity', (logoPct / 100).toFixed(2));
+  document.documentElement.style.setProperty('--transp-opacity', (transPct / 100).toFixed(2));
   document.body.classList.toggle('print-no-logo', $('#logoPrintOff').checked);
 }
 
 /* ============ Código de Barras (CODE128 via JsBarcode) ============ */
-function renderCode128(svg, text, opts={}){
-  if (window.JsBarcode){
-    while(svg.firstChild) svg.removeChild(svg.firstChild);
-    svg.setAttribute('class','barcode');
+function renderCode128(svg, text, opts = {}) {
+  if (window.JsBarcode) {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.setAttribute('class', 'barcode');
     JsBarcode(svg, text, {
-      format:'CODE128',
-      displayValue:false,
-      margin:0,
+      format: 'CODE128',
+      displayValue: false,
+      margin: 0,
       width: 2,      // barras um pouco mais largas (melhor leitura)
       height: 80,    // a altura real é controlada pelo CSS do container
       ...opts
     });
   } else {
     // Fallback simples: escreve no SVG um texto
-    while(svg.firstChild) svg.removeChild(svg.firstChild);
-    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x','0'); t.setAttribute('y','20');
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', '0'); t.setAttribute('y', '20');
     t.textContent = text;
     svg.appendChild(t);
   }
 }
 
 /* ============ QR Code (qrcode-generator) ============ */
-function renderQR(div, text){
+function renderQR(div, text) {
   div.innerHTML = '';
-  if (window.qrcode){
+  if (window.qrcode) {
     const qr = window.qrcode(4, 'M'); // versão maior e correção média
     qr.addData(text);
     qr.make();
-    const svgTag = qr.createSvgTag({cellSize:3, margin:0});
+    const svgTag = qr.createSvgTag({ cellSize: 3, margin: 0 });
     div.innerHTML = svgTag;
   } else {
     const img = document.createElement('img');
@@ -64,7 +64,7 @@ function renderQR(div, text){
   }
 }
 
-function buildLabel({codigoDotted, codigoCompact, orient, depNum, partes, idxParte, matricula}){
+function buildLabel({ codigoDotted, codigoCompact, orient, depNum, partes, idxParte, matricula, tipoMovimentacao }) {
   const label = document.createElement('div');
   label.className = `label ${orient}`;
 
@@ -78,7 +78,7 @@ function buildLabel({codigoDotted, codigoCompact, orient, depNum, partes, idxPar
   logos.className = 'header-logos';
   const imgPM = document.createElement('img');
   imgPM.src = 'pm.png'; imgPM.alt = 'Pague Menos';
-  imgPM.onerror = ()=>{ imgPM.style.display='none'; };
+  imgPM.onerror = () => { imgPM.style.display = 'none'; };
   logos.append(imgPM);
   header.append(title, logos);
   label.appendChild(header);
@@ -87,12 +87,18 @@ function buildLabel({codigoDotted, codigoCompact, orient, depNum, partes, idxPar
   const body = document.createElement('div');
   body.className = 'body';
 
+  // Tipo de Movimentação (acima do código de barras)
+  const tipoDiv = document.createElement('div');
+  tipoDiv.className = 'tipo-movimentacao';
+  tipoDiv.textContent = tipoMovimentacao;
+  body.appendChild(tipoDiv);
+
   // Barras
   const bars = document.createElement('div');
   bars.className = 'bars';
   const svgwrap = document.createElement('div');
   svgwrap.className = 'svgwrap';
-  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svgwrap.appendChild(svg);
   const hrtext = document.createElement('div');
   hrtext.className = 'hrtext';
@@ -110,8 +116,8 @@ function buildLabel({codigoDotted, codigoCompact, orient, depNum, partes, idxPar
   const vbox = document.createElement('div');
   vbox.className = 'volume-box';
   const vt = document.createElement('div'); vt.className = 'vtitle'; vt.textContent = 'VOLUME';
-  const vb = document.createElement('div'); vb.className = 'vbig';   vb.textContent = `${idxParte}/${partes}`;
-  const vs = document.createElement('div'); vs.className = 'vsmall'; vs.textContent = (partes>1? 'VOLUME FRACIONADO' : '');
+  const vb = document.createElement('div'); vb.className = 'vbig'; vb.textContent = `${idxParte}/${partes}`;
+  const vs = document.createElement('div'); vs.className = 'vsmall'; vs.textContent = (partes > 1 ? 'VOLUME FRACIONADO' : '');
   vbox.append(vt, vb, vs);
 
   body.append(bars, qrwrap, vbox);
@@ -121,12 +127,12 @@ function buildLabel({codigoDotted, codigoCompact, orient, depNum, partes, idxPar
   const meta = document.createElement('div');
   meta.className = 'meta';
   const now = new Date();
-  const mm = padLeft(String(now.getMonth()+1),2);
-  const dd = padLeft(String(now.getDate()),2);
+  const mm = padLeft(String(now.getMonth() + 1), 2);
+  const dd = padLeft(String(now.getDate()), 2);
   const yy = String(now.getFullYear()).slice(-2);
-  const hh = padLeft(String(now.getHours()),2);
-  const mi = padLeft(String(now.getMinutes()),2);
-  meta.innerHTML = `<span>CD: <strong>${depNum}</strong></span><span>MATRÍCULA: <strong>${matricula||'-'}</strong></span><span>DATA DA CRIAÇÃO: <strong>${dd}/${mm}/20${yy} ${hh}:${mi}</strong></span><span></span>`;
+  const hh = padLeft(String(now.getHours()), 2);
+  const mi = padLeft(String(now.getMinutes()), 2);
+  meta.innerHTML = `<span>CD: <strong>${depNum}</strong></span><span>MATRÍCULA: <strong>${matricula || '-'}</strong></span><span>DATA DA CRIAÇÃO: <strong>${dd}/${mm}/20${yy} ${hh}:${mi}</strong></span><span></span>`;
   label.appendChild(meta);
 
   // Renderizadores
@@ -136,35 +142,39 @@ function buildLabel({codigoDotted, codigoCompact, orient, depNum, partes, idxPar
   return label;
 }
 
-function gerar(){
-  try{
+function gerar() {
+  try {
     setVars();
 
     const depo = $('#deposito').value;
-    if(!/^[1-9]$/.test(depo)){
+    if (!/^[1-9]$/.test(depo)) {
       alert('Escolha um depósito entre 1 e 9.');
       return;
     }
     const depCode = DEPOSITO_MAP[depo];
-    const depNum = parseInt(depo,10);
+    const depNum = parseInt(depo, 10);
 
-    const tipo = ($('#tipo').value||'').toUpperCase();
-    if(!tipo){ alert('Selecione o Tipo de Movimentação.'); return; }
+    const tipo = ($('#tipo').value || '').toUpperCase();
+    if (!tipo) { alert('Selecione o Tipo de Movimentação.'); return; }
+
+    // Captura o texto completo da opção selecionada
+    const tipoSelect = $('#tipo');
+    const tipoMovimentacao = tipoSelect.options[tipoSelect.selectedIndex].text;
 
     const volRaw = $('#volume').value;
-    if(volRaw.trim()===''){ alert('Informe o número do volume.'); $('#volume').focus(); return; }
-    const volNum = parseInt(volRaw,10);
-    if(Number.isNaN(volNum) || volNum<0 || volNum>99999){ alert('Número do volume deve estar entre 0 e 99999.'); $('#volume').focus(); return; }
+    if (volRaw.trim() === '') { alert('Informe o número do volume.'); $('#volume').focus(); return; }
+    const volNum = parseInt(volRaw, 10);
+    if (Number.isNaN(volNum) || volNum < 0 || volNum > 99999) { alert('Número do volume deve estar entre 0 e 99999.'); $('#volume').focus(); return; }
     const volStr = padLeft(String(volNum), 5);
 
-    const partes = parseInt($('#fracao').value||'1',10);
-    if(partes<1 || partes>99){ alert('Fracionamento deve ser entre 1 e 99.'); return; }
+    const partes = parseInt($('#fracao').value || '1', 10);
+    if (partes < 1 || partes > 99) { alert('Fracionamento deve ser entre 1 e 99.'); return; }
 
     const matricula = $('#matricula').value.trim();
-    if(!matricula){ alert('Informe a Matrícula.'); $('#matricula').focus(); return; }
+    if (!matricula) { alert('Informe a Matrícula.'); $('#matricula').focus(); return; }
 
     const now = new Date();
-    const mm = padLeft(String(now.getMonth()+1),2);
+    const mm = padLeft(String(now.getMonth() + 1), 2);
     const yy = String(now.getFullYear()).slice(-2); // YY
     const calendario = `${mm}${yy}`;
 
@@ -178,30 +188,30 @@ function gerar(){
     const out = $('#preview');
     out.innerHTML = '';
 
-    for(let i=1; i<=partes; i++){
+    for (let i = 1; i <= partes; i++) {
       const el = buildLabel({
         codigoDotted, codigoCompact,
-        orient, depNum, partes, idxParte:i, matricula
+        orient, depNum, partes, idxParte: i, matricula, tipoMovimentacao
       });
       out.appendChild(el);
     }
-  }catch(e){
+  } catch (e) {
     alert('Erro: ' + e.message);
   }
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded', () => {
   $('#gerar').addEventListener('click', gerar);
-  $('#imprimir').addEventListener('click', ()=> window.print());
+  $('#imprimir').addEventListener('click', () => window.print());
 
-  ['wmm','hmm','colmm','tpt','logomm','logoop','transpop','logoPrintOff'].forEach(id=>{
+  ['wmm', 'hmm', 'colmm', 'tpt', 'logomm', 'logoop', 'transpop', 'logoPrintOff'].forEach(id => {
     const el = document.getElementById(id);
-    if(el) el.addEventListener('input', setVars);
-    if(el) el.addEventListener('change', setVars);
+    if (el) el.addEventListener('input', setVars);
+    if (el) el.addEventListener('change', setVars);
   });
 
-  document.addEventListener('keydown', (ev)=>{
-    if((ev.ctrlKey||ev.metaKey) && ev.key.toLowerCase()==='g'){ ev.preventDefault(); gerar(); }
+  document.addEventListener('keydown', (ev) => {
+    if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'g') { ev.preventDefault(); gerar(); }
   });
 
   setVars();
