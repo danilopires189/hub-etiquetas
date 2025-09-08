@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Etiquetas – Caixa</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <header class="app-header">
     <div class="brand">
@@ -18,25 +20,42 @@
       </div>
     </div>
     <div class="actions">
-      <button id="imprimir" type="button" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()" onclick="event.preventDefault(); window.print();" aria-label="Imprimir" onclick="window.print()">Imprimir</button>
+      <button id="historico-btn" type="button" class="btn btn-ghost" title="Ver histórico">📋</button>
+      <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()"
+        aria-label="Imprimir">Imprimir</button>
       <a href="https://wa.me/5562981020272" id="ajuda" class="btn btn-ghost" target="_blank" rel="noopener">Ajuda</a>
     </div>
   </header>
 
   <section class="panel controls">
     <div class="field">
-      <label for="base">Primeiro número (SEM DV)</label>
+      <label for="base">
+        Etiqueta Inicial
+        <span class="tooltip"
+          data-tooltip="Digite apenas números. O dígito verificador será calculado automaticamente.">ℹ️</span>
+      </label>
       <input id="base" placeholder="ex.: 564742" inputmode="numeric" />
+      <div class="field-validation" id="base-validation"></div>
+      <div class="field-info" id="base-info"></div>
     </div>
 
     <div class="field">
-      <label for="qtd">Quantidade de NÚMEROS</label>
-      <input id="qtd" type="number" min="1" value="10" />
+      <label for="qtd">
+        Quantidade de NÚMEROS
+        <span class="tooltip" data-tooltip="Quantos números sequenciais serão gerados">ℹ️</span>
+      </label>
+      <input id="qtd" type="number" min="1" max="1000" value="10" />
+      <div class="field-validation" id="qtd-validation"></div>
+      <div class="field-info" id="qtd-info"></div>
     </div>
 
     <div class="field">
-      <label for="copias">Cópias por número</label>
-      <input id="copias" type="number" min="1" value="2" />
+      <label for="copias">
+        Cópias por número
+        <span class="tooltip" data-tooltip="Quantas etiquetas iguais para cada número">ℹ️</span>
+      </label>
+      <input id="copias" type="number" min="1" max="50" value="2" />
+      <div class="field-validation" id="copias-validation"></div>
     </div>
 
     <div class="field">
@@ -64,15 +83,16 @@
       </select>
     </div>
 
-    
+
     <div class="field">
-      
+
       <label for="logo">Logo na etiqueta</label>
       <div class="row wrap">
         <label class="switch"><input type="checkbox" id="logo" checked><span>Exibir (Pague Menos)</span></label>
 
         <span class="hint">Opacidade (%)</span>
-        <input id="logoop" class="num" type="number" min="0" max="100" step="1" value="100" title="Opacidade da logo em %">
+        <input id="logoop" class="num" type="number" min="0" max="100" step="1" value="100"
+          title="Opacidade da logo em %">
         <label class="switch"><input type="checkbox" id="logoPrintOff"><span>Ocultar logo na impressão</span></label>
       </div>
     </div>
@@ -87,24 +107,58 @@
       <div class="row wrap">
         <label class="switch"><input type="checkbox" id="safeicon" checked><span>Exibir</span></label>
         <span class="hint">Intensidade (%)</span>
-        <input id="transpop" class="num" type="number" min="10" max="70" step="1" value="0" title="Opacidade do ícone em %">
+        <input id="transpop" class="num" type="number" min="10" max="70" step="1" value="0"
+          title="Opacidade do ícone em %">
       </div>
     </div>
 
     <div class="field">
-  <label for="intflag">Etiqueta interna</label>
-  <label class="switch">
-    <input type="checkbox" id="intflag">
-    <span>Gerar etiqueta interna</span>
-  </label>
-</div>
+      <label for="labelType">
+        Tipo de etiqueta
+        <span class="tooltip" data-tooltip="Ambas - Gera tudo | Interna - Gera etiqueta sem barras | Externa - Gera etiqueta com barras">ℹ️</span>
+      </label>
+      <select id="labelType">
+        <option value="external" selected>Externa</option>
+        <option value="internal">Interna</option>
+        <option value="both">Ambas</option>
+      </select>
+    </div>
 
     <div class="field full">
-      <button id="gerar" class="btn btn-primary" onclick="gerar()">Gerar etiquetas</button>
+      <div class="generation-controls">
+        <button id="gerar" class="btn btn-primary" onclick="gerar()">Gerar etiquetas</button>
+        <div class="generation-info">
+          <span id="total-labels">0 etiquetas</span>
+        </div>
+      </div>
+      <div class="progress-container" id="progress-container" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span class="progress-text" id="progress-text">Gerando...</span>
+      </div>
     </div>
   </section>
 
+
+
   <main id="preview" class="preview"></main>
+
+  <!-- Modal do Histórico -->
+  <div id="historico-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Histórico de Gerações</h3>
+        <button class="modal-close" id="historico-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="historico-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="limpar-historico" class="btn btn-ghost">Limpar Histórico</button>
+      </div>
+    </div>
+  </div>
 
   <footer class="app-footer">
     <small>Etiquetas Caixa - Desenvolvido por Danilo Pires.</small>
@@ -112,8 +166,7 @@
 
   <script src="app.js"></script>
 
-  <button id="fab-print" class="fab" type="button" title="Imprimir">🖨️</button>
 
-  <button id="imprimirFab" class="fab-print" title="Imprimir" aria-label="Imprimir">🖨️</button>
 </body>
+
 </html>
