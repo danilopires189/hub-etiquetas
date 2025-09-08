@@ -6,6 +6,25 @@ const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 /* ===== Estado Global ===== */
 let generationHistory = JSON.parse(localStorage.getItem('etiquetas-history') || '[]');
 
+// Limpar duplicatas do histórico existente na inicialização
+function cleanDuplicateHistory() {
+  const uniqueHistory = [];
+  const seen = new Set();
+  
+  for (const item of generationHistory) {
+    const key = `${item.base}-${item.qtd}-${item.copias}-${item.labelType}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueHistory.push(item);
+    }
+  }
+  
+  if (uniqueHistory.length !== generationHistory.length) {
+    generationHistory = uniqueHistory.slice(0, 5); // Manter apenas os 5 mais recentes
+    localStorage.setItem('etiquetas-history', JSON.stringify(generationHistory));
+  }
+}
+
 /* ===== Validações ===== */
 function validateField(fieldId, value, rules) {
   const field = $(`#${fieldId}`);
@@ -371,6 +390,20 @@ async function gerar() {
 
 
 function saveToHistory(config) {
+  // Verificar se já existe uma entrada similar (mesmo base, qtd, copias, labelType)
+  const existingIndex = generationHistory.findIndex(item => 
+    item.base === config.base && 
+    item.qtd === config.qtd && 
+    item.copias === config.copias && 
+    item.labelType === config.labelType
+  );
+
+  // Se encontrou uma entrada similar, remover a antiga
+  if (existingIndex !== -1) {
+    generationHistory.splice(existingIndex, 1);
+  }
+
+  // Adicionar a nova entrada no início
   generationHistory.unshift({
     ...config,
     id: Date.now()
@@ -489,6 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Inicialização
+  cleanDuplicateHistory(); // Limpar duplicatas existentes
   setVars();
   updateCalculatedInfo();
 });
