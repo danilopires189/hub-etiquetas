@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Transições Suaves Completas</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f8fafc; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; }
+        .test-result { margin: 15px 0; padding: 15px; border-radius: 6px; }
+        .success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .info { background: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8; }
+        .warning { background: #fff3cd; color: #856404; border-left: 4px solid #ffc107; }
+        button { padding: 12px 24px; margin: 8px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; }
+        button:hover { background: #0056b3; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+        .module-link { 
+            display: inline-block; margin: 10px; padding: 18px 30px; background: #007bff; color: white; 
+            text-decoration: none; border-radius: 8px; transition: all 0.3s ease; font-weight: 500;
+        }
+        .module-link:hover { 
+            background: #0056b3; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+            text-decoration: none; color: white;
+        }
+        .hub-link {
+            background: #28a745; font-size: 18px; padding: 20px 40px;
+        }
+        .hub-link:hover {
+            background: #1e7e34;
+        }
+        h1 { color: #2c3e50; }
+        h2 { color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 8px; }
+        h3 { color: #2980b9; }
+        ul { line-height: 1.6; }
+        .highlight { background: #fff3cd; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Teste - Transições Suaves Aplicadas a Todos os Módulos</h1>
+    
+    <div class="test-section">
+        <h2>🏠 Hub Principal</h2>
+        <div class="test-result success">
+            <p><strong>✅ Hub atualizado com transições suaves!</strong></p>
+            <p>O hub principal agora também tem a mesma transição elegante dos módulos.</p>
+            <a href="hub/index.html" class="module-link hub-link">🏠 Abrir Hub Principal</a>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>✅ Transições Implementadas</h2>
+        <div class="test-result success">
+            <h3>🎯 Melhorias Aplicadas:</h3>
+            <ul>
+                <li><strong>Fade-in suave</strong> - Todos os módulos agora aparecem gradualmente</li>
+                <li><strong>Animação escalonada</strong> - Elementos aparecem em sequência</li>
+                <li><strong>Transições de hover</strong> - Botões e campos com efeitos suaves</li>
+                <li><strong>Consistência visual</strong> - Mesma experiência em todos os módulos</li>
+                <li><strong>Hub atualizado</strong> - Transição suave também aplicada ao hub principal</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Teste os Módulos</h2>
+        <div class="test-result info">
+            <p>Clique nos links abaixo para testar as transições suaves:</p>
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="hub/index.html" class="module-link hub-link">🏠 Hub Principal</a>
+            </div>
+            <div style="text-align: center;">
+                <a href="caixa/index.html" class="module-link">📦 Caixa (Referência)</a>
+                <a href="placas/index.html" class="module-link">🏷️ Placas</a>
+                <a href="termo/index.html" class="module-link">🌡️ Termo</a>
+                <a href="transferencia/index.html" class="module-link">📋 Transferência</a>
+                <a href="enderec/index.html" class="module-link">📍 Endereço</a>
+                <a href="avulso/index.html" class="module-link">📄 Avulso</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Detalhes Técnicos</h2>
+        <div class="test-result info">
+            <h3>Animações de Entrada:</h3>
+            <ul>
+                <li><strong>Container principal:</strong> fade-in com <span class="highlight">translateY(30px)</span> em 0.8s</li>
+                <li><strong>Header:</strong> delay <span class="highlight">0.1s</span></li>
+                <li><strong>Formulário:</strong> delay <span class="highlight">0.2s</span></li>
+                <li><strong>Controles:</strong> delay <span class="highlight">0.3s</span></li>
+                <li><strong>Preview:</strong> delay <span class="highlight">0.4s</span></li>
+            </ul>
+            <h3>Transições Interativas:</h3>
+            <ul>
+                <li><strong>Botões:</strong> hover com <span class="highlight">translateY(-2px)</span> e sombra</li>
+                <li><strong>Campos:</strong> focus com <span class="highlight">translateY(-1px)</span> e sombra azul</li>
+                <li><strong>Duração:</strong> 0.3s para interações, 0.8s para entrada</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📁 Módulos Atualizados</h2>
+        <div class="test-result success">
+            <ul>
+                <li>✅ <strong>hub/index.html</strong> - Transição suave aplicada ao hub principal</li>
+                <li>✅ <strong>caixa/index.html</strong> - Transição suave aplicada (referência)</li>
+                <li>✅ <strong>placas/index.html</strong> - Transição suave aplicada</li>
+                <li>✅ <strong>termo/index.html</strong> - Transição suave aplicada</li>
+                <li>✅ <strong>transferencia/index.html</strong> - Transição suave aplicada</li>
+                <li>✅ <strong>enderec/index.html</strong> - Transição suave aplicada</li>
+                <li>✅ <strong>avulso/index.html</strong> - Transição suave aplicada</li>
+                <li>✅ <strong>shared/components.css</strong> - Estilos de transição aprimorados</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Como Verificar</h2>
+        <div class="test-result warning">
+            <h3>Sequência de Teste Recomendada:</h3>
+            <ol>
+                <li><strong>Comece pelo Hub:</strong> Clique no link "Hub Principal" acima</li>
+                <li><strong>Observe a transição:</strong> Veja como o hub aparece suavemente</li>
+                <li><strong>Teste os módulos:</strong> Use o seletor do hub ou os links diretos</li>
+                <li><strong>Verifique interações:</strong> Teste hover nos botões e focus nos campos</li>
+                <li><strong>Compare consistência:</strong> Todos devem ter a mesma transição elegante</li>
+            </ol>
+        </div>
+        
+        <div class="test-result success">
+            <p><strong>✅ Resultado esperado:</strong> Todos os módulos (incluindo o hub) devem ter transições suaves e elegantes, criando uma experiência visual consistente e profissional!</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎉 Resultado Final</h2>
+        <div class="test-result success">
+            <h3>🌟 Experiência Visual Aprimorada:</h3>
+            <p>Agora todo o sistema de etiquetas tem uma experiência visual consistente e profissional, com transições suaves que tornam a navegação mais agradável e moderna.</p>
+            <p><strong>Todos os módulos aparecem gradualmente na tela, criando uma sensação de fluidez e qualidade!</strong></p>
+        </div>
+    </div>
+</body>
+</html>

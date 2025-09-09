@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,7 +12,8 @@
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 </head>
-<body>
+
+<body class="fade-in">
   <header class="app-header">
     <div class="brand">
       <div class="brand-logos">
@@ -26,23 +28,24 @@
     <div class="actions">
       <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9,22 9,12 15,12 15,22"/>
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9,22 9,12 15,12 15,22" />
         </svg>
         Hub
       </button>
-      <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()" aria-label="Imprimir">
+      <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()"
+        aria-label="Imprimir">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6,9 6,2 18,2 18,9"/>
-          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-          <rect x="6" y="14" width="12" height="8"/>
+          <polyline points="6,9 6,2 18,2 18,9" />
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+          <rect x="6" y="14" width="12" height="8" />
         </svg>
         Imprimir
       </button>
     </div>
   </header>
 
-  <section class="panel controls">
+  <section class="panel controls animate-slide-in-up">
     <div class="field">
       <label for="deposito">Depósito</label>
       <select id="deposito" required>
@@ -75,7 +78,8 @@
 
     <div class="field">
       <label for="volume">Número do volume</label>
-      <input id="volume" type="number" required required required required required min="1" max="99999" placeholder="ex.: 2" />
+      <input id="volume" type="number" required required required required required min="1" max="99999"
+        placeholder="ex.: 2" />
     </div>
 
     <div class="field">
@@ -114,7 +118,8 @@
       <div class="row wrap">
         <label class="switch"><input type="checkbox" id="logo" checked><span>Exibir (Pague Menos)</span></label>
         <span class="hint">Opacidade (%)</span>
-        <input id="logoop" class="num" type="number" min="0" max="100" step="1" value="100" title="Opacidade da logo em %">
+        <input id="logoop" class="num" type="number" min="0" max="100" step="1" value="100"
+          title="Opacidade da logo em %">
         <label class="switch"><input type="checkbox" id="logoPrintOff"><span>Ocultar na impressão</span></label>
       </div>
     </div>
@@ -124,7 +129,8 @@
       <div class="row wrap">
         <label class="switch"><input type="checkbox" id="safeicon" checked><span>Exibir</span></label>
         <span class="hint">Intensidade (%)</span>
-        <input id="transpop" class="num" type="number" min="0" max="70" step="1" value="0" title="Opacidade do ícone em %">
+        <input id="transpop" class="num" type="number" min="0" max="70" step="1" value="0"
+          title="Opacidade do ícone em %">
       </div>
     </div>
 
@@ -145,9 +151,9 @@
         <div class="footer-links">
           <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="footer-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-              <circle cx="12" cy="17" r="0.5"/>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <circle cx="12" cy="17" r="0.5" />
             </svg>
             Suporte
           </a>
@@ -158,4 +164,5 @@
 
   <script src="app.js"></script>
 </body>
+
 </html>

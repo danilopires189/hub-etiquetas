@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 </head>
-<body>
+<body class="fade-in">
   <header class="app-header">
     <div class="brand">
       <div class="brand-logos">
@@ -50,14 +50,14 @@
       </div>
     </div>
 
-    <div id="blocoId" class="blocovis">
+    <div id="blocoId" class="blocovis animate-slide-in-up">
       <div class="field span3">
         <label for="idEtiqueta">ID da etiqueta</label>
         <input id="idEtiqueta" type="text" maxlength="23" placeholder="ex.: 22025235002035021200026" />
       </div>
     </div>
 
-    <div id="blocoCampos" class="blocohide">
+    <div id="blocoCampos" class="blocohide animate-slide-in-up">
       <div class="field span2">
         <label for="cd">Informe o CD.</label>
         <input id="cd" type="number" min="1" max="9" list="listCD" placeholder="ex.: 2" step="1" />
