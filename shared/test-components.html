@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teste de Componentes - Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="design-system.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="performance.css">
+  <style>
+    .test-section {
+      margin: var(--space-8) 0;
+      padding: var(--space-6);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+    
+    .test-title {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-bold);
+      color: var(--brand-primary);
+      margin-bottom: var(--space-4);
+      border-bottom: 2px solid var(--brand-primary);
+      padding-bottom: var(--space-2);
+    }
+    
+    .component-group {
+      margin: var(--space-4) 0;
+    }
+    
+    .component-label {
+      font-size: var(--text-sm);
+      font-weight: var(--font-medium);
+      color: var(--neutral-700);
+      margin-bottom: var(--space-2);
+      display: block;
+    }
+    
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-4);
+      margin: var(--space-4) 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header style="text-align: center; padding: var(--space-8) 0;">
+      <h1 style="font-size: var(--text-4xl); color: var(--brand-primary); margin-bottom: var(--space-2);">
+        Design System - Teste de Componentes
+      </h1>
+      <p style="color: var(--neutral-600); font-size: var(--text-lg);">
+        Página de teste para verificar todos os componentes do design system
+      </p>
+    </header>
+
+    <!-- Teste de Botões -->
+    <section class="test-section">
+      <h2 class="test-title">Botões</h2>
+      
+      <div class="component-group">
+        <span class="component-label">Variações</span>
+        <div class="flex gap-4 flex-wrap">
+          <button class="btn btn-primary">Primário</button>
+          <button class="btn btn-secondary">Secundário</button>
+          <button class="btn btn-ghost">Ghost</button>
+          <button class="btn btn-danger">Perigo</button>
+          <button class="btn btn-success">Sucesso</button>
+        </div>
+      </div>
+      
+      <div class="component-group">
+        <span class="component-label">Tamanhos</span>
+        <div class="flex gap-4 items-center flex-wrap">
+          <button class="btn btn-primary btn-sm">Pequeno</button>
+          <button class="btn btn-primary">Normal</button>
+          <button class="btn btn-primary btn-lg">Grande</button>
+          <button class="btn btn-primary btn-xl">Extra Grande</button>
+        </div>
+      </div>
+      
+      <div class="component-group">
+        <span class="component-label">Com Ícones</span>
+        <div class="flex gap-4 flex-wrap">
+          <button class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 6,2 18,2 18,9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            Imprimir
+          </button>
+          <button class="btn btn-ghost">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <circle cx="12" cy="17" r="0.5"/>
+            </svg>
+            Ajuda
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teste de Campos -->
+    <section class="test-section">
+      <h2 class="test-title">Campos de Entrada</h2>
+      
+      <div class="demo-grid">
+        <div class="form-field">
+          <label class="form-label">Campo Normal</label>
+          <input type="text" class="form-input" placeholder="Digite algo...">
+        </div>
+        
+        <div class="form-field">
+          <label class="form-label">Campo com Erro</label>
+          <input type="text" class="form-input error" placeholder="Campo obrigatório">
+          <div class="form-message error">Este campo é obrigatório</div>
+        </div>
+        
+        <div class="form-field">
+          <label class="form-label">Campo com Sucesso</label>
+          <input type="text" class="form-input success" value="Dados válidos">
+          <div class="form-message success">Campo preenchido corretamente</div>
+        </div>
+        
+        <div class="form-field">
+          <label class="form-label">Select</label>
+          <select class="form-select">
+            <option>Selecione uma opção</option>
+            <option>Opção 1</option>
+            <option>Opção 2</option>
+            <option>Opção 3</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teste de Checkboxes e Switches -->
+    <section class="test-section">
+      <h2 class="test-title">Checkboxes e Switches</h2>
+      
+      <div class="demo-grid">
+        <div>
+          <span class="component-label">Checkboxes</span>
+          <div class="flex flex-col gap-3">
+            <label class="form-checkbox">
+              <input type="checkbox" checked>
+              <span class="checkmark"></span>
+              Opção marcada
+            </label>
+            <label class="form-checkbox">
+              <input type="checkbox">
+              <span class="checkmark"></span>
+              Opção desmarcada
+            </label>
+          </div>
+        </div>
+        
+        <div>
+          <span class="component-label">Switches</span>
+          <div class="flex flex-col gap-3">
+            <label class="form-switch">
+              <input type="checkbox" checked>
+              <span class="switch-track">
+                <span class="switch-thumb"></span>
+              </span>
+              Switch ativo
+            </label>
+            <label class="form-switch">
+              <input type="checkbox">
+              <span class="switch-track">
+                <span class="switch-thumb"></span>
+              </span>
+              Switch inativo
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teste de Cards -->
+    <section class="test-section">
+      <h2 class="test-title">Cards</h2>
+      
+      <div class="demo-grid">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Card Básico</h3>
+            <p class="card-subtitle">Subtítulo do card</p>
+          </div>
+          <div class="card-body">
+            <p>Este é um card básico com header, body e footer.</p>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-primary btn-sm">Ação</button>
+          </div>
+        </div>
+        
+        <div class="card card-elevated">
+          <div class="card-header">
+            <h3 class="card-title">Card Elevado</h3>
+          </div>
+          <div class="card-body">
+            <p>Este card tem uma sombra mais pronunciada.</p>
+          </div>
+        </div>
+        
+        <div class="card card-glass">
+          <div class="card-header">
+            <h3 class="card-title">Card Glass</h3>
+          </div>
+          <div class="card-body">
+            <p>Este card tem efeito de vidro com backdrop-filter.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teste de Badges -->
+    <section class="test-section">
+      <h2 class="test-title">Badges</h2>
+      
+      <div class="flex gap-3 flex-wrap">
+        <span class="badge badge-primary">Primário</span>
+        <span class="badge badge-secondary">Secundário</span>
+        <span class="badge badge-success">Sucesso</span>
+        <span class="badge badge-warning">Aviso</span>
+        <span class="badge badge-error">Erro</span>
+        <span class="badge badge-outline">Outline</span>
+      </div>
+    </section>
+
+    <!-- Teste de Progress -->
+    <section class="test-section">
+      <h2 class="test-title">Progress Bars</h2>
+      
+      <div class="component-group">
+        <span class="component-label">Progress Normal</span>
+        <div class="progress">
+          <div class="progress-bar" style="width: 75%"></div>
+        </div>
+      </div>
+      
+      <div class="component-group">
+        <span class="component-label">Progress Animado</span>
+        <div class="progress">
+          <div class="progress-bar progress-bar-animated" style="width: 60%"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teste de Loading -->
+    <section class="test-section">
+      <h2 class="test-title">Estados de Loading</h2>
+      
+      <div class="demo-grid">
+        <div>
+          <span class="component-label">Spinner</span>
+          <div class="loading">
+            <div class="spinner"></div>
+            Carregando...
+          </div>
+        </div>
+        
+        <div>
+          <span class="component-label">Dots</span>
+          <div class="loading-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        
+        <div>
+          <span class="component-label">Wave</span>
+          <div class="loading-wave">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teste de Animações -->
+    <section class="test-section">
+      <h2 class="test-title">Animações</h2>
+      
+      <div class="demo-grid">
+        <div class="card animate-slide-in-up">
+          <div class="card-body">
+            <p>Slide In Up</p>
+          </div>
+        </div>
+        
+        <div class="card animate-scale-in animate-delay-200">
+          <div class="card-body">
+            <p>Scale In (com delay)</p>
+          </div>
+        </div>
+        
+        <div class="card animate-gentle-float">
+          <div class="card-body">
+            <p>Gentle Float</p>
+          </div>
+        </div>
+        
+        <div class="card animate-gentle-pulse">
+          <div class="card-body">
+            <p>Gentle Pulse</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Teste de Tooltips -->
+    <section class="test-section">
+      <h2 class="test-title">Tooltips</h2>
+      
+      <div class="flex gap-4 flex-wrap">
+        <span class="tooltip" data-tooltip="Este é um tooltip simples">
+          Hover para ver tooltip
+        </span>
+        <span class="tooltip" data-tooltip="Tooltip com texto mais longo para testar quebra de linha">
+          Tooltip longo
+        </span>
+      </div>
+    </section>
+
+    <!-- Teste de Grid -->
+    <section class="test-section">
+      <h2 class="test-title">Sistema de Grid</h2>
+      
+      <div class="component-group">
+        <span class="component-label">Grid 3 Colunas</span>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="card">
+            <div class="card-body">Item 1</div>
+          </div>
+          <div class="card">
+            <div class="card-body">Item 2</div>
+          </div>
+          <div class="card">
+            <div class="card-body">Item 3</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="component-group">
+        <span class="component-label">Grid Auto-fit</span>
+        <div class="grid-auto-fit gap-4">
+          <div class="card">
+            <div class="card-body">Auto 1</div>
+          </div>
+          <div class="card">
+            <div class="card-body">Auto 2</div>
+          </div>
+          <div class="card">
+            <div class="card-body">Auto 3</div>
+          </div>
+          <div class="card">
+            <div class="card-body">Auto 4</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer style="text-align: center; padding: var(--space-8) 0; color: var(--neutral-600);">
+      <p>Design System - Pague Menos Etiquetas</p>
+      <p style="font-size: var(--text-sm);">Desenvolvido por Danilo Pires</p>
+    </footer>
+  </div>
+
+  <script>
+    // Teste de funcionalidades JavaScript
+    console.log('Design System carregado com sucesso!');
+    
+    // Adicionar eventos de teste
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        console.log('Botão clicado:', e.target.textContent.trim());
+      });
+    });
+    
+    // Teste de modal (se necessário)
+    function showTestModal() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay active';
+      modal.innerHTML = `
+        <div class="modal">
+          <div class="modal-header">
+            <h3 class="modal-title">Modal de Teste</h3>
+            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+          </div>
+          <div class="modal-body">
+            <p>Este é um modal de teste para verificar o funcionamento.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove()">Fechar</button>
+            <button class="btn btn-primary">Confirmar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+    // Adicionar botão para testar modal
+    const modalTestBtn = document.createElement('button');
+    modalTestBtn.className = 'btn btn-primary';
+    modalTestBtn.textContent = 'Testar Modal';
+    modalTestBtn.onclick = showTestModal;
+    modalTestBtn.style.position = 'fixed';
+    modalTestBtn.style.bottom = '20px';
+    modalTestBtn.style.right = '20px';
+    modalTestBtn.style.zIndex = '1000';
+    document.body.appendChild(modalTestBtn);
+  </script>
+</body>
+</html>

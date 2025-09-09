@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Nova Lógica Interna</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        .sequence-demo { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 15px 0; }
+        .label-demo { 
+            border: 1px solid #333; 
+            padding: 10px; 
+            text-align: center; 
+            font-weight: bold; 
+            font-size: 14px;
+            background: white;
+        }
+        .correct { border-color: #28a745; background: #d4edda; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .code-block { background: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🆕 Teste - Nova Lógica de Etiquetas Internas</h1>
+    
+    <div class="test-section">
+        <h2>🔧 Nova Lógica Implementada</h2>
+        <div class="test-result success">
+            <h3>✨ Reconstruída do Zero - Super Simples</h3>
+            <div class="code-block">
+<strong>LÓGICA NOVA (simples e direta):</strong>
+
+1. Converter base para número: parseInt(base, 10)
+2. Para cada número da sequência (0 até qtd-1):
+   a. numeroAtual = baseNumber + numeroSequencial
+   b. numeroFormatado = padLeft(numeroAtual, len)
+   c. numeroInterno = últimos 4 dígitos
+   d. Gerar 'copias' etiquetas com numeroInterno
+3. Fim
+
+<strong>Exemplo: Base=7833, Qtd=5, Cópias=2</strong>
+- numeroSequencial=0: 7833+0=7833 -> 7833 (2 cópias)
+- numeroSequencial=1: 7833+1=7834 -> 7834 (2 cópias)  
+- numeroSequencial=2: 7833+2=7835 -> 7835 (2 cópias)
+- numeroSequencial=3: 7833+3=7836 -> 7836 (2 cópias)
+- numeroSequencial=4: 7833+4=7837 -> 7837 (2 cópias)
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Sequência Esperada Correta</h2>
+        <div class="test-result info">
+            <p><strong>Para Base: 7833, Quantidade: 5, Cópias: 2</strong></p>
+            <div class="sequence-demo">
+                <div class="label-demo correct">7833</div>
+                <div class="label-demo correct">7833</div>
+                <div class="label-demo correct">7834</div>
+                <div class="label-demo correct">7834</div>
+                <div class="label-demo correct">7835</div>
+                <div class="label-demo correct">7835</div>
+                <div class="label-demo correct">7836</div>
+                <div class="label-demo correct">7836</div>
+                <div class="label-demo correct">7837</div>
+                <div class="label-demo correct">7837</div>
+            </div>
+            <p>✅ <strong>Sequência linear crescente - SEM voltar para números menores!</strong></p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Cenários de Teste</h2>
+        
+        <div class="test-result info">
+            <h3>Teste 1: Cenário da Imagem Original</h3>
+            <p><strong>Config:</strong> Base: 7833, Quantidade: 5, Cópias: 2</p>
+            <p><strong>Esperado:</strong> 7833, 7833, 7834, 7834, 7835, 7835, 7836, 7836, 7837, 7837</p>
+            <button onclick="testarImagemOriginal()">🧪 Testar Cenário da Imagem</button>
+        </div>
+
+        <div class="test-result info">
+            <h3>Teste 2: Caso Simples</h3>
+            <p><strong>Config:</strong> Base: 1000, Quantidade: 3, Cópias: 2</p>
+            <p><strong>Esperado:</strong> 1000, 1000, 1001, 1001, 1002, 1002</p>
+            <button onclick="testarSimples()">🧪 Testar Simples</button>
+        </div>
+
+        <div class="test-result info">
+            <h3>Teste 3: Quantidade Maior (>5)</h3>
+            <p><strong>Config:</strong> Base: 2000, Quantidade: 8, Cópias: 1</p>
+            <p><strong>Esperado:</strong> 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007</p>
+            <button onclick="testarQuantidadeMaior()">🧪 Testar Qtd > 5</button>
+        </div>
+
+        <div class="test-result info">
+            <h3>Teste 4: Muitas Cópias</h3>
+            <p><strong>Config:</strong> Base: 5000, Quantidade: 2, Cópias: 5</p>
+            <p><strong>Esperado:</strong> 5000 (5x), 5001 (5x)</p>
+            <button onclick="testarMuitasCopias()">🧪 Testar Muitas Cópias</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Como Verificar</h2>
+        <ol>
+            <li>Abra a aplicação caixa (index.html)</li>
+            <li>Configure um dos cenários de teste acima</li>
+            <li>Selecione "Somente Interna"</li>
+            <li>Abra o Console (F12) para ver os logs detalhados</li>
+            <li>Clique em "Gerar"</li>
+            <li>Verifique se a sequência está correta</li>
+            <li>Confirme que não há números fora de ordem</li>
+        </ol>
+        
+        <div class="test-result success">
+            <p><strong>✅ Vantagens da Nova Lógica:</strong></p>
+            <ul>
+                <li>Código mais simples e legível</li>
+                <li>Logs detalhados para debug</li>
+                <li>Lógica linear sem complexidade</li>
+                <li>Fácil de entender e manter</li>
+                <li>Sem dependência de outras funções complexas</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function testarImagemOriginal() {
+            alert('🧪 TESTE DO CENÁRIO DA IMAGEM\\n\\nConfigure na aplicação:\\n\\nBase: 7833\\nQuantidade: 5\\nCópias: 2\\nTipo: Somente Interna\\n\\n✅ Sequência esperada:\\n7833, 7833, 7834, 7834, 7835, 7835, 7836, 7836, 7837, 7837\\n\\n🔍 Observe o console para logs detalhados!');
+        }
+
+        function testarSimples() {
+            alert('🧪 TESTE SIMPLES\\n\\nConfigure na aplicação:\\n\\nBase: 1000\\nQuantidade: 3\\nCópias: 2\\nTipo: Somente Interna\\n\\n✅ Sequência esperada:\\n1000, 1000, 1001, 1001, 1002, 1002');
+        }
+
+        function testarQuantidadeMaior() {
+            alert('🧪 TESTE QUANTIDADE > 5\\n\\nConfigure na aplicação:\\n\\nBase: 2000\\nQuantidade: 8\\nCópias: 1\\nTipo: Somente Interna\\n\\n✅ Sequência esperada:\\n2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007\\n\\n📝 Este teste verifica se o problema com qtd > 5 foi resolvido');
+        }
+
+        function testarMuitasCopias() {
+            alert('🧪 TESTE MUITAS CÓPIAS\\n\\nConfigure na aplicação:\\n\\nBase: 5000\\nQuantidade: 2\\nCópias: 5\\nTipo: Somente Interna\\n\\n✅ Sequência esperada:\\n5000, 5000, 5000, 5000, 5000, 5001, 5001, 5001, 5001, 5001');
+        }
+    </script>
+
+</body>
+</html>

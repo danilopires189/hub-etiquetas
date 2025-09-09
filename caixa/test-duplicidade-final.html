@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Duplicidade Final</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .sequence-demo { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 15px 0; }
+        .label-demo { 
+            border: 1px solid #333; 
+            padding: 10px; 
+            text-align: center; 
+            font-weight: bold; 
+            font-size: 14px;
+            background: white;
+        }
+        .correct { border-color: #28a745; background: #d4edda; }
+        .incorrect { border-color: #dc3545; background: #f8d7da; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🧹 Teste - Correção da Duplicidade Final</h1>
+    
+    <div class="test-section">
+        <h2>❌ Problema da Imagem (Antes)</h2>
+        <div class="test-result error">
+            <p><strong>Sequência Incorreta Observada:</strong></p>
+            <div class="sequence-demo">
+                <div class="label-demo incorrect">2549</div>
+                <div class="label-demo incorrect">2550</div>
+                <div class="label-demo incorrect">2550</div>
+                <div class="label-demo incorrect">2551</div>
+                <div class="label-demo incorrect">2551</div>
+                <div class="label-demo incorrect">2552</div>
+                <div class="label-demo incorrect">2552</div>
+                <div class="label-demo incorrect">2553</div>
+                <div class="label-demo incorrect">2553</div>
+                <div class="label-demo incorrect">2554</div>
+                <div class="label-demo incorrect">2554</div>
+                <div class="label-demo incorrect">2550</div>
+            </div>
+            <p>❌ <strong>Problemas:</strong></p>
+            <ul>
+                <li>Primeira etiqueta (2549) aparece sozinha</li>
+                <li>Duplicidade no final (2550 aparece novamente)</li>
+                <li>Sequência fora de ordem</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>✅ Sequência Correta Esperada (Depois)</h2>
+        <div class="test-result success">
+            <p><strong>Para Base: 2549, Quantidade: 6, Cópias: 2</strong></p>
+            <div class="sequence-demo">
+                <div class="label-demo correct">2549</div>
+                <div class="label-demo correct">2549</div>
+                <div class="label-demo correct">2550</div>
+                <div class="label-demo correct">2550</div>
+                <div class="label-demo correct">2551</div>
+                <div class="label-demo correct">2551</div>
+                <div class="label-demo correct">2552</div>
+                <div class="label-demo correct">2552</div>
+                <div class="label-demo correct">2553</div>
+                <div class="label-demo correct">2553</div>
+                <div class="label-demo correct">2554</div>
+                <div class="label-demo correct">2554</div>
+            </div>
+            <p>✅ <strong>Sequência linear perfeita - cada número com suas cópias!</strong></p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Correções Implementadas</h2>
+        <div class="test-result success">
+            <h3>✨ Melhorias na Lógica:</h3>
+            <ul>
+                <li>Array de debug para rastrear sequência gerada</li>
+                <li>Logs mais claros para cada número e cópia</li>
+                <li>Verificação da sequência final no console</li>
+                <li>Lógica mais robusta contra duplicidades</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Teste da Correção</h2>
+        
+        <div class="test-result info">
+            <h3>Cenário Exato da Imagem</h3>
+            <p><strong>Configure na aplicação:</strong></p>
+            <ul>
+                <li>Base: 2549</li>
+                <li>Quantidade: 6</li>
+                <li>Cópias: 2</li>
+                <li>Tipo: Somente Interna</li>
+            </ul>
+            <button onclick="testarImagemOriginal()">🧪 Testar Cenário da Imagem</button>
+        </div>
+
+        <div class="test-result info">
+            <h3>Teste Simples</h3>
+            <p><strong>Configure na aplicação:</strong></p>
+            <ul>
+                <li>Base: 1000</li>
+                <li>Quantidade: 3</li>
+                <li>Cópias: 2</li>
+                <li>Tipo: Somente Interna</li>
+            </ul>
+            <p><strong>Esperado:</strong> 1000, 1000, 1001, 1001, 1002, 1002</p>
+            <button onclick="testarSimples()">🧪 Testar Simples</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Como Verificar</h2>
+        <ol>
+            <li>Abra a aplicação caixa (index.html)</li>
+            <li>Configure: Base: 2549, Quantidade: 6, Cópias: 2</li>
+            <li>Selecione "Somente Interna"</li>
+            <li>Abra o Console (F12) ANTES de gerar</li>
+            <li>Clique em "Gerar"</li>
+            <li>Observe no console a linha "✅ SEQUÊNCIA FINAL: [...]"</li>
+            <li>Verifique se a sequência visual confere com o console</li>
+            <li>Confirme que NÃO há duplicidades no final</li>
+        </ol>
+        
+        <div class="test-result success">
+            <p><strong>🎯 O console agora mostra a sequência completa gerada!</strong></p>
+            <p>Exemplo: <code>✅ SEQUÊNCIA FINAL: [2549, 2549, 2550, 2550, 2551, 2551, 2552, 2552, 2553, 2553, 2554, 2554]</code></p>
+        </div>
+    </div>
+
+    <script>
+        function testarImagemOriginal() {
+            alert('🧪 TESTE DO CENÁRIO DA IMAGEM\\n\\nConfigure na aplicação:\\n\\nBase: 2549\\nQuantidade: 6\\nCópias: 2\\nTipo: Somente Interna\\n\\n✅ Sequência esperada:\\n2549, 2549, 2550, 2550, 2551, 2551, 2552, 2552, 2553, 2553, 2554, 2554\\n\\n🔍 Observe o console para ver "SEQUÊNCIA FINAL"!');
+        }
+
+        function testarSimples() {
+            alert('🧪 TESTE SIMPLES\\n\\nConfigure na aplicação:\\n\\nBase: 1000\\nQuantidade: 3\\nCópias: 2\\nTipo: Somente Interna\\n\\n✅ Sequência esperada:\\n1000, 1000, 1001, 1001, 1002, 1002\\n\\n🔍 Verifique no console a sequência final!');
+        }
+    </script>
+
+</body>
+</html>

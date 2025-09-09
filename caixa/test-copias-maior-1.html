@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Cópias > 1</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .code-block { background: #f8f9fa; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🐛 Teste - Problema com Cópias > 1 (Etiquetas Internas)</h1>
+    
+    <div class="test-section">
+        <h2>🔍 Problema Específico Identificado</h2>
+        <div class="test-result error">
+            <p><strong>Condições do Erro:</strong></p>
+            <ul>
+                <li>✅ Quantidade de cópias > 1</li>
+                <li>✅ Tipo = "Somente Interna"</li>
+            </ul>
+            <p><strong>Sintoma:</strong> Sequência incorreta quando há mais de 1 cópia por número</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Cenários de Teste Específicos</h2>
+        
+        <div class="test-result warning">
+            <h3>Teste 1: Cópias = 1 (Deve Funcionar)</h3>
+            <p><strong>Config:</strong> Base: 1000, Qtd: 3, Cópias: 1, Tipo: Interna</p>
+            <p><strong>Esperado:</strong> 1000, 1001, 1002</p>
+            <button onclick="testarCopias1()">🧪 Testar Cópias = 1</button>
+        </div>
+
+        <div class="test-result error">
+            <h3>Teste 2: Cópias = 2 (Problema)</h3>
+            <p><strong>Config:</strong> Base: 1000, Qtd: 3, Cópias: 2, Tipo: Interna</p>
+            <p><strong>Esperado:</strong> 1000, 1000, 1001, 1001, 1002, 1002</p>
+            <button onclick="testarCopias2()">🧪 Testar Cópias = 2</button>
+        </div>
+
+        <div class="test-result error">
+            <h3>Teste 3: Cópias = 3 (Problema)</h3>
+            <p><strong>Config:</strong> Base: 2000, Qtd: 2, Cópias: 3, Tipo: Interna</p>
+            <p><strong>Esperado:</strong> 2000, 2000, 2000, 2001, 2001, 2001</p>
+            <button onclick="testarCopias3()">🧪 Testar Cópias = 3</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Simulação da Lógica</h2>
+        <div class="test-result info">
+            <p>Vamos simular exatamente o que deveria acontecer:</p>
+            <button onclick="simularLogica()">▶️ Simular Lógica Correta</button>
+            <div id="simulacao-resultado" class="code-block" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Instruções para Debug</h2>
+        <ol>
+            <li>Abra a aplicação caixa (index.html)</li>
+            <li>Configure: Base: 1000, Quantidade: 3, Cópias: 2</li>
+            <li>Selecione "Somente Interna"</li>
+            <li>Abra o Console (F12) ANTES de clicar "Gerar"</li>
+            <li>Clique em "Gerar" e observe os logs</li>
+            <li>Compare com a simulação abaixo</li>
+            <li>Anote exatamente qual sequência está sendo gerada</li>
+        </ol>
+    </div>
+
+    <script>
+        const padLeft = (numStr, len) => (Array(len + 1).join('0') + numStr).slice(-len);
+
+        function testarCopias1() {
+            alert('🧪 TESTE CÓPIAS = 1\\n\\nConfigure na aplicação:\\n\\nBase: 1000\\nQuantidade: 3\\nCópias: 1\\nTipo: Somente Interna\\n\\n✅ Esperado: 1000, 1001, 1002\\n\\n📝 Este deve funcionar normalmente');
+        }
+
+        function testarCopias2() {
+            alert('🧪 TESTE CÓPIAS = 2 (PROBLEMA)\\n\\nConfigure na aplicação:\\n\\nBase: 1000\\nQuantidade: 3\\nCópias: 2\\nTipo: Somente Interna\\n\\n✅ Esperado: 1000, 1000, 1001, 1001, 1002, 1002\\n\\n⚠️ Observe se a sequência está correta!');
+        }
+
+        function testarCopias3() {
+            alert('🧪 TESTE CÓPIAS = 3 (PROBLEMA)\\n\\nConfigure na aplicação:\\n\\nBase: 2000\\nQuantidade: 2\\nCópias: 3\\nTipo: Somente Interna\\n\\n✅ Esperado: 2000, 2000, 2000, 2001, 2001, 2001\\n\\n⚠️ Verifique se todas as 6 etiquetas estão corretas!');
+        }
+
+        function simularLogica() {
+            const resultado = document.getElementById('simulacao-resultado');
+            resultado.style.display = 'block';
+            
+            // Parâmetros do teste problemático
+            const base = '1000';
+            const qtd = 3;
+            const copias = 2;
+            const len = base.length;
+            
+            let log = '';
+            log += `🧪 SIMULAÇÃO - CÓPIAS > 1 (PROBLEMA)\\n`;
+            log += `==========================================\\n\\n`;
+            log += `Parâmetros:\\n`;
+            log += `- base: "${base}"\\n`;
+            log += `- qtd: ${qtd}\\n`;
+            log += `- copias: ${copias} (> 1 - AQUI ESTÁ O PROBLEMA)\\n`;
+            log += `- len: ${len}\\n\\n`;
+            
+            let etiquetas = [];
+            let totalEtiquetas = 0;
+            
+            // Simular a lógica atual
+            log += `SIMULAÇÃO DA LÓGICA ATUAL:\\n`;
+            log += `for (i = 0; i < ${qtd}; i++)\\n\\n`;
+            
+            for (let i = 0; i < qtd; i++) {
+                log += `--- NÚMERO ${i + 1}/${qtd} ---\\n`;
+                log += `i = ${i}\\n`;
+                
+                const atual = padLeft(String(parseInt(base, 10) + i), len);
+                log += `atual = padLeft(String(${parseInt(base, 10)} + ${i}), ${len}) = "${atual}"\\n`;
+                
+                const numeroInterno = atual.length >= 4 ? atual.slice(-4) : atual;
+                log += `numeroInterno = "${atual}".slice(-4) = "${numeroInterno}"\\n\\n`;
+                
+                log += `  LOOP DE CÓPIAS (${copias} cópias):\\n`;
+                for (let c = 0; c < copias; c++) {
+                    totalEtiquetas++;
+                    etiquetas.push(numeroInterno);
+                    log += `    c = ${c}: Gerando "${numeroInterno}" (etiqueta #${totalEtiquetas})\\n`;
+                }
+                log += `\\n`;
+            }
+            
+            log += `==========================================\\n`;
+            log += `RESULTADO DA SIMULAÇÃO:\\n`;
+            log += `Total: ${totalEtiquetas} etiquetas\\n`;
+            log += `Sequência: [${etiquetas.join(', ')}]\\n\\n`;
+            
+            // Verificação
+            const esperado = ['1000', '1000', '1001', '1001', '1002', '1002'];
+            const correto = JSON.stringify(etiquetas) === JSON.stringify(esperado);
+            
+            if (correto) {
+                log += `✅ SIMULAÇÃO CORRETA!\\n`;
+                log += `A lógica deveria funcionar.\\n`;
+                log += `Se a aplicação real está dando resultado diferente,\\n`;
+                log += `pode haver problema em outro lugar do código.`;
+            } else {
+                log += `❌ PROBLEMA NA SIMULAÇÃO!\\n`;
+                log += `Esperado: [${esperado.join(', ')}]\\n`;
+                log += `Simulado: [${etiquetas.join(', ')}]\\n`;
+                log += `\\nISTO INDICA PROBLEMA NA LÓGICA BÁSICA!`;
+            }
+            
+            resultado.textContent = log;
+        }
+    </script>
+
+</body>
+</html>

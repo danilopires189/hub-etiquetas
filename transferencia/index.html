@@ -5,21 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pague Menos • Transferência CD → CD</title>
   <link rel="icon" href="assets/pm.png" />
+  <link rel="stylesheet" href="../shared/design-system.css" />
+  <link rel="stylesheet" href="../shared/components.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="left">
-      <div class="logo-pill"><img src="assets/pm.png" alt="Pague Menos"></div>
-      <div class="logo-pill"><img src="assets/danilopires.png" alt="Danilo Pires"></div>
-      <div class="brand">
-        <div class="brand-name">Pague Menos</div>
-        <div class="brand-sub">Transferência • CD → CD</div>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-logos">
+        <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary" onerror="this.style.display='none'">
+        <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary" onerror="this.style.display='none'">
+      </div>
+      <div class="brand-text">
+        <h1>Pague Menos</h1>
+        <span class="app-subtitle">Transferência • CD → CD</span>
       </div>
     </div>
-    <div class="right">
-      <button id="btnPrint" class="pill-btn"><span class="ico">🖨️</span> Imprimir</button>
-      <button id="btnAjuda" class="pill-btn ghost">Ajuda</button>
+    <div class="actions">
+      <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9,22 9,12 15,12 15,22"/>
+        </svg>
+        Hub
+      </button>
+      <button id="btnPrint" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()" aria-label="Imprimir">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6,9 6,2 18,2 18,9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Imprimir
+      </button>
     </div>
   </header>
 
@@ -123,13 +140,32 @@
     </section>
   </template>
 
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-info">
+          <p class="footer-title">Sistema de Etiquetas Pague Menos</p>
+          <p class="footer-subtitle">Desenvolvido por Danilo Pires</p>
+        </div>
+        <div class="footer-links">
+          <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="footer-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <circle cx="12" cy="17" r="0.5"/>
+            </svg>
+            Suporte
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
   <script src="app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('btnPrint').addEventListener('click', () => window.print());
-      document.getElementById('btnAjuda').addEventListener('click', () => {
-        alert('1) Selecione Origem e Destino (devem ser diferentes)\n2) Informe NF, Série e Quantidade\n3) Clique Gerar documento e depois Imprimir.');
-      });
+
     });
   </script>
 </body>

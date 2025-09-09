@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Quantidade Maior que 5</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .debug-log { background: #f8f9fa; padding: 10px; border-left: 4px solid #007bff; margin: 10px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste - Problema com Quantidade > 5 (Somente Interna)</h1>
+    
+    <div class="test-section">
+        <h2>🔍 Problema Identificado</h2>
+        <div class="test-result error">
+            <p><strong>Sintoma:</strong> Erro aparece quando quantidade > 5 e "somente interna" está selecionada</p>
+            <p><strong>Hipóteses possíveis:</strong></p>
+            <ul>
+                <li>Problema na função <code>padLeft</code> com números maiores</li>
+                <li>Erro no cálculo do <code>last4</code> (últimos 4 dígitos)</li>
+                <li>Problema de performance com muitas etiquetas</li>
+                <li>Erro no loop de geração</li>
+                <li>Problema com o delay/timeout</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Cenários de Teste Específicos</h2>
+        
+        <div class="test-result info">
+            <h3>Teste 1: Quantidade = 5 (Limite que funciona)</h3>
+            <p><strong>Config:</strong> Base: 1000, Qtd: 5, Cópias: 2, Tipo: internal</p>
+            <p><strong>Esperado:</strong> 10 etiquetas (1000, 1000, 1001, 1001, 1002, 1002, 1003, 1003, 1004, 1004)</p>
+            <button onclick="testarLimite()">🧪 Testar Limite (5)</button>
+        </div>
+
+        <div class="test-result warning">
+            <h3>Teste 2: Quantidade = 6 (Primeiro que falha)</h3>
+            <p><strong>Config:</strong> Base: 1000, Qtd: 6, Cópias: 2, Tipo: internal</p>
+            <p><strong>Esperado:</strong> 12 etiquetas</p>
+            <button onclick="testarFalha()">🧪 Testar Falha (6)</button>
+        </div>
+
+        <div class="test-result warning">
+            <h3>Teste 3: Quantidade = 10 (Maior)</h3>
+            <p><strong>Config:</strong> Base: 1000, Qtd: 10, Cópias: 1, Tipo: internal</p>
+            <p><strong>Esperado:</strong> 10 etiquetas</p>
+            <button onclick="testarMaior()">🧪 Testar Maior (10)</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Debug Manual</h2>
+        <div class="test-result info">
+            <h3>Teste da Função padLeft</h3>
+            <button onclick="testarPadLeft()">🧪 Testar padLeft</button>
+            <div id="padleft-result" class="debug-log" style="display: none;"></div>
+        </div>
+
+        <div class="test-result info">
+            <h3>Teste do Cálculo last4</h3>
+            <button onclick="testarLast4()">🧪 Testar last4</button>
+            <div id="last4-result" class="debug-log" style="display: none;"></div>
+        </div>
+
+        <div class="test-result info">
+            <h3>Teste do Loop de Geração</h3>
+            <button onclick="testarLoop()">🧪 Testar Loop</button>
+            <div id="loop-result" class="debug-log" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Instruções para Reproduzir o Erro</h2>
+        <ol>
+            <li>Abra a aplicação caixa (index.html)</li>
+            <li>Configure: Base: 1000, Quantidade: 6, Cópias: 2</li>
+            <li>Selecione "Somente Interna"</li>
+            <li>Abra o Console (F12) antes de clicar "Gerar"</li>
+            <li>Clique em "Gerar" e observe o erro no console</li>
+            <li>Anote a mensagem de erro exata</li>
+        </ol>
+    </div>
+
+    <script>
+        // Reproduzir as funções principais para teste
+        const padLeft = (numStr, len) => (Array(len + 1).join('0') + numStr).slice(-len);
+
+        function testarLimite() {
+            alert('Configure na aplicação:\\nBase: 1000\\nQuantidade: 5\\nCópias: 2\\nTipo: Somente Interna\\n\\nEste deve funcionar normalmente.');
+        }
+
+        function testarFalha() {
+            alert('Configure na aplicação:\\nBase: 1000\\nQuantidade: 6\\nCópias: 2\\nTipo: Somente Interna\\n\\nEste deve apresentar erro. Observe o console!');
+        }
+
+        function testarMaior() {
+            alert('Configure na aplicação:\\nBase: 1000\\nQuantidade: 10\\nCópias: 1\\nTipo: Somente Interna\\n\\nTeste com quantidade ainda maior.');
+        }
+
+        function testarPadLeft() {
+            const result = document.getElementById('padleft-result');
+            result.style.display = 'block';
+            
+            let output = 'Teste da função padLeft:\\n\\n';
+            
+            try {
+                const base = '1000';
+                const len = base.length;
+                
+                for (let i = 0; i < 10; i++) {
+                    const atual = padLeft(String(parseInt(base, 10) + i), len);
+                    output += `i=${i}: parseInt(${base}, 10) + ${i} = ${parseInt(base, 10) + i} -> padLeft = "${atual}"\\n`;
+                }
+                
+                output += '\\n✅ padLeft funcionou corretamente';
+            } catch (e) {
+                output += `\\n❌ ERRO na padLeft: ${e.message}`;
+            }
+            
+            result.textContent = output;
+        }
+
+        function testarLast4() {
+            const result = document.getElementById('last4-result');
+            result.style.display = 'block';
+            
+            let output = 'Teste do cálculo last4:\\n\\n';
+            
+            try {
+                const base = '1000';
+                const len = base.length;
+                
+                for (let i = 0; i < 10; i++) {
+                    const atual = padLeft(String(parseInt(base, 10) + i), len);
+                    const last4 = atual.length >= 4 ? atual.slice(-4) : atual;
+                    output += `i=${i}: atual="${atual}" -> last4="${last4}"\\n`;
+                }
+                
+                output += '\\n✅ last4 funcionou corretamente';
+            } catch (e) {
+                output += `\\n❌ ERRO no last4: ${e.message}`;
+            }
+            
+            result.textContent = output;
+        }
+
+        function testarLoop() {
+            const result = document.getElementById('loop-result');
+            result.style.display = 'block';
+            
+            let output = 'Teste do loop de geração (simulado):\\n\\n';
+            
+            try {
+                const base = '1000';
+                const qtd = 6;
+                const copias = 2;
+                const len = base.length;
+                let currentOperation = 0;
+                
+                output += `Configuração: base=${base}, qtd=${qtd}, copias=${copias}, len=${len}\\n\\n`;
+                
+                for (let i = 0; i < qtd; i++) {
+                    const atual = padLeft(String(parseInt(base, 10) + i), len);
+                    const last4 = atual.length >= 4 ? atual.slice(-4) : atual;
+                    
+                    output += `Número ${i + 1}/${qtd}: ${atual} -> ${last4}\\n`;
+                    
+                    for (let k = 0; k < copias; k++) {
+                        currentOperation++;
+                        output += `  Cópia ${k + 1}/${copias}: ${last4} (operação ${currentOperation})\\n`;
+                        
+                        // Simular possível problema
+                        if (currentOperation > 10) {
+                            output += `  ⚠️ Muitas operações, possível problema de performance\\n`;
+                        }
+                    }
+                }
+                
+                output += `\\n✅ Loop simulado concluído: ${currentOperation} operações`;
+            } catch (e) {
+                output += `\\n❌ ERRO no loop: ${e.message}`;
+            }
+            
+            result.textContent = output;
+        }
+    </script>
+
+</body>
+</html>

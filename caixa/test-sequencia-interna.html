@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Sequência Etiquetas Internas</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        .sequence-demo { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 15px 0; }
+        .label-demo { 
+            border: 1px solid #333; 
+            padding: 10px; 
+            text-align: center; 
+            font-weight: bold; 
+            font-size: 14px;
+            background: white;
+        }
+        .correct { border-color: #28a745; background: #d4edda; }
+        .incorrect { border-color: #dc3545; background: #f8d7da; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste - Sequência das Etiquetas Internas</h1>
+    
+    <div class="test-section">
+        <h2>🎯 Problema Identificado</h2>
+        <div class="test-result error">
+            <p><strong>Sequência Incorreta Observada na Imagem:</strong></p>
+            <div class="sequence-demo">
+                <div class="label-demo incorrect">4551</div>
+                <div class="label-demo incorrect">4551</div>
+                <div class="label-demo incorrect">4552</div>
+                <div class="label-demo incorrect">4552</div>
+                <div class="label-demo incorrect">4553</div>
+                <div class="label-demo incorrect">4553</div>
+                <div class="label-demo incorrect">4554</div>
+                <div class="label-demo incorrect">4554</div>
+                <div class="label-demo incorrect">4550</div>
+                <div class="label-demo incorrect">4550</div>
+                <div class="label-demo incorrect">4551</div>
+                <div class="label-demo incorrect">4551</div>
+            </div>
+            <p>❌ <strong>Problema:</strong> A sequência está fora de ordem, com números repetindo de forma incorreta</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>✅ Sequência Correta Esperada</h2>
+        <div class="test-result success">
+            <p><strong>Para Base: 4551, Quantidade: 4, Cópias: 2</strong></p>
+            <div class="sequence-demo">
+                <div class="label-demo correct">4551</div>
+                <div class="label-demo correct">4551</div>
+                <div class="label-demo correct">4552</div>
+                <div class="label-demo correct">4552</div>
+                <div class="label-demo correct">4553</div>
+                <div class="label-demo correct">4553</div>
+                <div class="label-demo correct">4554</div>
+                <div class="label-demo correct">4554</div>
+            </div>
+            <p>✅ <strong>Lógica:</strong> Todas as cópias de cada número antes de passar para o próximo</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Correção Implementada</h2>
+        <div class="test-result info">
+            <h3>Estrutura dos Loops Corrigida:</h3>
+            <pre style="background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto;">
+for (let i = 0; i < qtd; i++) {
+    const atual = padLeft(String(parseInt(base, 10) + i), len);
+    const last4 = atual.length >= 4 ? atual.slice(-4) : atual;
+    
+    // Gerar TODAS as cópias deste número antes do próximo
+    for (let k = 0; k < copias; k++) {
+        // Criar etiqueta interna
+        buildLabel({ numeroBase: last4, mode: 'internal' });
+    }
+}</pre>
+        </div>
+
+        <div class="test-result warning">
+            <h3>🔍 Logs Adicionados para Debug:</h3>
+            <ul>
+                <li>Log do número atual sendo processado</li>
+                <li>Log de cada cópia sendo gerada</li>
+                <li>Contagem total de operações</li>
+                <li>Verificação da sequência esperada vs gerada</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Cenários de Teste</h2>
+        
+        <div class="test-result info">
+            <h3>Teste 1: Caso Simples</h3>
+            <p><strong>Configuração:</strong> Base: 1000, Quantidade: 3, Cópias: 2</p>
+            <p><strong>Sequência Esperada:</strong> 1000, 1000, 1001, 1001, 1002, 1002</p>
+            <button onclick="testarCaso1()">🧪 Testar Caso 1</button>
+        </div>
+
+        <div class="test-result info">
+            <h3>Teste 2: Caso da Imagem</h3>
+            <p><strong>Configuração:</strong> Base: 4551, Quantidade: 4, Cópias: 2</p>
+            <p><strong>Sequência Esperada:</strong> 4551, 4551, 4552, 4552, 4553, 4553, 4554, 4554</p>
+            <button onclick="testarCaso2()">🧪 Testar Caso 2</button>
+        </div>
+
+        <div class="test-result info">
+            <h3>Teste 3: Mais Cópias</h3>
+            <p><strong>Configuração:</strong> Base: 2000, Quantidade: 2, Cópias: 3</p>
+            <p><strong>Sequência Esperada:</strong> 2000, 2000, 2000, 2001, 2001, 2001</p>
+            <button onclick="testarCaso3()">🧪 Testar Caso 3</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Como Verificar a Correção</h2>
+        <ol>
+            <li>Abra a aplicação caixa (index.html)</li>
+            <li>Configure: Base: 4551, Quantidade: 4, Cópias: 2</li>
+            <li>Selecione "Somente Interna"</li>
+            <li>Clique em "Gerar"</li>
+            <li>Abra o Console (F12) para ver os logs detalhados</li>
+            <li>Verifique se a sequência visual está: 4551, 4551, 4552, 4552, 4553, 4553, 4554, 4554</li>
+        </ol>
+    </div>
+
+    <script>
+        function testarCaso1() {
+            alert('Configure na aplicação:\nBase: 1000\nQuantidade: 3\nCópias: 2\nTipo: Somente Interna\n\nSequência esperada: 1000, 1000, 1001, 1001, 1002, 1002');
+        }
+
+        function testarCaso2() {
+            alert('Configure na aplicação:\nBase: 4551\nQuantidade: 4\nCópias: 2\nTipo: Somente Interna\n\nSequência esperada: 4551, 4551, 4552, 4552, 4553, 4553, 4554, 4554');
+        }
+
+        function testarCaso3() {
+            alert('Configure na aplicação:\nBase: 2000\nQuantidade: 2\nCópias: 3\nTipo: Somente Interna\n\nSequência esperada: 2000, 2000, 2000, 2001, 2001, 2001');
+        }
+    </script>
+
+</body>
+</html>

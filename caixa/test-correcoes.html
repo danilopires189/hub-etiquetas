@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Correções Quantidade e Sequência</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste das Correções - Aplicação Caixa</h1>
+    
+    <div class="test-section">
+        <h2>📋 Cenários de Teste</h2>
+        
+        <div class="test-result info">
+            <h3>Teste 1: Etiquetas Internas - Quantidade de Cópias</h3>
+            <p><strong>Cenário:</strong> Base: 1000, Quantidade: 3, Cópias: 5, Tipo: "internal"</p>
+            <p><strong>Esperado:</strong> 15 etiquetas (3 números × 5 cópias cada)</p>
+            <p><strong>Sequência esperada:</strong></p>
+            <ul>
+                <li>1000 (5 cópias)</li>
+                <li>1001 (5 cópias)</li>
+                <li>1002 (5 cópias)</li>
+            </ul>
+        </div>
+
+        <div class="test-result info">
+            <h3>Teste 2: Etiquetas Internas - Sequência Numérica</h3>
+            <p><strong>Cenário:</strong> Base: 12345678, Quantidade: 4, Cópias: 2, Tipo: "internal"</p>
+            <p><strong>Esperado:</strong> 8 etiquetas (4 números × 2 cópias cada)</p>
+            <p><strong>Sequência esperada (últimos 4 dígitos):</strong></p>
+            <ul>
+                <li>5678 (2 cópias)</li>
+                <li>5679 (2 cópias)</li>
+                <li>5680 (2 cópias)</li>
+                <li>5681 (2 cópias)</li>
+            </ul>
+        </div>
+
+        <div class="test-result info">
+            <h3>Teste 3: Modo "Both" - Sequência Correta</h3>
+            <p><strong>Cenário:</strong> Base: 2000, Quantidade: 2, Cópias: 3, Tipo: "both"</p>
+            <p><strong>Esperado:</strong> 12 etiquetas (2 números × 3 externas + 2 números × 3 internas)</p>
+            <p><strong>Sequência esperada:</strong></p>
+            <ul>
+                <li>2000 externa (3 cópias)</li>
+                <li>2000 interna (3 cópias)</li>
+                <li>2001 externa (3 cópias)</li>
+                <li>2001 interna (3 cópias)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Correções Implementadas</h2>
+        
+        <div class="test-result success">
+            <h3>✅ Correção 1: Quantidade de Cópias para Internas</h3>
+            <p><strong>Problema:</strong> Etiquetas internas sempre geravam 2 cópias, ignorando o valor do usuário</p>
+            <p><strong>Solução:</strong> Modificado para usar <code>copias</code> em vez de valor fixo 2</p>
+            <p><strong>Código alterado:</strong> <code>for (let k = 0; k < copias; k++)</code></p>
+        </div>
+
+        <div class="test-result success">
+            <h3>✅ Correção 2: Cálculo Total de Etiquetas</h3>
+            <p><strong>Problema:</strong> Cálculo do total mostrava valor incorreto para internas</p>
+            <p><strong>Solução:</strong> <code>totalLabels = qtd * copias</code> para internas</p>
+        </div>
+
+        <div class="test-result success">
+            <h3>✅ Correção 3: Sequência Numérica Correta</h3>
+            <p><strong>Problema:</strong> Sequência das internas não seguia a progressão numérica</p>
+            <p><strong>Solução:</strong> Mantido o loop <code>for (let i = 0; i < qtd; i++)</code> com <code>padLeft(String(parseInt(base, 10) + i), len)</code></p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Como Testar</h2>
+        <ol>
+            <li>Abra a aplicação caixa (index.html)</li>
+            <li>Configure: Base: 1000, Quantidade: 3, Cópias: 5</li>
+            <li>Selecione "Somente Interna"</li>
+            <li>Clique em "Gerar"</li>
+            <li>Verifique se são geradas exatamente 15 etiquetas</li>
+            <li>Confirme a sequência: 1000 (5x), 1001 (5x), 1002 (5x)</li>
+        </ol>
+    </div>
+
+    <div class="test-result info">
+        <p><strong>💡 Dica:</strong> Abra o console do navegador (F12) para ver os logs detalhados da geração</p>
+    </div>
+
+</body>
+</html>

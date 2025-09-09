@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Debug Simples</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-box { padding: 20px; border: 2px solid #007bff; border-radius: 10px; margin: 20px 0; }
+        .result { margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; font-family: monospace; white-space: pre-wrap; }
+        button { padding: 15px 30px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Teste Debug Simples - Etiquetas Internas</h1>
+    
+    <div class="test-box">
+        <h2>🧪 Teste da Lógica Passo a Passo</h2>
+        <p>Este teste simula exatamente o que o código deveria fazer:</p>
+        <button onclick="testarLogica()">▶️ Executar Teste</button>
+        <div id="resultado" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>📋 Instruções</h2>
+        <ol>
+            <li>Clique no botão acima para ver a simulação</li>
+            <li>Compare com o resultado da aplicação real</li>
+            <li>Configure na aplicação: Base=1000, Qtd=3, Cópias=2, Tipo=Interna</li>
+            <li>Verifique se os resultados são iguais</li>
+        </ol>
+    </div>
+
+    <script>
+        const padLeft = (numStr, len) => (Array(len + 1).join('0') + numStr).slice(-len);
+
+        function testarLogica() {
+            const resultado = document.getElementById('resultado');
+            resultado.style.display = 'block';
+            
+            // Parâmetros exatos do teste
+            const base = '1000';
+            const qtd = 3;
+            const copias = 2;
+            const len = base.length;
+            
+            let log = '';
+            log += `🧪 TESTE SIMPLES - LÓGICA ETIQUETAS INTERNAS\\n`;
+            log += `===============================================\\n\\n`;
+            log += `Parâmetros:\\n`;
+            log += `- base: "${base}"\\n`;
+            log += `- qtd: ${qtd}\\n`;
+            log += `- copias: ${copias}\\n`;
+            log += `- len: ${len}\\n\\n`;
+            
+            // Converter base para número
+            const baseNumber = parseInt(base, 10);
+            log += `baseNumber = parseInt("${base}", 10) = ${baseNumber}\\n\\n`;
+            
+            let etiquetas = [];
+            let totalEtiquetas = 0;
+            
+            // Loop principal
+            log += `INÍCIO DO LOOP PRINCIPAL:\\n`;
+            log += `for (numeroSequencial = 0; numeroSequencial < ${qtd}; numeroSequencial++)\\n\\n`;
+            
+            for (let numeroSequencial = 0; numeroSequencial < qtd; numeroSequencial++) {
+                log += `--- ITERAÇÃO ${numeroSequencial + 1} ---\\n`;
+                log += `numeroSequencial = ${numeroSequencial}\\n`;
+                
+                // Calcular número atual
+                const numeroAtual = baseNumber + numeroSequencial;
+                log += `numeroAtual = ${baseNumber} + ${numeroSequencial} = ${numeroAtual}\\n`;
+                
+                // Formatar com padding
+                const numeroFormatado = padLeft(String(numeroAtual), len);
+                log += `numeroFormatado = padLeft("${numeroAtual}", ${len}) = "${numeroFormatado}"\\n`;
+                
+                // Últimos 4 dígitos
+                const numeroInterno = numeroFormatado.length >= 4 ? numeroFormatado.slice(-4) : numeroFormatado;
+                log += `numeroInterno = "${numeroFormatado}".slice(-4) = "${numeroInterno}"\\n\\n`;
+                
+                // Loop de cópias
+                log += `  LOOP DE CÓPIAS (${copias} cópias):\\n`;
+                for (let copia = 0; copia < copias; copia++) {
+                    totalEtiquetas++;
+                    etiquetas.push(numeroInterno);
+                    log += `    Cópia ${copia + 1}: "${numeroInterno}" (etiqueta #${totalEtiquetas})\\n`;
+                }
+                log += `\\n`;
+            }
+            
+            log += `===============================================\\n`;
+            log += `RESULTADO FINAL:\\n`;
+            log += `Total de etiquetas geradas: ${totalEtiquetas}\\n`;
+            log += `Sequência: [${etiquetas.join(', ')}]\\n\\n`;
+            
+            // Verificação
+            const esperado = ['1000', '1000', '1001', '1001', '1002', '1002'];
+            const correto = JSON.stringify(etiquetas) === JSON.stringify(esperado);
+            
+            if (correto) {
+                log += `✅ RESULTADO CORRETO!\\n`;
+                log += `A lógica está funcionando perfeitamente.\\n`;
+                log += `Se a aplicação real está dando resultado diferente,\\n`;
+                log += `o problema pode estar em outro lugar (buildLabel, DOM, etc.)`;
+            } else {
+                log += `❌ PROBLEMA NA LÓGICA!\\n`;
+                log += `Esperado: [${esperado.join(', ')}]\\n`;
+                log += `Obtido:   [${etiquetas.join(', ')}]\\n`;
+            }
+            
+            resultado.textContent = log;
+        }
+    </script>
+
+</body>
+</html>

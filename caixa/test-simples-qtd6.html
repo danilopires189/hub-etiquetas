@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Simples - Quantidade 6</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-box { padding: 20px; border: 2px solid #007bff; border-radius: 10px; margin: 20px 0; }
+        .success { border-color: #28a745; background: #d4edda; }
+        .error { border-color: #dc3545; background: #f8d7da; }
+        .warning { border-color: #ffc107; background: #fff3cd; }
+        button { padding: 15px 30px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+        button:hover { background: #0056b3; }
+        .result { margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste Simples - Quantidade 6 (Somente Interna)</h1>
+    
+    <div class="test-box warning">
+        <h2>⚠️ Problema Reportado</h2>
+        <p><strong>Sintoma:</strong> Erro quando quantidade > 5 e "somente interna" selecionada</p>
+        <p><strong>Correção aplicada:</strong> Removido delay entre cópias, mantido apenas entre grupos de números</p>
+    </div>
+
+    <div class="test-box">
+        <h2>🎯 Teste Direto</h2>
+        <p>Configure exatamente assim na aplicação:</p>
+        <ul>
+            <li><strong>Base:</strong> 1000</li>
+            <li><strong>Quantidade:</strong> 6</li>
+            <li><strong>Cópias:</strong> 2</li>
+            <li><strong>Tipo:</strong> Somente Interna</li>
+        </ul>
+        
+        <button onclick="abrirAplicacao()">🚀 Abrir Aplicação para Teste</button>
+        <button onclick="mostrarSequenciaEsperada()">📋 Ver Sequência Esperada</button>
+    </div>
+
+    <div class="test-box">
+        <h2>🔍 Verificação Manual</h2>
+        <p>Após gerar as etiquetas, verifique:</p>
+        <ol>
+            <li>Total de etiquetas geradas: <strong>12</strong></li>
+            <li>Sequência correta: 1000, 1000, 1001, 1001, 1002, 1002, 1003, 1003, 1004, 1004, 1005, 1005</li>
+            <li>Nenhum erro no console</li>
+            <li>Barra de progresso funcionando</li>
+        </ol>
+        
+        <button onclick="verificarConsole()">🔧 Como Verificar Console</button>
+    </div>
+
+    <div id="resultado" class="result" style="display: none;"></div>
+
+    <div class="test-box">
+        <h2>🧪 Testes Adicionais</h2>
+        <p>Se o teste acima funcionar, teste também:</p>
+        <button onclick="testeQuantidade10()">Quantidade 10</button>
+        <button onclick="testeQuantidade20()">Quantidade 20</button>
+        <button onclick="testeQuantidade50()">Quantidade 50</button>
+    </div>
+
+    <script>
+        function abrirAplicacao() {
+            // Tentar abrir a aplicação em nova aba
+            const newWindow = window.open('../caixa/index.html', '_blank');
+            if (!newWindow) {
+                alert('Não foi possível abrir automaticamente.\\n\\nAbra manualmente: caixa/index.html');
+            } else {
+                alert('Aplicação aberta em nova aba.\\n\\nConfigure:\\nBase: 1000\\nQuantidade: 6\\nCópias: 2\\nTipo: Somente Interna');
+            }
+        }
+
+        function mostrarSequenciaEsperada() {
+            const resultado = document.getElementById('resultado');
+            resultado.style.display = 'block';
+            resultado.innerHTML = `
+                <h3>📋 Sequência Esperada (Base: 1000, Qtd: 6, Cópias: 2)</h3>
+                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 15px 0;">
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1000</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1000</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1001</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1001</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1002</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1002</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1003</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1003</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1004</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1004</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1005</div>
+                    <div style="border: 1px solid #333; padding: 10px; text-align: center; background: white;">1005</div>
+                </div>
+                <p><strong>Total:</strong> 12 etiquetas</p>
+            `;
+        }
+
+        function verificarConsole() {
+            alert('Para verificar o console:\\n\\n1. Pressione F12 (ou Ctrl+Shift+I)\\n2. Clique na aba "Console"\\n3. Gere as etiquetas\\n4. Observe se há erros (texto em vermelho)\\n5. Procure pelos logs que começam com 🏷️');
+        }
+
+        function testeQuantidade10() {
+            alert('Teste adicional:\\n\\nBase: 2000\\nQuantidade: 10\\nCópias: 1\\nTipo: Somente Interna\\n\\nEsperado: 10 etiquetas (2000, 2001, 2002, ..., 2009)');
+        }
+
+        function testeQuantidade20() {
+            alert('Teste de stress:\\n\\nBase: 3000\\nQuantidade: 20\\nCópias: 1\\nTipo: Somente Interna\\n\\nEsperado: 20 etiquetas');
+        }
+
+        function testeQuantidade50() {
+            alert('Teste de stress máximo:\\n\\nBase: 4000\\nQuantidade: 50\\nCópias: 1\\nTipo: Somente Interna\\n\\nEsperado: 50 etiquetas\\n\\n⚠️ Pode ser lento!');
+        }
+    </script>
+
+</body>
+</html>

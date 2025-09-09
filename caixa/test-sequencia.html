@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Sequência - Etiquetas Internas</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-case { 
+            border: 1px solid #ddd; 
+            margin: 10px 0; 
+            padding: 15px; 
+            border-radius: 5px; 
+        }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .results { margin-top: 10px; font-family: monospace; font-size: 12px; }
+        .sequence { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
+        .label-preview { 
+            border: 1px solid #ccc; 
+            padding: 5px; 
+            min-width: 50px; 
+            text-align: center; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Sequência - Etiquetas Internas</h1>
+    
+    <div class="test-case">
+        <h3>Teste: Base 082545, 5 números, modo Interno</h3>
+        <p>Esperado: 2545, 2546, 2547, 2548, 2549 (cada um 2x)</p>
+        <button onclick="testSequence()">Executar Teste</button>
+        <div id="result1" class="results"></div>
+        <div id="sequence1" class="sequence"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>Teste: Base 2550, 5 números, modo Interno</h3>
+        <p>Esperado: 2550, 2551, 2552, 2553, 2554 (cada um 2x)</p>
+        <button onclick="testSequence2()">Executar Teste</button>
+        <div id="result2" class="results"></div>
+        <div id="sequence2" class="sequence"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>Teste: Base 082550, 3 números, 2 cópias, modo AMBAS</h3>
+        <p>Sequência esperada: Ext(082550), Ext(082550), Int(2550), Int(2550), Ext(082551), Ext(082551), Int(2551), Int(2551), Ext(082552), Ext(082552), Int(2552), Int(2552)</p>
+        <button onclick="testBothMode()">Executar Teste</button>
+        <div id="result3" class="results"></div>
+        <div id="sequence3" class="sequence"></div>
+    </div>
+
+    <script>
+        const padLeft = (numStr, len) => (Array(len + 1).join('0') + numStr).slice(-len);
+        
+        function simulateInternalGeneration(base, qtd) {
+            const results = [];
+            const len = base.length;
+            
+            console.log(`Simulando geração interna: Base=${base}, Qtd=${qtd}`);
+            
+            for (let i = 0; i < qtd; i++) {
+                const atual = padLeft(String(parseInt(base, 10) + i), len);
+                const last4 = atual.length >= 4 ? atual.slice(-4) : atual;
+                
+                console.log(`i=${i}: atual=${atual}, last4=${last4}`);
+                
+                // Sempre 2 cópias para internas
+                for (let k = 0; k < 2; k++) {
+                    results.push({
+                        numero: last4,
+                        numeroCompleto: atual,
+                        copia: k + 1,
+                        posicao: i
+                    });
+                }
+            }
+            
+            return results;
+        }
+        
+        function displayResults(results, expectedSequence, resultId, sequenceId) {
+            const resultDiv = document.getElementById(resultId);
+            const sequenceDiv = document.getElementById(sequenceId);
+            const testCase = resultDiv.parentElement;
+            
+            // Mostrar sequência visual
+            sequenceDiv.innerHTML = '';
+            results.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'label-preview';
+                div.textContent = item.numero;
+                div.title = `Posição ${index}: ${item.numeroCompleto} -> ${item.numero} (cópia ${item.copia})`;
+                sequenceDiv.appendChild(div);
+            });
+            
+            // Análise
+            let analysis = `Total gerado: ${results.length}\n`;
+            analysis += `Sequência esperada: ${expectedSequence.join(', ')}\n`;
+            
+            // Verificar se a sequência está correta
+            const uniqueNumbers = [...new Set(results.map(r => r.numero))];
+            analysis += `Números únicos gerados: ${uniqueNumbers.join(', ')}\n`;
+            
+            // Verificar se cada número aparece exatamente 2 vezes
+            const counts = {};
+            results.forEach(r => {
+                counts[r.numero] = (counts[r.numero] || 0) + 1;
+            });
+            
+            let isCorrect = true;
+            let errors = [];
+            
+            expectedSequence.forEach(expected => {
+                if (counts[expected] !== 2) {
+                    isCorrect = false;
+                    errors.push(`${expected}: esperado 2, encontrado ${counts[expected] || 0}`);
+                }
+            });
+            
+            // Verificar números extras
+            Object.keys(counts).forEach(num => {
+                if (!expectedSequence.includes(num)) {
+                    isCorrect = false;
+                    errors.push(`${num}: número inesperado (${counts[num]} vezes)`);
+                }
+            });
+            
+            if (isCorrect) {
+                analysis += `\n✅ SEQUÊNCIA CORRETA`;
+                testCase.className = 'test-case success';
+            } else {
+                analysis += `\n❌ SEQUÊNCIA INCORRETA:\n`;
+                errors.forEach(error => analysis += `  - ${error}\n`);
+                testCase.className = 'test-case error';
+            }
+            
+            analysis += `\nContagem por número:\n`;
+            Object.keys(counts).sort().forEach(num => {
+                analysis += `  ${num}: ${counts[num]} vezes\n`;
+            });
+            
+            resultDiv.textContent = analysis;
+        }
+        
+        function testSequence() {
+            const results = simulateInternalGeneration('082545', 5);
+            const expected = ['2545', '2546', '2547', '2548', '2549'];
+            displayResults(results, expected, 'result1', 'sequence1');
+        }
+        
+        function testSequence2() {
+            const results = simulateInternalGeneration('2550', 5);
+            const expected = ['2550', '2551', '2552', '2553', '2554'];
+            displayResults(results, expected, 'result2', 'sequence2');
+        }
+        
+        function simulateBothMode(base, qtd, copias) {
+            const results = [];
+            const len = base.length;
+            
+            console.log(`Simulando modo BOTH sequencial: Base=${base}, Qtd=${qtd}, Cópias=${copias}`);
+            
+            // Para cada número, gerar externas + internas em sequência
+            for (let i = 0; i < qtd; i++) {
+                const atual = padLeft(String(parseInt(base, 10) + i), len);
+                const payloadBase = (atual.length % 2 === 0) ? atual : ('0' + atual);
+                const last4 = atual.length >= 4 ? atual.slice(-4) : atual;
+                
+                console.log(`Número ${i}: atual=${atual}, payloadBase=${payloadBase}, last4=${last4}`);
+                
+                // Primeiro: externas deste número
+                for (let c = 0; c < copias; c++) {
+                    results.push({
+                        tipo: 'externa',
+                        numero: payloadBase,
+                        numeroCompleto: atual,
+                        copia: c + 1,
+                        posicao: i
+                    });
+                }
+                
+                // Depois: internas do mesmo número
+                for (let k = 0; k < 2; k++) {
+                    results.push({
+                        tipo: 'interna',
+                        numero: last4,
+                        numeroCompleto: atual,
+                        copia: k + 1,
+                        posicao: i
+                    });
+                }
+            }
+            
+            return results;
+        }
+        
+        function displayBothResults(results, resultId, sequenceId) {
+            const resultDiv = document.getElementById(resultId);
+            const sequenceDiv = document.getElementById(sequenceId);
+            const testCase = resultDiv.parentElement;
+            
+            // Mostrar sequência visual
+            sequenceDiv.innerHTML = '';
+            results.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'label-preview';
+                div.style.backgroundColor = item.tipo === 'externa' ? '#e3f2fd' : '#fff3e0';
+                div.textContent = item.numero;
+                div.title = `${index}: ${item.tipo} ${item.numero} (cópia ${item.copia})`;
+                sequenceDiv.appendChild(div);
+            });
+            
+            // Análise da sequência
+            let analysis = `Total gerado: ${results.length}\n`;
+            analysis += `Sequência por tipo:\n`;
+            
+            let isCorrect = true;
+            let currentPos = 0;
+            
+            // Verificar se a sequência está correta (externa + interna por número)
+            for (let i = 0; i < 3; i++) { // Testar apenas os primeiros 3 números
+                const expectedExternal = results.filter(r => r.posicao === i && r.tipo === 'externa').length;
+                const expectedInternal = results.filter(r => r.posicao === i && r.tipo === 'interna').length;
+                
+                analysis += `Número ${i}: ${expectedExternal} externas, ${expectedInternal} internas\n`;
+                
+                if (expectedExternal !== 2 || expectedInternal !== 2) {
+                    isCorrect = false;
+                }
+            }
+            
+            if (isCorrect) {
+                analysis += `\n✅ SEQUÊNCIA CORRETA - Externas + Internas por número`;
+                testCase.className = 'test-case success';
+            } else {
+                analysis += `\n❌ SEQUÊNCIA INCORRETA`;
+                testCase.className = 'test-case error';
+            }
+            
+            resultDiv.textContent = analysis;
+        }
+        
+        function testBothMode() {
+            const results = simulateBothMode('082550', 3, 2);
+            displayBothResults(results, 'result3', 'sequence3');
+        }
+        
+        // Executar testes automaticamente
+        window.addEventListener('load', () => {
+            console.log('🧪 Executando testes de sequência...');
+            setTimeout(() => {
+                testSequence();
+                testSequence2();
+                testBothMode();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

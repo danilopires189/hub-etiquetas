@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Carregamento - Base de Dados</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #results { margin-top: 20px; }
+        .item { padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Carregamento da Base</h1>
+    
+    <div id="status" class="status info">Pronto para testar</div>
+    
+    <button onclick="testAutoLoad()">Teste Automático</button>
+    <button onclick="testManualLoad()">Teste Manual</button>
+    <button onclick="testCache()">Teste Cache</button>
+    <button onclick="clearCache()">Limpar Cache</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        const $ = (sel) => document.querySelector(sel);
+        
+        function setStatus(text, type = 'info') {
+            const status = $('#status');
+            status.textContent = text;
+            status.className = `status ${type}`;
+        }
+        
+        function showResults(data) {
+            const results = $('#results');
+            if (!data) {
+                results.innerHTML = '<p>Nenhum dado para exibir</p>';
+                return;
+            }
+            
+            const items = Object.values(data).slice(0, 10);
+            results.innerHTML = `
+                <h3>Primeiros 10 itens carregados:</h3>
+                ${items.map(item => `
+                    <div class="item">
+                        <strong>COD:</strong> ${item.COD} | 
+                        <strong>DV:</strong> ${item.DV} | 
+                        <strong>BARRAS:</strong> ${item.BARRAS} | 
+                        <strong>DESC:</strong> ${item.DESC}
+                    </div>
+                `).join('')}
+                <p><strong>Total:</strong> ${Object.keys(data).length} itens</p>
+            `;
+        }
+        
+        async function testAutoLoad() {
+            setStatus('Testando carregamento automático...', 'info');
+            
+            try {
+                const res = await fetch('base_barras_index.json');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
+                const data = await res.json();
+                setStatus(`✅ Sucesso! ${Object.keys(data).length} itens carregados`, 'success');
+                showResults(data);
+                
+            } catch (error) {
+                setStatus(`❌ Erro: ${error.message}`, 'error');
+                $('#results').innerHTML = `
+                    <h3>Possíveis soluções:</h3>
+                    <ul>
+                        <li>Verifique se o arquivo base_barras_index.json existe na pasta placas/</li>
+                        <li>Se estiver abrindo via file://, use o teste manual</li>
+                        <li>Verifique se o servidor web está rodando</li>
+                    </ul>
+                `;
+            }
+        }
+        
+        async function testManualLoad() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                setStatus('Carregando arquivo...', 'info');
+                
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    
+                    setStatus(`✅ Arquivo carregado! ${Object.keys(data).length} itens`, 'success');
+                    showResults(data);
+                    
+                    // Salvar no cache para teste
+                    localStorage.setItem('DP_BASE_JSON', JSON.stringify(data));
+                    
+                } catch (error) {
+                    setStatus(`❌ Erro ao processar arquivo: ${error.message}`, 'error');
+                }
+            };
+            
+            input.click();
+        }
+        
+        function testCache() {
+            setStatus('Verificando cache...', 'info');
+            
+            try {
+                const cached = localStorage.getItem('DP_BASE_JSON');
+                if (!cached) {
+                    setStatus('❌ Nenhum cache encontrado', 'warning');
+                    $('#results').innerHTML = '<p>Use o teste manual para carregar dados primeiro</p>';
+                    return;
+                }
+                
+                const data = JSON.parse(cached);
+                setStatus(`✅ Cache encontrado! ${Object.keys(data).length} itens`, 'success');
+                showResults(data);
+                
+            } catch (error) {
+                setStatus(`❌ Erro no cache: ${error.message}`, 'error');
+                localStorage.removeItem('DP_BASE_JSON');
+            }
+        }
+        
+        function clearCache() {
+            localStorage.removeItem('DP_BASE_JSON');
+            localStorage.removeItem('DP_PRINT_CFG');
+            setStatus('🗑️ Cache limpo', 'info');
+            $('#results').innerHTML = '';
+        }
+        
+        // Teste inicial
+        window.addEventListener('load', () => {
+            console.log('🧪 Página de teste carregada');
+            setStatus('Página carregada. Escolha um teste acima.', 'info');
+        });
+    </script>
+</body>
+</html>

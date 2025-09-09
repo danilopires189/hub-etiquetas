@@ -16,7 +16,7 @@
 
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 "Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial}
+body{margin:0;color:var(--text);font:15px/1.45 "Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial} /* Background definido no design-system.css */
 
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
@@ -176,17 +176,10 @@ body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 "Inter",syst
 }
 
 /* Seu .brand-logo é o <img>; usamos o próprio elemento como “pill” */
-.app-header .brand-logo{
-  padding: 6px;                       /* cria a borda interna da pill */
-  border-radius: 12px;
-  background: linear-gradient(145deg, var(--pill-grad1), var(--pill-grad2));
-  background-clip: padding-box;
-  border: 1px solid var(--pill-border-soft);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.65) inset,  /* brilho interno sutil */
-    0 6px 18px rgba(15,23,42,.06);        /* sombra suave */
-  object-fit: contain;                   /* mantém seu comportamento atual */
-}
+/* Removido - usando definição do components.css */
 
 /* (Opcional) leve realce no hover */
 .app-header .brand-logo:hover{ filter: brightness(1.02); }
+
+/* === CORREÇÃO DOS LOGOS === */
+/* Removido - usando definição do components.css */

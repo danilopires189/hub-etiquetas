@@ -18,36 +18,9 @@ body {
   height: 100%;
 }
 
-body {
-  font-family: ui-sans-serif, system-ui, Segoe UI, Arial, sans-serif;
-  margin: 0;
-  color: var(--ink);
-  background: radial-gradient(1200px 400px at 50% -200px, #ffe6ee3d, transparent 60%), linear-gradient(180deg, #f3f6ff 0%, #fff 40%);
-}
+/* Background definido no design-system.css */
 
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  background: linear-gradient(90deg, rgba(224, 0, 43, .10), rgba(6, 46, 111, .10));
-  border-bottom: 1px solid #e6ecff;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.brand-logos {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+/* Cabeçalho definido no components.css */
 }
 
 .brand-logo {

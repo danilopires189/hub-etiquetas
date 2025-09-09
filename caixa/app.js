@@ -10,18 +10,35 @@ let generationHistory = JSON.parse(localStorage.getItem('etiquetas-history') || 
 function cleanDuplicateHistory() {
   const uniqueHistory = [];
   const seen = new Set();
-  
-  for (const item of generationHistory) {
-    const key = `${item.base}-${item.qtd}-${item.copias}-${item.labelType}`;
+
+  // Ordenar por timestamp (mais recente primeiro)
+  const sortedHistory = [...generationHistory].sort((a, b) =>
+    new Date(b.timestamp || 0) - new Date(a.timestamp || 0)
+  );
+
+  for (const item of sortedHistory) {
+    // Criar chave única mais específica
+    const key = `${item.base}-${item.qtd}-${item.copias}-${item.labelType}-${item.orient || 'h'}`;
+
     if (!seen.has(key)) {
       seen.add(key);
+      // Garantir que o item tem ID único
+      if (!item.id) {
+        item.id = Date.now() + Math.random();
+      }
       uniqueHistory.push(item);
     }
   }
-  
+
+  // Se houve mudanças, atualizar
   if (uniqueHistory.length !== generationHistory.length) {
     generationHistory = uniqueHistory.slice(0, 5); // Manter apenas os 5 mais recentes
-    localStorage.setItem('etiquetas-history', JSON.stringify(generationHistory));
+    try {
+      localStorage.setItem('etiquetas-history', JSON.stringify(generationHistory));
+      console.log(`Histórico limpo: ${sortedHistory.length - uniqueHistory.length} duplicatas removidas`);
+    } catch (e) {
+      console.warn('Erro ao salvar histórico limpo:', e.message);
+    }
   }
 }
 
@@ -118,7 +135,7 @@ function updateCalculatedInfo() {
   // Limpar informação do campo base
   const baseInfo = $('#base-info');
   const qtdInfo = $('#qtd-info');
-  
+
   // Mostrar etiqueta final calculada logo abaixo da inicial
   if (base && /^\d+$/.test(base) && qtd > 0) {
     const baseNum = parseInt(base);
@@ -128,7 +145,7 @@ function updateCalculatedInfo() {
   } else {
     baseInfo.textContent = '';
   }
-  
+
   // Limpar info do campo quantidade
   qtdInfo.textContent = '';
 
@@ -137,7 +154,7 @@ function updateCalculatedInfo() {
   if (labelType === 'external') {
     totalLabels = qtd * copias;
   } else if (labelType === 'internal') {
-    totalLabels = qtd * 2; // Sempre 2 cópias para internas
+    totalLabels = qtd * copias; // Internas usam a quantidade de cópias especificada
   } else if (labelType === 'both') {
     totalLabels = (qtd * copias) + (qtd * 2);
   }
@@ -308,13 +325,21 @@ async function gerar() {
     progressFill.style.width = '0%';
 
     const out = $('#preview');
-    out.innerHTML = '';
+    out.innerHTML = ''; // Limpar preview anterior
     const len = base.length;
 
     // Calcular total de operações para progresso
     let totalOperations = 0;
-    if (labelType === 'external' || labelType === 'both') totalOperations += qtd * copias;
-    if (labelType === 'internal' || labelType === 'both') totalOperations += qtd * 2;
+    if (labelType === 'external') {
+      totalOperations = qtd * copias;
+    } else if (labelType === 'internal') {
+      totalOperations = qtd * copias; // Internas usam a quantidade de cópias do usuário
+    } else if (labelType === 'both') {
+      totalOperations = (qtd * copias) + (qtd * copias); // Externas + Internas (mesma quantidade)
+    }
+
+    console.log(`🏷️ Gerando etiquetas: Base=${base}, Qtd=${qtd}, Cópias=${copias}, Tipo=${labelType}`);
+    console.log(`📊 Total esperado: ${totalOperations} etiquetas`);
 
     let currentOperation = 0;
 
@@ -325,44 +350,156 @@ async function gerar() {
       progressText.textContent = `Gerando... ${currentOperation}/${totalOperations}`;
     };
 
-    for (let i = 0; i < qtd; i++) {
-      const atual = padLeft(String(parseInt(base, 10) + i), len);
-      const dv = dvMod10_31(atual);
-      const payloadBase = (atual.length % 2 === 0) ? atual : ('0' + atual);
+    // Gerar etiquetas de forma organizada para evitar duplicação
+    if (labelType === 'external') {
+      // Apenas etiquetas externas (com barras)
+      for (let i = 0; i < qtd; i++) {
+        const atual = padLeft(String(parseInt(base, 10) + i), len);
+        const dv = dvMod10_31(atual);
+        const payloadBase = (atual.length % 2 === 0) ? atual : ('0' + atual);
 
-      // Gerar etiquetas externas (com barras)
-      if (labelType === 'external' || labelType === 'both') {
         for (let c = 0; c < copias; c++) {
           const el = buildLabel({ numeroBase: payloadBase, dv, orient, showLogo, showSafeIcon });
           out.appendChild(el);
           currentOperation++;
           updateProgress();
 
-          // Permitir que a UI responda a cada 10 etiquetas
           if (currentOperation % 10 === 0) {
             await new Promise(resolve => setTimeout(resolve, 1));
           }
         }
       }
+    } else if (labelType === 'internal') {
+      // ETIQUETAS INTERNAS - COPIANDO EXATAMENTE A LÓGICA DAS EXTERNAS
+      console.log(`� EtiqueTtas internas usando lógica das externas`);
 
-      // Gerar etiquetas internas (sem barras)
-      if (labelType === 'internal' || labelType === 'both') {
-        const last4 = atual.slice(-4);
-        for (let k = 0; k < 2; k++) {
+      // ===== VERSÃO ANTI-REPETIÇÃO PARA QUANTIDADE >= 8 =====
+      console.log(`🚨 MODO ANTI-REPETIÇÃO ATIVADO (qtd=${qtd})`);
+
+      // Limpar completamente o preview
+      out.innerHTML = '';
+      currentOperation = 0;
+
+      // Array para controle rigoroso da sequência
+      const sequenciaGerada = [];
+      const baseNum = parseInt(base, 10);
+
+      console.log(`📊 Parâmetros: baseNum=${baseNum}, qtd=${qtd}, copias=${copias}`);
+      console.log(`📋 Sequência esperada: ${baseNum} até ${baseNum + qtd - 1}`);
+
+      // Loop com controle rigoroso
+      for (let numeroIndex = 0; numeroIndex < qtd; numeroIndex++) {
+        const numeroAtual = baseNum + numeroIndex;
+        const numeroFormatado = padLeft(String(numeroAtual), len);
+        const numeroInterno = numeroFormatado.length >= 4 ? numeroFormatado.slice(-4) : numeroFormatado;
+
+        console.log(`\\n🔢 [${numeroIndex + 1}/${qtd}] Processando: ${numeroAtual} -> ${numeroInterno}`);
+
+        // Loop de cópias com controle rigoroso
+        for (let copiaIndex = 0; copiaIndex < copias; copiaIndex++) {
+          console.log(`   📄 [${copiaIndex + 1}/${copias}] Gerando: ${numeroInterno}`);
+
+          // Adicionar à sequência de controle
+          sequenciaGerada.push(numeroInterno);
+
+          // Criar etiqueta
+          const etiqueta = buildLabel({
+            numeroBase: numeroInterno,
+            dv: null,
+            orient: 'h',
+            showLogo: false,
+            showSafeIcon: false,
+            mode: 'internal'
+          });
+
+          // Adicionar ao DOM
+          out.appendChild(etiqueta);
+
+          // Atualizar progresso
+          currentOperation++;
+          updateProgress();
+
+          // Delay reduzido para evitar problemas de timing
+          if (currentOperation % 20 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 1));
+          }
+        }
+      }
+
+      console.log(`\\n✅ GERAÇÃO CONCLUÍDA:`);
+      console.log(`   📊 Total gerado: ${currentOperation} etiquetas`);
+      console.log(`   📊 Total esperado: ${qtd * copias} etiquetas`);
+      console.log(`   📋 Sequência: [${sequenciaGerada.join(', ')}]`);
+
+      // Verificação de integridade
+      if (currentOperation !== qtd * copias) {
+        console.error(`❌ ERRO: Quantidade incorreta! Esperado: ${qtd * copias}, Gerado: ${currentOperation}`);
+      } else {
+        console.log(`✅ VERIFICAÇÃO OK: Quantidade correta!`);
+      }
+
+      console.log(`\\n✅ CONCLUÍDO: ${currentOperation} etiquetas internas geradas`);
+    } else if (labelType === 'both') {
+      // Ambas: gerar em sequência numérica (externa + interna do mesmo número)
+      console.log(`🔄 Gerando modo BOTH: Base=${base}, Qtd=${qtd}, Cópias=${copias}`);
+      console.log('📋 Sequência: externa + interna por número');
+
+      for (let i = 0; i < qtd; i++) {
+        const atual = padLeft(String(parseInt(base, 10) + i), len);
+        const dv = dvMod10_31(atual);
+        const payloadBase = (atual.length % 2 === 0) ? atual : ('0' + atual);
+        const last4 = atual.length >= 4 ? atual.slice(-4) : atual;
+
+        console.log(`\n--- NÚMERO ${i} ---`);
+        console.log(`Base original: "${base}" (length: ${base.length})`);
+        console.log(`Len: ${len}`);
+        console.log(`parseInt(base, 10): ${parseInt(base, 10)}`);
+        console.log(`Calculado: ${parseInt(base, 10)} + ${i} = ${parseInt(base, 10) + i}`);
+        console.log(`String(parseInt(base, 10) + i): "${String(parseInt(base, 10) + i)}"`);
+        console.log(`padLeft result: "${atual}"`);
+        console.log(`PayloadBase: "${payloadBase}"`);
+        console.log(`Last4: "${last4}"`);
+
+        // PRIMEIRO: Etiquetas externas deste número
+        for (let c = 0; c < copias; c++) {
+          console.log(`🏷️ EXTERNA ${currentOperation + 1}: ${payloadBase}-${dv}`);
+          const el = buildLabel({ numeroBase: payloadBase, dv, orient, showLogo, showSafeIcon });
+          out.appendChild(el);
+          currentOperation++;
+          updateProgress();
+
+          // Remover delay para evitar problemas de timing
+          // if (currentOperation % 10 === 0) {
+          //   await new Promise(resolve => setTimeout(resolve, 1));
+          // }
+        }
+
+        // DEPOIS: Etiquetas internas do MESMO número (mesma quantidade de cópias)
+        for (let k = 0; k < copias; k++) {
+          console.log(`🏷️ INTERNA ${currentOperation + 1}: ${last4}`);
           const elInt = buildLabel({ numeroBase: last4, dv: null, orient: 'h', showLogo: false, showSafeIcon: false, mode: 'internal' });
           out.appendChild(elInt);
           currentOperation++;
           updateProgress();
 
-          if (currentOperation % 10 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 1));
-          }
+          // Remover delay para evitar problemas de timing
+          // if (currentOperation % 10 === 0) {
+          //   await new Promise(resolve => setTimeout(resolve, 1));
+          // }
         }
       }
     }
 
     // Ocultar barra de progresso
     progressContainer.style.display = 'none';
+
+    // Verificação final
+    const finalLabelsCount = out.children.length;
+    console.log(`✅ Geração concluída: ${finalLabelsCount} etiquetas criadas (esperado: ${totalOperations})`);
+
+    if (finalLabelsCount !== totalOperations) {
+      console.warn(`⚠️ Divergência: esperado ${totalOperations}, gerado ${finalLabelsCount}`);
+    }
 
     // Calcular próximo número para histórico
     const ultimoNumero = padLeft(String(parseInt(base, 10) + qtd - 1), base.length);
@@ -390,31 +527,40 @@ async function gerar() {
 
 
 function saveToHistory(config) {
-  // Verificar se já existe uma entrada similar (mesmo base, qtd, copias, labelType)
-  const existingIndex = generationHistory.findIndex(item => 
-    item.base === config.base && 
-    item.qtd === config.qtd && 
-    item.copias === config.copias && 
-    item.labelType === config.labelType
-  );
+  // Criar chave única para identificar duplicatas
+  const uniqueKey = `${config.base}-${config.qtd}-${config.copias}-${config.labelType}-${config.orient}`;
+
+  // Verificar se já existe uma entrada com a mesma configuração
+  const existingIndex = generationHistory.findIndex(item => {
+    const itemKey = `${item.base}-${item.qtd}-${item.copias}-${item.labelType}-${item.orient}`;
+    return itemKey === uniqueKey;
+  });
 
   // Se encontrou uma entrada similar, remover a antiga
   if (existingIndex !== -1) {
     generationHistory.splice(existingIndex, 1);
+    console.log('Removida entrada duplicada do histórico');
   }
 
   // Adicionar a nova entrada no início
   generationHistory.unshift({
     ...config,
-    id: Date.now()
+    id: Date.now() + Math.random(), // ID único para evitar conflitos
+    uniqueKey
   });
 
-  // Manter apenas os últimos 5 registros
+  // Manter apenas os últimos 5 registros únicos
   if (generationHistory.length > 5) {
     generationHistory = generationHistory.slice(0, 5);
   }
 
-  localStorage.setItem('etiquetas-history', JSON.stringify(generationHistory));
+  // Salvar no localStorage
+  try {
+    localStorage.setItem('etiquetas-history', JSON.stringify(generationHistory));
+    console.log('Histórico salvo:', generationHistory.length, 'entradas');
+  } catch (e) {
+    console.warn('Erro ao salvar histórico:', e.message);
+  }
 }
 
 

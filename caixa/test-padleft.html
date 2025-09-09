@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste PadLeft</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { 
+            background: #f5f5f5; 
+            padding: 10px; 
+            margin: 5px 0; 
+            border-radius: 3px; 
+            font-family: monospace;
+        }
+        .error { background: #ffebee; }
+        .success { background: #e8f5e8; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste da Função padLeft</h1>
+    
+    <div id="results"></div>
+
+    <script>
+        const padLeft = (numStr, len) => (Array(len + 1).join('0') + numStr).slice(-len);
+        
+        function testPadLeft() {
+            const tests = [
+                { input: '82547', len: 6, expected: '082547' },
+                { input: '82548', len: 6, expected: '082548' },
+                { input: '82549', len: 6, expected: '082549' },
+                { input: '2547', len: 4, expected: '2547' },
+                { input: '123', len: 6, expected: '000123' },
+                { input: '1', len: 4, expected: '0001' }
+            ];
+            
+            const resultsDiv = document.getElementById('results');
+            let allPassed = true;
+            
+            tests.forEach((test, index) => {
+                const result = padLeft(test.input, test.len);
+                const passed = result === test.expected;
+                
+                if (!passed) allPassed = false;
+                
+                const div = document.createElement('div');
+                div.className = `test-result ${passed ? 'success' : 'error'}`;
+                div.textContent = `Teste ${index + 1}: padLeft("${test.input}", ${test.len}) = "${result}" ${passed ? '✅' : '❌ (esperado: "' + test.expected + '")'}`;
+                resultsDiv.appendChild(div);
+                
+                console.log(`Teste ${index + 1}:`, { input: test.input, len: test.len, result, expected: test.expected, passed });
+            });
+            
+            // Teste específico do problema
+            console.log('\n=== TESTE ESPECÍFICO DO PROBLEMA ===');
+            const base = '082547';
+            const len = base.length;
+            
+            for (let i = 0; i < 3; i++) {
+                const calculated = parseInt(base, 10) + i;
+                const stringified = String(calculated);
+                const padded = padLeft(stringified, len);
+                
+                console.log(`i=${i}: parseInt("${base}", 10) + ${i} = ${calculated}`);
+                console.log(`String(${calculated}) = "${stringified}"`);
+                console.log(`padLeft("${stringified}", ${len}) = "${padded}"`);
+                
+                const div = document.createElement('div');
+                div.className = 'test-result';
+                div.textContent = `Sequência ${i}: ${base} + ${i} = ${calculated} → "${padded}"`;
+                resultsDiv.appendChild(div);
+            }
+            
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = `test-result ${allPassed ? 'success' : 'error'}`;
+            summaryDiv.textContent = allPassed ? '✅ Todos os testes passaram!' : '❌ Alguns testes falharam!';
+            resultsDiv.appendChild(summaryDiv);
+        }
+        
+        window.addEventListener('load', testPadLeft);
+    </script>
+</body>
+</html>
