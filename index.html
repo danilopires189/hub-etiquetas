@@ -11,11 +11,13 @@
   <link rel="stylesheet" href="shared/design-system.css">
   <link rel="stylesheet" href="shared/components.css">
   <link rel="stylesheet" href="shared/performance.css">
-  <script src="config/contador-config.js"></script>
-  <script src="shared/contador-integration.js"></script>
+  <!-- Contador GitHub Nativo -->
+  <script src="js/contador-github-nativo.js"></script>
+  <script src="js/contador-ui.js"></script>
+  <script src="js/contador-integration.js"></script>
   <style>
     /* ===== ESTILOS ESPECÍFICOS DO INDEX PRINCIPAL ===== */
-    
+
     /* Contador discreto na navegação */
     .stats-counter-nav {
       display: flex;
@@ -64,13 +66,13 @@
         flex-direction: column;
         gap: var(--space-2);
       }
-      
+
       .stats-counter-nav {
         order: -1;
         align-self: flex-end;
       }
     }
-    
+
     /* Hero Section Moderna */
     .hero {
       background: var(--gradient-hero);
@@ -82,456 +84,456 @@
       align-items: center;
     }
 
-  .hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-  opacity: 0.3;
-  }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
 
-  .hero-content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
-  }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
 
-  .hero-logos {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--space-6);
-  margin-bottom: var(--space-8);
-  animation: slideUp 0.8s ease-out;
-  }
+    .hero-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--space-6);
+      margin-bottom: var(--space-8);
+      animation: slideUp 0.8s ease-out;
+    }
 
-  .hero-logo {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--radius-xl);
-  object-fit: contain;
-  padding: var(--space-2);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: var(--shadow-glass);
-  transition: all var(--transition-base);
-  }
+    .hero-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-xl);
+      object-fit: contain;
+      padding: var(--space-2);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: var(--shadow-glass);
+      transition: all var(--transition-base);
+    }
 
-  .hero-logo:hover {
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: var(--shadow-xl);
-  }
+    .hero-logo:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: var(--shadow-xl);
+    }
 
-  .hero-title {
-  font-size: var(--text-5xl);
-  font-weight: var(--font-extrabold);
-  color: var(--neutral-900);
-  margin-bottom: var(--space-4);
-  line-height: var(--leading-tight);
-  animation: slideUp 0.8s ease-out 0.2s both;
-  }
+    .hero-title {
+      font-size: var(--text-5xl);
+      font-weight: var(--font-extrabold);
+      color: var(--neutral-900);
+      margin-bottom: var(--space-4);
+      line-height: var(--leading-tight);
+      animation: slideUp 0.8s ease-out 0.2s both;
+    }
 
-  .hero-subtitle {
-  font-size: var(--text-xl);
-  color: var(--neutral-600);
-  margin-bottom: var(--space-8);
-  line-height: var(--leading-relaxed);
-  animation: slideUp 0.8s ease-out 0.4s both;
-  }
+    .hero-subtitle {
+      font-size: var(--text-xl);
+      color: var(--neutral-600);
+      margin-bottom: var(--space-8);
+      line-height: var(--leading-relaxed);
+      animation: slideUp 0.8s ease-out 0.4s both;
+    }
 
-  .hero-description {
-  font-size: var(--text-lg);
-  color: var(--neutral-500);
-  max-width: 600px;
-  margin: 0 auto var(--space-12);
-  line-height: var(--leading-relaxed);
-  animation: slideUp 0.8s ease-out 0.6s both;
-  }
+    .hero-description {
+      font-size: var(--text-lg);
+      color: var(--neutral-500);
+      max-width: 600px;
+      margin: 0 auto var(--space-12);
+      line-height: var(--leading-relaxed);
+      animation: slideUp 0.8s ease-out 0.6s both;
+    }
 
-  /* Navegação Moderna */
-  .nav-header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--neutral-200);
-  padding: var(--space-4) 0;
-  transition: all var(--transition-base);
-  }
+    /* Navegação Moderna */
+    .nav-header {
+      position: sticky;
+      top: 0;
+      z-index: var(--z-sticky);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--neutral-200);
+      padding: var(--space-4) 0;
+      transition: all var(--transition-base);
+    }
 
-  @media (prefers-color-scheme: dark) {
-  .nav-header {
-  background: rgba(15, 23, 42, 0.8);
-  border-bottom-color: var(--neutral-700);
-  }
-  }
+    @media (prefers-color-scheme: dark) {
+      .nav-header {
+        background: rgba(15, 23, 42, 0.8);
+        border-bottom-color: var(--neutral-700);
+      }
+    }
 
-  .nav-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  }
+    .nav-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
 
-  .nav-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
 
-  .nav-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-lg);
-  object-fit: contain;
-  padding: var(--space-1);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-  }
+    .nav-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-lg);
+      object-fit: contain;
+      padding: var(--space-1);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
 
-  .nav-title {
-  font-size: var(--text-lg);
-  font-weight: var(--font-bold);
-  color: var(--brand-primary);
-  margin: 0;
-  }
+    .nav-title {
+      font-size: var(--text-lg);
+      font-weight: var(--font-bold);
+      color: var(--brand-primary);
+      margin: 0;
+    }
 
-  .nav-actions {
-  display: flex;
-  gap: var(--space-2);
-  }
+    .nav-actions {
+      display: flex;
+      gap: var(--space-2);
+    }
 
-  .btn-nav {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  text-decoration: none;
-  border: 1px solid var(--neutral-200);
-  background: var(--surface);
-  color: var(--brand-primary);
-  transition: all var(--transition-base);
-  }
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: var(--font-medium);
+      text-decoration: none;
+      border: 1px solid var(--neutral-200);
+      background: var(--surface);
+      color: var(--brand-primary);
+      transition: all var(--transition-base);
+    }
 
-  .btn-nav:hover {
-  background: var(--neutral-50);
-  border-color: var(--brand-accent);
-  transform: translateY(-1px);
-  }
+    .btn-nav:hover {
+      background: var(--neutral-50);
+      border-color: var(--brand-accent);
+      transform: translateY(-1px);
+    }
 
-  .btn-nav.hidden {
-  display: none;
-  }
+    .btn-nav.hidden {
+      display: none;
+    }
 
-  /* Classe utilitária para esconder elementos */
-  .hidden {
-  display: none !important;
-  }
+    /* Classe utilitária para esconder elementos */
+    .hidden {
+      display: none !important;
+    }
 
-  /* Grid de Aplicações Moderno */
-  .apps-section {
-  padding: var(--space-16) 0;
-  background: var(--bg-primary);
-  }
+    /* Grid de Aplicações Moderno */
+    .apps-section {
+      padding: var(--space-16) 0;
+      background: var(--bg-primary);
+    }
 
-  .section-header {
-  text-align: center;
-  margin-bottom: var(--space-12);
-  }
+    .section-header {
+      text-align: center;
+      margin-bottom: var(--space-12);
+    }
 
-  .section-title {
-  font-size: var(--text-3xl);
-  font-weight: var(--font-bold);
-  color: var(--neutral-900);
-  margin-bottom: var(--space-4);
-  }
+    .section-title {
+      font-size: var(--text-3xl);
+      font-weight: var(--font-bold);
+      color: var(--neutral-900);
+      margin-bottom: var(--space-4);
+    }
 
-  .section-description {
-  font-size: var(--text-lg);
-  color: var(--neutral-600);
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: var(--leading-relaxed);
-  }
+    .section-description {
+      font-size: var(--text-lg);
+      color: var(--neutral-600);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: var(--leading-relaxed);
+    }
 
-  .apps-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: var(--space-8);
-  margin-bottom: var(--space-12);
-  }
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-8);
+      margin-bottom: var(--space-12);
+    }
 
-  .app-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-8);
-  border-radius: var(--radius-xl);
-  background: var(--surface);
-  border: 1px solid var(--neutral-200);
-  cursor: pointer;
-  text-align: left;
-  transition: all var(--transition-base);
-  overflow: hidden;
-  animation: slideUp 0.6s ease-out;
-  }
+    .app-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      padding: var(--space-8);
+      border-radius: var(--radius-xl);
+      background: var(--surface);
+      border: 1px solid var(--neutral-200);
+      cursor: pointer;
+      text-align: left;
+      transition: all var(--transition-base);
+      overflow: hidden;
+      animation: slideUp 0.6s ease-out;
+    }
 
-  .app-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--gradient-primary);
-  transform: scaleX(0);
-  transition: transform var(--transition-base);
-  }
+    .app-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+      transform: scaleX(0);
+      transition: transform var(--transition-base);
+    }
 
-  .app-card:hover::before {
-  transform: scaleX(1);
-  }
+    .app-card:hover::before {
+      transform: scaleX(1);
+    }
 
-  .app-card:hover {
-  transform: translateY(-8px);
-  border-color: var(--brand-accent);
-  box-shadow: var(--shadow-xl);
-  }
+    .app-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--brand-accent);
+      box-shadow: var(--shadow-xl);
+    }
 
-  .app-card:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
-  }
+    .app-card:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
+    }
 
-  .app-icon {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--radius-xl);
-  background: var(--gradient-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-brand);
-  animation: float 3s ease-in-out infinite;
-  margin-bottom: var(--space-2);
-  }
+    .app-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--radius-xl);
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-brand);
+      animation: float 3s ease-in-out infinite;
+      margin-bottom: var(--space-2);
+    }
 
-  .app-icon svg {
-  width: 36px;
-  height: 36px;
-  color: white;
-  }
+    .app-icon svg {
+      width: 36px;
+      height: 36px;
+      color: white;
+    }
 
-  .app-title {
-  font-size: var(--text-xl);
-  font-weight: var(--font-bold);
-  color: var(--neutral-900);
-  margin-bottom: var(--space-2);
-  }
+    .app-title {
+      font-size: var(--text-xl);
+      font-weight: var(--font-bold);
+      color: var(--neutral-900);
+      margin-bottom: var(--space-2);
+    }
 
-  .app-description {
-  font-size: var(--text-base);
-  color: var(--neutral-600);
-  line-height: var(--leading-relaxed);
-  flex-grow: 1;
-  }
+    .app-description {
+      font-size: var(--text-base);
+      color: var(--neutral-600);
+      line-height: var(--leading-relaxed);
+      flex-grow: 1;
+    }
 
-  .app-badge {
-  position: absolute;
-  top: var(--space-4);
-  right: var(--space-4);
-  font-size: var(--text-xs);
-  font-weight: var(--font-bold);
-  letter-spacing: 0.05em;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-  background: var(--gradient-primary);
-  color: white;
-  text-transform: uppercase;
-  }
+    .app-badge {
+      position: absolute;
+      top: var(--space-4);
+      right: var(--space-4);
+      font-size: var(--text-xs);
+      font-weight: var(--font-bold);
+      letter-spacing: 0.05em;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      background: var(--gradient-primary);
+      color: white;
+      text-transform: uppercase;
+    }
 
-  /* Seção de Ajuda */
-  .help-section {
-  background: var(--bg-secondary);
-  padding: var(--space-12) 0;
-  text-align: center;
-  }
+    /* Seção de Ajuda */
+    .help-section {
+      background: var(--bg-secondary);
+      padding: var(--space-12) 0;
+      text-align: center;
+    }
 
-  .help-content {
-  max-width: 600px;
-  margin: 0 auto;
-  }
+    .help-content {
+      max-width: 600px;
+      margin: 0 auto;
+    }
 
-  .help-title {
-  font-size: var(--text-2xl);
-  font-weight: var(--font-bold);
-  color: var(--neutral-900);
-  margin-bottom: var(--space-4);
-  }
+    .help-title {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-bold);
+      color: var(--neutral-900);
+      margin-bottom: var(--space-4);
+    }
 
-  .help-text {
-  font-size: var(--text-base);
-  color: var(--neutral-600);
-  line-height: var(--leading-relaxed);
-  margin-bottom: var(--space-6);
-  }
+    .help-text {
+      font-size: var(--text-base);
+      color: var(--neutral-600);
+      line-height: var(--leading-relaxed);
+      margin-bottom: var(--space-6);
+    }
 
-  .keyboard-shortcuts {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  }
+    .keyboard-shortcuts {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
 
-  .shortcut {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  background: var(--surface);
-  border: 1px solid var(--neutral-200);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  color: var(--neutral-700);
-  }
+    .shortcut {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--surface);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      color: var(--neutral-700);
+    }
 
-  .shortcut-key {
-  font-family: var(--font-mono);
-  font-weight: var(--font-bold);
-  background: var(--neutral-100);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-  }
+    .shortcut-key {
+      font-family: var(--font-mono);
+      font-weight: var(--font-bold);
+      background: var(--neutral-100);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-xs);
+    }
 
-  /* Viewer Moderno */
-  .viewer {
-  margin-top: var(--space-6);
-  }
+    /* Viewer Moderno */
+    .viewer {
+      margin-top: var(--space-6);
+    }
 
-  .viewer-toolbar {
-  display: flex;
-  gap: var(--space-3);
-  align-items: center;
-  justify-content: flex-end;
-  padding: var(--space-4) 0;
-  }
+    .viewer-toolbar {
+      display: flex;
+      gap: var(--space-3);
+      align-items: center;
+      justify-content: flex-end;
+      padding: var(--space-4) 0;
+    }
 
-  .btn-toolbar {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  text-decoration: none;
-  border: 1px solid var(--neutral-200);
-  background: var(--surface);
-  color: var(--neutral-700);
-  transition: all var(--transition-base);
-  }
+    .btn-toolbar {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: var(--font-medium);
+      text-decoration: none;
+      border: 1px solid var(--neutral-200);
+      background: var(--surface);
+      color: var(--neutral-700);
+      transition: all var(--transition-base);
+    }
 
-  .btn-toolbar:hover {
-  background: var(--neutral-50);
-  border-color: var(--neutral-300);
-  }
+    .btn-toolbar:hover {
+      background: var(--neutral-50);
+      border-color: var(--neutral-300);
+    }
 
-  .btn-toolbar svg {
-  width: 16px;
-  height: 16px;
-  }
+    .btn-toolbar svg {
+      width: 16px;
+      height: 16px;
+    }
 
-  .frame-container {
-  border: 1px solid var(--neutral-200);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  background: var(--neutral-50);
-  box-shadow: var(--shadow-lg);
-  }
+    .frame-container {
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      background: var(--neutral-50);
+      box-shadow: var(--shadow-lg);
+    }
 
-  .app-frame {
-  width: 100%;
-  height: calc(100vh - 200px);
-  border: 0;
-  background: white;
-  display: block;
-  }
+    .app-frame {
+      width: 100%;
+      height: calc(100vh - 200px);
+      border: 0;
+      background: white;
+      display: block;
+    }
 
-  /* Responsividade */
-  @media (max-width: 768px) {
-  .hero {
-  padding: var(--space-12) 0 var(--space-16);
-  min-height: 50vh;
-  }
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .hero {
+        padding: var(--space-12) 0 var(--space-16);
+        min-height: 50vh;
+      }
 
-  .hero-title {
-  font-size: var(--text-3xl);
-  }
+      .hero-title {
+        font-size: var(--text-3xl);
+      }
 
-  .hero-subtitle {
-  font-size: var(--text-lg);
-  }
+      .hero-subtitle {
+        font-size: var(--text-lg);
+      }
 
-  .hero-logos {
-  gap: var(--space-4);
-  }
+      .hero-logos {
+        gap: var(--space-4);
+      }
 
-  .hero-logo {
-  width: 60px;
-  height: 60px;
-  }
+      .hero-logo {
+        width: 60px;
+        height: 60px;
+      }
 
-  .apps-grid {
-  grid-template-columns: 1fr;
-  gap: var(--space-6);
-  }
+      .apps-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+      }
 
-  .nav-content {
-  flex-direction: column;
-  gap: var(--space-3);
-  }
+      .nav-content {
+        flex-direction: column;
+        gap: var(--space-3);
+      }
 
-  .keyboard-shortcuts {
-  flex-direction: column;
-  align-items: center;
-  }
-  }
+      .keyboard-shortcuts {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
 
-  @media (max-width: 640px) {
-  .hero-title {
-  font-size: var(--text-2xl);
-  }
+    @media (max-width: 640px) {
+      .hero-title {
+        font-size: var(--text-2xl);
+      }
 
-  .section-title {
-  font-size: var(--text-2xl);
-  }
+      .section-title {
+        font-size: var(--text-2xl);
+      }
 
-  .app-card {
-  padding: var(--space-6);
-  }
+      .app-card {
+        padding: var(--space-6);
+      }
 
-  .app-icon {
-  width: 60px;
-  height: 60px;
-  }
+      .app-icon {
+        width: 60px;
+        height: 60px;
+      }
 
-  .app-icon svg {
-  width: 30px;
-  height: 30px;
-  }
-  }
+      .app-icon svg {
+        width: 30px;
+        height: 30px;
+      }
+    }
   </style>
 </head>
 
@@ -652,18 +654,18 @@
     const EtiquetasCounter = {
       defaultValue: window.ContadorConfig?.valorInicial || 19452,
       storageKey: 'hub-etiquetas-count',
-      
+
       get githubUrl() {
         return window.ContadorConfig?.githubRawUrl || null;
       },
-      
+
       async init() {
         try {
           // Inicializa o valor se não existir
           if (!localStorage.getItem(this.storageKey)) {
             this.setValue(this.defaultValue);
           }
-          
+
           // Tenta carregar do GitHub primeiro
           await this.syncFromGitHub();
           this.updateDisplay();
@@ -680,19 +682,19 @@
           console.log('ℹ️ Sincronização GitHub não configurada - usando modo local');
           return;
         }
-        
+
         try {
           const response = await fetch(url + '?t=' + Date.now());
           if (response.ok) {
             const data = await response.json();
             const githubTotal = data.totalEtiquetas || this.defaultValue;
-            
+
             // Compara com valor local
             const localTotal = this.getValue();
-            
+
             // Usa o maior valor (evita regressão)
             const finalTotal = Math.max(githubTotal, localTotal);
-            
+
             if (finalTotal !== localTotal) {
               this.setValue(finalTotal);
               console.log(`🔄 Sincronizado com GitHub: ${finalTotal}`);
@@ -742,7 +744,7 @@
         try {
           // Converte para número se for string
           const number = typeof num === 'string' ? parseFloat(num) : num;
-          
+
           if (isNaN(number)) {
             return this.formatNumber(this.defaultValue);
           }
@@ -767,9 +769,9 @@
 
         const currentValue = this.getValue();
         const formattedValue = this.formatNumber(currentValue);
-        
+
         counterElement.textContent = formattedValue;
-        
+
         // Salva o valor atual se ainda não existe no storage
         if (!localStorage.getItem(this.storageKey)) {
           this.setValue(this.defaultValue);
@@ -788,18 +790,18 @@
         try {
           const current = this.getValue();
           const newValue = current + amount;
-          
+
           if (this.setValue(newValue)) {
             this.updateDisplay();
-            
+
             // Tenta reportar para um serviço externo (opcional)
             this.reportToExternal(amount, newValue);
-            
+
             console.log(`📈 Contador atualizado: +${amount} (Total: ${this.formatNumber(newValue)})`);
-            
+
             // Animação visual no contador
             this.animateCounter();
-            
+
             return newValue;
           } else {
             console.error('❌ Falha ao salvar novo valor do contador');
@@ -817,7 +819,7 @@
         if (counterElement) {
           counterElement.style.transform = 'scale(1.1)';
           counterElement.style.color = '#10b981';
-          
+
           setTimeout(() => {
             counterElement.style.transform = 'scale(1)';
             counterElement.style.color = '';
@@ -830,7 +832,7 @@
           // Você pode configurar um webhook aqui
           // Por exemplo: Zapier, IFTTT, ou um serviço próprio
           const webhookUrl = 'https://hooks.zapier.com/hooks/catch/SEU_WEBHOOK/'; // Configure se quiser
-          
+
           if (webhookUrl && !webhookUrl.includes('SEU_WEBHOOK')) {
             await fetch(webhookUrl, {
               method: 'POST',
@@ -858,40 +860,40 @@
     // Expõe o contador globalmente para que as aplicações possam usar
     window.HubEtiquetas = {
       // Função para incrementar o contador de qualquer aplicação
-      incrementarContador: function(quantidade = 1) {
+      incrementarContador: function (quantidade = 1) {
         try {
           console.log(`🔄 API: Incrementando contador +${quantidade}`);
-          
+
           if (typeof EtiquetasCounter === 'undefined') {
             console.warn('❌ Sistema de contador não disponível');
             return null;
           }
-          
+
           // Valida a quantidade
           const qtd = parseInt(quantidade) || 1;
           if (qtd <= 0) {
             console.warn('⚠️ Quantidade inválida, usando 1');
             qtd = 1;
           }
-          
+
           const resultado = EtiquetasCounter.addEtiquetas(qtd);
           console.log(`✅ Contador incrementado! +${qtd} (Total: ${resultado})`);
-          
+
           return resultado;
         } catch (error) {
           console.error('❌ Erro na API incrementarContador:', error);
           return null;
         }
       },
-      
+
       // Função para obter o valor atual
-      obterTotal: function() {
+      obterTotal: function () {
         try {
           if (typeof EtiquetasCounter === 'undefined') {
             console.warn('❌ Sistema de contador não disponível para obter total');
             return 0;
           }
-          
+
           const total = EtiquetasCounter.getValue();
           console.log(`📊 Total atual: ${total}`);
           return total;
@@ -900,14 +902,14 @@
           return 0;
         }
       },
-      
+
       // Função para verificar se o sistema está disponível
-      disponivel: function() {
+      disponivel: function () {
         return typeof EtiquetasCounter !== 'undefined';
       },
-      
+
       // Função de teste (DESABILITADA EM PRODUÇÃO)
-      testar: function() {
+      testar: function () {
         console.warn('🚫 Função de teste desabilitada em produção');
         return this.obterTotal();
       }
@@ -944,7 +946,7 @@
       if (!app) return;
 
       const url = app.path.endsWith('/') ? app.path + 'index.html' : app.path;
-      
+
       // Abre na mesma guia
       window.location.href = url;
     }
@@ -994,63 +996,93 @@
     // Inicialização
     function boot() {
       console.log('🚀 Iniciando Hub de Etiquetas...');
-      
+
       // Inicializa contador de etiquetas
       EtiquetasCounter.init();
-      
+
       renderCards();
       addCardEffects();
 
       if (ALWAYS_START_IN_HUB) {
         console.log('📱 Configurando exibição inicial...');
-        
+
         // Estado inicial: Hero visível, Chooser escondido
         hero.style.display = 'flex';
         hero.style.opacity = '1';
         hero.style.transform = 'translateY(0)';
-        
+
         chooser.style.display = 'none';
         chooser.style.opacity = '0';
-        
+
         console.log('⏰ Timer de 3 segundos iniciado...');
-        
+
         // Após 3 segundos, faz a transição
         setTimeout(() => {
           console.log('🔄 Iniciando transição para escolha de aplicação...');
-          
+
           // Anima saída do hero
           hero.style.transition = 'all 0.4s ease-out';
           hero.style.opacity = '0';
           hero.style.transform = 'translateY(-30px)';
-          
+
           // Após animação do hero, mostra chooser
           setTimeout(() => {
             console.log('✅ Mostrando seção de escolha de aplicação');
-            
+
             // Esconde hero e mostra chooser
             hero.style.display = 'none';
             chooser.style.display = 'block';
             chooser.style.opacity = '0';
             chooser.style.transform = 'translateY(30px)';
             chooser.style.transition = 'all 0.4s ease-out';
-            
+
             // Anima entrada do chooser
             setTimeout(() => {
               chooser.style.opacity = '1';
               chooser.style.transform = 'translateY(0)';
-              
+
               // Limpa estilos após animação
               setTimeout(() => {
                 hero.style.transition = '';
                 chooser.style.transition = '';
               }, 400);
             }, 50);
-            
+
           }, 400);
         }, 3000);
       }
     }
 
+    // Inicializar quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot);
+    } else {
+      boot();
+    }
+
+    // Integração com contador GitHub nativo
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('🏠 Hub principal carregado');
+
+      // Configurar contador global
+      if (window.contadorGlobal) {
+        await window.contadorGlobal.init({
+          autoSync: true,
+          showUI: false // Não mostrar UI no hub principal
+        });
+
+        // Atualizar display do contador no hub
+        try {
+          const contador = await window.contadorGlobal.obterContador();
+          const counterElement = document.getElementById('etiquetas-counter');
+          if (counterElement && contador) {
+            counterElement.textContent = contador.totalEtiquetas.toLocaleString('pt-BR');
+          }
+        } catch (error) {
+          console.error('Erro ao atualizar contador no hub:', error);
+        }
+      }
+    });
     // Inicializar quando o DOM estiver pronto
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', boot);
