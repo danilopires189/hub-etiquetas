@@ -129,11 +129,53 @@
 
   <script>window.BARRAS_JSON_PATH = "base_barras_index.json";</script>
   <script src="busca.js"></script>
-  <!-- Integração com contador global -->
-  <script src="../shared/contador-integration.js"></script>
+  
+  <!-- Contador GitHub Nativo -->
+  <script src="../js/contador-github-nativo.js"></script>
+  <script src="../js/contador-ui.js"></script>
+  <script src="../js/contador-integration.js"></script>
+  
   <script>
-    // A integração é feita automaticamente pelo contador-integration.js
-    console.log('🏷️ Aplicação de Etiquetas de Produto carregada');
+    // Configurar contador para tipo 'placas'
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('🏷️ Aplicação de Etiquetas de Produto carregada');
+      
+      // Configurar contador específico para placas
+      if (window.contadorGlobal) {
+        await window.contadorGlobal.init({
+          // Auto-detecta owner/repo da URL
+          autoSync: true,
+          showUI: false  // 👈 ESCONDER interface visual
+        });
+        
+        // Interceptar impressões para contar etiquetas
+        const btnPrint = document.getElementById('btnPrint');
+        if (btnPrint) {
+          const originalClick = btnPrint.onclick;
+          btnPrint.onclick = async function(e) {
+            try {
+              // Incrementar contador antes de imprimir
+              await window.contadorGlobal.incrementarContador(1, 'placas');
+              
+              // Executar função original de impressão
+              if (originalClick) {
+                originalClick.call(this, e);
+              } else {
+                window.print();
+              }
+            } catch (error) {
+              console.error('Erro ao incrementar contador:', error);
+              // Continuar com impressão mesmo se contador falhar
+              if (originalClick) {
+                originalClick.call(this, e);
+              } else {
+                window.print();
+              }
+            }
+          };
+        }
+      }
+    });
   </script>
 </body>
 </html>

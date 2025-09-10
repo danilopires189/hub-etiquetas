@@ -1,6 +1,7 @@
 {
   "totalEtiquetas": 19452,
-  "ultimaAtualizacao": "2025-01-09T12:00:00Z",
+  "ultimaAtualizacao": "2025-01-09T15:30:00Z",
+  "versao": "2.0",
   "breakdown": {
     "placas": 0,
     "caixa": 0,
@@ -9,11 +10,18 @@
     "transfer": 0,
     "termo": 0
   },
-  "historico": [
-    {
-      "data": "2025-01-09T12:00:00Z",
-      "valor": 19452,
-      "tipo": "inicial"
+  "metadata": {
+    "sistema": "GitHub API Nativo",
+    "sessaoAtual": null,
+    "ultimoCommit": null,
+    "migradoEm": "2025-01-09T15:30:00Z",
+    "versaoAnterior": "1.0-local",
+    "protegido": true,
+    "valorMinimo": 19452,
+    "politicaSeguranca": {
+      "permitirDecremento": false,
+      "valorMinimoAbsoluto": 19452,
+      "resetAdministrativo": true
     }
-  ]
+  }
 }

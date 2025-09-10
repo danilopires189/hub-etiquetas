@@ -163,13 +163,43 @@
   </footer>
 
   <script src="app.js"></script>
-  <!-- Integração com contador global -->
-  <script src="../shared/contador-integration.js"></script>
+  
+  <!-- Contador GitHub Nativo -->
+  <script src="../js/contador-github-nativo.js"></script>
+  <script src="../js/contador-ui.js"></script>
+  <script src="../js/contador-integration.js"></script>
+  
   <script>
-    // A integração é feita automaticamente pelo contador-integration.js
-    console.log('📦 Aplicação de Volume Avulso carregada');
-
-
+    // Configurar contador para tipo 'avulso'
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('📦 Aplicação de Volume Avulso carregada');
+      
+      // Configurar contador específico para avulso
+      if (window.contadorGlobal) {
+        await window.contadorGlobal.init({
+          autoSync: true,
+          showUI: false  // 👈 ESCONDER interface visual
+        });
+        
+        // Interceptar geração de etiquetas para contar
+        const btnGerar = document.getElementById('gerar');
+        if (btnGerar) {
+          btnGerar.addEventListener('click', async function(e) {
+            try {
+              // Obter quantidade de caixas
+              const fracao = parseInt(document.getElementById('fracao').value) || 1;
+              
+              // Incrementar contador (1 etiqueta por volume, independente das caixas)
+              await window.contadorGlobal.incrementarContador(1, 'avulso');
+              
+            } catch (error) {
+              console.error('Erro ao incrementar contador:', error);
+              // Continuar com geração mesmo se contador falhar
+            }
+          });
+        }
+      }
+    });
   </script>
 </body>
 

@@ -195,13 +195,62 @@
   </footer>
 
   <script src="app.js"></script>
-  <!-- Integração com contador global -->
-  <script src="../shared/contador-integration.js"></script>
+  
+  <!-- Contador GitHub Nativo -->
+  <script src="../js/contador-github-nativo.js"></script>
+  <script src="../js/contador-ui.js"></script>
+  <script src="../js/contador-integration.js"></script>
+  
   <script>
-    // A integração é feita automaticamente pelo contador-integration.js
-    console.log('🏷️ Aplicação de Endereçamento carregada');
-    
-
+    // Configurar contador para tipo 'enderec'
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('🏷️ Aplicação de Endereçamento carregada');
+      
+      // Configurar contador específico para endereçamento
+      if (window.contadorGlobal) {
+        await window.contadorGlobal.init({
+          autoSync: true,
+          showUI: false  // 👈 ESCONDER interface visual
+        });
+        
+        // Interceptar geração de etiquetas para contar
+        const btnGerar = document.getElementById('gerar');
+        if (btnGerar) {
+          btnGerar.addEventListener('click', async function(e) {
+            try {
+              // Calcular quantidade de etiquetas que serão geradas
+              const copias = parseInt(document.getElementById('copias').value) || 1;
+              const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
+              
+              let totalEtiquetas = 0;
+              
+              if (tipo === 'pulmao') {
+                // Calcular etiquetas de pulmão
+                const colIni = parseInt(document.getElementById('colIni').value) || 1;
+                const colFim = parseInt(document.getElementById('colFim').value) || 1;
+                const niveisChecked = document.querySelectorAll('.nivel:checked').length;
+                
+                const colunas = Math.max(0, colFim - colIni + 1);
+                totalEtiquetas = colunas * niveisChecked * copias;
+                
+              } else if (tipo === 'estacao') {
+                // Para estações, assumir 1 etiqueta por estação
+                totalEtiquetas = copias;
+              }
+              
+              if (totalEtiquetas > 0) {
+                // Incrementar contador
+                await window.contadorGlobal.incrementarContador(totalEtiquetas, 'enderec');
+              }
+              
+            } catch (error) {
+              console.error('Erro ao incrementar contador:', error);
+              // Continuar com geração mesmo se contador falhar
+            }
+          });
+        }
+      }
+    });
   </script>
 </body>
 </html>
