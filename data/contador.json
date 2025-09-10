@@ -1,0 +1,19 @@
+{
+  "totalEtiquetas": 19452,
+  "ultimaAtualizacao": "2025-01-09T12:00:00Z",
+  "breakdown": {
+    "placas": 0,
+    "caixa": 0,
+    "avulso": 0,
+    "enderec": 0,
+    "transfer": 0,
+    "termo": 0
+  },
+  "historico": [
+    {
+      "data": "2025-01-09T12:00:00Z",
+      "valor": 19452,
+      "tipo": "inicial"
+    }
+  ]
+}

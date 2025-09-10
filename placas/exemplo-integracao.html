@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo - Integração Contador</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #0ea5e9; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0284c7; }
+        .resultado { margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 4px; }
+        .contador-info { background: #ecfdf5; padding: 10px; border-radius: 4px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏷️ Gerador de Etiquetas - Exemplo</h1>
+        
+        <div class="contador-info">
+            <strong>📊 Total Global:</strong> <span id="total-global">Carregando...</span> etiquetas geradas
+        </div>
+
+        <form id="form-etiquetas">
+            <div class="form-group">
+                <label for="produto">Produto:</label>
+                <input type="text" id="produto" value="Produto Exemplo" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="quantidade">Quantidade de Etiquetas:</label>
+                <input type="number" id="quantidade" value="1" min="1" max="100" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="tipo">Tipo:</label>
+                <select id="tipo">
+                    <option value="placas">Etiquetas de Produto</option>
+                    <option value="caixa">Etiquetas de Caixa</option>
+                    <option value="avulso">Volume Avulso</option>
+                </select>
+            </div>
+            
+            <button type="submit">🖨️ Gerar Etiquetas</button>
+        </form>
+        
+        <div id="resultado" class="resultado" style="display: none;">
+            <h3>✅ Etiquetas Geradas!</h3>
+            <p id="resultado-texto"></p>
+            <p><strong>Novo Total Global:</strong> <span id="novo-total"></span> etiquetas</p>
+        </div>
+    </div>
+
+    <script>
+        // Função para verificar se o sistema de contador está disponível
+        function verificarContador() {
+            if (window.parent && window.parent.HubEtiquetas) {
+                return window.parent.HubEtiquetas;
+            } else if (window.HubEtiquetas) {
+                return window.HubEtiquetas;
+            } else {
+                // Fallback local se não estiver no Hub
+                return {
+                    incrementarContador: function(qtd) {
+                        console.log(`Incrementaria ${qtd} etiquetas (sistema não disponível)`);
+                        return Math.floor(Math.random() * 50000) + 20000; // Simula um total
+                    },
+                    obterTotal: function() {
+                        return Math.floor(Math.random() * 50000) + 20000;
+                    }
+                };
+            }
+        }
+
+        // Atualiza o total global na tela
+        function atualizarTotalGlobal() {
+            const contador = verificarContador();
+            const total = contador.obterTotal();
+            document.getElementById('total-global').textContent = total.toLocaleString('pt-BR');
+        }
+
+        // Simula a geração de etiquetas
+        function gerarEtiquetas(produto, quantidade, tipo) {
+            // Aqui você colocaria sua lógica real de geração
+            console.log(`Gerando ${quantidade} etiquetas para ${produto} (tipo: ${tipo})`);
+            
+            // Simula um delay de processamento
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve({
+                        sucesso: true,
+                        arquivo: `etiquetas_${produto.replace(/\s+/g, '_')}_${Date.now()}.pdf`,
+                        quantidade: quantidade
+                    });
+                }, 1000);
+            });
+        }
+
+        // Event listener do formulário
+        document.getElementById('form-etiquetas').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const produto = document.getElementById('produto').value;
+            const quantidade = parseInt(document.getElementById('quantidade').value);
+            const tipo = document.getElementById('tipo').value;
+            
+            // Desabilita o botão durante o processamento
+            const btnSubmit = e.target.querySelector('button[type="submit"]');
+            const textoOriginal = btnSubmit.textContent;
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = '⏳ Gerando...';
+            
+            try {
+                // Gera as etiquetas
+                const resultado = await gerarEtiquetas(produto, quantidade, tipo);
+                
+                if (resultado.sucesso) {
+                    // Incrementa o contador global
+                    const contador = verificarContador();
+                    const novoTotal = contador.incrementarContador(quantidade);
+                    
+                    // Mostra o resultado
+                    document.getElementById('resultado-texto').textContent = 
+                        `${quantidade} etiqueta(s) gerada(s) para "${produto}" (${resultado.arquivo})`;
+                    document.getElementById('novo-total').textContent = novoTotal.toLocaleString('pt-BR');
+                    document.getElementById('resultado').style.display = 'block';
+                    
+                    // Atualiza o total na tela
+                    atualizarTotalGlobal();
+                    
+                    // Limpa o formulário
+                    document.getElementById('produto').value = '';
+                    document.getElementById('quantidade').value = '1';
+                }
+            } catch (error) {
+                alert('Erro ao gerar etiquetas: ' + error.message);
+            } finally {
+                // Reabilita o botão
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = textoOriginal;
+            }
+        });
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            atualizarTotalGlobal();
+            
+            // Atualiza o total a cada 30 segundos
+            setInterval(atualizarTotalGlobal, 30000);
+        });
+    </script>
+</body>
+</html>
