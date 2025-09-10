@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚫 Teste Desabilitado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1e40af; text-align: center; }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover { background: #2563eb; }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
+        .contador-display {
+            font-size: 2em;
+            text-align: center;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .logs {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚫 Teste Desabilitado</h1>
+        
+        <div id="status" class="status error">
+            ❌ Esta página de teste foi desabilitada em produção.
+        </div>
+        
+        <div class="contador-display">
+            🚫 Funcionalidade desabilitada
+        </div>
+        
+        <div style="text-align: center;">
+            <button disabled style="background: #9ca3af;">Teste Desabilitado</button>
+            <a href="index.html" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; margin: 5px;">← Voltar ao Hub</a>
+        </div>
+        
+        <div class="logs" id="logs">
+            <div>🚀 Sistema iniciado...</div>
+        </div>
+    </div>
+
+    <script>
+        // Simula o sistema de contador (versão simplificada para teste)
+        const ContadorTeste = {
+            storageKey: 'hub-etiquetas-count',
+            defaultValue: 19452,
+            
+            getValue() {
+                try {
+                    const stored = localStorage.getItem(this.storageKey);
+                    if (stored) {
+                        const data = JSON.parse(stored);
+                        return data.totalCount || this.defaultValue;
+                    }
+                } catch (error) {
+                    this.log('❌ Erro ao ler localStorage: ' + error.message);
+                }
+                return this.defaultValue;
+            },
+            
+            setValue(value) {
+                try {
+                    const data = {
+                        totalCount: value,
+                        lastUpdated: Date.now(),
+                        breakdown: { placas: 0, caixa: 0, avulso: 0, enderec: 0, transfer: 0, termo: 0 }
+                    };
+                    localStorage.setItem(this.storageKey, JSON.stringify(data));
+                    this.log(`💾 Valor salvo: ${value}`);
+                    return true;
+                } catch (error) {
+                    this.log('❌ Erro ao salvar: ' + error.message);
+                    return false;
+                }
+            },
+            
+            increment(amount) {
+                const current = this.getValue();
+                const newValue = current + amount;
+                this.setValue(newValue);
+                this.log(`📈 Incrementado: +${amount} (${current} → ${newValue})`);
+                return newValue;
+            },
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logElement = document.getElementById('logs');
+                logElement.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+                logElement.scrollTop = logElement.scrollHeight;
+                console.log(message);
+            }
+        };
+        
+        // API Global (igual ao sistema real)
+        window.HubEtiquetas = {
+            incrementarContador: function(quantidade = 1) {
+                ContadorTeste.log(`🔄 API chamada: incrementarContador(${quantidade})`);
+                return ContadorTeste.increment(quantidade);
+            },
+            
+            obterTotal: function() {
+                const total = ContadorTeste.getValue();
+                ContadorTeste.log(`📊 API chamada: obterTotal() = ${total}`);
+                return total;
+            },
+            
+            testar: function() {
+                ContadorTeste.log('🧪 Executando teste automático...');
+                const antes = this.obterTotal();
+                const depois = this.incrementarContador(1);
+                ContadorTeste.log(`✅ Teste concluído: ${antes} → ${depois}`);
+                return depois;
+            }
+        };
+        
+        // Funções da interface
+        function testarIncremento(quantidade) {
+            try {
+                const novoTotal = window.HubEtiquetas.incrementarContador(quantidade);
+                atualizarDisplay();
+                mostrarStatus(`✅ Incrementado +${quantidade}! Novo total: ${novoTotal.toLocaleString('pt-BR')}`, 'success');
+            } catch (error) {
+                mostrarStatus(`❌ Erro: ${error.message}`, 'error');
+                ContadorTeste.log('❌ Erro no incremento: ' + error.message);
+            }
+        }
+        
+        function atualizarDisplay() {
+            try {
+                const total = window.HubEtiquetas.obterTotal();
+                document.getElementById('contador-valor').textContent = total.toLocaleString('pt-BR');
+                ContadorTeste.log(`🔄 Display atualizado: ${total}`);
+            } catch (error) {
+                ContadorTeste.log('❌ Erro ao atualizar display: ' + error.message);
+            }
+        }
+        
+        function limparStorage() {
+            if (confirm('Tem certeza que deseja limpar o contador?')) {
+                localStorage.removeItem(ContadorTeste.storageKey);
+                ContadorTeste.log('🗑️ Storage limpo - reiniciando...');
+                atualizarDisplay();
+                mostrarStatus('🗑️ Contador resetado para valor inicial', 'info');
+            }
+        }
+        
+        function mostrarStatus(mensagem, tipo) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = mensagem;
+            statusEl.className = `status ${tipo}`;
+            
+            setTimeout(() => {
+                statusEl.textContent = '✅ Sistema funcionando normalmente';
+                statusEl.className = 'status success';
+            }, 3000);
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            ContadorTeste.log('🚀 Página carregada - inicializando...');
+            
+            // Testa se o sistema está funcionando
+            try {
+                atualizarDisplay();
+                mostrarStatus('✅ Sistema inicializado com sucesso!', 'success');
+                ContadorTeste.log('✅ Inicialização concluída');
+                
+                // Teste automático
+                setTimeout(() => {
+                    ContadorTeste.log('🤖 Executando teste automático em 2 segundos...');
+                    window.HubEtiquetas.testar();
+                    atualizarDisplay();
+                }, 2000);
+                
+            } catch (error) {
+                mostrarStatus(`❌ Erro na inicialização: ${error.message}`, 'error');
+                ContadorTeste.log('❌ Falha na inicialização: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

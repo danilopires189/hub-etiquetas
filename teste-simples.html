@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Teste Simples do Contador</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f9ff;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 { color: #0369a1; margin-bottom: 30px; }
+        .contador {
+            font-size: 3em;
+            font-weight: bold;
+            color: #0c4a6e;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f0f9ff;
+            border-radius: 8px;
+            border: 2px solid #0ea5e9;
+        }
+        button {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #0284c7;
+            transform: translateY(-2px);
+        }
+        .info {
+            background: #ecfdf5;
+            border: 1px solid #10b981;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste Simples do Contador</h1>
+        
+        <div class="contador" id="display">
+            19.452
+        </div>
+        
+        <div>
+            <button onclick="incrementar(1)">+1 Etiqueta</button>
+            <button onclick="incrementar(5)">+5 Etiquetas</button>
+            <button onclick="incrementar(10)">+10 Etiquetas</button>
+        </div>
+        
+        <div>
+            <button onclick="resetar()" style="background: #dc2626;">🗑️ Resetar</button>
+            <button onclick="verificar()" style="background: #7c3aed;">🔍 Verificar</button>
+        </div>
+        
+        <div class="info" id="info">
+            Clique nos botões acima para testar o contador
+        </div>
+    </div>
+
+    <script>
+        // Sistema de contador super simples
+        const STORAGE_KEY = 'hub-etiquetas-count';
+        const VALOR_INICIAL = 19452;
+        
+        function obterTotal() {
+            try {
+                const dados = localStorage.getItem(STORAGE_KEY);
+                if (dados) {
+                    const obj = JSON.parse(dados);
+                    return obj.totalCount || VALOR_INICIAL;
+                }
+            } catch (error) {
+                console.error('Erro ao ler:', error);
+            }
+            return VALOR_INICIAL;
+        }
+        
+        function salvarTotal(valor) {
+            try {
+                const dados = {
+                    totalCount: valor,
+                    lastUpdated: Date.now(),
+                    breakdown: {}
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+                console.log('✅ Salvo:', valor);
+                return true;
+            } catch (error) {
+                console.error('❌ Erro ao salvar:', error);
+                return false;
+            }
+        }
+        
+        function atualizarDisplay() {
+            const total = obterTotal();
+            const formatted = total.toLocaleString('pt-BR');
+            document.getElementById('display').textContent = formatted;
+            
+            document.getElementById('info').innerHTML = `
+                <strong>Total atual:</strong> ${formatted} etiquetas<br>
+                <strong>Última atualização:</strong> ${new Date().toLocaleTimeString()}
+            `;
+        }
+        
+        function incrementar(quantidade) {
+            console.log(`🔄 Incrementando +${quantidade}...`);
+            
+            const atual = obterTotal();
+            const novo = atual + quantidade;
+            
+            console.log(`📊 ${atual} + ${quantidade} = ${novo}`);
+            
+            if (salvarTotal(novo)) {
+                atualizarDisplay();
+                
+                // Animação visual
+                const display = document.getElementById('display');
+                display.style.transform = 'scale(1.1)';
+                display.style.color = '#10b981';
+                
+                setTimeout(() => {
+                    display.style.transform = 'scale(1)';
+                    display.style.color = '#0c4a6e';
+                }, 300);
+                
+                console.log(`✅ Contador atualizado para ${novo}`);
+            } else {
+                console.error('❌ Falha ao salvar');
+                alert('Erro ao salvar o contador!');
+            }
+        }
+        
+        function resetar() {
+            if (confirm('Resetar contador para valor inicial?')) {
+                salvarTotal(VALOR_INICIAL);
+                atualizarDisplay();
+                console.log('🔄 Contador resetado');
+            }
+        }
+        
+        function verificar() {
+            console.log('🔍 === VERIFICAÇÃO COMPLETA ===');
+            
+            const stored = localStorage.getItem(STORAGE_KEY);
+            console.log('📖 Raw localStorage:', stored);
+            
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    console.log('📊 Dados parseados:', parsed);
+                    console.log('🔢 Total:', parsed.totalCount);
+                } catch (error) {
+                    console.error('❌ Erro ao parsear:', error);
+                }
+            } else {
+                console.log('📭 localStorage vazio');
+            }
+            
+            const total = obterTotal();
+            console.log('🎯 Total calculado:', total);
+            
+            alert(`Total atual: ${total.toLocaleString('pt-BR')} etiquetas`);
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Teste simples iniciado');
+            atualizarDisplay();
+            
+            // Teste automático
+            setTimeout(() => {
+                console.log('🤖 Executando teste automático...');
+                incrementar(1);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

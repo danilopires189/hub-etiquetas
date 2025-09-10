@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Teste - Gerar E Contar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1e40af; text-align: center; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+            display: block;
+            width: 100%;
+        }
+        button:hover { background: #2563eb; }
+        .resultado {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .contador-info {
+            background: #f0fdf4;
+            border: 1px solid #22c55e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .logs {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .status {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        .status div {
+            padding: 10px;
+            border-radius: 6px;
+            flex: 1;
+            margin: 0 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status .gerou { background: #dbeafe; color: #1e40af; }
+        .status .contou { background: #dcfce7; color: #166534; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste - Gerar E Contar</h1>
+        
+        <p>Este teste verifica se o contador funciona <strong>SEM interferir</strong> na geração de etiquetas.</p>
+        
+        <div class="status">
+            <div class="gerou" id="status-geracao">
+                🏷️ Aguardando geração...
+            </div>
+            <div class="contou" id="status-contador">
+                📊 Aguardando contagem...
+            </div>
+        </div>
+        
+        <button id="gerar" onclick="gerarEtiquetas()">🖨️ Gerar Etiquetas</button>
+        
+        <div id="resultado" class="resultado" style="display: none;">
+            <strong>✅ Etiquetas Geradas!</strong><br>
+            <span id="detalhes-geracao"></span>
+        </div>
+        
+        <div id="contador-resultado" class="contador-info" style="display: none;">
+            <strong>📊 Contador Atualizado!</strong><br>
+            <span id="detalhes-contador"></span>
+        </div>
+        
+        <div class="logs" id="logs">
+            <div>🚀 Sistema iniciado - aguardando teste...</div>
+        </div>
+    </div>
+
+    <!-- Sistema de integração -->
+    <script src="shared/contador-integration.js"></script>
+    
+    <script>
+        let contadorGeracoes = 0;
+        let etiquetasGeradas = 0;
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('logs');
+            logElement.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+        
+        // FUNÇÃO ORIGINAL DE GERAR ETIQUETAS (simula aplicação real)
+        function gerarEtiquetas() {
+            log('🔄 INICIANDO geração de etiquetas...');
+            
+            // Atualiza status
+            document.getElementById('status-geracao').innerHTML = '🔄 Gerando...';
+            
+            // Simula processamento de geração
+            setTimeout(() => {
+                contadorGeracoes++;
+                etiquetasGeradas += 3; // Simula 3 etiquetas geradas
+                
+                // Mostra resultado da geração
+                document.getElementById('resultado').style.display = 'block';
+                document.getElementById('detalhes-geracao').innerHTML = `
+                    Geração #${contadorGeracoes}<br>
+                    Etiquetas: ${etiquetasGeradas}<br>
+                    Timestamp: ${new Date().toLocaleString()}
+                `;
+                
+                // Atualiza status
+                document.getElementById('status-geracao').innerHTML = '✅ Etiquetas geradas!';
+                document.getElementById('status-geracao').style.background = '#dcfce7';
+                document.getElementById('status-geracao').style.color = '#166534';
+                
+                log(`✅ GERAÇÃO CONCLUÍDA! ${etiquetasGeradas} etiquetas no total`);
+                
+                // Esconde resultado após 5 segundos
+                setTimeout(() => {
+                    document.getElementById('resultado').style.display = 'none';
+                }, 5000);
+                
+            }, 800); // Simula 800ms de processamento
+            
+            // Retorna true para indicar sucesso (importante para o contador)
+            return true;
+        }
+        
+        // Monitora atualizações do contador
+        function monitorarContador() {
+            // Intercepta logs do contador
+            const originalLog = console.log;
+            console.log = function(...args) {
+                const message = args.join(' ');
+                
+                // Detecta quando o contador é atualizado
+                if (message.includes('Etiqueta contabilizada!') || message.includes('Total:')) {
+                    document.getElementById('contador-resultado').style.display = 'block';
+                    document.getElementById('detalhes-contador').innerHTML = `
+                        Último update: ${new Date().toLocaleString()}<br>
+                        Status: Funcionando ✅
+                    `;
+                    
+                    document.getElementById('status-contador').innerHTML = '✅ Contador atualizado!';
+                    document.getElementById('status-contador').style.background = '#dcfce7';
+                    document.getElementById('status-contador').style.color = '#166534';
+                    
+                    setTimeout(() => {
+                        document.getElementById('contador-resultado').style.display = 'none';
+                    }, 5000);
+                }
+                
+                originalLog.apply(console, args);
+            };
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Teste de integração iniciado');
+            monitorarContador();
+            
+            // Configura o contador após um delay
+            setTimeout(() => {
+                if (window.ContadorIntegration) {
+                    log('📊 Sistema de contador detectado');
+                    
+                    // Força configuração para este teste
+                    const configurado = window.ContadorIntegration.interceptarBotao('gerar', 'teste', () => {
+                        // Retorna quantas etiquetas foram geradas nesta sessão
+                        return 3; // Simula 3 etiquetas por geração
+                    });
+                    
+                    if (configurado) {
+                        log('✅ Contador configurado com sucesso!');
+                        log('🎯 Agora clique em "Gerar Etiquetas" para testar');
+                    } else {
+                        log('❌ Falha ao configurar contador');
+                    }
+                } else {
+                    log('⚠️ Sistema de contador não encontrado');
+                }
+            }, 1000);
+        });
+        
+        // Função de teste manual
+        function testarSistema() {
+            log('🧪 === TESTE MANUAL ===');
+            log('1. Clique em "Gerar Etiquetas"');
+            log('2. Verifique se AMBOS acontecem:');
+            log('   - ✅ Etiquetas são geradas (caixa azul)');
+            log('   - 📊 Contador é atualizado (caixa verde)');
+            log('3. Verifique os logs no console do navegador');
+        }
+        
+        // Expõe função para teste
+        window.testarSistema = testarSistema;
+        
+        // Executa teste automático após 3 segundos
+        setTimeout(() => {
+            log('');
+            log('🎯 === INSTRUÇÕES DE TESTE ===');
+            testarSistema();
+        }, 3000);
+    </script>
+</body>
+</html>

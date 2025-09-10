@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Debug do Contador</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1e40af; text-align: center; }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover { background: #2563eb; }
+        .contador-display {
+            font-size: 2em;
+            text-align: center;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .logs {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug do Sistema de Contador</h1>
+        
+        <div id="status" class="status info">
+            ⏳ Inicializando sistema...
+        </div>
+        
+        <div class="contador-display">
+            📊 Total: <span id="contador-valor">---</span> etiquetas
+        </div>
+        
+        <div style="text-align: center;">
+            <button onclick="testarSistema()">🧪 Testar Sistema</button>
+            <button onclick="testarIncremento(1)">+1 Etiqueta</button>
+            <button onclick="testarIncremento(5)">+5 Etiquetas</button>
+            <button onclick="verificarLocalStorage()">🔍 Ver localStorage</button>
+            <button onclick="limparStorage()">🗑️ Limpar</button>
+        </div>
+        
+        <div class="logs" id="logs">
+            <div>🚀 Sistema iniciado...</div>
+        </div>
+    </div>
+
+    <script>
+        // Sistema de contador simplificado para debug
+        const ContadorDebug = {
+            storageKey: 'hub-etiquetas-count',
+            defaultValue: 19452,
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logElement = document.getElementById('logs');
+                logElement.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+                logElement.scrollTop = logElement.scrollHeight;
+                console.log(message);
+            },
+            
+            getValue() {
+                try {
+                    const stored = localStorage.getItem(this.storageKey);
+                    this.log(`📖 localStorage raw: ${stored}`);
+                    
+                    if (stored) {
+                        const data = JSON.parse(stored);
+                        this.log(`📊 Dados parseados: ${JSON.stringify(data)}`);
+                        return data.totalCount || this.defaultValue;
+                    }
+                } catch (error) {
+                    this.log('❌ Erro ao ler localStorage: ' + error.message);
+                }
+                return this.defaultValue;
+            },
+            
+            setValue(value) {
+                try {
+                    const data = {
+                        totalCount: value,
+                        lastUpdated: Date.now(),
+                        breakdown: { placas: 0, caixa: 0, avulso: 0, enderec: 0, transfer: 0, termo: 0 }
+                    };
+                    
+                    this.log(`💾 Salvando: ${JSON.stringify(data)}`);
+                    localStorage.setItem(this.storageKey, JSON.stringify(data));
+                    this.log(`✅ Salvo com sucesso!`);
+                    return true;
+                } catch (error) {
+                    this.log('❌ Erro ao salvar: ' + error.message);
+                    return false;
+                }
+            },
+            
+            increment(amount) {
+                const current = this.getValue();
+                const newValue = current + amount;
+                
+                this.log(`📈 Incrementando: ${current} + ${amount} = ${newValue}`);
+                
+                if (this.setValue(newValue)) {
+                    this.updateDisplay();
+                    return newValue;
+                } else {
+                    this.log('❌ Falha ao salvar novo valor');
+                    return current;
+                }
+            },
+            
+            updateDisplay() {
+                const total = this.getValue();
+                const formatted = total.toLocaleString('pt-BR');
+                document.getElementById('contador-valor').textContent = formatted;
+                this.log(`🔄 Display atualizado: ${formatted}`);
+            }
+        };
+        
+        // Funções de teste
+        function testarSistema() {
+            ContadorDebug.log('🧪 === TESTE COMPLETO DO SISTEMA ===');
+            
+            // Teste 1: Verificar localStorage
+            ContadorDebug.log('📋 Teste 1: Verificando localStorage...');
+            const valorAtual = ContadorDebug.getValue();
+            ContadorDebug.log(`📊 Valor atual: ${valorAtual}`);
+            
+            // Teste 2: Testar incremento
+            ContadorDebug.log('📋 Teste 2: Testando incremento...');
+            const novoValor = ContadorDebug.increment(1);
+            ContadorDebug.log(`📈 Novo valor: ${novoValor}`);
+            
+            // Teste 3: Verificar se salvou
+            ContadorDebug.log('📋 Teste 3: Verificando se salvou...');
+            const valorVerificacao = ContadorDebug.getValue();
+            ContadorDebug.log(`🔍 Valor de verificação: ${valorVerificacao}`);
+            
+            if (valorVerificacao === novoValor) {
+                ContadorDebug.log('✅ TESTE PASSOU: Sistema funcionando corretamente!');
+                mostrarStatus('✅ Sistema funcionando corretamente!', 'success');
+            } else {
+                ContadorDebug.log('❌ TESTE FALHOU: Problema no sistema!');
+                mostrarStatus('❌ Problema detectado no sistema!', 'error');
+            }
+        }
+        
+        function testarIncremento(quantidade) {
+            ContadorDebug.log(`🔄 Testando incremento de ${quantidade}...`);
+            const novoTotal = ContadorDebug.increment(quantidade);
+            mostrarStatus(`✅ Incrementado +${quantidade}! Novo total: ${novoTotal.toLocaleString('pt-BR')}`, 'success');
+        }
+        
+        function verificarLocalStorage() {
+            ContadorDebug.log('🔍 === VERIFICAÇÃO DO LOCALSTORAGE ===');
+            
+            try {
+                const stored = localStorage.getItem(ContadorDebug.storageKey);
+                ContadorDebug.log(`📖 Conteúdo bruto: ${stored}`);
+                
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    ContadorDebug.log(`📊 Dados estruturados:`);
+                    ContadorDebug.log(`   - totalCount: ${parsed.totalCount}`);
+                    ContadorDebug.log(`   - lastUpdated: ${new Date(parsed.lastUpdated).toLocaleString()}`);
+                    ContadorDebug.log(`   - breakdown: ${JSON.stringify(parsed.breakdown)}`);
+                } else {
+                    ContadorDebug.log('📭 localStorage vazio');
+                }
+                
+                // Verificar outros itens no localStorage
+                ContadorDebug.log('🗂️ Outros itens no localStorage:');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    ContadorDebug.log(`   - ${key}: ${localStorage.getItem(key).substring(0, 50)}...`);
+                }
+                
+            } catch (error) {
+                ContadorDebug.log('❌ Erro ao verificar localStorage: ' + error.message);
+            }
+        }
+        
+        function limparStorage() {
+            if (confirm('Tem certeza que deseja limpar o contador?')) {
+                localStorage.removeItem(ContadorDebug.storageKey);
+                ContadorDebug.log('🗑️ localStorage limpo');
+                ContadorDebug.updateDisplay();
+                mostrarStatus('🗑️ Contador resetado', 'info');
+            }
+        }
+        
+        function mostrarStatus(mensagem, tipo) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = mensagem;
+            statusEl.className = `status ${tipo}`;
+            
+            setTimeout(() => {
+                statusEl.textContent = '✅ Sistema funcionando normalmente';
+                statusEl.className = 'status success';
+            }, 3000);
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            ContadorDebug.log('🚀 Página carregada - inicializando debug...');
+            
+            try {
+                ContadorDebug.updateDisplay();
+                mostrarStatus('✅ Sistema de debug inicializado!', 'success');
+                ContadorDebug.log('✅ Inicialização concluída');
+                
+                // Teste automático após 1 segundo
+                setTimeout(() => {
+                    ContadorDebug.log('🤖 Executando teste automático...');
+                    testarSistema();
+                }, 1000);
+                
+            } catch (error) {
+                mostrarStatus(`❌ Erro na inicialização: ${error.message}`, 'error');
+                ContadorDebug.log('❌ Falha na inicialização: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
