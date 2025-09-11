@@ -27,6 +27,8 @@ class ContadorGlobalCentralizado {
       const pathParts = pathname.split('/').filter(p => p);
       const repo = pathParts[0] || `${owner}.github.io`;
       
+      console.log(`🔍 GitHub Pages detectado: ${owner}/${repo}`);
+      
       return {
         owner,
         repo,
@@ -37,6 +39,7 @@ class ContadorGlobalCentralizado {
     }
     
     // Desenvolvimento local
+    console.log('🏠 Modo desenvolvimento local detectado');
     return {
       owner: 'SEU_USUARIO_GITHUB',
       repo: 'SEU_REPOSITORIO',
@@ -48,12 +51,16 @@ class ContadorGlobalCentralizado {
   
   async inicializar() {
     try {
-      // Carregar estado local
+      // Carregar estado local primeiro (sempre funciona)
       await this.carregarEstadoLocal();
       
-      // Tentar sincronizar com GitHub se disponível
+      // Tentar sincronizar com GitHub se disponível (não crítico)
       if (this.config.isGitHubPages) {
-        await this.sincronizarComGitHub();
+        try {
+          await this.sincronizarComGitHub();
+        } catch (syncError) {
+          console.warn('⚠️ Sincronização falhou, continuando com localStorage:', syncError.message);
+        }
       } else {
         console.log('🏠 Modo local: usando apenas armazenamento local');
       }
@@ -66,12 +73,14 @@ class ContadorGlobalCentralizado {
       
       console.log('✅ Contador Global Centralizado pronto');
       console.log(`📊 Valor atual: ${this.valorAtual} etiquetas`);
+      console.log(`🌐 Modo: ${this.config.isGitHubPages ? 'GitHub Pages' : 'Local'}`);
       
     } catch (error) {
       console.warn('⚠️ Erro na inicialização:', error.message);
-      // Continuar com estado local
+      // Continuar com estado local como fallback
       this.valorAtual = this.valorInicial;
       this.ultimaAtualizacao = new Date().toISOString();
+      console.log('🔄 Usando valores padrão como fallback');
     }
   }
   
@@ -130,7 +139,7 @@ class ContadorGlobalCentralizado {
     }
   }
   
-  // Sincronizar com GitHub
+  // Sincronizar com GitHub (modo simplificado para GitHub Pages)
   async sincronizarComGitHub() {
     if (!this.config.isGitHubPages) {
       console.log('ℹ️ Não é GitHub Pages, usando apenas localStorage');
@@ -138,7 +147,7 @@ class ContadorGlobalCentralizado {
     }
     
     try {
-      // Tentar obter dados do GitHub
+      // Tentar obter dados do GitHub (apenas leitura)
       const url = `https://raw.githubusercontent.com/${this.config.owner}/${this.config.repo}/main/data/contador.json?t=${Date.now()}`;
       const response = await fetch(url);
       
@@ -146,61 +155,34 @@ class ContadorGlobalCentralizado {
         const dadosGitHub = await response.json();
         const valorGitHub = dadosGitHub.totalEtiquetas || this.valorInicial;
         
-        // Sempre usar o valor do GitHub se disponível (mais confiável)
-        if (valorGitHub !== this.valorAtual) {
+        // Usar o valor do GitHub apenas se for maior que o local
+        if (valorGitHub > this.valorAtual) {
           console.log(`🔄 Sincronizando do GitHub: ${this.valorAtual} → ${valorGitHub}`);
           this.valorAtual = valorGitHub;
           this.ultimaAtualizacao = dadosGitHub.ultimaAtualizacao || new Date().toISOString();
           
           // Salvar estado atualizado
           await this.salvarEstadoLocal();
+        } else if (this.valorAtual > valorGitHub) {
+          console.log(`📊 Valor local (${this.valorAtual}) é maior que GitHub (${valorGitHub}), mantendo local`);
         }
         
         console.log(`✅ Sincronização concluída: ${this.valorAtual} etiquetas`);
         
       } else {
         console.log('ℹ️ Arquivo não encontrado no GitHub, usando estado local');
-        // Se não existe no GitHub, criar com valor atual
-        await this.criarArquivoGitHub();
+        // No GitHub Pages, não podemos criar arquivos, então apenas usar localStorage
+        console.log('💾 GitHub Pages: usando apenas localStorage para persistência');
       }
       
     } catch (error) {
       console.warn('⚠️ Erro na sincronização com GitHub:', error.message);
+      console.log('💾 Continuando com localStorage apenas');
     }
   }
   
-  // Criar arquivo no GitHub se não existir
-  async criarArquivoGitHub() {
-    if (!this.config.isGitHubPages) return;
-    
-    try {
-      const dados = {
-        totalEtiquetas: this.valorAtual,
-        ultimaAtualizacao: this.ultimaAtualizacao,
-        breakdown: {
-          caixa: 0,
-          avulso: 0,
-          enderec: 0,
-          placas: 0,
-          geral: 0
-        },
-        historico: [],
-        configuracao: {
-          valorInicial: this.valorInicial,
-          versao: "1.0",
-          criadoEm: new Date().toISOString()
-        }
-      };
-      
-      // Salvar localmente primeiro
-      await this.salvarEstadoLocal();
-      
-      console.log(`📝 Arquivo GitHub criado localmente: ${this.valorAtual} etiquetas`);
-      
-    } catch (error) {
-      console.warn('⚠️ Erro ao criar arquivo GitHub:', error.message);
-    }
-  }
+  // No GitHub Pages, não podemos criar arquivos no repositório
+  // Esta função foi removida pois não é necessária
   
   // Incrementar contador
   async incrementar(quantidade = 1, tipo = 'geral') {
@@ -312,7 +294,7 @@ class ContadorGlobalCentralizado {
     if (!this.config.isGitHubPages) return;
     
     setInterval(() => {
-      if (this.isOnline && this.operacoesPendentes.length > 0) {
+      if (this.isOnline) {
         console.log('🔄 Sincronização periódica...');
         this.sincronizarComGitHub();
       }

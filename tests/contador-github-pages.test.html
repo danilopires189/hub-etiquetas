@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste do Contador Global - GitHub Pages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .counter-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 10px 0;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste do Contador Global - GitHub Pages</h1>
+        
+        <div class="test-section info">
+            <h3>📊 Status do Contador</h3>
+            <div class="counter-display" id="counterDisplay">Carregando...</div>
+            <p><strong>Configuração:</strong> <span id="configInfo">Detectando...</span></p>
+            <p><strong>Última Atualização:</strong> <span id="lastUpdate">-</span></p>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Testes de Funcionalidade</h3>
+            <button onclick="testIncrement()">Incrementar +1</button>
+            <button onclick="testIncrement(5)">Incrementar +5</button>
+            <button onclick="testIncrement(10, 'teste')">Incrementar +10 (tipo: teste)</button>
+            <button onclick="testGetValue()">Obter Valor</button>
+            <button onclick="testGetStats()">Obter Estatísticas</button>
+            <button onclick="clearLog()">Limpar Log</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🌐 Testes de Conectividade</h3>
+            <button onclick="testGitHubSync()">Testar Sincronização GitHub</button>
+            <button onclick="testLocalStorage()">Testar LocalStorage</button>
+            <button onclick="testOfflineMode()">Simular Modo Offline</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 Log de Testes</h3>
+            <div class="log" id="testLog"></div>
+        </div>
+    </div>
+
+    <!-- Contador Global Centralizado -->
+    <script src="../js/contador-global-centralizado.js"></script>
+    
+    <script>
+        let testResults = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            testResults.push(logEntry);
+            
+            const logElement = document.getElementById('testLog');
+            logElement.innerHTML += `<div class="${type}">${logEntry}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(logEntry);
+        }
+        
+        function clearLog() {
+            testResults = [];
+            document.getElementById('testLog').innerHTML = '';
+        }
+        
+        function updateDisplay() {
+            try {
+                const valor = window.contadorGlobal.obterValor();
+                const stats = window.contadorGlobal.obterEstatisticas();
+                
+                document.getElementById('counterDisplay').textContent = `${valor.toLocaleString()} etiquetas`;
+                document.getElementById('configInfo').textContent = 
+                    `${stats.configuracao.owner}/${stats.configuracao.repo} (${stats.configuracao.isGitHubPages ? 'GitHub Pages' : 'Local'})`;
+                document.getElementById('lastUpdate').textContent = 
+                    new Date(stats.ultimaAtualizacao).toLocaleString();
+                    
+            } catch (error) {
+                log(`❌ Erro ao atualizar display: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testIncrement(quantidade = 1, tipo = 'teste') {
+            try {
+                log(`🔄 Testando incremento: +${quantidade} (${tipo})`);
+                const valorAnterior = window.contadorGlobal.obterValor();
+                const novoValor = await window.contadorGlobal.incrementar(quantidade, tipo);
+                
+                if (novoValor === valorAnterior + quantidade) {
+                    log(`✅ Incremento bem-sucedido: ${valorAnterior} → ${novoValor}`, 'success');
+                } else {
+                    log(`❌ Incremento falhou: esperado ${valorAnterior + quantidade}, obtido ${novoValor}`, 'error');
+                }
+                
+                updateDisplay();
+                
+            } catch (error) {
+                log(`❌ Erro no incremento: ${error.message}`, 'error');
+            }
+        }
+        
+        function testGetValue() {
+            try {
+                const valor = window.contadorGlobal.obterValor();
+                log(`📊 Valor atual: ${valor}`, 'success');
+                updateDisplay();
+            } catch (error) {
+                log(`❌ Erro ao obter valor: ${error.message}`, 'error');
+            }
+        }
+        
+        function testGetStats() {
+            try {
+                const stats = window.contadorGlobal.obterEstatisticas();
+                log(`📈 Estatísticas: ${JSON.stringify(stats, null, 2)}`, 'info');
+            } catch (error) {
+                log(`❌ Erro ao obter estatísticas: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testGitHubSync() {
+            try {
+                log('🔄 Testando sincronização com GitHub...');
+                await window.contadorGlobal.sincronizarComGitHub();
+                log('✅ Sincronização concluída', 'success');
+                updateDisplay();
+            } catch (error) {
+                log(`❌ Erro na sincronização: ${error.message}`, 'error');
+            }
+        }
+        
+        function testLocalStorage() {
+            try {
+                const chave = 'contador_global_centralizado_v1';
+                const dados = localStorage.getItem(chave);
+                
+                if (dados) {
+                    const parsed = JSON.parse(dados);
+                    log(`💾 LocalStorage OK: ${parsed.totalEtiquetas} etiquetas`, 'success');
+                } else {
+                    log('⚠️ Nenhum dado encontrado no localStorage', 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro no localStorage: ${error.message}`, 'error');
+            }
+        }
+        
+        function testOfflineMode() {
+            try {
+                // Simular modo offline
+                Object.defineProperty(navigator, 'onLine', {
+                    writable: true,
+                    value: false
+                });
+                
+                log('📱 Modo offline simulado');
+                
+                // Testar incremento offline
+                testIncrement(1, 'offline-test').then(() => {
+                    // Restaurar modo online
+                    Object.defineProperty(navigator, 'onLine', {
+                        writable: true,
+                        value: true
+                    });
+                    log('🌐 Modo online restaurado');
+                });
+                
+            } catch (error) {
+                log(`❌ Erro no teste offline: ${error.message}`, 'error');
+            }
+        }
+        
+        // Inicializar quando a página carregar
+        window.addEventListener('load', () => {
+            log('🚀 Página carregada, testando contador...');
+            
+            // Aguardar um pouco para o contador inicializar
+            setTimeout(() => {
+                if (window.contadorGlobal) {
+                    log('✅ Contador Global carregado com sucesso', 'success');
+                    updateDisplay();
+                    
+                    // Teste automático básico
+                    testGetValue();
+                    testGetStats();
+                } else {
+                    log('❌ Contador Global não foi carregado', 'error');
+                }
+            }, 1000);
+        });
+        
+        // Escutar eventos do contador
+        window.addEventListener('contador-incremento', (event) => {
+            log(`📈 Evento de incremento recebido: +${event.detail.quantidade}`, 'info');
+        });
+        
+        window.addEventListener('contador-atualizado', (event) => {
+            log(`🔄 Evento de atualização recebido: ${event.detail.valor}`, 'info');
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>
