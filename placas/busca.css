@@ -72,18 +72,25 @@ svg.barcode{ width: var(--bc-width-mm); height: var(--bc-height-mm); display:blo
 .app-footer{ max-width:1000px; margin:20px auto; color:#64748b; text-align:center; }
 
 @media print{
-  @page{ size: 92.5mm 50mm; margin: 0; }
+  @page{ size: 80mm 60mm; margin: 0; }
   html, body{ background:#fff; }
   .app-header, .panel.search, .app-footer{ display:none !important; }
   .content{ margin:0; }
-  .card{ border:none; box-shadow:none; width:92.5mm; height:50mm; }
-  .card-head{ padding:6px 8px 4px 8px; }
-  .card-head .title h1{ font-size:12px; }
-  .card-head .title p{ font-size:10px; }
-  .barcode-zone{ padding: 2mm 0 0 var(--bc-left-mm); min-height: 24mm; }
+  .card{ border:none; box-shadow:none; width:80mm; height:60mm; page-break-inside: avoid; }
+  .card-head{ padding:4mm 6mm 2mm 6mm; }
+  .card-head .title h1{ font-size:11px; line-height:1.2; }
+  .card-head .title p{ font-size:9px; margin:1px 0 0 0; }
+  .barcode-zone{ padding: 1mm 0 0 var(--bc-left-mm); min-height: 20mm; }
   svg.barcode{ width: var(--bc-width-mm); height: var(--bc-height-mm); }
-  .legend{ padding: 2mm 4mm 2mm 4mm; font-size:10px; gap:8px; }
+  .legend{ padding: 1mm 4mm 2mm 4mm; font-size:9px; gap:6px; border-top:1px dashed #ccc; }
   .card-actions{ display:none; }
+  
+  /* Garantir que toda a etiqueta seja impressa */
+  .card * { 
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 
 
@@ -112,3 +119,5 @@ svg.barcode{ width: var(--bc-width-mm); height: var(--bc-height-mm); display:blo
 }
 
 .btn.primary:hover{ background:#1a56c7; border-color:#1a56c7; color:#fff; }
+
+/* CSS do popup padrão já está definido no HTML */

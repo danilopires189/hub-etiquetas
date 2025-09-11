@@ -93,9 +93,9 @@
 
       <div class="card-actions">
         <div class="print-controls">
-          <label>Largura (mm)<input id="wmm" type="number" min="40" max="65" step="1"></label>
-          <label>Altura (mm)<input id="hmm" type="number" min="12" max="30" step="1"></label>
-          <label>Margem Esq. (mm)<input id="lmm" type="number" min="0" max="10" step="1"></label>
+          <label>Largura (mm)<input id="wmm" type="number" min="50" max="80" step="1"></label>
+          <label>Altura (mm)<input id="hmm" type="number" min="30" max="60" step="1"></label>
+          <label>Margem Esq. (mm)<input id="lmm" type="number" min="0" max="5" step="1"></label>
           <label>Espaço barras<input id="space" type="range" min="1.0" max="1.8" step="0.05"></label>
         </div>
         <div class="spacer"></div>
@@ -158,7 +158,9 @@
                 console.log(`✅ Contador incrementado: +1 placas = ${novoValor}`);
                 
                 // Mostrar popup de sucesso
+                console.log('🎉 Chamando mostrarPopupSucesso...');
                 mostrarPopupSucesso('Etiqueta gerada com sucesso!', `Total: ${novoValor.toLocaleString('pt-BR')} etiquetas`);
+                console.log('✅ Popup chamado com sucesso');
                 
                 // Feedback visual discreto
                 const valorFormatado = novoValor.toLocaleString('pt-BR');
@@ -191,6 +193,15 @@
     
     // Função para mostrar popup de sucesso
     function mostrarPopupSucesso(titulo, subtitulo) {
+      console.log('🎯 mostrarPopupSucesso chamada com:', titulo, subtitulo);
+      
+      // Remover popup existente se houver
+      const existingPopup = document.getElementById('popup-sucesso');
+      if (existingPopup) {
+        console.log('🗑️ Removendo popup existente');
+        existingPopup.remove();
+      }
+      
       // Criar popup
       const popup = document.createElement('div');
       popup.id = 'popup-sucesso';
@@ -204,20 +215,27 @@
         </div>
       `;
       
+      console.log('📝 Popup criado, adicionando ao body...');
+      
       // Adicionar ao body
       document.body.appendChild(popup);
+      console.log('✅ Popup adicionado ao body');
       
       // Mostrar com animação
       setTimeout(() => {
+        console.log('🎬 Adicionando classe show...');
         popup.classList.add('show');
+        console.log('✅ Classe show adicionada');
       }, 100);
       
       // Remover após 2 segundos
       setTimeout(() => {
+        console.log('⏰ Removendo popup...');
         popup.classList.remove('show');
         setTimeout(() => {
           if (popup.parentNode) {
             popup.parentNode.removeChild(popup);
+            console.log('🗑️ Popup removido do DOM');
           }
         }, 300);
       }, 2000);
@@ -227,20 +245,21 @@
   <style>
     /* Popup de Sucesso */
     #popup-sucesso {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 10000;
-      background: white;
+      position: fixed !important;
+      top: 20px !important;
+      right: 20px !important;
+      z-index: 99999 !important;
+      background: white !important;
       border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-      border: 1px solid #e2e8f0;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+      border: 2px solid #10b981 !important;
       padding: 0;
       opacity: 0;
       transform: translateX(100%);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       max-width: 320px;
       overflow: hidden;
+      pointer-events: auto !important;
     }
     
     #popup-sucesso.show {

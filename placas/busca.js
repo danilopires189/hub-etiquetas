@@ -31,6 +31,8 @@ function toast(msg) {
   document.body.appendChild(t); setTimeout(() => t.remove(), 1500);
 }
 
+// Função removida - o popup é gerenciado pelo HTML
+
 function tipoBarras(len) { return len === 13 ? 'EAN‑13' : (len === 14 ? 'ITF‑14' : (len === 8 ? 'EAN‑8' : '—')); }
 
 // Config
@@ -354,8 +356,7 @@ function renderCard(r) {
   const legend = $('#legend');
   if (legend) {
     legend.innerHTML = `
-      <span><span class="tag">BARRAS:</span> <span class="mono">${r.BARRAS}</span> <small class="muted">(${tipoBarras((r.BARRAS || '').trim().length)})</small></span>
-      <span><span class="tag">Criado em:</span> ${nowStr()}</span>`;
+      <span><span class="tag">BARRAS:</span> <span class="mono">${r.BARRAS}</span> <small class="muted">(${tipoBarras((r.BARRAS || '').trim().length)})</small></span>`;
   }
 
   const barras = String(r.BARRAS || '').trim();
@@ -554,9 +555,9 @@ function saveCfg() {
   const space = $('#space');
 
   const cfg = {
-    wmm: wmm ? Number(wmm.value) : 86,
-    hmm: hmm ? Number(hmm.value) : 22,
-    lmm: lmm ? Number(lmm.value) : 4,
+    wmm: wmm ? Number(wmm.value) : 70,
+    hmm: hmm ? Number(hmm.value) : 50,
+    lmm: lmm ? Number(lmm.value) : 2,
     space: space ? Number(space.value) : SPACE_SCALE
   };
 
@@ -592,7 +593,10 @@ function setupInterface() {
   }
 
   const btnPrint = $('#btnPrint');
-  if (btnPrint) btnPrint.addEventListener('click', () => window.print());
+  if (btnPrint) {
+    // Apenas adicionar listener básico - o contador é gerenciado pelo HTML
+    btnPrint.addEventListener('click', () => window.print());
+  }
 
   const btnB = $('#btnCopyBarras');
   if (btnB) btnB.addEventListener('click', () => {
