@@ -558,6 +558,10 @@
               <span class="shortcut-key">Ctrl+6</span>
               <span>Termolábeis</span>
             </div>
+            <div class="shortcut">
+              <span class="shortcut-key">Ctrl+7</span>
+              <span>Pedido Direto</span>
+            </div>
           </div>
         </div>
       </div>
@@ -576,6 +580,7 @@
       { id: 'enderec', name: 'Endereçamento', desc: 'Etiquetas de endereço para inventário', path: './enderec/', hotkey: '4', icon: 'map' },
       { id: 'transfer', name: 'Transferência CD → CD', desc: 'Documentos A4 para transferências', path: './transferencia/', hotkey: '5', icon: 'truck' },
       { id: 'termo', name: 'Termolábeis', desc: 'Módulo especializado para produtos termolábeis', path: './termo/', hotkey: '6', icon: 'thermo' },
+      { id: 'pedido-direto', name: 'Pedido Direto', desc: 'Etiquetas para pedidos diretos sem código de barras', path: './pedido-direto/', hotkey: '7', icon: 'direct' },
     ];
 
     // ===== Ícones modernos inline =====
@@ -586,6 +591,7 @@
       map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6l7-3 8 3 7-3v15l-7 3-8-3-7 3z"/><path d="M8 3v15"/><path d="M16 6v15"/></svg>',
       truck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h12v8H3z"/><path d="M15 10h4l2 3v2h-6z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
       thermo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2v8a5 5 0 1 1-4 0V4a2 2 0 0 1 2-2z"/><path d="M12 9v8"/></svg>',
+      direct: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18m-9-9l9 9-9 9"/></svg>',
     };
 
     const $ = (s) => document.querySelector(s);
@@ -707,7 +713,7 @@
       }, 150);
     });
 
-    // Hotkeys Ctrl+1..6
+    // Hotkeys Ctrl+1..7
     document.addEventListener('keydown', (ev) => {
       const isCtrl = ev.ctrlKey || ev.metaKey;
       if (!isCtrl) return;
