@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Etiquetas – Volume Avulso</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Bibliotecas (podem ser baixadas para uso offline, se preferir) -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-logos">
+        <img src="pm.png" alt="Pague Menos" class="brand-logo">
+        <img src="logo.png" alt="Danilo" class="brand-logo">
+      </div>
+      <div class="brand-text">
+        <strong>Pague Menos</strong><span>Etiquetas • Volume Avulso</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="imprimir" class="btn btn-ghost" title="Ctrl/Cmd+P">Imprimir</button>
+      <a href="https://wa.me/5562981020272" id="ajuda" class="btn btn-ghost" target="_blank" rel="noopener">Ajuda</a>
+    </div>
+  </header>
+
+  <section class="panel controls">
+    <div class="field">
+      <label for="deposito">Depósito</label>
+      <select id="deposito" required>
+        <option value="" disabled selected>Selecione...</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="tipo">Tipo de Movimentação</label>
+      <select id="tipo" required>
+        <option value="" disabled selected>Selecione..</option>
+        <option value="SD1">SD1 - RECALL</option>
+        <option value="SD2">SD2 - SOLICITAÇÃO FORNECEDOR</option>
+        <option value="SX">SX - AVARIA/DANIFICADO</option>
+        <option value="SY">SY - VENCIDO/A VENCER</option>
+        <option value="SXR">SXR - AVARIA/DANIFICADO NA REVERSA</option>
+        <option value="SYR">SYR - VENCIDO/A VENCER NA REVERSA</option>
+        <option value="SE">SE - EXCESSO NO CD</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="volume">Número do volume</label>
+      <input id="volume" type="number" required required required required required min="1" max="99999" placeholder="ex.: 2" />
+    </div>
+
+    <div class="field">
+      <label for="fracao">Fracionamento (Qtd de caixas)</label>
+      <input id="fracao" type="number" min="1" max="99" value="1" / required>
+    </div>
+
+    <div class="field">
+      <label for="matricula">Matrícula</label>
+      <input id="matricula" type="text" required required required required placeholder="ex.: 88885" />
+    </div>
+
+    <div class="field">
+      <label>Largura × Altura (mm)</label>
+      <div class="row">
+        <input id="wmm" type="number" min="155" value="155" />
+        <input id="hmm" type="number" min="63" value="80" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Texto (pt) | Coluna (mm)</label>
+      <div class="row">
+        <input id="tpt" type="number" min="8" value="22" />
+        <input id="colmm" type="number" min="6" value="20" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="logomm">Tamanho da logo (mm)</label>
+      <input id="logomm" type="number" min="6" value="10">
+    </div>
+
+    <div class="field">
+      <label for="logo">Logo na etiqueta</label>
+      <div class="row wrap">
+        <label class="switch"><input type="checkbox" id="logo" checked><span>Exibir (Pague Menos)</span></label>
+        <span class="hint">Opacidade (%)</span>
+        <input id="logoop" class="num" type="number" min="0" max="100" step="1" value="100" title="Opacidade da logo em %">
+        <label class="switch"><input type="checkbox" id="logoPrintOff"><span>Ocultar na impressão</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="transpop">Ícone de transparência</label>
+      <div class="row wrap">
+        <label class="switch"><input type="checkbox" id="safeicon" checked><span>Exibir</span></label>
+        <span class="hint">Intensidade (%)</span>
+        <input id="transpop" class="num" type="number" min="0" max="70" step="1" value="0" title="Opacidade do ícone em %">
+      </div>
+    </div>
+
+    <div class="field full">
+      <button id="gerar" class="btn btn-primary">Gerar etiquetas</button>
+    </div>
+  </section>
+
+  <main id="preview" class="preview"></main>
+
+  <footer class="app-footer">
+    <small>Gerador de Etiquetas – Desenvolvido por Danilo Pires.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

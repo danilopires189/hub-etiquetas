@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Contador Garantido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .contador-display {
+            font-size: 2em;
+            font-weight: bold;
+            color: #0ea5e9;
+            text-align: center;
+            padding: 20px;
+            background: #f0f9ff;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .botoes {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #0ea5e9;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0284c7;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .status {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .log {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .breakdown-item {
+            text-align: center;
+            padding: 10px;
+            background: #f3f4f6;
+            border-radius: 4px;
+        }
+        
+        .breakdown-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+        
+        .breakdown-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste do Contador Garantido</h1>
+        
+        <div class="contador-display" id="contador-display">
+            Carregando...
+        </div>
+        
+        <div class="botoes">
+            <button class="btn-primary" onclick="testarIncremento(1)">+1</button>
+            <button class="btn-primary" onclick="testarIncremento(5)">+5</button>
+            <button class="btn-primary" onclick="testarIncremento(10)">+10</button>
+            <button class="btn-secondary" onclick="obterStatus()">Status</button>
+            <button class="btn-secondary" onclick="sincronizar()">Sincronizar</button>
+            <button class="btn-secondary" onclick="limparLog()">Limpar Log</button>
+        </div>
+        
+        <div class="breakdown" id="breakdown">
+            <!-- Será preenchido dinamicamente -->
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>📊 Status do Sistema</h2>
+        <div class="status" id="status">
+            Aguardando inicialização...
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>📝 Log de Operações</h2>
+        <div class="log" id="log"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/contador-garantido.js"></script>
+    <script src="../js/contador-garantido-integration.js"></script>
+    
+    <script>
+        // Variáveis globais para teste
+        let logContainer;
+        let contadorDisplay;
+        let statusContainer;
+        let breakdownContainer;
+        
+        // Inicializar teste
+        document.addEventListener('DOMContentLoaded', async () => {
+            logContainer = document.getElementById('log');
+            contadorDisplay = document.getElementById('contador-display');
+            statusContainer = document.getElementById('status');
+            breakdownContainer = document.getElementById('breakdown');
+            
+            log('🚀 Iniciando teste do Contador Garantido...');
+            
+            try {
+                // Inicializar com debug habilitado
+                await window.contadorGarantido.init({ debug: true });
+                
+                // Atualizar display inicial
+                await atualizarDisplay();
+                
+                log('✅ Sistema inicializado com sucesso!');
+                
+            } catch (error) {
+                log(`❌ Erro na inicialização: ${error.message}`);
+            }
+        });
+        
+        // Testar incremento
+        async function testarIncremento(quantidade) {
+            try {
+                log(`🔄 Testando incremento de ${quantidade}...`);
+                
+                const resultado = await window.contadorGarantido.incrementar(quantidade, 'placas');
+                
+                log(`✅ Incremento realizado: ${resultado}`);
+                await atualizarDisplay();
+                
+            } catch (error) {
+                log(`❌ Erro no incremento: ${error.message}`);
+            }
+        }
+        
+        // Obter status do sistema
+        async function obterStatus() {
+            try {
+                const status = await window.contadorGarantido.obterStatus();
+                
+                statusContainer.innerHTML = `
+                    <strong>Total:</strong> ${status.total}<br>
+                    <strong>Estratégia Ativa:</strong> ${status.estrategiaAtiva}<br>
+                    <strong>Operações Pendentes:</strong> ${status.operacoesPendentes}<br>
+                    <strong>Última Atualização:</strong> ${new Date(status.ultimaAtualizacao).toLocaleString()}<br>
+                    <strong>Sessão ID:</strong> ${status.sessaoId}<br>
+                    <strong>Online:</strong> ${status.conectividade.online ? 'Sim' : 'Não'}<br>
+                    <strong>LocalStorage:</strong> ${status.conectividade.localStorageDisponivel ? 'Disponível' : 'Indisponível'}<br>
+                    <strong>GitHub:</strong> ${status.conectividade.githubDisponivel ? 'Disponível' : 'Indisponível'}
+                `;
+                
+                log('📊 Status atualizado');
+                
+            } catch (error) {
+                log(`❌ Erro ao obter status: ${error.message}`);
+            }
+        }
+        
+        // Sincronizar manualmente
+        async function sincronizar() {
+            try {
+                log('🔄 Iniciando sincronização manual...');
+                
+                await window.contadorGarantido.sincronizar();
+                
+                log('✅ Sincronização concluída');
+                await atualizarDisplay();
+                
+            } catch (error) {
+                log(`❌ Erro na sincronização: ${error.message}`);
+            }
+        }
+        
+        // Atualizar display
+        async function atualizarDisplay() {
+            try {
+                const total = await window.contadorGarantido.obterTotal();
+                const status = await window.contadorGarantido.obterStatus();
+                
+                // Atualizar contador principal
+                contadorDisplay.textContent = total.toLocaleString('pt-BR');
+                
+                // Atualizar breakdown
+                const breakdown = window.contadorGarantido.contador.obterBreakdown();
+                breakdownContainer.innerHTML = Object.entries(breakdown)
+                    .map(([tipo, valor]) => `
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">${tipo}</div>
+                            <div class="breakdown-value">${valor}</div>
+                        </div>
+                    `).join('');
+                
+            } catch (error) {
+                log(`❌ Erro ao atualizar display: ${error.message}`);
+            }
+        }
+        
+        // Função de log
+        function log(mensagem) {
+            const timestamp = new Date().toLocaleTimeString();
+            const linha = `[${timestamp}] ${mensagem}\n`;
+            
+            logContainer.textContent += linha;
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            console.log(mensagem);
+        }
+        
+        // Limpar log
+        function limparLog() {
+            logContainer.textContent = '';
+            log('📝 Log limpo');
+        }
+        
+        // Testes automáticos
+        async function executarTestesAutomaticos() {
+            log('🧪 Iniciando testes automáticos...');
+            
+            try {
+                // Teste 1: Incremento simples
+                await testarIncremento(1);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Teste 2: Incremento múltiplo
+                await testarIncremento(5);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Teste 3: Obter status
+                await obterStatus();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Teste 4: Sincronização
+                await sincronizar();
+                
+                log('✅ Todos os testes automáticos concluídos!');
+                
+            } catch (error) {
+                log(`❌ Erro nos testes automáticos: ${error.message}`);
+            }
+        }
+        
+        // Executar testes automáticos após 3 segundos
+        setTimeout(executarTestesAutomaticos, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hub de Etiquetas - Pague Menos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="//fonts.googleapis.com">
+  <link rel="stylesheet" href="shared/design-system.css">
+  <link rel="stylesheet" href="shared/components.css">
+  <link rel="stylesheet" href="shared/performance.css">
+  <style>
+    /* ===== ESTILOS ESPECÍFICOS DO INDEX PRINCIPAL ===== */
+
+    /* Contador discreto na navegação */
+    .stats-counter-nav {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-1);
+      padding: var(--space-2) var(--space-3);
+      background: rgba(14, 165, 233, 0.1);
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      border-radius: var(--radius-md);
+      opacity: 0;
+      transform: translateY(-10px);
+      animation: slideUp 0.4s ease-out 0.3s both;
+    }
+
+    .counter-number-small {
+      font-size: var(--text-sm);
+      font-weight: var(--font-bold);
+      color: var(--brand-primary);
+      line-height: 1;
+    }
+
+    .counter-label-small {
+      font-size: var(--text-xs);
+      font-weight: var(--font-medium);
+      color: var(--neutral-500);
+      text-transform: lowercase;
+    }
+
+    /* Responsividade do contador na nav */
+    @media (max-width: 768px) {
+      .stats-counter-nav {
+        padding: var(--space-1) var(--space-2);
+      }
+
+      .counter-number-small {
+        font-size: var(--text-xs);
+      }
+
+      .counter-label-small {
+        font-size: 10px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .nav-content {
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .stats-counter-nav {
+        order: -1;
+        align-self: flex-end;
+      }
+    }
+
+    /* Hero Section Moderna */
+    .hero {
+      background: var(--gradient-hero);
+      position: relative;
+      overflow: hidden;
+      padding: var(--space-16) 0 var(--space-20);
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--space-6);
+      margin-bottom: var(--space-8);
+      animation: slideUp 0.8s ease-out;
+    }
+
+    .hero-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-xl);
+      object-fit: contain;
+      padding: var(--space-2);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: var(--shadow-glass);
+      transition: all var(--transition-base);
+    }
+
+    .hero-logo:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .hero-title {
+      font-size: var(--text-5xl);
+      font-weight: var(--font-extrabold);
+      color: var(--neutral-900);
+      margin-bottom: var(--space-4);
+      line-height: var(--leading-tight);
+      animation: slideUp 0.8s ease-out 0.2s both;
+    }
+
+    .hero-subtitle {
+      font-size: var(--text-xl);
+      color: var(--neutral-600);
+      margin-bottom: var(--space-8);
+      line-height: var(--leading-relaxed);
+      animation: slideUp 0.8s ease-out 0.4s both;
+    }
+
+    .hero-description {
+      font-size: var(--text-lg);
+      color: var(--neutral-500);
+      max-width: 600px;
+      margin: 0 auto var(--space-12);
+      line-height: var(--leading-relaxed);
+      animation: slideUp 0.8s ease-out 0.6s both;
+    }
+
+    /* Navegação Moderna */
+    .nav-header {
+      position: sticky;
+      top: 0;
+      z-index: var(--z-sticky);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--neutral-200);
+      padding: var(--space-4) 0;
+      transition: all var(--transition-base);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .nav-header {
+        background: rgba(15, 23, 42, 0.8);
+        border-bottom-color: var(--neutral-700);
+      }
+    }
+
+    .nav-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .nav-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-lg);
+      object-fit: contain;
+      padding: var(--space-1);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-title {
+      font-size: var(--text-lg);
+      font-weight: var(--font-bold);
+      color: var(--brand-primary);
+      margin: 0;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: var(--font-medium);
+      text-decoration: none;
+      border: 1px solid var(--neutral-200);
+      background: var(--surface);
+      color: var(--brand-primary);
+      transition: all var(--transition-base);
+    }
+
+    .btn-nav:hover {
+      background: var(--neutral-50);
+      border-color: var(--brand-accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-nav.hidden {
+      display: none;
+    }
+
+    /* Classe utilitária para esconder elementos */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Grid de Aplicações Moderno */
+    .apps-section {
+      padding: var(--space-16) 0;
+      background: var(--bg-primary);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: var(--space-12);
+    }
+
+    .section-title {
+      font-size: var(--text-3xl);
+      font-weight: var(--font-bold);
+      color: var(--neutral-900);
+      margin-bottom: var(--space-4);
+    }
+
+    .section-description {
+      font-size: var(--text-lg);
+      color: var(--neutral-600);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: var(--leading-relaxed);
+    }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-8);
+      margin-bottom: var(--space-12);
+    }
+
+    .app-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      padding: var(--space-8);
+      border-radius: var(--radius-xl);
+      background: var(--surface);
+      border: 1px solid var(--neutral-200);
+      cursor: pointer;
+      text-align: left;
+      transition: all var(--transition-base);
+      overflow: hidden;
+      animation: slideUp 0.6s ease-out;
+    }
+
+    .app-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+      transform: scaleX(0);
+      transition: transform var(--transition-base);
+    }
+
+    .app-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .app-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--brand-accent);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .app-card:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
+    }
+
+    .app-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--radius-xl);
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-brand);
+      animation: float 3s ease-in-out infinite;
+      margin-bottom: var(--space-2);
+    }
+
+    .app-icon svg {
+      width: 36px;
+      height: 36px;
+      color: white;
+    }
+
+    .app-title {
+      font-size: var(--text-xl);
+      font-weight: var(--font-bold);
+      color: var(--neutral-900);
+      margin-bottom: var(--space-2);
+    }
+
+    .app-description {
+      font-size: var(--text-base);
+      color: var(--neutral-600);
+      line-height: var(--leading-relaxed);
+      flex-grow: 1;
+    }
+
+    .app-badge {
+      position: absolute;
+      top: var(--space-4);
+      right: var(--space-4);
+      font-size: var(--text-xs);
+      font-weight: var(--font-bold);
+      letter-spacing: 0.05em;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      background: var(--gradient-primary);
+      color: white;
+      text-transform: uppercase;
+    }
+
+    /* Seção de Ajuda */
+    .help-section {
+      background: var(--bg-secondary);
+      padding: var(--space-12) 0;
+      text-align: center;
+    }
+
+    .help-content {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .help-title {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-bold);
+      color: var(--neutral-900);
+      margin-bottom: var(--space-4);
+    }
+
+    .help-text {
+      font-size: var(--text-base);
+      color: var(--neutral-600);
+      line-height: var(--leading-relaxed);
+      margin-bottom: var(--space-6);
+    }
+
+    .keyboard-shortcuts {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .shortcut {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--surface);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      color: var(--neutral-700);
+    }
+
+    .shortcut-key {
+      font-family: var(--font-mono);
+      font-weight: var(--font-bold);
+      background: var(--neutral-100);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-xs);
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .hero {
+        padding: var(--space-12) 0 var(--space-16);
+        min-height: 50vh;
+      }
+
+      .hero-title {
+        font-size: var(--text-3xl);
+      }
+
+      .hero-subtitle {
+        font-size: var(--text-lg);
+      }
+
+      .hero-logos {
+        gap: var(--space-4);
+      }
+
+      .hero-logo {
+        width: 60px;
+        height: 60px;
+      }
+
+      .apps-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+      }
+
+      .nav-content {
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+
+      .keyboard-shortcuts {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-title {
+        font-size: var(--text-2xl);
+      }
+
+      .section-title {
+        font-size: var(--text-2xl);
+      }
+
+      .app-card {
+        padding: var(--space-6);
+      }
+
+      .app-icon {
+        width: 60px;
+        height: 60px;
+      }
+
+      .app-icon svg {
+        width: 30px;
+        height: 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navegação Moderna -->
+  <nav class="nav-header">
+    <div class="container">
+      <div class="nav-content">
+        <div class="nav-brand">
+          <img src="./assets/pm.png" alt="Pague Menos" class="nav-logo" onerror="this.style.display='none'">
+          <img src="./assets/logo.png" alt="Danilo" class="nav-logo" onerror="this.style.display='none'">
+          <h1 class="nav-title">Hub de Etiquetas</h1>
+        </div>
+        <div class="nav-actions">
+          <div class="stats-counter-nav">
+            <span class="counter-number-small" id="etiquetas-counter">Carregando...</span>
+            <span class="counter-label-small">etiquetas geradas 🚀</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="hero" class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-logos">
+          <img src="./assets/pm.png" alt="Pague Menos" class="hero-logo" onerror="this.style.display='none'">
+          <img src="./assets/logo.png" alt="Danilo" class="hero-logo" onerror="this.style.display='none'">
+        </div>
+        <h1 class="hero-title">Hub de Etiquetas</h1>
+        <p class="hero-subtitle">Sistema Integrado de Geração de Etiquetas</p>
+        <p class="hero-description">
+          Plataforma completa para geração de etiquetas.
+          Acesse todas as aplicações de forma rápida e intuitiva.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seção de Aplicações -->
+  <section id="chooser" class="apps-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Escolha sua Aplicação</h2>
+        <p class="section-description">
+          Selecione a aplicação desejada para começar a gerar suas etiquetas
+        </p>
+      </div>
+      <div id="apps" class="apps-grid" role="list"></div>
+
+      <!-- Seção de Ajuda -->
+      <div class="help-section">
+        <div class="help-content">
+          <h3 class="help-title">Atalhos de Teclado</h3>
+          <p class="help-text">Use os atalhos abaixo para acesso rápido às aplicações</p>
+          <div class="keyboard-shortcuts">
+            <div class="shortcut">
+              <span class="shortcut-key">Ctrl+1</span>
+              <span>Etiquetas de Produto</span>
+            </div>
+            <div class="shortcut">
+              <span class="shortcut-key">Ctrl+2</span>
+              <span>Etiquetas de Caixa</span>
+            </div>
+            <div class="shortcut">
+              <span class="shortcut-key">Ctrl+3</span>
+              <span>Volume Avulso</span>
+            </div>
+            <div class="shortcut">
+              <span class="shortcut-key">Ctrl+4</span>
+              <span>Endereçamento</span>
+            </div>
+            <div class="shortcut">
+              <span class="shortcut-key">Ctrl+5</span>
+              <span>Transferência</span>
+            </div>
+            <div class="shortcut">
+              <span class="shortcut-key">Ctrl+6</span>
+              <span>Termolábeis</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sistema de Contador Global Centralizado -->
+  <script src="js/contador-global-centralizado.js"></script>
+  
+  <script>
+    // ===== Definição dos apps: caminhos que você JÁ usa =====
+    const APPS = [
+      { id: 'placas', name: 'Etiquetas de Produto', desc: 'Códigos de barras com legenda para produtos', path: './placas/', hotkey: '1', icon: 'barcode' },
+      { id: 'caixa', name: 'Etiquetas de Caixa', desc: 'Etiquetas para caixas padrão com rotulagem', path: './caixa/', hotkey: '2', icon: 'box' },
+      { id: 'avulso', name: 'Volume Avulso', desc: 'Etiquetas individuais por volume', path: './avulso/', hotkey: '3', icon: 'layers' },
+      { id: 'enderec', name: 'Endereçamento', desc: 'Etiquetas de endereço para inventário', path: './enderec/', hotkey: '4', icon: 'map' },
+      { id: 'transfer', name: 'Transferência CD → CD', desc: 'Documentos A4 para transferências', path: './transferencia/', hotkey: '5', icon: 'truck' },
+      { id: 'termo', name: 'Termolábeis', desc: 'Módulo especializado para produtos termolábeis', path: './termo/', hotkey: '6', icon: 'thermo' },
+    ];
+
+    // ===== Ícones modernos inline =====
+    const ICONS = {
+      box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9 4 9-4"/><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/></svg>',
+      barcode: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6v12"/><path d="M7 6v12"/><path d="M10 6v12"/><path d="M12 6v12"/><path d="M15 6v12"/><path d="M18 6v12"/><path d="M20 6v12"/></svg>',
+      layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg>',
+      map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6l7-3 8 3 7-3v15l-7 3-8-3-7 3z"/><path d="M8 3v15"/><path d="M16 6v15"/></svg>',
+      truck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h12v8H3z"/><path d="M15 10h4l2 3v2h-6z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
+      thermo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2v8a5 5 0 1 1-4 0V4a2 2 0 0 1 2-2z"/><path d="M12 9v8"/></svg>',
+    };
+
+    const $ = (s) => document.querySelector(s);
+    const grid = $('#apps');
+    const chooser = $('#chooser');
+    const hero = $('#hero');
+
+    // Sistema de contador será carregado pelo contador-global-centralizado.js
+    
+    // Função para atualizar o contador no mostrador
+    function atualizarContadorDisplay(animar = false) {
+      if (window.contadorGlobal) {
+        const valor = window.contadorGlobal.obterValor();
+        const valorFormatado = valor.toLocaleString('pt-BR');
+        const elemento = document.getElementById('etiquetas-counter');
+        
+        if (elemento) {
+          // Verificar se o valor mudou
+          const valorAtual = elemento.textContent.replace(/\./g, '');
+          const valorNovo = valorFormatado.replace(/\./g, '');
+          
+          // Atualizar valor
+          elemento.textContent = valorFormatado;
+          
+          // Animação apenas se solicitada E se o valor mudou
+          if (animar && valorAtual !== valorNovo) {
+            // Animação de "piscar" - valor surge com destaque
+            elemento.style.opacity = '0.7';
+            elemento.style.transform = 'scale(1.05)';
+            elemento.style.color = '#10b981';
+            elemento.style.transition = 'all 0.4s ease';
+            
+            setTimeout(() => {
+              elemento.style.opacity = '1';
+              elemento.style.transform = 'scale(1)';
+              elemento.style.color = 'var(--brand-primary)';
+            }, 400);
+            
+            console.log(`✨ Animação de incremento: ${valorAtual} → ${valorNovo}`);
+          }
+        }
+      }
+    }
+    
+    // Escutar eventos de incremento
+    window.addEventListener('contador-incremento', (event) => {
+      console.log('📈 Contador atualizado via evento:', event.detail);
+      atualizarContadorDisplay(true); // Animar quando houver incremento
+    });
+    
+    window.addEventListener('contador-atualizado', (event) => {
+      console.log('🔄 Contador atualizado:', event.detail);
+      atualizarContadorDisplay(true); // Animar quando houver incremento
+    });
+    
+    // Monitorar mudanças no localStorage (para sincronização entre abas)
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'contador_global_centralizado_v1' || event.key === 'contador_ultimo_incremento') {
+        console.log('🔄 Contador atualizado via localStorage');
+        atualizarContadorDisplay();
+      }
+    });
+    
+    // Monitorar mudanças no localStorage localmente também
+    let ultimoIncremento = null;
+    setInterval(() => {
+      try {
+        const dados = localStorage.getItem('contador_ultimo_incremento');
+        if (dados) {
+          const parsed = JSON.parse(dados);
+          if (!ultimoIncremento || parsed.timestamp > ultimoIncremento.timestamp) {
+            ultimoIncremento = parsed;
+            console.log('🔄 Novo incremento detectado:', parsed);
+            atualizarContadorDisplay();
+          }
+        }
+      } catch (error) {
+        // Ignorar erros de parsing
+      }
+    }, 1000);
+
+    function cardHTML(app, index) {
+      const icon = ICONS[app.icon] || ICONS.box;
+      return `
+        <button class="app-card" data-id="${app.id}" data-path="${app.path}" role="listitem" aria-label="${app.name}" style="animation-delay: ${index * 0.1}s">
+          <div class="app-icon">
+            ${icon}
+          </div>
+          <h3 class="app-title">${app.name}</h3>
+          <p class="app-description">${app.desc || ''}</p>
+          <span class="app-badge">Ctrl+${app.hotkey || ''}</span>
+        </button>
+      `;
+    }
+
+    function renderCards() {
+      try {
+        grid.innerHTML = APPS.map((app, index) => cardHTML(app, index)).join('');
+      } catch (e) {
+        console.error('Erro ao renderizar cards', e);
+      }
+    }
+
+    function openById(id) {
+      const app = APPS.find(a => a.id === id);
+      if (!app) return;
+      const url = app.path.endsWith('/') ? app.path + 'index.html' : app.path;
+      window.location.href = url;
+    }
+
+    // Event Listeners
+    grid.addEventListener('click', (ev) => {
+      const card = ev.target.closest('.app-card');
+      if (!card) return;
+      card.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        card.style.transform = '';
+        openById(card.dataset.id);
+      }, 150);
+    });
+
+    // Hotkeys Ctrl+1..6
+    document.addEventListener('keydown', (ev) => {
+      const isCtrl = ev.ctrlKey || ev.metaKey;
+      if (!isCtrl) return;
+      const hit = APPS.find(a => a.hotkey === ev.key);
+      if (hit) {
+        ev.preventDefault();
+        openById(hit.id);
+      }
+    });
+
+    function addCardEffects() {
+      const cards = document.querySelectorAll('.app-card');
+      cards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+          card.style.transform = 'translateY(-8px)';
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = '';
+        });
+      });
+    }
+
+    // Inicialização
+    function boot() {
+      console.log('🚀 Iniciando Hub de Etiquetas...');
+      
+      // Aguardar contador estar pronto
+      setTimeout(() => {
+        if (window.contadorGlobal) {
+          console.log('✅ Contador Global carregado');
+          
+          // Carregar valor atual SEM animação
+          const valorAtual = window.contadorGlobal.obterValor();
+          const elemento = document.getElementById('etiquetas-counter');
+          if (elemento) {
+            // Mostrar valor atual diretamente, sem animação
+            elemento.textContent = valorAtual.toLocaleString('pt-BR');
+            console.log(`📊 Valor global carregado: ${valorAtual.toLocaleString('pt-BR')}`);
+          }
+          
+          // Atualizar contador periodicamente
+          setInterval(() => atualizarContadorDisplay(false), 5000);
+        } else {
+          console.warn('⚠️ Contador Global não disponível');
+          // Mostrar valor padrão se contador não estiver disponível
+          const elemento = document.getElementById('etiquetas-counter');
+          if (elemento) {
+            elemento.textContent = '20.430';
+          }
+        }
+      }, 1000);
+      
+      renderCards();
+      addCardEffects();
+
+      // Transição do hero para chooser após 3 segundos
+      hero.style.display = 'flex';
+      chooser.style.display = 'none';
+
+      setTimeout(() => {
+        hero.style.transition = 'all 0.4s ease-out';
+        hero.style.opacity = '0';
+        hero.style.transform = 'translateY(-20px)';
+
+        setTimeout(() => {
+          hero.style.display = 'none';
+          chooser.style.display = 'block';
+          chooser.style.opacity = '0';
+          chooser.style.transform = 'translateY(20px)';
+          
+          requestAnimationFrame(() => {
+            chooser.style.transition = 'all 0.4s ease-out';
+            chooser.style.opacity = '1';
+            chooser.style.transform = 'translateY(0)';
+          });
+        }, 400);
+      }, 3000);
+    }
+
+    // Inicializar quando DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot);
+    } else {
+      boot();
+    }
+  </script>
+</body>
+</html>

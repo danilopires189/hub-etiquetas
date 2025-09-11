@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Etiquetas – Placas</title>
+  <link rel="stylesheet" href="../shared/design-system.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="busca.css">
+</head>
+<body class="fade-in">
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-logos">
+        <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary" onerror="this.style.display='none'">
+        <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary" onerror="this.style.display='none'">
+      </div>
+      <div class="brand-text">
+        <h1>Pague Menos</h1>
+        <span class="app-subtitle">Etiquetas • Produto</span>
+      </div>
+    </div>
+    <div class="actions">
+      <span id="status" class="status chip">Carregando base…</span>
+      <button id="btnReload" class="btn btn-ghost" style="display:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        Tentar novamente
+      </button>
+      <label class="btn btn-ghost file-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14,2 14,8 20,8"/>
+          <line x1="12" y1="11" x2="12" y2="17"/>
+          <polyline points="9,14 12,11 15,14"/>
+        </svg>
+        Carregar base
+        <input id="fileLoad" type="file" accept=".json,.txt,application/json" hidden>
+      </label>
+      <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9,22 9,12 15,12 15,22"/>
+        </svg>
+        Hub
+      </button>
+    </div>
+  </header>
+
+  <div id="loadHelp" class="panel search" style="display:none; background:#fef3c7; border-color:#f59e0b;">
+    <div class="field full">
+      <h3 style="margin:0 0 12px 0; color:#92400e;">📁 Como carregar a base de dados</h3>
+      <p style="margin:0 0 8px 0; color:#92400e;">O carregamento automático falhou. Para usar o sistema:</p>
+      <ol style="margin:0; padding-left:20px; color:#92400e;">
+        <li>Clique no botão <strong>"Carregar base"</strong> acima</li>
+        <li>Selecione o arquivo <strong>base_barras_index.json</strong></li>
+        <li>O arquivo deve estar na mesma pasta que este HTML</li>
+      </ol>
+      <p style="margin:8px 0 0 0; font-size:12px; color:#a16207;">💡 Após carregar uma vez, os dados ficam salvos no navegador</p>
+    </div>
+  </div>
+
+  <section class="panel search animate-slide-in-up">
+    <div class="field full">
+      <label for="q">Busque por Códico Interno, Barras ou Descrição</label>
+      <div class="search-row">
+        <input id="q" autocomplete="off" placeholder="Ex.: 68697 • 7897076911070 • Dipirona 500mg" />
+        <button id="btnClear" class="icon-btn" title="Limpar">🧹</button>
+      </div>
+      <div id="noResults" class="no-results" hidden>Nenhuma correspondência encontrada.</div>
+      <div id="matchInfo" class="match-info" hidden></div>
+      <div id="hints" class="hints" hidden></div>
+    </div>
+  </section>
+
+  <main class="content">
+    <article id="card" class="card animate-slide-in-up" hidden>
+      <header class="card-head">
+        <div class="title">
+          <h1 id="desc">—</h1>
+          <p id="meta">—</p>
+        </div>
+        <div class="logos"><!-- logos escondidos no CSS --></div>
+      </header>
+
+      <section class="barcode-zone">
+        <svg id="barcodeSvg" class="barcode" aria-label="Código de barras"></svg>
+      </section>
+
+      <footer class="legend" id="legend">—</footer>
+
+      <div class="card-actions">
+        <div class="print-controls">
+          <label>Largura (mm)<input id="wmm" type="number" min="40" max="65" step="1"></label>
+          <label>Altura (mm)<input id="hmm" type="number" min="12" max="30" step="1"></label>
+          <label>Margem Esq. (mm)<input id="lmm" type="number" min="0" max="10" step="1"></label>
+          <label>Espaço barras<input id="space" type="range" min="1.0" max="1.8" step="0.05"></label>
+        </div>
+        <div class="spacer"></div>
+        <button id="btnCopyBarras" class="btn">Copiar BARRAS</button>
+        <button id="btnCopyCod" class="btn">Copiar COD</button>
+        <button id="btnPrint" class="btn primary">Imprimir</button>
+      </div>
+    </article>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-info">
+          <p class="footer-title">Sistema de Etiquetas Pague Menos</p>
+          <p class="footer-subtitle">Desenvolvido por Danilo Pires</p>
+        </div>
+        <div class="footer-links">
+          <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="footer-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <circle cx="12" cy="17" r="0.5"/>
+            </svg>
+            Suporte
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>window.BARRAS_JSON_PATH = "base_barras_index.json";</script>
+  <script src="busca.js"></script>
+  
+  <!-- Contador Global Centralizado -->
+  <script src="../js/contador-global-centralizado.js"></script>
+  
+  <script>
+    // Configurar contador para tipo 'placas'
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('🏷️ Aplicação de Etiquetas de Produto carregada');
+      
+      // Aguardar contador estar pronto
+      setTimeout(async () => {
+        if (window.contadorGlobal) {
+          console.log('✅ Contador Global disponível');
+          
+          // Interceptar impressões para contar etiquetas
+          const btnPrint = document.getElementById('btnPrint');
+          if (btnPrint) {
+            console.log('🔗 Botão imprimir encontrado, configurando interceptação...');
+            
+            const originalClick = btnPrint.onclick;
+            btnPrint.onclick = async function(e) {
+              try {
+                console.log('🖱️ Botão imprimir clicado');
+                
+                // Incrementar contador global antes de imprimir
+                const novoValor = await window.contadorGlobal.incrementarContador(1, 'placas');
+                console.log(`✅ Contador incrementado: +1 placas = ${novoValor}`);
+                
+                // Mostrar popup de sucesso
+                mostrarPopupSucesso('Etiqueta gerada com sucesso!', `Total: ${novoValor.toLocaleString('pt-BR')} etiquetas`);
+                
+                // Feedback visual discreto
+                const valorFormatado = novoValor.toLocaleString('pt-BR');
+                console.log(`📊 Total atual: ${valorFormatado} etiquetas`);
+                
+                // Executar função original de impressão
+                if (originalClick) {
+                  originalClick.call(this, e);
+                } else {
+                  window.print();
+                }
+              } catch (error) {
+                console.error('❌ Erro ao incrementar contador:', error);
+                // Continuar com impressão mesmo se contador falhar
+                if (originalClick) {
+                  originalClick.call(this, e);
+                } else {
+                  window.print();
+                }
+              }
+            };
+          } else {
+            console.warn('⚠️ Botão imprimir não encontrado');
+          }
+        } else {
+          console.warn('⚠️ Contador Global não disponível');
+        }
+      }, 2000);
+    });
+    
+    // Função para mostrar popup de sucesso
+    function mostrarPopupSucesso(titulo, subtitulo) {
+      // Criar popup
+      const popup = document.createElement('div');
+      popup.id = 'popup-sucesso';
+      popup.innerHTML = `
+        <div class="popup-content">
+          <div class="popup-icon">✅</div>
+          <div class="popup-text">
+            <div class="popup-titulo">${titulo}</div>
+            <div class="popup-subtitulo">${subtitulo}</div>
+          </div>
+        </div>
+      `;
+      
+      // Adicionar ao body
+      document.body.appendChild(popup);
+      
+      // Mostrar com animação
+      setTimeout(() => {
+        popup.classList.add('show');
+      }, 100);
+      
+      // Remover após 2 segundos
+      setTimeout(() => {
+        popup.classList.remove('show');
+        setTimeout(() => {
+          if (popup.parentNode) {
+            popup.parentNode.removeChild(popup);
+          }
+        }, 300);
+      }, 2000);
+    }
+  </script>
+  
+  <style>
+    /* Popup de Sucesso */
+    #popup-sucesso {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      border: 1px solid #e2e8f0;
+      padding: 0;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 320px;
+      overflow: hidden;
+    }
+    
+    #popup-sucesso.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    .popup-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+    }
+    
+    .popup-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .popup-text {
+      flex: 1;
+    }
+    
+    .popup-titulo {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    
+    .popup-subtitulo {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    
+    /* Barra de progresso */
+    #popup-sucesso::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #10b981, #059669);
+      width: 100%;
+      animation: progress 2s linear forwards;
+    }
+    
+    @keyframes progress {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    
+    /* Responsivo */
+    @media (max-width: 640px) {
+      #popup-sucesso {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+      }
+    }
+  </style>
+</body>
+</html>

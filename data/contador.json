@@ -1,0 +1,19 @@
+{
+  "totalEtiquetas": 20430,
+  "ultimaAtualizacao": "2024-01-01T00:00:00.000Z",
+  "breakdown": {
+    "caixa": 0,
+    "avulso": 0,
+    "enderec": 0,
+    "placas": 0,
+    "transfer": 0,
+    "termo": 0,
+    "geral": 0
+  },
+  "historico": [],
+  "configuracao": {
+    "valorInicial": 20430,
+    "versao": "1.0",
+    "criadoEm": "2024-01-01T00:00:00.000Z"
+  }
+}
