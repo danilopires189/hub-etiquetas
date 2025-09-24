@@ -4,7 +4,7 @@ Sistema web para geração de etiquetas com códigos de barras para farmácia.
 
 ## 🚀 Acesso Rápido
 
-**GitHub Pages:** [https://seu-usuario.github.io/sistema-etiquetas](https://seu-usuario.github.io/sistema-etiquetas)
+**GitHub Pages:** [https://danilopires189.github.io/sistema-etiquetas](https://danilopires189.github.io/sistema-etiquetas)
 
 ## ⚡ Características
 
