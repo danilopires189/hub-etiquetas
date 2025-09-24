@@ -4,7 +4,7 @@
 class ContadorGlobalCentralizado {
   constructor() {
     this.config = this.detectarConfiguracao();
-    this.valorInicial = 85430;
+    this.valorInicial = 83430;
     this.chaveStorage = 'contador_global_centralizado_v1';
     this.intervaloSync = 30000; // 30 segundos
     this.isOnline = navigator.onLine;
@@ -331,5 +331,6 @@ window.HubEtiquetas = {
 };
 
 console.log('🚀 Sistema de Contador Global Centralizado carregado');
+
 
 
