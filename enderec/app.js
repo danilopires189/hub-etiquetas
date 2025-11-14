@@ -96,7 +96,8 @@ function buildLabel({codigo, orient, showLogo}){
 }
 
 /* ===== Lógica PULMÃO =====
-   Formato: [PREFIXO].001.COLUNA.NIVEL
+   Formato: [PREFIXO].001.COLUNA.NIVEL (com níveis)
+   Formato: [PREFIXO].001.COLUNA (sem níveis)
    - NÍVEL: se "T" vira "A0T"; demais "A01..A10".
 */
 function montarCodigosPulmao(){
@@ -112,7 +113,8 @@ function montarCodigosPulmao(){
   const allBtn = $('#nivAll');
   const marcados = $$('.nivel').filter(n=>n.checked).map(n=>n.value);
   let niveis = marcados;
-  if(allBtn && (allBtn.checked || niveis.length===0)){
+  // Se botão "Todos" estiver marcado, seleciona todos os níveis
+  if(allBtn && allBtn.checked){
     niveis = ['T','1','2','3','4','5','6','7','8','9','10'];
   }
 
@@ -122,10 +124,18 @@ function montarCodigosPulmao(){
   for(const pfx of prefixes){
     for(let c=colIni; c<=colFim; c++){
       const colStr = String(c).padStart(3,'0');
-      for(const nv of niveis){
-        const nivelStr = (nv==='T') ? 'A0T' : ('A' + String(nv).padStart(2,'0'));
-        const codigo = `${pfx}.001.${colStr}.${nivelStr}`;
+      
+      // Se nenhum nível selecionado, gera código sem nível
+      if(niveis.length === 0){
+        const codigo = `${pfx}.001.${colStr}`;
         lista.push(codigo);
+      } else {
+        // Comportamento atual: gera código com níveis
+        for(const nv of niveis){
+          const nivelStr = (nv==='T') ? 'A0T' : ('A' + String(nv).padStart(2,'0'));
+          const codigo = `${pfx}.001.${colStr}.${nivelStr}`;
+          lista.push(codigo);
+        }
       }
     }
   }
