@@ -25,27 +25,26 @@
     <div class="actions">
       <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-          <polyline points="9,22 9,12 15,12 15,22" />
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9,22 9,12 15,12 15,22"/>
         </svg>
         Hub
       </button>
       <button id="historico-btn" type="button" class="btn btn-ghost" title="Ver histórico">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14,2 14,8 20,8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
-          <polyline points="10,9 9,9 8,9" />
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14,2 14,8 20,8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10,9 9,9 8,9"/>
         </svg>
         Histórico
       </button>
-      <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()"
-        aria-label="Imprimir">
+      <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()" aria-label="Imprimir">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6,9 6,2 18,2 18,9" />
-          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-          <rect x="6" y="14" width="12" height="8" />
+          <polyline points="6,9 6,2 18,2 18,9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
         </svg>
         Imprimir
       </button>
@@ -141,8 +140,7 @@
     <div class="field">
       <label for="labelType">
         Tipo de etiqueta
-        <span class="tooltip"
-          data-tooltip="Ambas - Gera tudo | Interna - Gera etiqueta sem barras | Externa - Gera etiqueta com barras">ℹ️</span>
+        <span class="tooltip" data-tooltip="Ambas - Gera tudo | Interna - Gera etiqueta sem barras | Externa - Gera etiqueta com barras">ℹ️</span>
       </label>
       <select id="labelType">
         <option value="external" selected>Externa</option>
@@ -197,9 +195,9 @@
         <div class="footer-links">
           <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="footer-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <circle cx="12" cy="17" r="0.5" />
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <circle cx="12" cy="17" r="0.5"/>
             </svg>
             Suporte
           </a>
@@ -208,47 +206,45 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <script src="../shared/barcode.js"></script>
   <script src="app.js"></script>
-
+  
   <!-- Contador Global Centralizado -->
   <script src="../js/contador-global-centralizado.js"></script>
-
+  
   <script>
     // Configurar contador para tipo 'caixa'
     window.addEventListener('DOMContentLoaded', async () => {
       console.log('📦 Aplicação de Etiquetas de Caixa carregada');
-
+      
       // Aguardar contador estar pronto
       setTimeout(async () => {
         if (window.contadorGlobal) {
           console.log('✅ Contador Global disponível');
-
+          
           // Interceptar geração de etiquetas para contar
           const originalGerar = window.gerar;
-          window.gerar = async function () {
+          window.gerar = async function() {
             try {
               // Obter quantidade de etiquetas que serão geradas
               const qtd = parseInt(document.getElementById('qtd').value) || 0;
               const copias = parseInt(document.getElementById('copias').value) || 1;
               const totalEtiquetas = qtd * copias;
-
+              
               console.log(`📊 Gerando ${totalEtiquetas} etiquetas (${qtd} × ${copias})`);
-
+              
               if (totalEtiquetas > 0) {
                 // Incrementar contador global antes de gerar
                 const novoValor = await window.contadorGlobal.incrementarContador(totalEtiquetas, 'caixa');
                 console.log(`✅ Contador incrementado: +${totalEtiquetas} caixa = ${novoValor}`);
-
+                
                 // Mostrar popup de sucesso
                 mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${totalEtiquetas} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
-
+                
                 // Feedback visual discreto
                 const valorFormatado = novoValor.toLocaleString('pt-BR');
                 console.log(`📊 Total atual: ${valorFormatado} etiquetas`);
               }
-
+              
               // Executar função original de geração
               if (originalGerar) {
                 return originalGerar.call(this);
@@ -267,7 +263,7 @@
         }
       }, 2000);
     });
-
+    
     // Função para mostrar popup de sucesso
     function mostrarPopupSucesso(titulo, subtitulo) {
       // Criar popup
@@ -282,15 +278,15 @@
           </div>
         </div>
       `;
-
+      
       // Adicionar ao body
       document.body.appendChild(popup);
-
+      
       // Mostrar com animação
       setTimeout(() => {
         popup.classList.add('show');
       }, 100);
-
+      
       // Remover após 2 segundos
       setTimeout(() => {
         popup.classList.remove('show');
@@ -302,7 +298,7 @@
       }, 2000);
     }
   </script>
-
+  
   <style>
     /* Popup de Sucesso */
     #popup-sucesso {
@@ -321,41 +317,41 @@
       max-width: 320px;
       overflow: hidden;
     }
-
+    
     #popup-sucesso.show {
       opacity: 1;
       transform: translateX(0);
     }
-
+    
     .popup-content {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 16px 20px;
     }
-
+    
     .popup-icon {
       font-size: 24px;
       flex-shrink: 0;
     }
-
+    
     .popup-text {
       flex: 1;
     }
-
+    
     .popup-titulo {
       font-weight: 600;
       color: #1f2937;
       font-size: 14px;
       margin-bottom: 2px;
     }
-
+    
     .popup-subtitulo {
       font-size: 12px;
       color: #6b7280;
       font-weight: 500;
     }
-
+    
     /* Barra de progresso */
     #popup-sucesso::after {
       content: '';
@@ -367,17 +363,12 @@
       width: 100%;
       animation: progress 2s linear forwards;
     }
-
+    
     @keyframes progress {
-      from {
-        width: 100%;
-      }
-
-      to {
-        width: 0%;
-      }
+      from { width: 100%; }
+      to { width: 0%; }
     }
-
+    
     /* Responsivo */
     @media (max-width: 640px) {
       #popup-sucesso {
