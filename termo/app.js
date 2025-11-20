@@ -1,7 +1,7 @@
 /* ===== Helpers & Base ===== */
-const $ = (sel)=>document.querySelector(sel);
-const pad = (n, len)=> (Array(len+1).join('0') + String(n)).slice(-len);
-const onlyDigits = (s)=> String(s||'').replace(/\D+/g,'');
+const $ = (sel) => document.querySelector(sel);
+const pad = (n, len) => (Array(len + 1).join('0') + String(n)).slice(-len);
+const onlyDigits = (s) => String(s || '').replace(/\D+/g, '');
 
 /* ===== Estado Global do Histórico Termolábeis ===== */
 let termoGenerationHistory = JSON.parse(localStorage.getItem('termo-etiquetas-history') || '[]');
@@ -46,7 +46,7 @@ function cleanDuplicateTermoHistory() {
 function cleanOldTermoRecords() {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - 90);
-  
+
   const cleaned = termoGenerationHistory.filter(item => {
     const itemDate = new Date(item.timestamp);
     return itemDate >= cutoffDate;
@@ -64,105 +64,105 @@ function cleanOldTermoRecords() {
 }
 
 // Exibição como inteiro (sem zeros à esquerda), com fallback
-const toIntStr = (v, fallback=0) => {
+const toIntStr = (v, fallback = 0) => {
   const d = onlyDigits(v);
   return d ? String(Number(d)) : String(Number(fallback));
 };
 
 // Fallback embutido (injetado no index.html)
-let BASE = window.BASE_EMBED || { cds:[], lojas:{}, rotas:{} };
+let BASE = window.BASE_EMBED || { cds: [], lojas: {}, rotas: {} };
 
-async function loadBase(){
-  try{
-    const resp = await fetch('base.json', {cache:'no-store'});
-    if(resp.ok){
+async function loadBase() {
+  try {
+    const resp = await fetch('base.json', { cache: 'no-store' });
+    if (resp.ok) {
       BASE = await resp.json();
     }
-  }catch(e){
+  } catch (e) {
     console.warn('Base via fetch indisponível, usando embutida.');
   }
   fillCDList();
 }
 
-function fillCDList(){
+function fillCDList() {
   const dc = document.getElementById('listCD');
-  if(!dc) return;
-  const cds = (BASE.cds||[]).slice().sort((a,b)=>Number(a)-Number(b));
-  dc.innerHTML = cds.map(cd=>`<option value="${cd}"></option>`).join('');
+  if (!dc) return;
+  const cds = (BASE.cds || []).slice().sort((a, b) => Number(a) - Number(b));
+  dc.innerHTML = cds.map(cd => `<option value="${cd}"></option>`).join('');
 }
 
-function setVars(){
+function setVars() {
   document.documentElement.style.setProperty('--label-w-mm', $('#wmm').value || 92.5);
   document.documentElement.style.setProperty('--label-h-mm', $('#hmm').value || 50);
 }
 
-function leap(y){ return (y%4===0 && y%100!==0) || (y%400===0); }
+function leap(y) { return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0); }
 
-function pedidoToDateStr(pedido7){
+function pedidoToDateStr(pedido7) {
   const s = onlyDigits(pedido7);
-  if(s.length !== 7) return null;
-  const ano = Number(s.slice(0,4));
-  const ddd = Number(s.slice(4,7));
+  if (s.length !== 7) return null;
+  const ano = Number(s.slice(0, 4));
+  const ddd = Number(s.slice(4, 7));
   const maxDDD = leap(ano) ? 366 : 365;
-  if(ano < 2024 || ano > (new Date()).getFullYear()) return null;
-  if(ddd < 1 || ddd > maxDDD) return null;
+  if (ano < 2024 || ano > (new Date()).getFullYear()) return null;
+  if (ddd < 1 || ddd > maxDDD) return null;
   const d = new Date(ano, 0, 1);
   d.setDate(ddd);
-  const dd = pad(d.getDate(),2);
-  const mm = pad(d.getMonth()+1,2);
+  const dd = pad(d.getDate(), 2);
+  const mm = pad(d.getMonth() + 1, 2);
   return `${dd}/${mm}/${ano}`;
 }
 
-function parseId(id){
+function parseId(id) {
   const s = onlyDigits(id);
-  if(s.length !== 23) throw new Error('ID deve ter 23 dígitos.');
-  const ano = Number(s.slice(1,5));
-  if(ano < 2024 || ano > (new Date()).getFullYear()) throw new Error('Ano do pedido inválido no ID.');
+  if (s.length !== 23) throw new Error('ID deve ter 23 dígitos.');
+  const ano = Number(s.slice(1, 5));
+  if (ano < 2024 || ano > (new Date()).getFullYear()) throw new Error('Ano do pedido inválido no ID.');
   return {
-    cd: s.slice(0,1),
-    pedido: s.slice(1,8),
-    seq: s.slice(8,11),
-    loja: s.slice(11,15),
-    rota: s.slice(15,18),
-    vol: s.slice(18,23)
+    cd: s.slice(0, 1),
+    pedido: s.slice(1, 8),
+    seq: s.slice(8, 11),
+    loja: s.slice(11, 15),
+    rota: s.slice(15, 18),
+    vol: s.slice(18, 23)
   };
 }
 
-function buildId({cd, pedido, seq, loja, rota, vol}){
+function buildId({ cd, pedido, seq, loja, rota, vol }) {
   const parts = {
-    cd: pad(onlyDigits(cd),1).slice(-1), // último dígito
-    pedido: pad(onlyDigits(pedido),7),
-    seq: pad(onlyDigits(seq),3),
-    loja: pad(onlyDigits(loja),4),
-    rota: pad(onlyDigits(rota),3),
-    vol: pad(onlyDigits(vol),5),
+    cd: pad(onlyDigits(cd), 1).slice(-1), // último dígito
+    pedido: pad(onlyDigits(pedido), 7),
+    seq: pad(onlyDigits(seq), 3),
+    loja: pad(onlyDigits(loja), 4),
+    rota: pad(onlyDigits(rota), 3),
+    vol: pad(onlyDigits(vol), 5),
   };
   const s = parts.cd + parts.pedido + parts.seq + parts.loja + parts.rota + parts.vol;
-  if(s.length !== 23) throw new Error('ID gerado não possui 23 dígitos.');
-  if(!pedidoToDateStr(parts.pedido)) throw new Error('PEDIDO (AAAADDD) inválido.');
+  if (s.length !== 23) throw new Error('ID gerado não possui 23 dígitos.');
+  if (!pedidoToDateStr(parts.pedido)) throw new Error('PEDIDO (AAAADDD) inválido.');
   return s;
 }
 
-function getRotaDesc(cd, n){
-  const c = String(Number(cd||0));
-  const k = pad(onlyDigits(n),3);
+function getRotaDesc(cd, n) {
+  const c = String(Number(cd || 0));
+  const k = pad(onlyDigits(n), 3);
   const map = (BASE.rotas && BASE.rotas[c]) || {};
   return map[k] ? `ROTA ${k} - ${map[k]}` : `ROTA ${k}`;
 }
-function getLojaDesc(cd, n){
-  const c = String(Number(cd||0));
-  const k = pad(onlyDigits(n),4);
+function getLojaDesc(cd, n) {
+  const c = String(Number(cd || 0));
+  const k = pad(onlyDigits(n), 4);
   const map = (BASE.lojas && BASE.lojas[c]) || {};
-  return map[k] ? `${Number(n)} - ${map[k]}` : String(Number(n||0));
+  return map[k] ? `${Number(n)} - ${map[k]}` : String(Number(n || 0));
 }
 
 /* ===== UI ===== */
-function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matricula, id, numeroVolumeStr}){
+function montarEtiqueta({ cd, loja, pedido, seq, rota, volAtual, volTotal, matricula, id, numeroVolumeStr }) {
   const wrap = document.createElement('div');
   wrap.className = 'labelwrap';
 
   const rotSel = $('#rotacao').value;
-  wrap.classList.add(rotSel === '90' ? 'rot90' : (rotSel==='180' ? 'rot180' : (rotSel==='270' ? 'rot270' : 'rot0')));
+  wrap.classList.add(rotSel === '90' ? 'rot90' : (rotSel === '180' ? 'rot180' : (rotSel === '270' ? 'rot270' : 'rot0')));
 
   const el = document.createElement('div');
   el.className = 'label';
@@ -172,10 +172,10 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
   header.className = 'header';
   const leftTitle = document.createElement('div');
   leftTitle.className = 'title';
-  leftTitle.textContent = `VOLUMES TERMOLÁBEIS CD ${Number(cd||0)}`;
+  leftTitle.textContent = `VOLUMES TERMOLÁBEIS CD ${Number(cd || 0)}`;
   const logos = document.createElement('div');
   logos.className = 'logos';
-  const img1 = document.createElement('img'); img1.src = 'pm.png'; img1.alt = 'Pague Menos'; img1.className='brand-logo pm';
+  const img1 = document.createElement('img'); img1.src = 'pm.png'; img1.alt = 'Pague Menos'; img1.className = 'brand-logo pm';
   // Removido o logo .logo (DP) da área de impressão/preview
   logos.append(img1);
   header.append(leftTitle, logos);
@@ -194,7 +194,7 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
   info.className = 'info';
 
   const dtPedidoStr = pedidoToDateStr(pedido) || '--/--/----';
-  function addRow(lbl, val){
+  function addRow(lbl, val) {
     const l = document.createElement('div'); l.className = 'lbl'; l.textContent = lbl;
     const v = document.createElement('div'); v.className = 'val'; v.textContent = val;
     info.append(l, v);
@@ -209,7 +209,7 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
   // BARCODE + LEGENDA
   const barArea = document.createElement('div');
   barArea.className = 'bararea';
-  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.classList.add('barcode');
   barArea.appendChild(svg);
   const barText = document.createElement('div');
@@ -226,7 +226,7 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
   const qrbox = document.createElement('div');
   qrbox.className = 'qrbox';
   const qsel = window.qrcode ? window.qrcode(0, 'M') : null;
-  if(qsel){
+  if (qsel) {
     qsel.addData(String(id));
     qsel.make();
     const img = qsel.createImgTag(3, 8);
@@ -236,10 +236,10 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
     const size = 260; c.width = size; c.height = size;
     const ctx = c.getContext('2d');
     const timg = new Image();
-    timg.onload = ()=>{ ctx.drawImage(timg, 0, 0, size, size); };
+    timg.onload = () => { ctx.drawImage(timg, 0, 0, size, size); };
     timg.src = qimg.src;
     qrbox.appendChild(c);
-  }else{
+  } else {
     const fallback = document.createElement('div'); fallback.textContent = 'QR'; qrbox.appendChild(fallback);
   }
   right.appendChild(qrbox);
@@ -248,29 +248,29 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
   vbox.className = 'volume-box';
 
   const vt = document.createElement('div');
-  vt.className='t';
-  vt.textContent='VOLUME';
+  vt.className = 't';
+  vt.textContent = 'VOLUME';
 
   const vb = document.createElement('div');
-  vb.className='big';
+  vb.className = 'big';
   vb.textContent = `${volAtual}/${volTotal}`;
 
   vbox.append(vt, vb);
 
   // Exibir "NÚMERO:" apenas quando houver fracionamento (mais de 1 volume)
-  if(Number(volTotal) > 1){
+  if (Number(volTotal) > 1) {
     const vn = document.createElement('div');
-    vn.className='mini';
+    vn.className = 'mini';
     vn.textContent = `NÚMERO: ${toIntStr(numeroVolumeStr, volAtual)}`;
     vbox.appendChild(vn);
 
     const vf = document.createElement('div');
-    vf.className='mini';
+    vf.className = 'mini';
     vf.textContent = 'VOLUME FRACIONADO';
     vbox.appendChild(vf);
-  }else{
+  } else {
     const vs = document.createElement('div');
-    vs.className='mini';
+    vs.className = 'mini';
     // VOL também como inteiro quando não for fracionado
     vs.textContent = `VOL: ${toIntStr(numeroVolumeStr, volAtual)}`;
     vbox.appendChild(vs);
@@ -284,19 +284,19 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
   const meta = document.createElement('div');
   meta.className = 'meta';
   const now = new Date();
-  const dd = pad(now.getDate(),2), mm = pad(now.getMonth()+1,2), aa = now.getFullYear();
-  const hh = pad(now.getHours(),2), mi = pad(now.getMinutes(),2);
-  meta.innerHTML = `<span>CD: <strong>${Number(cd||0)}</strong></span>` +
-                   (matricula ? `<span>MATRÍCULA: <strong>${matricula}</strong></span>` : '') +
-                   `<span>SEPARADO EM: <strong>${dd}/${mm}/${aa} ${hh}:${mi}</strong></span>`;
+  const dd = pad(now.getDate(), 2), mm = pad(now.getMonth() + 1, 2), aa = now.getFullYear();
+  const hh = pad(now.getHours(), 2), mi = pad(now.getMinutes(), 2);
+  meta.innerHTML = `<span>CD: <strong>${Number(cd || 0)}</strong></span>` +
+    (matricula ? `<span>MATRÍCULA: <strong>${matricula}</strong></span>` : '') +
+    `<span>SEPARADO EM: <strong>${dd}/${mm}/${aa} ${hh}:${mi}</strong></span>`;
   el.appendChild(meta);
 
   // render barcode
-  if(window.JsBarcode){
-    JsBarcode(svg, id, {format:'CODE128', displayValue:false, margin:0, width: 1, height: 42});
-  }else{
-    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x','0'); t.setAttribute('y','20'); t.textContent = id;
+  if (window.JsBarcode) {
+    JsBarcode(svg, id, { format: 'CODE128', displayValue: false, margin: 0, width: 1, height: 42 });
+  } else {
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', '0'); t.setAttribute('y', '20'); t.textContent = id;
     svg.appendChild(t);
   }
 
@@ -304,42 +304,42 @@ function montarEtiqueta({cd, loja, pedido, seq, rota, volAtual, volTotal, matric
   return wrap;
 }
 
-function setManualEnabled(enabled){
-  ['loja','pedido','seq','rota','numeroVolume'].forEach(id=>{
+function setManualEnabled(enabled) {
+  ['loja', 'pedido', 'seq', 'rota', 'numeroVolume'].forEach(id => {
     const el = document.getElementById(id);
     el.disabled = !enabled;
   });
 }
 
-function onCdChange(){
+function onCdChange() {
   const cdVal = $('#cd').value.trim();
   const ok = /^[1-9]$/.test(cdVal);
   setManualEnabled(ok);
 
-  const c = String(Number(cdVal||0));
+  const c = String(Number(cdVal || 0));
   const lojas = (BASE.lojas && BASE.lojas[c]) || {};
   const rotas = (BASE.rotas && BASE.rotas[c]) || {};
 
   const dlLoja = document.getElementById('listLoja');
-  dlLoja.innerHTML = Object.keys(lojas).sort().map(k=>`<option value="${parseInt(k,10)}">${lojas[k]}</option>`).join('');
+  dlLoja.innerHTML = Object.keys(lojas).sort().map(k => `<option value="${parseInt(k, 10)}">${lojas[k]}</option>`).join('');
 
   const dlRota = document.getElementById('listRota');
-  dlRota.innerHTML = Object.keys(rotas).sort().map(k=>`<option value="${parseInt(k,10)}">${rotas[k]}</option>`).join('');
+  dlRota.innerHTML = Object.keys(rotas).sort().map(k => `<option value="${parseInt(k, 10)}">${rotas[k]}</option>`).join('');
 }
 
-function gerar(){
-  try{
+function gerar() {
+  try {
     setVars();
     const preview = $('#preview');
     preview.innerHTML = '';
 
     const usaId = $('#modoId').checked;
-    const totalVol = Math.max(1, parseInt($('#qtdVolumes').value||'1',10));
+    const totalVol = Math.max(1, parseInt($('#qtdVolumes').value || '1', 10));
     const mat = $('#matricula').value.trim();
     const numVolInput = onlyDigits(document.getElementById('numeroVolume') ? document.getElementById('numeroVolume').value : '');
     const etiquetas = [];
 
-    if(usaId){
+    if (usaId) {
       const idRaw = onlyDigits($('#idEtiqueta').value);
       const parsed = parseId(idRaw); // valida e já quebra campos
       const idFixo = idRaw;          // ID permanece fixo em todas as etiquetas
@@ -347,7 +347,7 @@ function gerar(){
       // Base para mostrar NÚMERO (somente exibição)
       const base4 = numVolInput ? Number(String(numVolInput).slice(-4)) : Number(String(parsed.vol).slice(-4));
 
-      for(let v=1; v<=totalVol; v++){
+      for (let v = 1; v <= totalVol; v++) {
         const num4 = pad(base4, 4);
         const etq = montarEtiqueta({
           cd: parsed.cd,
@@ -363,22 +363,22 @@ function gerar(){
         });
         etiquetas.push(etq);
       }
-    }else{
+    } else {
       const cd = $('#cd').value;
-      if(!/^[1-9]$/.test(cd)) throw new Error('Informe o CD (1 a 9) para liberar os demais campos.');
+      if (!/^[1-9]$/.test(cd)) throw new Error('Informe o CD (1 a 9) para liberar os demais campos.');
 
       const loja = $('#loja').value;
       const pedido = $('#pedido').value;
       const seq = $('#seq').value;
       const rota = $('#rota').value;
 
-      if(!pedidoToDateStr(pedido)) throw new Error('PEDIDO (AAAADDD) inválido. Ex.: 2024269');
+      if (!pedidoToDateStr(pedido)) throw new Error('PEDIDO (AAAADDD) inválido. Ex.: 2024269');
 
       const baseNum5 = numVolInput ? pad(Number(numVolInput), 5) : '00001';
-      const idFixo = buildId({cd, pedido, seq, loja, rota, vol: baseNum5}); // ID fixo
+      const idFixo = buildId({ cd, pedido, seq, loja, rota, vol: baseNum5 }); // ID fixo
 
       const base4 = Number(baseNum5.slice(-4)); // para exibição
-      for(let v=1; v<=totalVol; v++){
+      for (let v = 1; v <= totalVol; v++) {
         const num4 = pad(base4, 4);
         const etq = montarEtiqueta({
           cd, loja, pedido, seq, rota,
@@ -396,7 +396,7 @@ function gerar(){
 
     // Salvar no histórico após geração bem-sucedida
     console.log('🔄 Salvando no histórico termo...');
-    
+
     const now = new Date();
     const dd = pad(now.getDate(), 2);
     const mm = pad(now.getMonth() + 1, 2);
@@ -405,12 +405,12 @@ function gerar(){
     const mi = pad(now.getMinutes(), 2);
 
     let historyData;
-    
-    if(usaId){
+
+    if (usaId) {
       const idRaw = onlyDigits($('#idEtiqueta').value);
       const parsed = parseId(idRaw);
       const dtPedidoStr = pedidoToDateStr(parsed.pedido) || '--/--/----';
-      
+
       historyData = {
         etiquetaId: idRaw,
         pedido: onlyDigits(parsed.pedido),
@@ -429,8 +429,8 @@ function gerar(){
       const rota = $('#rota').value;
       const dtPedidoStr = pedidoToDateStr(pedido) || '--/--/----';
       const baseNum5 = numVolInput ? pad(Number(numVolInput), 5) : '00001';
-      const idFixo = buildId({cd, pedido, seq: $('#seq').value, loja, rota, vol: baseNum5});
-      
+      const idFixo = buildId({ cd, pedido, seq: $('#seq').value, loja, rota, vol: baseNum5 });
+
       historyData = {
         etiquetaId: idFixo,
         pedido: onlyDigits(pedido),
@@ -443,24 +443,24 @@ function gerar(){
         timestamp: now.toISOString()
       };
     }
-    
+
     console.log('📋 Dados para histórico termo:', historyData);
     saveToTermoHistory(historyData);
-    
-  }catch(e){
+
+  } catch (e) {
     alert('Erro: ' + e.message);
   }
 }
 
 
-document.addEventListener('DOMContentLoaded', async ()=>{
+document.addEventListener('DOMContentLoaded', async () => {
   await loadBase();
 
-  const toggle = ()=>{
+  const toggle = () => {
     const usaId = $('#modoId').checked;
     $('#blocoId').className = usaId ? 'blocovis' : 'blocohide';
     $('#blocoCampos').className = usaId ? 'blocohide' : 'blocovis';
-    if(!usaId) onCdChange();
+    if (!usaId) onCdChange();
   };
   $('#modoId').addEventListener('change', toggle);
   $('#modoCampos').addEventListener('change', toggle);
@@ -470,11 +470,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   setManualEnabled(false);
 
   $('#gerar').addEventListener('click', gerar);
-  $('#imprimir').addEventListener('click', ()=> window.print());
+  $('#imprimir').addEventListener('click', () => window.print());
 
-  ['wmm','hmm','rotacao'].forEach(id=>{
+  ['wmm', 'hmm', 'rotacao'].forEach(id => {
     const el = document.getElementById(id);
-    if(el) el.addEventListener('input', setVars);
+    if (el) el.addEventListener('input', setVars);
   });
   setVars();
 
@@ -488,6 +488,25 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       hideTermoHistorico();
     }
   });
+
+  // Toggle da busca
+  const toggleSearchBtn = $('#termo-toggle-search');
+  if (toggleSearchBtn) {
+    toggleSearchBtn.addEventListener('click', () => {
+      const searchSection = $('#termo-search-section');
+      const isHidden = searchSection.style.display === 'none';
+
+      if (isHidden) {
+        searchSection.style.display = 'block';
+        toggleSearchBtn.classList.add('active');
+        const input = $('#termo-search-input');
+        if (input) setTimeout(() => input.focus(), 100);
+      } else {
+        searchSection.style.display = 'none';
+        toggleSearchBtn.classList.remove('active');
+      }
+    });
+  }
 
   document.addEventListener('keydown', (ev) => {
     if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'h') { ev.preventDefault(); showTermoHistorico(); }
@@ -508,24 +527,31 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 /* ===== Funções do Histórico Termolábeis ===== */
 function showTermoHistorico() {
   const modal = $('#termo-historico-modal');
-  
+
   // Limpar registros antigos antes de exibir
   cleanOldTermoRecords();
+
+  // Resetar estado da busca (fechado por padrão)
+  const searchSection = $('#termo-search-section');
+  const toggleBtn = $('#termo-toggle-search');
+  if (searchSection) searchSection.style.display = 'none';
+  if (toggleBtn) toggleBtn.classList.remove('active');
 
   // Limpar busca anterior
   const searchInput = $('#termo-search-input');
   if (searchInput) {
     searchInput.value = '';
   }
+  clearTermoSearch(); // Garante que filtros também resetem
 
   // Renderizar lista completa
   renderTermoHistoryList(termoGenerationHistory);
 
   modal.style.display = 'flex';
-  
+
   // Configurar eventos de busca
   setupTermoSearchEvents();
-  
+
   // Foco para acessibilidade
   const closeBtn = $('#termo-historico-close');
   if (closeBtn) closeBtn.focus();
@@ -542,7 +568,7 @@ function renderTermoHistoryList(historyData) {
   if (historyData.length === 0) {
     const searchInput = $('#termo-search-input');
     const isSearching = searchInput && searchInput.value.trim() !== '';
-    
+
     if (isSearching) {
       list.innerHTML = `
         <div style="text-align: center; padding: 3rem;">
@@ -570,7 +596,7 @@ function renderTermoHistoryList(historyData) {
     const totalRecords = termoGenerationHistory.length;
     const showingRecords = historyData.length;
     const isFiltered = totalRecords !== showingRecords;
-    
+
     const statsHtml = `
       <div style="text-align: center; padding: 1rem; margin-top: 1rem; border-top: 1px solid var(--neutral-200);">
         <small style="color: var(--neutral-500);">
@@ -627,7 +653,7 @@ function setupTermoSearchEvents() {
         }
       }
     });
-    
+
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         clearTermoSearch();
@@ -658,17 +684,17 @@ function performTermoSearch() {
       switch (selectedFilter) {
         case 'pedido':
           return item.pedido && item.pedido.toLowerCase().includes(searchTerm);
-        
+
         case 'loja':
           return item.loja && item.loja.toLowerCase().includes(searchTerm);
-        
+
         case 'rota':
           return item.rota && item.rota.toLowerCase().includes(searchTerm);
-        
+
         case 'data':
           return (item.dataPedido && item.dataPedido.includes(searchTerm)) ||
-                 (item.dataSeparacao && item.dataSeparacao.includes(searchTerm));
-        
+            (item.dataSeparacao && item.dataSeparacao.includes(searchTerm));
+
         case 'all':
         default:
           return (
@@ -689,25 +715,25 @@ function performTermoSearch() {
 function clearTermoSearch() {
   const searchInput = $('#termo-search-input');
   const clearBtn = $('#termo-clear-search');
-  
+
   if (searchInput) {
     searchInput.value = '';
   }
-  
+
   // Ocultar botão de limpar
   if (clearBtn) {
     clearBtn.style.opacity = '0';
     clearBtn.style.visibility = 'hidden';
   }
-  
+
   // Resetar para "Todos"
   const allFilter = document.querySelector('input[name="termoSearchType"][value="all"]');
   if (allFilter) {
     allFilter.checked = true;
   }
-  
+
   renderTermoHistoryList(termoGenerationHistory);
-  
+
   // Foco de volta no input
   if (searchInput) {
     searchInput.focus();
@@ -751,7 +777,7 @@ function saveToTermoHistory(config) {
     console.log('✅ Histórico termo salvo:', config.etiquetaId, '- Total:', termoGenerationHistory.length, 'entradas');
   } catch (e) {
     console.warn('⚠️ Erro ao salvar histórico termo:', e.message);
-    
+
     // Tentar limpeza emergencial
     if (e.name === 'QuotaExceededError') {
       try {
