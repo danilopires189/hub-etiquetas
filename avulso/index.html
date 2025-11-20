@@ -156,9 +156,17 @@
     <div class="modal-content">
       <div class="modal-header">
         <h3>Histórico de Etiquetas Avulsas</h3>
-        <button class="modal-close" id="avulso-historico-close">×</button>
+        <div class="header-actions">
+          <button id="avulso-toggle-search" class="btn-icon" title="Buscar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+          </button>
+          <button class="modal-close" id="avulso-historico-close">×</button>
+        </div>
       </div>
-      <div class="modal-search">
+      <div id="avulso-search-section" class="modal-search" style="display: none;">
         <div class="search-container">
           <div class="search-input-group">
             <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -282,6 +290,12 @@
       background: var(--bg-secondary);
     }
 
+    #avulso-historico-modal .header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
     #avulso-historico-modal .modal-header h3 {
       font-size: var(--text-xl);
       font-weight: var(--font-semibold);
@@ -289,24 +303,73 @@
       margin: 0;
     }
 
-    #avulso-historico-modal .modal-close {
-      width: 32px;
-      height: 32px;
+    .btn-icon {
+      width: 36px;
+      height: 36px;
       border: none;
-      background: none;
-      border-radius: var(--radius-base);
+      background: var(--surface);
+      border-radius: var(--radius-full);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: var(--neutral-500);
-      font-size: 20px;
+      color: var(--neutral-600);
+      border: 1px solid var(--neutral-200);
       transition: all var(--transition-base);
     }
 
-    #avulso-historico-modal .modal-close:hover {
+    .btn-icon:hover {
       background: var(--neutral-100);
-      color: var(--neutral-700);
+      color: var(--brand-primary);
+      border-color: var(--brand-primary);
+      transform: translateY(-1px);
+    }
+
+    .btn-icon.active {
+      background: var(--brand-primary);
+      color: white;
+      border-color: var(--brand-primary);
+    }
+
+    #avulso-historico-modal .modal-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: var(--error);
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      font-size: 24px;
+      line-height: 1;
+      transition: all var(--transition-base);
+      box-shadow: var(--shadow-sm);
+    }
+
+    #avulso-historico-modal .modal-close:hover {
+      background: #dc2626; /* Darker red */
+      transform: scale(1.05);
+      box-shadow: var(--shadow-md);
+    }
+
+    #avulso-historico-modal .modal-search {
+      padding: var(--space-4) var(--space-6);
+      border-bottom: 1px solid var(--neutral-200);
+      background: var(--bg-secondary);
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     #avulso-historico-modal .modal-search {

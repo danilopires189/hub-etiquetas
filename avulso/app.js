@@ -46,7 +46,7 @@ function cleanDuplicateAvulsoHistory() {
 function cleanOldAvulsoRecords() {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - 90);
-  
+
   const cleaned = avulsoGenerationHistory.filter(item => {
     const itemDate = new Date(item.timestamp);
     return itemDate >= cutoffDate;
@@ -66,24 +66,31 @@ function cleanOldAvulsoRecords() {
 /* ===== Funções do Histórico ===== */
 function showAvulsoHistorico() {
   const modal = $('#avulso-historico-modal');
-  
+
   // Limpar registros antigos antes de exibir
   cleanOldAvulsoRecords();
+
+  // Resetar estado da busca (fechado por padrão)
+  const searchSection = $('#avulso-search-section');
+  const toggleBtn = $('#avulso-toggle-search');
+  if (searchSection) searchSection.style.display = 'none';
+  if (toggleBtn) toggleBtn.classList.remove('active');
 
   // Limpar busca anterior
   const searchInput = $('#avulso-search-input');
   if (searchInput) {
     searchInput.value = '';
   }
+  clearAvulsoSearch(); // Garante que filtros também resetem
 
   // Renderizar lista completa
   renderAvulsoHistoryList(avulsoGenerationHistory);
 
   modal.style.display = 'flex';
-  
+
   // Configurar eventos de busca
   setupAvulsoSearchEvents();
-  
+
   // Foco para acessibilidade
   const closeBtn = $('#avulso-historico-close');
   if (closeBtn) closeBtn.focus();
@@ -95,7 +102,7 @@ function renderAvulsoHistoryList(historyData) {
   if (historyData.length === 0) {
     const searchInput = $('#avulso-search-input');
     const isSearching = searchInput && searchInput.value.trim() !== '';
-    
+
     if (isSearching) {
       list.innerHTML = `
         <div style="text-align: center; padding: 3rem;">
@@ -123,7 +130,7 @@ function renderAvulsoHistoryList(historyData) {
     const totalRecords = avulsoGenerationHistory.length;
     const showingRecords = historyData.length;
     const isFiltered = totalRecords !== showingRecords;
-    
+
     const statsHtml = `
       <div style="text-align: center; padding: 1rem; margin-top: 1rem; border-top: 1px solid var(--neutral-200);">
         <small style="color: var(--neutral-500);">
@@ -158,7 +165,7 @@ function setupAvulsoSearchEvents() {
         }
       }
     });
-    
+
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         clearAvulsoSearch();
@@ -189,13 +196,13 @@ function performAvulsoSearch() {
       switch (selectedFilter) {
         case 'matricula':
           return item.matricula && item.matricula.toLowerCase().includes(searchTerm);
-        
+
         case 'etiqueta':
           return item.etiquetaId && item.etiquetaId.toLowerCase().includes(searchTerm);
-        
+
         case 'data':
           return item.dataCriacao && item.dataCriacao.includes(searchTerm);
-        
+
         case 'all':
         default:
           return (
@@ -214,25 +221,25 @@ function performAvulsoSearch() {
 function clearAvulsoSearch() {
   const searchInput = $('#avulso-search-input');
   const clearBtn = $('#avulso-clear-search');
-  
+
   if (searchInput) {
     searchInput.value = '';
   }
-  
+
   // Ocultar botão de limpar
   if (clearBtn) {
     clearBtn.style.opacity = '0';
     clearBtn.style.visibility = 'hidden';
   }
-  
+
   // Resetar para "Todos"
   const allFilter = document.querySelector('input[name="searchType"][value="all"]');
   if (allFilter) {
     allFilter.checked = true;
   }
-  
+
   renderAvulsoHistoryList(avulsoGenerationHistory);
-  
+
   // Foco de volta no input
   if (searchInput) {
     searchInput.focus();
@@ -287,15 +294,15 @@ function showSuccessMessage(message) {
     transition: all 0.3s ease;
   `;
   feedback.textContent = message;
-  
+
   document.body.appendChild(feedback);
-  
+
   // Animar entrada
   setTimeout(() => {
     feedback.style.opacity = '1';
     feedback.style.transform = 'translateX(0)';
   }, 100);
-  
+
   // Remover após 3 segundos
   setTimeout(() => {
     feedback.style.opacity = '0';
@@ -345,7 +352,7 @@ function saveToAvulsoHistory(config) {
     console.log('✅ Histórico avulso salvo:', config.etiquetaId, '- Total:', avulsoGenerationHistory.length, 'entradas');
   } catch (e) {
     console.warn('⚠️ Erro ao salvar histórico avulso:', e.message);
-    
+
     // Tentar limpeza emergencial
     if (e.name === 'QuotaExceededError') {
       try {
@@ -574,7 +581,7 @@ function gerar() {
       proximoVolume: padLeft(String(volNum + 1), 5),
       timestamp: new Date().toISOString()
     };
-    
+
     console.log('📋 Dados para histórico:', historyData);
     saveToAvulsoHistory(historyData);
 
@@ -599,6 +606,25 @@ document.addEventListener('DOMContentLoaded', () => {
       hideAvulsoHistorico();
     }
   });
+
+  // Toggle da busca
+  const toggleSearchBtn = $('#avulso-toggle-search');
+  if (toggleSearchBtn) {
+    toggleSearchBtn.addEventListener('click', () => {
+      const searchSection = $('#avulso-search-section');
+      const isHidden = searchSection.style.display === 'none';
+
+      if (isHidden) {
+        searchSection.style.display = 'block';
+        toggleSearchBtn.classList.add('active');
+        const input = $('#avulso-search-input');
+        if (input) setTimeout(() => input.focus(), 100);
+      } else {
+        searchSection.style.display = 'none';
+        toggleSearchBtn.classList.remove('active');
+      }
+    });
+  }
 
   ['wmm', 'hmm', 'colmm', 'tpt', 'logomm', 'logoop', 'transpop', 'logoPrintOff'].forEach(id => {
     const el = document.getElementById(id);
