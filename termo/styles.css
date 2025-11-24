@@ -126,6 +126,11 @@ label {
   color: var(--muted);
 }
 
+.required {
+  color: #dc2626;
+  font-weight: 600;
+}
+
 input,
 select {
   width: 100%;

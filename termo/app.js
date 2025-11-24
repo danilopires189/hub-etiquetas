@@ -3,6 +3,34 @@ const $ = (sel) => document.querySelector(sel);
 const pad = (n, len) => (Array(len + 1).join('0') + String(n)).slice(-len);
 const onlyDigits = (s) => String(s || '').replace(/\D+/g, '');
 
+/* ===== Validação de Matrícula ===== */
+function validarMatricula(matricula) {
+  // Tratar valores null, undefined e converter para string
+  const mat = matricula != null ? String(matricula).trim() : '';
+  
+  // Verificar se está vazio ou contém apenas espaços
+  if (!mat || mat.length === 0) {
+    return {
+      valida: false,
+      erro: 'Matrícula é obrigatória. Por favor, informe sua matrícula.'
+    };
+  }
+  
+  // Se chegou até aqui, a matrícula é válida
+  return { 
+    valida: true 
+  };
+}
+
+function exibirErroMatricula(mensagem) {
+  alert('Erro: ' + mensagem);
+  const campoMatricula = $('#matricula');
+  if (campoMatricula) {
+    campoMatricula.focus();
+    campoMatricula.select(); // Selecionar texto para facilitar correção
+  }
+}
+
 /* ===== Estado Global do Histórico Termolábeis ===== */
 let termoGenerationHistory = JSON.parse(localStorage.getItem('termo-etiquetas-history') || '[]');
 
@@ -329,6 +357,15 @@ function onCdChange() {
 
 function gerar() {
   try {
+    // Validar matrícula antes de processar qualquer etiqueta
+    const matriculaInput = $('#matricula').value;
+    const validacaoMatricula = validarMatricula(matriculaInput);
+    
+    if (!validacaoMatricula.valida) {
+      exibirErroMatricula(validacaoMatricula.erro);
+      return; // Interromper o processo quando validação falhar
+    }
+
     setVars();
     const preview = $('#preview');
     preview.innerHTML = '';
