@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,9 +8,10 @@
   <link rel="stylesheet" href="../shared/design-system.css">
   <link rel="stylesheet" href="../shared/components.css">
   <link rel="stylesheet" href="styles.css">
-  
+
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 </head>
+
 <body class="fade-in">
   <header class="app-header">
     <div class="brand">
@@ -25,16 +27,17 @@
     <div class="actions">
       <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9,22 9,12 15,12 15,22"/>
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9,22 9,12 15,12 15,22" />
         </svg>
         Hub
       </button>
-      <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()" aria-label="Imprimir">
+      <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()"
+        aria-label="Imprimir">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6,9 6,2 18,2 18,9"/>
-          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-          <rect x="6" y="14" width="12" height="8"/>
+          <polyline points="6,9 6,2 18,2 18,9" />
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+          <rect x="6" y="14" width="12" height="8" />
         </svg>
         Imprimir
       </button>
@@ -55,6 +58,11 @@
           <input type="radio" name="tipo" value="estacao">
           <span class="icon" aria-hidden="true">🗂️</span>
           <span class="title">Estação</span>
+        </label>
+        <label class="type-card">
+          <input type="radio" name="tipo" value="outro">
+          <span class="icon" aria-hidden="true">📝</span>
+          <span class="title">Outro</span>
         </label>
       </div>
       <small class="hint">Escolha um tipo um tipo de etiqueta.</small>
@@ -121,6 +129,55 @@
       </div>
     </div>
 
+    <!-- 1c) CAMPOS OUTRO -->
+    <div id="outroFields" class="outro-fields hide">
+      <!-- Linha 1: Estação -->
+      <div class="field full">
+        <label>Estação</label>
+        <div class="row">
+          <input id="prefixIniO" placeholder="Início" maxlength="12" style="flex:1" />
+          <input id="prefixFimO" placeholder="Fim" maxlength="12" style="flex:1" />
+        </div>
+      </div>
+
+      <!-- Linha 2: Blocos 1, 2 e 3 em grid/flex -->
+      <div class="row wrap" style="align-items: flex-start;">
+
+        <!-- Bloco 1 -->
+        <div class="field" style="flex: 1; min-width: 200px;">
+          <label>Bloco 1</label>
+          <div class="row">
+            <input id="b1Ini" placeholder="Início" maxlength="12" style="flex:1" />
+            <input id="b1Fim" placeholder="Fim" maxlength="12" style="flex:1" />
+          </div>
+        </div>
+
+        <!-- Bloco 2 -->
+        <div class="field" style="flex: 1; min-width: 200px;">
+          <label>Bloco 2</label>
+          <div class="row">
+            <input id="b2Ini" placeholder="Início" maxlength="12" style="flex:1" />
+            <input id="b2Fim" placeholder="Fim" maxlength="12" style="flex:1" />
+          </div>
+        </div>
+
+        <!-- Bloco 3 -->
+        <div class="field" style="flex: 1; min-width: 200px;">
+          <label>Bloco 3</label>
+          <div class="row">
+            <input id="b3Ini" placeholder="Início" maxlength="12" style="flex:1" />
+            <input id="b3Fim" placeholder="Fim" maxlength="12" style="flex:1" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Linha 3: Separador -->
+      <div class="field">
+        <label for="separador">Separador</label>
+        <input id="separador" placeholder="Padrão: ." value="." maxlength="5" />
+      </div>
+    </div>
+
     <!-- 2) AJUSTES (comum aos dois tipos) -->
     <div class="field">
       <label>Cópias por etiqueta</label>
@@ -156,7 +213,8 @@
       <div class="row wrap">
         <label class="switch"><input type="checkbox" id="logo" checked><span>Exibir (Pague Menos)</span></label>
         <span class="hint">Opacidade (%)</span>
-        <input id="logoop" class="num" type="number" min="0" max="100" step="1" value="100" title="Opacidade da logo em %">
+        <input id="logoop" class="num" type="number" min="0" max="100" step="1" value="100"
+          title="Opacidade da logo em %">
         <label class="switch"><input type="checkbox" id="logoPrintOff"><span>Ocultar logo na impressão</span></label>
       </div>
     </div>
@@ -183,9 +241,9 @@
         <div class="footer-links">
           <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="footer-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-              <circle cx="12" cy="17" r="0.5"/>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <circle cx="12" cy="17" r="0.5" />
             </svg>
             Suporte
           </a>
@@ -195,64 +253,119 @@
   </footer>
 
   <script src="app.js"></script>
-  
+
   <!-- Contador Global Centralizado -->
   <script src="../js/contador-global-centralizado.js"></script>
-  
+
   <script>
     // Configurar contador para tipo 'enderec'
     window.addEventListener('DOMContentLoaded', async () => {
       console.log('🏷️ Aplicação de Endereçamento carregada');
-      
+
       // Aguardar contador estar pronto
       setTimeout(async () => {
         if (window.contadorGlobal) {
           console.log('✅ Contador Global disponível');
-          
+
           // Interceptar geração de etiquetas para contar
           const btnGerar = document.getElementById('gerar');
           if (btnGerar) {
             console.log('🔗 Botão gerar encontrado, configurando interceptação...');
-            
-            btnGerar.addEventListener('click', async function(e) {
+
+            btnGerar.addEventListener('click', async function (e) {
               try {
                 console.log('🖱️ Botão gerar clicado');
-                
+
                 // Calcular quantidade de etiquetas que serão geradas
                 const copias = parseInt(document.getElementById('copias').value) || 1;
                 const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
-                
+
                 let totalEtiquetas = 0;
-                
+
                 if (tipo === 'pulmao') {
                   // Calcular etiquetas de pulmão
                   const colIni = parseInt(document.getElementById('colIni').value) || 1;
                   const colFim = parseInt(document.getElementById('colFim').value) || 1;
                   const niveisChecked = document.querySelectorAll('.nivel:checked').length;
-                  
+
                   const colunas = Math.max(0, colFim - colIni + 1);
                   totalEtiquetas = colunas * niveisChecked * copias;
-                  
+
                 } else if (tipo === 'estacao') {
                   // Para estações, assumir 1 etiqueta por estação
                   totalEtiquetas = copias;
+                } else if (tipo === 'outro') {
+                  // Calcular etiquetas de Outro (Produto Cartesiano)
+                  const countRange = (idIni, idFim) => {
+                    const ini = document.getElementById(idIni).value;
+                    const fim = document.getElementById(idFim).value;
+                    if (!ini) return 0; // Se vazio, não gera nada? Ou gera 1 se for opcional? 
+                    // Na lógica do app.js, se o range é inválido ou vazio, ele pode ser ignorado ou tratado.
+                    // Vamos assumir que se tem inicio, conta. Se tem fim, calcula a diferença.
+                    // Mas precisamos usar a mesma lógica do makePrefixList para saber a quantidade exata.
+                    // Simplificação: se tem inicio e fim, tenta parsear.
+
+                    // Helper local para simular o parseAlphaNum do app.js
+                    const sanitize = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    const parse = (s) => {
+                      const m = sanitize(s).match(/^([A-Z]*)(\d+)?$/);
+                      return m ? { alpha: m[1], num: m[2] ? parseInt(m[2], 10) : null } : null;
+                    };
+
+                    const a = parse(ini);
+                    if (!a) return 0; // Inválido
+
+                    if (!fim) return 1; // Só inicio = 1 item
+
+                    const b = parse(fim);
+                    if (!b) return 1; // Fim inválido, considera só inicio
+
+                    if (a.alpha !== b.alpha) return 1; // Prefixos diferentes, fallback para 1 (ou erro na geração)
+                    if (a.num === null || b.num === null) return 1; // Sem número
+
+                    return Math.max(0, b.num - a.num + 1);
+                  };
+
+                  const qtdEstacao = countRange('prefixIniO', 'prefixFimO');
+                  // Blocos são opcionais. Se não preenchidos, não multiplicam (são "1" na combinação, ou "0" se não existirem?)
+                  // Na lógica do app.js: "Se não tem início, ignora este bloco". 
+                  // Se ignora, ele não participa do produto cartesiano.
+                  // O produto cartesiano é: (R1 items) x (R2 items) x ...
+                  // Se R2 não existe, é (R1 items) x ...
+                  // Então count deve ser 1 se vazio, para elemento neutro da multiplicação?
+                  // Não, se ranges = [R1], length é len(R1).
+                  // Se ranges = [R1, R2], length é len(R1) * len(R2).
+                  // Então precisamos contar apenas os ranges que existem.
+
+                  const counts = [
+                    countRange('prefixIniO', 'prefixFimO'),
+                    countRange('b1Ini', 'b1Fim'),
+                    countRange('b2Ini', 'b2Fim'),
+                    countRange('b3Ini', 'b3Fim')
+                  ].filter(c => c > 0); // Filtra os que tem itens
+
+                  if (counts.length > 0) {
+                    totalEtiquetas = counts.reduce((a, b) => a * b, 1) * copias;
+                  } else {
+                    totalEtiquetas = 0;
+                  }
                 }
-                
+
                 console.log(`📊 Calculado: ${totalEtiquetas} etiquetas de endereçamento`);
-                
+
                 if (totalEtiquetas > 0) {
                   // Incrementar contador global
                   const novoValor = await window.contadorGlobal.incrementarContador(totalEtiquetas, 'enderec');
                   console.log(`✅ Contador incrementado: +${totalEtiquetas} enderec = ${novoValor}`);
-                  
+
                   // Mostrar popup de sucesso
                   mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${totalEtiquetas} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
-                  
+
                   // Feedback visual discreto
                   const valorFormatado = novoValor.toLocaleString('pt-BR');
                   console.log(`📊 Total atual: ${valorFormatado} etiquetas`);
                 }
-                
+
               } catch (error) {
                 console.error('❌ Erro ao incrementar contador:', error);
                 // Continuar com geração mesmo se contador falhar
@@ -266,7 +379,7 @@
         }
       }, 2000);
     });
-    
+
     // Função para mostrar popup de sucesso
     function mostrarPopupSucesso(titulo, subtitulo) {
       // Criar popup
@@ -281,15 +394,15 @@
           </div>
         </div>
       `;
-      
+
       // Adicionar ao body
       document.body.appendChild(popup);
-      
+
       // Mostrar com animação
       setTimeout(() => {
         popup.classList.add('show');
       }, 100);
-      
+
       // Remover após 2 segundos
       setTimeout(() => {
         popup.classList.remove('show');
@@ -301,7 +414,7 @@
       }, 2000);
     }
   </script>
-  
+
   <style>
     /* Popup de Sucesso */
     #popup-sucesso {
@@ -320,41 +433,41 @@
       max-width: 320px;
       overflow: hidden;
     }
-    
+
     #popup-sucesso.show {
       opacity: 1;
       transform: translateX(0);
     }
-    
+
     .popup-content {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 16px 20px;
     }
-    
+
     .popup-icon {
       font-size: 24px;
       flex-shrink: 0;
     }
-    
+
     .popup-text {
       flex: 1;
     }
-    
+
     .popup-titulo {
       font-weight: 600;
       color: #1f2937;
       font-size: 14px;
       margin-bottom: 2px;
     }
-    
+
     .popup-subtitulo {
       font-size: 12px;
       color: #6b7280;
       font-weight: 500;
     }
-    
+
     /* Barra de progresso */
     #popup-sucesso::after {
       content: '';
@@ -366,12 +479,17 @@
       width: 100%;
       animation: progress 2s linear forwards;
     }
-    
+
     @keyframes progress {
-      from { width: 100%; }
-      to { width: 0%; }
+      from {
+        width: 100%;
+      }
+
+      to {
+        width: 0%;
+      }
     }
-    
+
     /* Responsivo */
     @media (max-width: 640px) {
       #popup-sucesso {
@@ -383,4 +501,5 @@
     }
   </style>
 </body>
+
 </html>
