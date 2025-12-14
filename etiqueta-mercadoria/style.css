@@ -1,0 +1,307 @@
+/* Screen Styles */
+body {
+    background-color: var(--bg-primary, #f3f4f6);
+    color: var(--text-primary, #111827);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+}
+
+.screen-container {
+    max-width: 1200px;
+    /* Wider to match other apps */
+    margin: 0 auto;
+    padding: 2rem;
+    width: 100%;
+}
+
+/* Header Styles */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.brand-logos {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.brand-logo {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+}
+
+.brand-text h1 {
+    font-size: 1.25rem;
+    color: var(--brand-primary, #059669);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.app-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #6b7280);
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-ghost:hover {
+    background: #f3f4f6;
+    color: var(--text-primary);
+    border-color: #e5e7eb;
+}
+
+.card {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.search-form {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.small-group {
+    flex: 0 0 100px;
+}
+
+label {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.input-lg {
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1.25rem;
+    width: 100%;
+}
+
+.input-lg:focus {
+    outline: 2px solid var(--brand-primary, #059669);
+    border-color: transparent;
+}
+
+.btn-primary {
+    padding: 0.75rem 1.5rem;
+    background: var(--brand-primary, #059669);
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    height: 3.2rem;
+    /* Align with input */
+}
+
+.btn-primary:hover {
+    filter: brightness(110%);
+}
+
+.status-msg {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.status-msg.error {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.status-msg.success {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.status-msg.warning {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.instructions {
+    margin-top: 2rem;
+    color: var(--text-secondary);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top-color: var(--brand-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Print Styles */
+@media print {
+    @page {
+        size: 100mm 50mm;
+        /* Standard label size? Adjust as needed */
+        margin: 0;
+    }
+
+    body {
+        background: white;
+        display: block;
+    }
+
+    #screen-ui,
+    #loading-overlay {
+        display: none !important;
+    }
+
+    #print-area {
+        display: block;
+    }
+
+    .label-badge {
+        width: 100mm;
+        height: 50mm;
+        box-sizing: border-box;
+        padding: 3mm;
+        position: relative;
+        font-family: 'Arial', sans-serif;
+        /* Use standard font for reliable printing */
+        page-break-after: always;
+        overflow: hidden;
+        border: 1px dotted #ccc;
+        /* Helper for cutting if on regular paper, invisible on thermal usually */
+    }
+
+    /* Layout based on image */
+    /*
+        Top: DESC (Left), MAT (Right)
+        Center: Big Number
+        Bottom: Address, Date/COD, Barcode
+    */
+
+    .label-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        font-size: 10pt;
+        font-weight: bold;
+        border-bottom: 1px solid #000;
+        padding-bottom: 2px;
+        margin-bottom: 2px;
+    }
+
+    .label-desc {
+        width: 70%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .label-mat {
+        font-size: 8pt;
+    }
+
+    .label-main {
+        text-align: center;
+        margin: 2mm 0;
+    }
+
+    .label-big-num {
+        font-size: 60pt;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -2px;
+    }
+
+    .label-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-top: 1px solid #000;
+        padding-top: 2px;
+        margin-bottom: 2px;
+    }
+
+    .label-addr {
+        font-size: 14pt;
+        font-weight: bold;
+        font-family: monospace;
+    }
+
+    .label-meta {
+        text-align: right;
+        font-size: 9pt;
+    }
+
+    .label-barcode-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2px;
+    }
+
+    .barcode-svg {
+        height: 8mm;
+        max-width: 90%;
+    }
+}
