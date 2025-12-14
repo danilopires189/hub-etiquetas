@@ -41,8 +41,7 @@
                     </svg>
                     Hub
                 </button>
-                <button id="historico-btn" type="button" class="btn btn-ghost" title="Ver histórico"
-                    onclick="alert('Histórico em breve!')">
+                <button id="historico-btn" type="button" class="btn btn-ghost" title="Ver histórico">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                         <polyline points="14,2 14,8 20,8" />
@@ -73,6 +72,25 @@
                 </div>
 
                 <div class="form-group small-group">
+                    <label for="input-matricula">Matrícula</label>
+                    <input type="text" id="input-matricula" class="input-lg" placeholder="00000" required>
+                </div>
+
+                <div class="form-group small-group">
+                    <label style="font-size: 0.8rem;">Destino</label>
+                    <div style="display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.2rem;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
+                            <input type="radio" name="destino" value="pulmao" checked> Pulmão
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
+                            <input type="radio" name="destino" value="separacao"> Separação
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group small-group">
                     <label for="input-copies">Cópias</label>
                     <input type="number" id="input-copies" class="input-lg" value="1" min="1" max="100">
                 </div>
@@ -82,7 +100,38 @@
                 </button>
             </form>
 
+            <!-- Print Adjustments -->
+            <!-- Print Adjustments -->
+            <div class="adjust-box" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                <label
+                    style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight:600;">Configuração
+                    da Etiqueta (mm)</label>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="form-group" style="flex:0 0 auto; width: 100px;">
+                        <label for="input-width" style="font-size: 0.8rem;">Largura</label>
+                        <input type="number" id="input-width" class="input-lg" value="90"
+                            style="font-size: 1rem; padding: 0.5rem;">
+                    </div>
+                    <div class="form-group" style="flex:0 0 auto; width: 100px;">
+                        <label for="input-height" style="font-size: 0.8rem;">Altura</label>
+                        <input type="number" id="input-height" class="input-lg" value="47"
+                            style="font-size: 1rem; padding: 0.5rem;">
+                    </div>
+
+
+                </div>
+            </div>
+
             <div id="status-msg" class="status-msg"></div>
+        </div>
+
+        <!-- Preview Area -->
+        <div id="preview-section" style="margin-top: 2rem;">
+            <h3 style="color: var(--text-secondary); margin-bottom: 1rem;">Visualização</h3>
+            <div id="screen-preview" class="preview-container"
+                style="background: #e5e7eb; padding: 2rem; border-radius: 1rem; display: flex; justify-content: center; align-items: center; min-height: 200px;">
+                <p style="color: #6b7280; font-style: italic;">A etiqueta gerada aparecerá aqui...</p>
+            </div>
         </div>
 
         <div class="instructions">
@@ -98,8 +147,58 @@
     <!-- Print Area (Hidden on screen) -->
     <div id="print-area"></div>
 
+    <!-- History Modal -->
+    <div id="historico-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Histórico de Etiquetas</h3>
+                <div class="header-actions">
+                    <button id="toggle-search" class="btn-icon" title="Buscar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg>
+                    </button>
+                    <button class="modal-close" id="historico-close">×</button>
+                </div>
+            </div>
+
+            <div id="search-section" class="modal-search" style="display: none;">
+                <div class="search-container">
+                    <div class="search-input-group">
+                        <input type="text" id="search-input" placeholder="Buscar..." class="search-input" />
+                        <button id="clear-search" class="clear-search" title="Limpar">×</button>
+                    </div>
+                    <div class="search-filters">
+                        <label class="filter-option"><input type="radio" name="searchType" value="all" checked>
+                            <span>Todos</span></label>
+                        <label class="filter-option"><input type="radio" name="searchType" value="matricula">
+                            <span>Matrícula</span></label>
+                        <label class="filter-option"><input type="radio" name="searchType" value="data">
+                            <span>Data</span></label>
+                        <label class="filter-option"><input type="radio" name="searchType" value="coddv">
+                            <span>CODDV</span></label>
+                        <label class="filter-option"><input type="radio" name="searchType" value="descricao">
+                            <span>Descrição</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <div id="historico-list" class="historico-list"></div>
+            </div>
+
+            <div class="modal-footer">
+                <small>Histórico local (últimos 500 itens)</small>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="../shared/barcode.js"></script>
+    <script src="data_cadastro.js"></script>
+    <script src="data_end.js"></script>
     <script src="app.js"></script>
 </body>
 

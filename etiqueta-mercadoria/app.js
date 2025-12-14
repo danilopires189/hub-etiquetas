@@ -10,7 +10,11 @@ const ui = {
     btnGenerate: $('#btn-generate'),
     status: $('#status-msg'),
     loading: $('#loading-overlay'),
-    loadingText: $('#loading-text')
+    loadingText: $('#loading-text'),
+    matriculaInput: $('#input-matricula'),
+    widthInput: $('#input-width'),
+    heightInput: $('#input-height'),
+    preview: $('#screen-preview')
 };
 
 // Data Store
@@ -20,12 +24,15 @@ const Data = {
     isReady: false
 };
 
+// History Store
+let historyData = JSON.parse(localStorage.getItem('mercadoria-history') || '[]');
+
 // Shared Utils
 function curDateTime() {
     const now = new Date();
     const d = now.toLocaleDateString('pt-BR');
     const t = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    return `${d}`; // Image only shows date
+    return `${d} ${t}`;
 }
 
 // Initialization
@@ -36,9 +43,9 @@ async function init() {
 
         // Load CADASTRO
         // Using explicit relative path to avoid 404s on some hostings
-        const resCad = await fetch('./BASE_CADASTRO.json');
-        if (!resCad.ok) throw new Error(`Falha ao carregar BASE_CADASTRO.json (${resCad.status})`);
-        const jsonCad = await resCad.json();
+        // Load CADASTRO (Loaded via script tag)
+        if (!window.DB_CADASTRO) throw new Error('Base de dados CADASTRO não encontrada. Verifique data_cadastro.js');
+        const jsonCad = window.DB_CADASTRO;
 
         ui.loadingText.textContent = 'Indexando produtos...';
         if (jsonCad.BASE_CADASTRO) {
@@ -52,9 +59,9 @@ async function init() {
 
         ui.loadingText.textContent = 'Carregando banco de endereços...';
         // Load END
-        const resEnd = await fetch('./BASE_END.json');
-        if (!resEnd.ok) throw new Error(`Falha ao carregar BASE_END.json (${resEnd.status})`);
-        const jsonEnd = await resEnd.json();
+        // Load END (Loaded via script tag)
+        if (!window.DB_END) throw new Error('Base de dados ENDERECOS não encontrada. Verifique data_end.js');
+        const jsonEnd = window.DB_END;
 
         ui.loadingText.textContent = 'Indexando endereços...';
         if (jsonEnd.BASE_END) {
@@ -109,43 +116,40 @@ function getShortAddress(address) {
 
 function generateLabel(product, addressItem) {
     const copies = parseInt(ui.copiesInput.value) || 1;
-    const dateStr = curDateTime(); // e.g. 01/12/25
+    const matricula = ui.matriculaInput.value.trim() || '---';
+    const dateStr = curDateTime(); // e.g. 01/12/25 00:00
     const codFormatted = formatCODDV(product.CODDV);
     const largeNum = getLargeSuffix(addressItem.ENDERECO);
     const shortAddr = getShortAddress(addressItem.ENDERECO);
 
     // Create label HTML
-    // We render SVG separately
     const labelDiv = document.createElement('div');
     labelDiv.className = 'label-page';
-
-    // We loop for copies
-    // Usually each copy is a page or a sticker.
-    // Assuming standard thermal printer roll.
-    // We will generate ONE label div per copy
 
     for (let i = 0; i < copies; i++) {
         const item = document.createElement('div');
         item.className = 'label-badge';
         item.innerHTML = `
-            <div class="label-header">
-                <span class="label-desc">${product.DESC}</span>
-                <span class="label-mat">MAT: ???</span>
-            </div>
-            
-            <div class="label-main">
-                <div class="label-big-num">${largeNum}</div>
-            </div>
-            
-            <div class="label-footer">
-                <div class="label-addr">${shortAddr}</div>
-                <div class="label-meta">
-                    <div class="label-date">${dateStr}</div>
-                    <div class="label-cod">COD: ${codFormatted}</div>
+            <div class="label-row-top">
+                <div class="label-desc">${product.DESC}</div>
+                <div class="label-meta-top">
+                    <div>${dateStr}</div>
                 </div>
             </div>
-            <div class="label-barcode-container">
-                <svg class="barcode-svg"></svg>
+            
+            <div class="label-row-middle">
+                <div class="label-big-num">${largeNum}</div>
+                <div class="label-barcode-container">
+                    <svg class="barcode-svg" preserveAspectRatio="none"></svg>
+                </div>
+            </div>
+            
+            <div class="label-row-bottom">
+                <div class="label-addr">${shortAddr}</div>
+                <div class="label-info-right">
+                    <div class="label-txt">MAT: ${matricula}</div>
+                    <div class="label-txt">COD: ${codFormatted}</div>
+                </div>
             </div>
         `;
 
@@ -153,9 +157,6 @@ function generateLabel(product, addressItem) {
         const svg = item.querySelector('.barcode-svg');
         try {
             // Using ITF for CODDV (digits only)
-            // Ensure even length by padding if needed?
-            // CODDV "621412" is 6 digits.
-            // If odd, pad leading zero? Standard is usually to pad.
             let code = product.CODDV;
             if (code.length % 2 !== 0) code = '0' + code;
 
@@ -173,6 +174,14 @@ function generateLabel(product, addressItem) {
 function handleSearch(e) {
     e.preventDefault();
     const barcode = ui.barcodeInput.value.trim();
+    const matricula = ui.matriculaInput.value.trim();
+
+    if (!matricula) {
+        showStatus('Informe a matrícula!', 'warning');
+        ui.matriculaInput.focus();
+        return;
+    }
+
     if (!barcode) return;
 
     // Lookup
@@ -204,13 +213,44 @@ function handleSearch(e) {
     // Clear print area
     ui.print.innerHTML = '';
 
-    // Generate
+    // Apply Print Adjustments & Dimensions
+    const w = ui.widthInput.value || '90';
+    const h = ui.heightInput.value || '42';
+
+    document.documentElement.style.setProperty('--print-mt', '0mm');
+    document.documentElement.style.setProperty('--label-width', w + 'mm');
+    document.documentElement.style.setProperty('--label-height', h + 'mm');
+
+    // Generate Label Element
     const labelEl = generateLabel(product, targetAddress);
+
+    // 1. Render to Print Area
+    ui.print.innerHTML = '';
     ui.print.appendChild(labelEl);
+
+    // 2. Render to Preview Area (Clone)
+    ui.preview.innerHTML = '';
+    const previewEl = labelEl.cloneNode(true);
+    // Remove page-break for preview if needed, or keep as is.
+    // We need to re-render barcode in the clone because cloning SVG internal state sometimes fails or is tricky?
+    // Actually, deep clone copies SVG structure. But JsBarcode/BarcodeLib might need re-running if they modify DOM.
+    // In our case, generateLabel returns fully populated HTML.
+    // However, SVG barcodes generated by script might not clone perfectly if they depend on internal state? 
+    // The previous implementation used `window.BarcodeLib.renderITF(svg, code)`. 
+    // It manipulated the SVG. Cloning should preserve attributes/children.
+    ui.preview.appendChild(previewEl);
 
     // Auto print?
     // "bipa... informar copias... gerara automaticamente"
     // Usually means show it, user confirms via print dialog.
+    // Save to History
+    saveHistory({
+        desc: product.DESC,
+        coddv: product.CODDV,
+        matricula: matricula,
+        timestamp: new Date().toISOString()
+    });
+
     window.print();
 
     // Reset focus
@@ -223,8 +263,121 @@ function showStatus(msg, type) {
     ui.status.className = 'status-msg ' + type;
 }
 
+// Live Dimension Updates (Optional UX improvement)
+function updateDimensions() {
+    const w = ui.widthInput.value || '90';
+    const h = ui.heightInput.value || '42';
+    document.documentElement.style.setProperty('--label-width', w + 'mm');
+    document.documentElement.style.setProperty('--label-height', h + 'mm');
+}
+
 // Events
 ui.form.addEventListener('submit', handleSearch);
+ui.widthInput.addEventListener('input', updateDimensions);
+ui.heightInput.addEventListener('input', updateDimensions);
+
+// History UI Events
+$('#historico-btn')?.addEventListener('click', showHistory);
+$('#historico-close')?.addEventListener('click', hideHistory);
+$('#historico-modal')?.addEventListener('click', (e) => {
+    if (e.target === $('#historico-modal')) hideHistory();
+});
+$('#toggle-search')?.addEventListener('click', () => {
+    const s = $('#search-section');
+    s.style.display = s.style.display === 'none' ? 'block' : 'none';
+    if (s.style.display === 'block') $('#search-input').focus();
+});
+$('#search-input')?.addEventListener('input', filterHistory);
+$('#clear-search')?.addEventListener('click', () => {
+    $('#search-input').value = '';
+    filterHistory();
+});
+document.querySelectorAll('input[name="searchType"]').forEach(r => {
+    r.addEventListener('change', filterHistory);
+});
+
+// History Logic
+function saveHistory(item) {
+    // Add ID
+    item.id = Date.now();
+
+    // Unshift to beginning
+    historyData.unshift(item);
+
+    // Limit to 500
+    if (historyData.length > 500) {
+        historyData = historyData.slice(0, 500);
+    }
+
+    localStorage.setItem('mercadoria-history', JSON.stringify(historyData));
+}
+
+function showHistory() {
+    $('#historico-modal').style.display = 'flex';
+    renderHistory(historyData);
+    $('#search-section').style.display = 'none';
+    $('#search-input').value = '';
+}
+
+function hideHistory() {
+    $('#historico-modal').style.display = 'none';
+}
+
+function renderHistory(list) {
+    const container = $('#historico-list');
+    container.innerHTML = '';
+
+    if (list.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding: 2rem; color: #999;">Nenhum registro encontrado.</div>';
+        return;
+    }
+
+    list.forEach(item => {
+        const date = new Date(item.timestamp).toLocaleString('pt-BR');
+        const div = document.createElement('div');
+        div.className = 'historico-item';
+        div.innerHTML = `
+            <div class="historico-info">
+                <div class="historico-primary">${item.desc}</div>
+                <div class="historico-secondary">
+                    <span>CODDV: ${item.coddv}</span> • 
+                    <span>Matrícula: ${item.matricula}</span>
+                </div>
+                <div class="historico-meta">${date}</div>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function filterHistory() {
+    const term = $('#search-input').value.toLowerCase();
+    const type = document.querySelector('input[name="searchType"]:checked').value;
+
+    const filtered = historyData.filter(item => {
+        if (!term) return true;
+
+        const dateStr = new Date(item.timestamp).toLocaleString('pt-BR').toLowerCase();
+
+        if (type === 'all') {
+            return (item.desc || '').toLowerCase().includes(term) ||
+                (item.coddv || '').toLowerCase().includes(term) ||
+                (item.matricula || '').toLowerCase().includes(term) ||
+                dateStr.includes(term);
+        } else if (type === 'matricula') {
+            return (item.matricula || '').toLowerCase().includes(term);
+        } else if (type === 'coddv') {
+            return (item.coddv || '').toLowerCase().includes(term);
+        } else if (type === 'descricao') {
+            return (item.desc || '').toLowerCase().includes(term);
+        } else if (type === 'data') {
+            return dateStr.includes(term);
+        }
+        return true;
+    });
+
+    renderHistory(filtered);
+}
 
 // Boot
 init();
