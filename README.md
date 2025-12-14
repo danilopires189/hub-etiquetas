@@ -19,8 +19,8 @@ O sistema é composto por módulos especializados para diferentes necessidades:
 ### 🌡️ Controle de Qualidade
 - **Termolábeis** (`termo`): Etiquetas especiais para produtos sensíveis à temperatura.
 
-### 🏷️ Loja e Precificação
-- **Precificação/Gôndola** (`placas`): Etiquetas de preço e sinalização para lojas.
+### 🏷️ Etiquetas de Produto
+- **Etiquetas de Produto** (`placas`): Geração de etiquetas para produtos sem código de barras ou com código rasurado.
 
 ---
 
