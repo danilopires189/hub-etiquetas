@@ -7,6 +7,7 @@ const APPS = [
     { id: 'transfer', name: 'Transferência CD → CD', desc: 'Documentos A4 para transferências', path: './transferencia/', hotkey: '5', icon: 'truck' },
     { id: 'termo', name: 'Termolábeis', desc: 'Módulo especializado para produtos termolábeis', path: './termo/', hotkey: '6', icon: 'thermo' },
     { id: 'pedido-direto', name: 'Pedido Direto', desc: 'Etiquetas para pedidos diretos sem código de barras', path: './pedido-direto/', hotkey: '7', icon: 'direct' },
+    { id: 'etiqueta-mercadoria', name: 'Etiqueta de Mercadoria', desc: 'Geração de etiqueta de mercadoria rastreável para alocação pulmão', path: './etiqueta-mercadoria/', hotkey: '8', icon: 'tag' },
 ];
 
 // ===== Ícones modernos inline =====
@@ -18,6 +19,7 @@ const ICONS = {
     truck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h12v8H3z"/><path d="M15 10h4l2 3v2h-6z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
     thermo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2v8a5 5 0 1 1-4 0V4a2 2 0 0 1 2-2z"/><path d="M12 9v8"/></svg>',
     direct: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18m-9-9l9 9-9 9"/></svg>',
+    tag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
 };
 
 const $ = (s) => document.querySelector(s);
