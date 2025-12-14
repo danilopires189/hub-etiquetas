@@ -102,9 +102,20 @@
                     </div>
                 </div>
 
-                <div class="form-group small-group">
-                    <label for="input-copies">Cópias</label>
-                    <input type="number" id="input-copies" class="input-lg" value="1" min="1" max="100">
+                <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <div class="form-group" style="width: 80px;">
+                        <label
+                            style="font-size: 0.8rem; display: block; margin-bottom: 0.5rem; text-align: center;">Depósito</label>
+                        <input type="text" class="input-lg" value="2" disabled
+                            style="text-align: center; background-color: #f3f4f6; cursor: not-allowed; width: 100%;">
+                    </div>
+
+                    <div class="form-group" style="width: 80px;">
+                        <label for="input-copies"
+                            style="font-size: 0.8rem; display: block; margin-bottom: 0.5rem; text-align: center;">Cópias</label>
+                        <input type="number" id="input-copies" class="input-lg" value="1" min="1" max="100"
+                            style="width: 100%; text-align: center;">
+                    </div>
                 </div>
 
                 <button type="submit" id="btn-generate" class="btn-primary">
