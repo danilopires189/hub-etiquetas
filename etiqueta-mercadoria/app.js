@@ -118,7 +118,7 @@ const getSeparacaoLargeNum = (address) => {
     return match[0].padStart(3, '0');
 };
 
-function generateLabel(product, addressItem) {
+function generateLabel(product, addressItem, inputBarcode) {
     const copies = parseInt(ui.copiesInput.value) || 1;
     const matricula = ui.matriculaInput.value.trim() || '---';
     const dateStr = curDateTime(); // e.g. 01/12/25 00:00
@@ -151,7 +151,10 @@ function generateLabel(product, addressItem) {
             </div>
             
             <div class="label-row-bottom">
-                <div class="label-addr">${shortAddr}</div>
+                <div class="label-addr">
+                    ${shortAddr}
+                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 6px;">${inputBarcode}</span>
+                </div>
                 <div class="label-info-right">
                     <div class="label-txt">MAT: ${matricula}</div>
                     <div class="label-txt">COD: ${codFormatted}</div>
@@ -299,7 +302,7 @@ async function handleSearch(e) {
     document.documentElement.style.setProperty('--label-height', h + 'mm');
 
     // Generate Label Element
-    const labelEl = generateLabel(product, targetAddress);
+    const labelEl = generateLabel(product, targetAddress, barcode);
 
     // 1. Render to Print Area
     ui.print.innerHTML = '';
@@ -336,6 +339,7 @@ async function handleSearch(e) {
     saveHistory({
         desc: product.DESC,
         coddv: product.CODDV,
+        barcode: barcode,
         matricula: matricula,
         address: targetAddress.ENDERECO,
         type: destinoType,
@@ -437,6 +441,7 @@ function renderHistory(list) {
                 <div class="historico-primary">${item.desc}</div>
                 <div class="historico-secondary">
                     <span>CODDV: ${item.coddv}</span> • 
+                    <span>EAN: ${item.barcode || '---'}</span> • 
                     <span>Matrícula: ${item.matricula}</span>
                 </div>
                 <div class="historico-secondary" style="margin-top: 2px; color: #4b5563;">
