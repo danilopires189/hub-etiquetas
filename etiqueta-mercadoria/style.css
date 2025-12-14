@@ -13,6 +13,10 @@
     /* Print Offsets (Dynamic) */
     --print-mt: 0mm;
     --print-ml: 0mm;
+
+    /* Gradients */
+    --grad1: #efe7ef;
+    --grad2: #eef2ff;
 }
 
 #print-area {
@@ -41,8 +45,10 @@ body {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(90deg, var(--grad1), var(--grad2));
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .brand {
@@ -57,11 +63,7 @@ body {
     gap: 0.5rem;
 }
 
-.brand-logo {
-    height: 32px;
-    width: auto;
-    object-fit: contain;
-}
+/* .brand-logo handled by shared/components.css */
 
 .brand-text h1 {
     font-size: 1.25rem;
@@ -84,7 +86,7 @@ body {
     background: transparent;
     color: var(--text-secondary);
     padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
+    border-radius: 10px;
     font-size: 0.875rem;
     display: flex;
     align-items: center;
@@ -130,10 +132,11 @@ label {
     font-size: 0.9rem;
 }
 
+
 .input-lg {
     padding: 0.75rem;
     border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
+    border-radius: 10px;
     font-size: 1.1rem;
     width: 100%;
     box-sizing: border-box;
@@ -152,6 +155,7 @@ label {
     color: white;
     font-weight: 600;
     border: none;
+    border-radius: 10px;
     border-radius: 0.5rem;
     cursor: pointer;
     font-size: 1.1rem;
