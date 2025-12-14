@@ -221,7 +221,7 @@ function handleSearch(e) {
         filteredList = addressList.filter(a => a.TIPO === 'PULMÃO');
 
         if (filteredList.length === 0) {
-            showStatus(`Produto encontrado, mas SEM endereço de PULMÃO.`, 'warning');
+            showStatus(`Produto encontrado (${product.DESC}), mas SEM endereço de PULMÃO.`, 'warning');
             return;
         }
 
@@ -240,15 +240,15 @@ function handleSearch(e) {
         filteredList = addressList.filter(a => a.TIPO === 'SEPARACAO');
 
         if (filteredList.length === 0) {
-            showStatus(`Produto encontrado, mas SEM endereço de SEPARAÇÃO.`, 'warning');
+            showStatus(`Produto encontrado (${product.DESC}), mas SEM endereço de SEPARAÇÃO.`, 'warning');
             return;
         }
 
         // "retorno o endereço correspondente" -> Assumindo o primeiro
         targetAddress = filteredList[0];
 
-        // Large Num: First quadrant number only
-        largeNumVal = getSeparacaoLargeNum(targetAddress.ENDERECO);
+        // Large Num: Suffix (Same as Pulmão)
+        largeNumVal = getPadraoLargeNum(targetAddress.ENDERECO);
         shortAddrVal = targetAddress.ENDERECO; // Show full address for separation? Or logic wasn't specified? 
         // User didn't specify short address format for Separação, but usually we print the full address or short?
         // In "Termo" separation usually shows full or specific.
@@ -442,6 +442,20 @@ function filterHistory() {
 
     renderHistory(filtered);
 }
+
+
+
+// Dynamic Instructions
+function updateInstructions() {
+    const type = document.querySelector('input[name="destino"]:checked').value;
+    const target = $('#instruction-target');
+    if (target) {
+        target.textContent = `O sistema buscará automaticamente o endereço de ${type.toUpperCase()}.`;
+    }
+}
+document.querySelectorAll('input[name="destino"]').forEach(r => {
+    r.addEventListener('change', updateInstructions);
+});
 
 // Boot
 init();
