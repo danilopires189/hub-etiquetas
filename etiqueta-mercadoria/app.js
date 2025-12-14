@@ -312,6 +312,8 @@ function handleSearch(e) {
         desc: product.DESC,
         coddv: product.CODDV,
         matricula: matricula,
+        address: targetAddress.ENDERECO,
+        type: destinoType,
         timestamp: new Date().toISOString()
     });
 
@@ -368,10 +370,12 @@ function saveHistory(item) {
     // Unshift to beginning
     historyData.unshift(item);
 
-    // Limit to 500
-    if (historyData.length > 500) {
-        historyData = historyData.slice(0, 500);
-    }
+    // Limit to 60 days
+    const limitDate = new Date();
+    limitDate.setDate(limitDate.getDate() - 60);
+
+    // Filter keep only newer than limitDate
+    historyData = historyData.filter(h => new Date(h.timestamp) > limitDate);
 
     localStorage.setItem('mercadoria-history', JSON.stringify(historyData));
 }
@@ -406,6 +410,10 @@ function renderHistory(list) {
                 <div class="historico-secondary">
                     <span>CODDV: ${item.coddv}</span> • 
                     <span>Matrícula: ${item.matricula}</span>
+                </div>
+                <div class="historico-secondary" style="margin-top: 2px; color: #4b5563;">
+                    <span>📍 ${item.address || '---'}</span> • 
+                    <span>${(item.type || '').toUpperCase()}</span>
                 </div>
                 <div class="historico-meta">${date}</div>
             </div>
