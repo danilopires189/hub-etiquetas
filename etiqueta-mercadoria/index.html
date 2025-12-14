@@ -67,8 +67,20 @@
             <form id="form-search" class="search-form">
                 <div class="form-group">
                     <label for="input-barcode">Código de Barras (Bipe aqui)</label>
-                    <input type="text" id="input-barcode" class="input-lg" placeholder="Aguardando leitor..."
-                        autocomplete="off">
+                    <div style="position: relative;">
+                        <input type="text" id="input-barcode" class="input-lg" placeholder="Aguardando leitor..."
+                            autocomplete="off" style="padding-right: 40px;">
+                        <div class="scanner-icon"
+                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <path d="M3 14h7v7H3z"></path>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group small-group">
@@ -114,7 +126,7 @@
                     </div>
                     <div class="form-group" style="flex:0 0 auto; width: 100px;">
                         <label for="input-height" style="font-size: 0.8rem;">Altura</label>
-                        <input type="number" id="input-height" class="input-lg" value="47"
+                        <input type="number" id="input-height" class="input-lg" value="49"
                             style="font-size: 1rem; padding: 0.5rem;">
                     </div>
 
