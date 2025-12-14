@@ -18,15 +18,7 @@ body {
   height: 100%;
 }
 
-.brand-logo {
-  width: 42px;
-  height: 42px;
-  border-radius: 8px;
-  object-fit: contain;
-  padding: 2px;
-  background: transparent;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
-}
+/* .brand-logo handled by shared/components.css */
 
 .brand-text strong {
   display: block;
