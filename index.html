@@ -1,118 +1,153 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hub de Etiquetas - Pague Menos</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="//fonts.googleapis.com">
-  <link rel="stylesheet" href="shared/design-system.css">
-  <link rel="stylesheet" href="shared/components.css">
-  <link rel="stylesheet" href="shared/performance.css">
-  <link rel="stylesheet" href="css/landing.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etiqueta de Mercadoria - Hub de Etiquetas</title>
+    <link rel="stylesheet" href="../shared/design-system.css">
+    <link rel="stylesheet" href="../shared/components.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <!-- Navegação Moderna -->
-  <nav class="nav-header">
-    <div class="container">
-      <div class="nav-content">
-        <div class="nav-brand">
-          <img src="./assets/pm.png" alt="Pague Menos" class="nav-logo" onerror="this.style.display='none'">
-          <img src="./assets/logo.png" alt="Danilo" class="nav-logo" onerror="this.style.display='none'">
-          <h1 class="nav-title">Hub de Etiquetas</h1>
-        </div>
-        <div class="nav-actions">
-          <div class="stats-counter-nav">
-            <span class="counter-number-small" id="etiquetas-counter">Carregando...</span>
-            <span class="counter-label-small">etiquetas geradas 🚀</span>
-          </div>
-        </div>
-      </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p id="loading-text">Iniciando sistema...</p>
     </div>
-  </nav>
 
-  <!-- Hero Section -->
-  <section id="hero" class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <div class="hero-logos">
-          <img src="./assets/pm.png" alt="Pague Menos" class="hero-logo" onerror="this.style.display='none'">
-          <img src="./assets/logo.png" alt="Danilo" class="hero-logo" onerror="this.style.display='none'">
+    <!-- Screen UI -->
+    <div id="screen-ui" class="screen-container">
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logos">
+                    <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary"
+                        onerror="this.style.display='none'">
+                    <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary"
+                        onerror="this.style.display='none'">
+                </div>
+                <div class="brand-text">
+                    <h1>Pague Menos</h1>
+                    <span class="app-subtitle">Etiquetas • Mercadoria</span>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9,22 9,12 15,12 15,22" />
+                    </svg>
+                    Hub
+                </button>
+                <button id="historico-btn" type="button" class="btn btn-ghost" title="Ver histórico"
+                    onclick="alert('Histórico em breve!')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14,2 14,8 20,8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10,9 9,9 8,9" />
+                    </svg>
+                    Histórico
+                </button>
+                <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()"
+                    aria-label="Imprimir">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6,9 6,2 18,2 18,9" />
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                        <rect x="6" y="14" width="12" height="8" />
+                    </svg>
+                    Imprimir
+                </button>
+            </div>
+        </header>
+
+        <div class="card search-card">
+            <form id="form-search" class="search-form">
+                <div class="form-group">
+                    <label for="input-barcode">Código de Barras (Bipe aqui)</label>
+                    <input type="text" id="input-barcode" class="input-lg" placeholder="Aguardando leitor..."
+                        autocomplete="off">
+                </div>
+
+                <div class="form-group small-group">
+                    <label for="input-matricula">Matrícula</label>
+                    <input type="text" id="input-matricula" class="input-lg" placeholder="00000" required>
+                </div>
+
+                <div class="form-group small-group">
+                    <label for="input-copies">Cópias</label>
+                    <input type="number" id="input-copies" class="input-lg" value="1" min="1" max="100">
+                </div>
+
+                <button type="submit" id="btn-generate" class="btn-primary">
+                    Gerar Etiqueta
+                </button>
+            </form>
+
+            <!-- Print Adjustments -->
+            <!-- Print Adjustments -->
+            <div class="adjust-box" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                <label
+                    style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight:600;">Configuração
+                    da Etiqueta (mm)</label>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="form-group" style="flex:0 0 auto; width: 100px;">
+                        <label for="input-width" style="font-size: 0.8rem;">Largura</label>
+                        <input type="number" id="input-width" class="input-lg" value="90"
+                            style="font-size: 1rem; padding: 0.5rem;">
+                    </div>
+                    <div class="form-group" style="flex:0 0 auto; width: 100px;">
+                        <label for="input-height" style="font-size: 0.8rem;">Altura</label>
+                        <input type="number" id="input-height" class="input-lg" value="42"
+                            style="font-size: 1rem; padding: 0.5rem;">
+                    </div>
+
+                    <div class="form-group" style="flex:0 0 auto; width: 100px;">
+                        <label for="input-margin-top" style="font-size: 0.8rem;">Margem Topo</label>
+                        <input type="number" id="input-margin-top" class="input-lg" value="0" step="0.1"
+                            style="font-size: 1rem; padding: 0.5rem;">
+                    </div>
+                    <div class="form-group" style="flex:0 0 auto; width: 100px;">
+                        <label for="input-margin-left" style="font-size: 0.8rem;">Margem Esq.</label>
+                        <input type="number" id="input-margin-left" class="input-lg" value="0" step="0.1"
+                            style="font-size: 1rem; padding: 0.5rem;">
+                    </div>
+                </div>
+            </div>
+
+            <div id="status-msg" class="status-msg"></div>
         </div>
-        <h1 class="hero-title">Hub de Etiquetas</h1>
-        <p class="hero-subtitle">Sistema Integrado de Geração de Etiquetas</p>
-        <p class="hero-description">
-          Plataforma completa para geração de etiquetas.
-          Acesse todas as aplicações de forma rápida e intuitiva.
-        </p>
-      </div>
-    </div>
-  </section>
 
-  <!-- Seção de Aplicações -->
-  <section id="chooser" class="apps-section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Escolha sua Aplicação</h2>
-        <p class="section-description">
-          Selecione a aplicação desejada para começar a gerar suas etiquetas
-        </p>
-      </div>
-      <div id="apps" class="apps-grid" role="list"></div>
-
-      <!-- Seção de Ajuda -->
-      <div class="help-section">
-        <div class="help-content">
-          <h3 class="help-title">Atalhos de Teclado</h3>
-          <p class="help-text">Use os atalhos abaixo para acesso rápido às aplicações</p>
-          <div class="keyboard-shortcuts">
-            <div class="shortcut">
-              <span class="shortcut-key">Ctrl+1</span>
-              <span>Etiquetas de Produto</span>
+        <!-- Preview Area -->
+        <div id="preview-section" style="margin-top: 2rem;">
+            <h3 style="color: var(--text-secondary); margin-bottom: 1rem;">Visualização</h3>
+            <div id="screen-preview" class="preview-container"
+                style="background: #e5e7eb; padding: 2rem; border-radius: 1rem; display: flex; justify-content: center; align-items: center; min-height: 200px;">
+                <p style="color: #6b7280; font-style: italic;">A etiqueta gerada aparecerá aqui...</p>
             </div>
-            <div class="shortcut">
-              <span class="shortcut-key">Ctrl+2</span>
-              <span>Etiquetas de Caixa</span>
-            </div>
-            <div class="shortcut">
-              <span class="shortcut-key">Ctrl+3</span>
-              <span>Volume Avulso</span>
-            </div>
-            <div class="shortcut">
-              <span class="shortcut-key">Ctrl+4</span>
-              <span>Endereçamento</span>
-            </div>
-            <div class="shortcut">
-              <span class="shortcut-key">Ctrl+5</span>
-              <span>Transferência</span>
-            </div>
-            <div class="shortcut">
-              <span class="shortcut-key">Ctrl+6</span>
-              <span>Termolábeis</span>
-            </div>
-            <div class="shortcut">
-              <span class="shortcut-key">Ctrl+7</span>
-              <span>Pedido Direto</span>
-            </div>
-            <div class="shortcut">
-              <span class="shortcut-key">Ctrl+8</span>
-              <span>Etiqueta de Mercadoria</span>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Sistema de Contador Global Centralizado -->
-  <script src="js/contador-global-centralizado.js"></script>
-  <!-- Shared Utils -->
-  <script src="shared/utils.js"></script>
-  <!-- Landing Page Logic -->
-  <script src="js/landing.js"></script>
+        <div class="instructions">
+            <h3>Instruções</h3>
+            <ul>
+                <li>Bipe o código de barras do produto.</li>
+                <li>O sistema buscará automaticamente o endereço de PULMÃO.</li>
+                <li>Se encontrado, a janela de impressão abrirá automaticamente.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Print Area (Hidden on screen) -->
+    <div id="print-area"></div>
+
+    <!-- Scripts -->
+    <script src="../shared/barcode.js"></script>
+    <script src="data_cadastro.js"></script>
+    <script src="data_end.js"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>
