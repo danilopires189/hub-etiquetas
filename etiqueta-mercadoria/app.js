@@ -67,7 +67,7 @@ async function init() {
         if (jsonEnd.BASE_END) {
             for (const item of jsonEnd.BASE_END) {
                 // Only care about PULMÃO type as per requirement
-                if (item.TIPO === 'PULMÃO') {
+                if (item.CODDV) {
                     if (!Data.addresses.has(item.CODDV)) {
                         Data.addresses.set(item.CODDV, []);
                     }
@@ -102,25 +102,31 @@ function getLargeSuffix(address) {
     return parts[parts.length - 1];
 }
 
-function getShortAddress(address) {
-    // Address format: PG06.001.019.934
-    // We want "PG06.001.019"
-    // Remove the last part
+const getPadraoLargeNum = (address) => {
+    // Address format: PG06.001.019.934 -> "934"
     const parts = address.split('.');
-    if (parts.length > 1) {
-        parts.pop();
-        return parts.join('.');
-    }
-    return address;
-}
+    return parts[parts.length - 1];
+};
+
+const getSeparacaoLargeNum = (address) => {
+    // Address format: M205.001... -> "M205" -> "205"
+    // m70... -> "m70" -> "070"
+    const parts = address.split('.');
+    const firstPart = parts[0];
+    const match = firstPart.match(/\d+/);
+    if (!match) return '000';
+    return match[0].padStart(3, '0');
+};
 
 function generateLabel(product, addressItem) {
     const copies = parseInt(ui.copiesInput.value) || 1;
     const matricula = ui.matriculaInput.value.trim() || '---';
     const dateStr = curDateTime(); // e.g. 01/12/25 00:00
     const codFormatted = formatCODDV(product.CODDV);
-    const largeNum = getLargeSuffix(addressItem.ENDERECO);
-    const shortAddr = getShortAddress(addressItem.ENDERECO);
+
+
+    // Address formatting is now handled outside
+    const { largeNum, shortAddr } = addressItem.formatted;
 
     // Create label HTML
     const labelDiv = document.createElement('div');
@@ -202,13 +208,71 @@ function handleSearch(e) {
     }
 
     // We have addresses.
-    // If multiple, picking the FIRST one for now as per "Scan -> Print" flow.
-    // Or we could list them in the UI. 
-    // Given the automation request, we pick the first valid one.
-    // Ideally we'd sort?
-    const targetAddress = addressList[0];
+    // Filter based on Destino
+    const destinoType = document.querySelector('input[name="destino"]:checked').value; // 'pulmao' or 'separacao'
 
-    showStatus(`Gerando etiquetas para: ${product.DESC}`, 'success');
+    let filteredList = [];
+    let targetAddress = null;
+    let largeNumVal = '';
+    let shortAddrVal = '';
+
+    if (destinoType === 'pulmao') {
+        // Mode PULMAO: Filter by TIPO='PULMÃO'
+        filteredList = addressList.filter(a => a.TIPO === 'PULMÃO');
+
+        if (filteredList.length === 0) {
+            showStatus(`Produto encontrado, mas SEM endereço de PULMÃO.`, 'warning');
+            return;
+        }
+
+        // "no caso de pulmao retono sempre o ultimo endereco"
+        targetAddress = filteredList[filteredList.length - 1];
+
+        // Large Num: Suffix
+        largeNumVal = getLargeSuffix(targetAddress.ENDERECO);
+        // Short Addr: Remove suffix
+        const p = targetAddress.ENDERECO.split('.');
+        p.pop();
+        shortAddrVal = p.join('.');
+
+    } else {
+        // Mode SEPARACAO: Filter by TIPO='SEPARACAO'
+        filteredList = addressList.filter(a => a.TIPO === 'SEPARACAO');
+
+        if (filteredList.length === 0) {
+            showStatus(`Produto encontrado, mas SEM endereço de SEPARAÇÃO.`, 'warning');
+            return;
+        }
+
+        // "retorno o endereço correspondente" -> Assumindo o primeiro
+        targetAddress = filteredList[0];
+
+        // Large Num: First quadrant number only
+        largeNumVal = getSeparacaoLargeNum(targetAddress.ENDERECO);
+        shortAddrVal = targetAddress.ENDERECO; // Show full address for separation? Or logic wasn't specified? 
+        // User didn't specify short address format for Separação, but usually we print the full address or short?
+        // In "Termo" separation usually shows full or specific.
+        // User only specified "numero grande".
+        // Let's assume standard short address logic (remove last part) applies?
+        // Or "retorno o endereço correspondente".
+        // Let's keep existing behavior for shortAddr (remove last part) unless it looks weird.
+        // BUT, address "M205.003..." -> Suffix is "004". Short is "M205.003.003".
+        // If we want to show location, "M205.003.003" is good.
+        // Let's stick to standard `getShortAddress` logic for consistency unless user complains.
+        // Actually, let's just implement `getShortAddress` removal inline or restore the function.
+        // I removed `getShortAddress` in previous chunk. I should restore valid logic.
+        const p = targetAddress.ENDERECO.split('.');
+        if (p.length > 1) p.pop();
+        shortAddrVal = p.join('.');
+    }
+
+    // Attach formatted data to addressItem for generation
+    targetAddress.formatted = {
+        largeNum: largeNumVal,
+        shortAddr: shortAddrVal
+    };
+
+    showStatus(`Gerando etiquetas para: ${product.DESC} (${destinoType.toUpperCase()})`, 'success');
 
     // Clear print area
     ui.print.innerHTML = '';
