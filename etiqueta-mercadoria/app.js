@@ -177,7 +177,28 @@ function generateLabel(product, addressItem) {
     return labelDiv;
 }
 
-function handleSearch(e) {
+// Popup Helper
+function mostrarPopupSucesso(titulo, subtitulo) {
+    const popup = document.createElement('div');
+    popup.id = 'popup-sucesso';
+    popup.innerHTML = `
+        <div class="popup-content">
+            <div class="popup-icon">✅</div>
+            <div class="popup-text">
+                <div class="popup-titulo">${titulo}</div>
+                <div class="popup-subtitulo">${subtitulo}</div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    setTimeout(() => popup.classList.add('show'), 100);
+    setTimeout(() => {
+        popup.classList.remove('show');
+        setTimeout(() => popup.remove(), 300);
+    }, 2000);
+}
+
+async function handleSearch(e) {
     e.preventDefault();
     const barcode = ui.barcodeInput.value.trim();
     const matricula = ui.matriculaInput.value.trim();
@@ -188,7 +209,11 @@ function handleSearch(e) {
         return;
     }
 
-    if (!barcode) return;
+    if (!barcode) {
+        showStatus('Informe o código de barras!', 'warning');
+        ui.barcodeInput.focus();
+        return;
+    }
 
     // Lookup
     const product = Data.products.get(barcode);
@@ -249,18 +274,6 @@ function handleSearch(e) {
 
         // Large Num: Suffix (Same as Pulmão)
         largeNumVal = getPadraoLargeNum(targetAddress.ENDERECO);
-        shortAddrVal = targetAddress.ENDERECO; // Show full address for separation? Or logic wasn't specified? 
-        // User didn't specify short address format for Separação, but usually we print the full address or short?
-        // In "Termo" separation usually shows full or specific.
-        // User only specified "numero grande".
-        // Let's assume standard short address logic (remove last part) applies?
-        // Or "retorno o endereço correspondente".
-        // Let's keep existing behavior for shortAddr (remove last part) unless it looks weird.
-        // BUT, address "M205.003..." -> Suffix is "004". Short is "M205.003.003".
-        // If we want to show location, "M205.003.003" is good.
-        // Let's stick to standard `getShortAddress` logic for consistency unless user complains.
-        // Actually, let's just implement `getShortAddress` removal inline or restore the function.
-        // I removed `getShortAddress` in previous chunk. I should restore valid logic.
         const p = targetAddress.ENDERECO.split('.');
         if (p.length > 1) p.pop();
         shortAddrVal = p.join('.');
@@ -304,6 +317,18 @@ function handleSearch(e) {
     // It manipulated the SVG. Cloning should preserve attributes/children.
     ui.preview.appendChild(previewEl);
 
+    // Global Counter & Animation
+    try {
+        if (window.contadorGlobal) {
+            const copies = parseInt(ui.copiesInput.value) || 1;
+            console.log(`📊 Incrementando contador: +${copies}`);
+            const novoValor = await window.contadorGlobal.incrementarContador(copies, 'mercadoria');
+            mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${copies} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
+        }
+    } catch (err) {
+        console.error('Erro ao incrementar contador:', err);
+    }
+
     // Auto print?
     // "bipa... informar copias... gerara automaticamente"
     // Usually means show it, user confirms via print dialog.
@@ -317,11 +342,14 @@ function handleSearch(e) {
         timestamp: new Date().toISOString()
     });
 
-    window.print();
+    // Delay print to show animation
+    setTimeout(() => {
+        window.print();
 
-    // Reset focus
-    ui.barcodeInput.value = '';
-    ui.barcodeInput.focus();
+        // Reset focus after print dialog closes
+        ui.barcodeInput.value = '';
+        ui.barcodeInput.focus();
+    }, 3000);
 }
 
 function showStatus(msg, type) {
