@@ -334,17 +334,6 @@ async function executePrint(copies) {
     ui.preview.innerHTML = '';
     ui.preview.appendChild(labelEl.cloneNode(true));
 
-    // Counter
-    try {
-        if (window.contadorGlobal) {
-            console.log(`📊 Incrementando contador: +${copies}`);
-            const novoValor = await window.contadorGlobal.incrementarContador(copies, 'mercadoria');
-            mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${copies} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
-        }
-    } catch (err) {
-        console.error('Erro ao incrementar contador:', err);
-    }
-
     // History
     saveHistory({
         desc: product.DESC,
@@ -356,12 +345,25 @@ async function executePrint(copies) {
         timestamp: new Date().toISOString()
     });
 
-    // Print
-    setTimeout(() => {
-        window.print();
+    // Print then Counter
+    // Use setTimeout to ensure rendering before print, and make callback async to handle await
+    setTimeout(async () => {
+        window.print(); // Blocks execution until dialog closes
+
+        // Counter Logic (Runs after dialog closes)
+        try {
+            if (window.contadorGlobal) {
+                console.log(`📊 Incrementando contador: +${copies}`);
+                const novoValor = await window.contadorGlobal.incrementarContador(copies, 'mercadoria');
+                mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${copies} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
+            }
+        } catch (err) {
+            console.error('Erro ao incrementar contador:', err);
+        }
+
         ui.barcodeInput.value = ''; // Clear after print
         ui.barcodeInput.focus();
-    }, 500); // Shorter delay since we have manual confirmation now
+    }, 100);
 }
 
 function showStatus(msg, type) {
