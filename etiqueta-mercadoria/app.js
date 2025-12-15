@@ -14,8 +14,15 @@ const ui = {
     matriculaInput: $('#input-matricula'),
     widthInput: $('#input-width'),
     heightInput: $('#input-height'),
-    preview: $('#screen-preview')
+    preview: $('#screen-preview'),
+    // Modal Copies
+    copiesModal: $('#copies-modal'),
+    modalInputCopies: $('#modal-input-copies'),
+    btnConfirmCopies: $('#confirm-copies'),
+    btnCancelCopies: $('#cancel-copies')
 };
+
+let pendingData = null;
 
 // Data Store
 const Data = {
@@ -118,8 +125,7 @@ const getSeparacaoLargeNum = (address) => {
     return match[0].padStart(3, '0');
 };
 
-function generateLabel(product, addressItem, inputBarcode) {
-    const copies = parseInt(ui.copiesInput.value) || 1;
+function generateLabel(product, addressItem, inputBarcode, copies = 1) {
     const matricula = ui.matriculaInput.value.trim() || '---';
     const dateStr = curDateTime(); // e.g. 01/12/25 00:00
     const codFormatted = formatCODDV(product.CODDV);
@@ -213,9 +219,13 @@ async function handleSearch(e) {
     const barcode = ui.barcodeInput.value.trim();
     const matricula = ui.matriculaInput.value.trim();
 
+    // 1. Validate Matricula
     if (!matricula) {
-        showStatus('Informe a matrícula!', 'warning');
+        showStatus('⚠️ Informe a matrícula antes de continuar!', 'warning');
+        // Flash effect or sound could be added
         ui.matriculaInput.focus();
+        ui.matriculaInput.style.borderColor = 'red';
+        setTimeout(() => ui.matriculaInput.style.borderColor = '', 2000);
         return;
     }
 
@@ -225,112 +235,108 @@ async function handleSearch(e) {
         return;
     }
 
-    // Lookup
+    // 2. Lookup Product
     const product = Data.products.get(barcode);
-
     if (!product) {
         showStatus('Produto não encontrado (BARRAS: ' + barcode + ')', 'error');
         ui.barcodeInput.select();
         return;
     }
 
-    // Found Product, Lookup Address
+    // 3. Lookup Address
     const addressList = Data.addresses.get(product.CODDV);
-
     if (!addressList || addressList.length === 0) {
         showStatus(`Produto encontrado (${product.DESC}), mas SEM endereço de PULMÃO.`, 'warning');
+        ui.barcodeInput.select();
         return;
     }
 
-    // We have addresses.
-    // Filter based on Destino
-    const destinoType = document.querySelector('input[name="destino"]:checked').value; // 'pulmao' or 'separacao'
-
-    let filteredList = [];
-    let targetAddress = null;
-    let largeNumVal = '';
-    let shortAddrVal = '';
+    // 4. Resolve Target Address
+    const destinoType = document.querySelector('input[name="destino"]:checked').value;
+    let filteredList = [], targetAddress = null;
+    let largeNumVal = '', shortAddrVal = '';
 
     if (destinoType === 'pulmao') {
-        // Mode PULMAO: Filter by TIPO='PULMÃO'
         filteredList = addressList.filter(a => a.TIPO === 'PULMÃO');
-
         if (filteredList.length === 0) {
-            showStatus(`Produto encontrado (${product.DESC}), mas SEM endereço de PULMÃO.`, 'warning');
+            showStatus(`Produto encontrado, mas SEM endereço de PULMÃO.`, 'warning');
             return;
         }
-
-        // "no caso de pulmao retono sempre o ultimo endereco"
         targetAddress = filteredList[filteredList.length - 1];
-
-        // Large Num: Suffix
         largeNumVal = getLargeSuffix(targetAddress.ENDERECO);
-        // Short Addr: Remove suffix
         const p = targetAddress.ENDERECO.split('.');
         p.pop();
         shortAddrVal = p.join('.');
-
     } else {
-        // Mode SEPARACAO: Filter by TIPO='SEPARACAO'
         filteredList = addressList.filter(a => a.TIPO === 'SEPARACAO');
-
         if (filteredList.length === 0) {
-            showStatus(`Produto encontrado (${product.DESC}), mas SEM endereço de SEPARAÇÃO.`, 'warning');
+            showStatus(`Produto encontrado, mas SEM endereço de SEPARAÇÃO.`, 'warning');
             return;
         }
-
-        // "retorno o endereço correspondente" -> Assumindo o primeiro
         targetAddress = filteredList[0];
-
-        // Large Num: Suffix (Same as Pulmão)
         largeNumVal = getPadraoLargeNum(targetAddress.ENDERECO);
         const p = targetAddress.ENDERECO.split('.');
         if (p.length > 1) p.pop();
         shortAddrVal = p.join('.');
     }
 
-    // Attach formatted data to addressItem for generation
     targetAddress.formatted = {
         largeNum: largeNumVal,
         shortAddr: shortAddrVal
     };
 
+    // 5. Store Data & Open Modal
+    pendingData = {
+        product,
+        targetAddress,
+        barcode,
+        matricula,
+        destinoType
+    };
+
+    openCopiesModal();
+}
+
+function openCopiesModal() {
+    ui.copiesModal.style.display = 'flex';
+    ui.modalInputCopies.value = '1';
+    ui.modalInputCopies.focus();
+    ui.modalInputCopies.select();
+}
+
+function closeCopiesModal() {
+    ui.copiesModal.style.display = 'none';
+    ui.barcodeInput.focus();
+}
+
+async function executePrint(copies) {
+    if (!pendingData) return;
+    const { product, targetAddress, barcode, matricula, destinoType } = pendingData;
+
+    // Clear pending
+    pendingData = null;
+
     showStatus(`Gerando etiquetas para: ${product.DESC} (${destinoType.toUpperCase()})`, 'success');
 
-    // Clear print area
-    ui.print.innerHTML = '';
+    // Generate Label
+    const labelEl = generateLabel(product, targetAddress, barcode, copies);
 
-    // Apply Print Adjustments & Dimensions
+    // Apply Dimensions (Ensure they are set)
     const w = ui.widthInput.value || '90';
     const h = ui.heightInput.value || '42';
-
-    document.documentElement.style.setProperty('--print-mt', '0mm');
     document.documentElement.style.setProperty('--label-width', w + 'mm');
     document.documentElement.style.setProperty('--label-height', h + 'mm');
 
-    // Generate Label Element
-    const labelEl = generateLabel(product, targetAddress, barcode);
-
-    // 1. Render to Print Area
+    // Render
     ui.print.innerHTML = '';
     ui.print.appendChild(labelEl);
 
-    // 2. Render to Preview Area (Clone)
     ui.preview.innerHTML = '';
-    const previewEl = labelEl.cloneNode(true);
-    // Remove page-break for preview if needed, or keep as is.
-    // We need to re-render barcode in the clone because cloning SVG internal state sometimes fails or is tricky?
-    // Actually, deep clone copies SVG structure. But JsBarcode/BarcodeLib might need re-running if they modify DOM.
-    // In our case, generateLabel returns fully populated HTML.
-    // However, SVG barcodes generated by script might not clone perfectly if they depend on internal state? 
-    // The previous implementation used `window.BarcodeLib.renderITF(svg, code)`. 
-    // It manipulated the SVG. Cloning should preserve attributes/children.
-    ui.preview.appendChild(previewEl);
+    ui.preview.appendChild(labelEl.cloneNode(true));
 
-    // Global Counter & Animation
+    // Counter
     try {
         if (window.contadorGlobal) {
-            const copies = parseInt(ui.copiesInput.value) || 1;
             console.log(`📊 Incrementando contador: +${copies}`);
             const novoValor = await window.contadorGlobal.incrementarContador(copies, 'mercadoria');
             mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${copies} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
@@ -339,10 +345,7 @@ async function handleSearch(e) {
         console.error('Erro ao incrementar contador:', err);
     }
 
-    // Auto print?
-    // "bipa... informar copias... gerara automaticamente"
-    // Usually means show it, user confirms via print dialog.
-    // Save to History
+    // History
     saveHistory({
         desc: product.DESC,
         coddv: product.CODDV,
@@ -353,14 +356,12 @@ async function handleSearch(e) {
         timestamp: new Date().toISOString()
     });
 
-    // Delay print to show animation
+    // Print
     setTimeout(() => {
         window.print();
-
-        // Reset focus after print dialog closes
-        ui.barcodeInput.value = '';
+        ui.barcodeInput.value = ''; // Clear after print
         ui.barcodeInput.focus();
-    }, 3000);
+    }, 500); // Shorter delay since we have manual confirmation now
 }
 
 function showStatus(msg, type) {
@@ -380,6 +381,29 @@ function updateDimensions() {
 ui.form.addEventListener('submit', handleSearch);
 ui.widthInput.addEventListener('input', updateDimensions);
 ui.heightInput.addEventListener('input', updateDimensions);
+
+// Modal Events
+ui.btnConfirmCopies.addEventListener('click', () => {
+    const copies = parseInt(ui.modalInputCopies.value) || 1;
+    executePrint(copies);
+    closeCopiesModal();
+});
+ui.btnCancelCopies.addEventListener('click', closeCopiesModal);
+ui.modalInputCopies.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const copies = parseInt(ui.modalInputCopies.value) || 1;
+        executePrint(copies);
+        closeCopiesModal();
+    }
+    if (e.key === 'Escape') closeCopiesModal();
+});
+// Global Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && ui.copiesModal.style.display === 'flex') {
+        closeCopiesModal();
+    }
+});
 
 // History UI Events
 $('#historico-btn')?.addEventListener('click', showHistory);

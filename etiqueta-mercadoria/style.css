@@ -241,7 +241,9 @@ label {
 
     #screen-ui,
     #loading-overlay,
-    #preview-section {
+    #preview-section,
+    #popup-sucesso,
+    .modal {
         display: none !important;
     }
 
