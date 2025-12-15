@@ -300,8 +300,11 @@ async function handleSearch(e) {
 function openCopiesModal() {
     ui.copiesModal.style.display = 'flex';
     ui.modalInputCopies.value = '1';
-    ui.modalInputCopies.focus();
-    ui.modalInputCopies.select();
+    // Timeout needed to ensure element is visible before selection matches
+    setTimeout(() => {
+        ui.modalInputCopies.focus();
+        ui.modalInputCopies.select();
+    }, 100);
 }
 
 function closeCopiesModal() {
