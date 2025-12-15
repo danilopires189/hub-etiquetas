@@ -165,11 +165,16 @@ function generateLabel(product, addressItem, inputBarcode) {
         // Render Barcode
         const svg = item.querySelector('.barcode-svg');
         try {
-            // Using ITF for CODDV (digits only)
-            let code = product.CODDV;
-            if (code.length % 2 !== 0) code = '0' + code;
-
-            window.BarcodeLib.renderITF(svg, code);
+            // Using JsBarcode with CODE128 to allow odd-length barcodes without padding
+            // displayValue: false as requested (no legend in image)
+            JsBarcode(svg, product.CODDV, {
+                format: "CODE128",
+                displayValue: false,
+                fontSize: 16,
+                margin: 10,
+                height: 40,
+                width: 2
+            });
         } catch (e) {
             console.warn('Erro ao gerar barcode', e);
         }
