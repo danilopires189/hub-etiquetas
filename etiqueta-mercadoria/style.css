@@ -340,7 +340,7 @@ label {
     align-items: stretch;
     justify-content: space-between;
     overflow: hidden;
-    margin: 0.1mm 0;
+    margin: 0;
     height: 100%;
 }
 
@@ -359,13 +359,29 @@ label {
     height: 100%;
 }
 
-.label-barcode-container {
+.label-barcode-section {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    height: 100%;
+}
+
+.label-barcode-container {
     height: 70%;
-    /* Reduzido ainda mais para dar espaço ao número */
     display: flex;
     align-items: center;
     justify-content: flex-end;
+}
+
+.label-barcode-cod {
+    font-size: 6.5pt;
+    font-weight: 600;
+    color: #222;
+    text-align: left;
+    margin-top: 0.5mm;
+    line-height: 1.0;
 }
 
 .barcode-svg {
@@ -379,10 +395,10 @@ label {
 .label-row-bottom {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     border-top: 1px solid #000;
-    padding-top: 0.2mm;
-    margin-top: 0.2mm;
+    padding-top: 0.3mm;
+    margin-top: 0mm;
 }
 
 .label-addr {
@@ -390,6 +406,9 @@ label {
     font-weight: bold;
     font-family: monospace;
     color: #000;
+    line-height: 1;
+    padding-top: 0;
+    margin-top: 0;
 }
 
 .label-info-right {

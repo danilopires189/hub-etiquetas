@@ -145,8 +145,11 @@ function generateLabel(product, addressItem, inputBarcode) {
             
             <div class="label-row-middle">
                 <div class="label-big-num">${largeNum}</div>
-                <div class="label-barcode-container">
-                    <svg class="barcode-svg" preserveAspectRatio="none"></svg>
+                <div class="label-barcode-section">
+                    <div class="label-barcode-container">
+                        <svg class="barcode-svg" preserveAspectRatio="none"></svg>
+                    </div>
+                    <div class="label-barcode-cod">COD: ${codFormatted}</div>
                 </div>
             </div>
             
@@ -157,7 +160,6 @@ function generateLabel(product, addressItem, inputBarcode) {
                 </div>
                 <div class="label-info-right">
                     <div class="label-txt">MAT: ${matricula}</div>
-                    <div class="label-txt">COD: ${codFormatted}</div>
                 </div>
             </div>
         `;
