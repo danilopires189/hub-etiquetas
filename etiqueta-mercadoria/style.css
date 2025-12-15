@@ -272,7 +272,7 @@ label {
     width: var(--label-width);
     height: var(--label-height);
     box-sizing: border-box;
-    padding: 2mm 3mm;
+    padding: 0.5mm 1.5mm;
     font-family: 'Arial', sans-serif;
     background: white;
     display: flex;
@@ -299,21 +299,21 @@ label {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 1mm;
+    margin-bottom: 0.2mm;
 
     /* Termo Header Style */
     background: #f6f8fb;
     border: 1px solid #e5eaf5;
-    padding: 1mm 1.5mm;
-    border-radius: 2mm;
+    padding: 0.3mm 0.8mm;
+    border-radius: 1mm;
 }
 
 .label-desc {
-    font-size: 9pt;
+    font-size: 7.5pt;
     font-weight: 800;
     /* Bolder like Termo */
-    line-height: 1.1;
-    max-height: 2.2em;
+    line-height: 0.9;
+    max-height: 1.8em;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
@@ -326,38 +326,43 @@ label {
 
 .label-meta-top {
     text-align: right;
-    font-size: 7.5pt;
+    font-size: 6.5pt;
     width: 35%;
     color: #333;
     font-weight: 600;
+    line-height: 0.9;
 }
 
 /* 2. Middle: Big Num (Left) + Barcode (Right) */
 .label-row-middle {
     flex: 1;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: space-between;
     overflow: hidden;
-    margin: 1mm 0;
+    margin: 0.1mm 0;
+    height: 100%;
 }
 
 .label-big-num {
-    font-size: 74pt;
+    font-size: 110pt;
     font-weight: 900;
-    line-height: 0.8;
-    letter-spacing: -3px;
+    line-height: 0.6;
+    letter-spacing: -5px;
     text-align: left;
     margin-right: 0;
     color: #000;
     position: relative;
-    top: -2mm;
+    top: 0;
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .label-barcode-container {
     flex: 1;
-    height: 120%;
-    /* Estica verticalmente (mais 20% solicitado) */
+    height: 70%;
+    /* Reduzido ainda mais para dar espaço ao número */
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -376,11 +381,12 @@ label {
     justify-content: space-between;
     align-items: flex-end;
     border-top: 1px solid #000;
-    padding-top: 1mm;
+    padding-top: 0.2mm;
+    margin-top: 0.2mm;
 }
 
 .label-addr {
-    font-size: 16pt;
+    font-size: 13pt;
     font-weight: bold;
     font-family: monospace;
     color: #000;
@@ -388,12 +394,13 @@ label {
 
 .label-info-right {
     text-align: right;
-    font-size: 8pt;
+    font-size: 6.5pt;
     font-weight: 600;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     color: #222;
+    line-height: 1.0;
 }
 
 .label-txt {

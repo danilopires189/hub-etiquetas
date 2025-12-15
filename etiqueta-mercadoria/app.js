@@ -170,10 +170,10 @@ function generateLabel(product, addressItem, inputBarcode) {
             JsBarcode(svg, product.CODDV, {
                 format: "CODE128",
                 displayValue: false,
-                fontSize: 16,
-                margin: 10,
-                height: 40,
-                width: 2
+                fontSize: 10,
+                margin: 3,
+                height: 25,
+                width: 1.2
             });
         } catch (e) {
             console.warn('Erro ao gerar barcode', e);
