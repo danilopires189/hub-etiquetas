@@ -299,7 +299,7 @@ async function handleSearch(e) {
 
 function openCopiesModal() {
     ui.copiesModal.style.display = 'flex';
-    ui.modalInputCopies.value = '1';
+    ui.modalInputCopies.value = ui.copiesInput.value || '1';
     ui.modalInputCopies.focus();
     ui.modalInputCopies.select();
 }
