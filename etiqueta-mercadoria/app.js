@@ -19,10 +19,17 @@ const ui = {
     copiesModal: $('#copies-modal'),
     modalInputCopies: $('#modal-input-copies'),
     btnConfirmCopies: $('#confirm-copies'),
-    btnCancelCopies: $('#cancel-copies')
+    btnCancelCopies: $('#cancel-copies'),
+    // Validity Modal
+    validityModal: $('#validity-modal'),
+    modalInputValidity: $('#modal-input-validity'),
+    btnConfirmValidity: $('#confirm-validity'),
+    btnCancelValidity: $('#cancel-validity'),
+    checkValidade: $('#check-validade')
 };
 
 let pendingData = null;
+let pendingCopies = 1;
 
 // Data Store
 const Data = {
@@ -125,7 +132,7 @@ const getSeparacaoLargeNum = (address) => {
     return match[0].padStart(3, '0');
 };
 
-function generateLabel(product, addressItem, inputBarcode, copies = 1) {
+function generateLabel(product, addressItem, inputBarcode, copies = 1, validityDate = null) {
     const matricula = ui.matriculaInput.value.trim() || '---';
     const dateStr = curDateTime(); // e.g. 01/12/25 00:00
     const codFormatted = formatCODDV(product.CODDV);
@@ -137,6 +144,37 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1) {
     // Create label HTML
     const labelDiv = document.createElement('div');
     labelDiv.className = 'label-page';
+
+    // Validity Label (Optional, first)
+    if (validityDate) {
+        const item = document.createElement('div');
+        item.className = 'label-badge';
+        item.innerHTML = `
+            <div class="label-row-top">
+                <div class="label-desc">${product.DESC}</div>
+                <div class="label-meta-top">
+                    <div>${dateStr}</div>
+                </div>
+            </div>
+            
+            <div class="label-row-middle" style="display: flex; align-items: center; justify-content: flex-start; overflow: hidden;">
+                <!-- Maximized Validity Date, No Barcode -->
+                <div class="label-big-num" style="font-size: 87pt; width: 100%; text-align: left; line-height: 0.8; letter-spacing: -3px; font-family: 'Arial Black', sans-serif;">${validityDate}</div>
+            </div>
+            
+            <div class="label-row-bottom">
+                <div class="label-addr">
+                    ${shortAddr}
+                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 6px;">${inputBarcode}</span>
+                </div>
+                <div class="label-info-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                    <div class="label-txt">COD: ${codFormatted}</div>
+                    <div class="label-txt">MAT: ${matricula}</div>
+                </div>
+            </div>
+        `;
+        labelDiv.appendChild(item);
+    }
 
     for (let i = 0; i < copies; i++) {
         const item = document.createElement('div');
@@ -309,10 +347,22 @@ function openCopiesModal() {
 
 function closeCopiesModal() {
     ui.copiesModal.style.display = 'none';
+}
+
+function openValidityModal() {
+    ui.validityModal.style.display = 'flex';
+    ui.modalInputValidity.value = '';
+    setTimeout(() => {
+        ui.modalInputValidity.focus();
+    }, 100);
+}
+
+function closeValidityModal() {
+    ui.validityModal.style.display = 'none';
     ui.barcodeInput.focus();
 }
 
-async function executePrint(copies) {
+async function executePrint(copies, validityDate = null) {
     if (!pendingData) return;
     const { product, targetAddress, barcode, matricula, destinoType } = pendingData;
 
@@ -322,7 +372,7 @@ async function executePrint(copies) {
     showStatus(`Gerando etiquetas para: ${product.DESC} (${destinoType.toUpperCase()})`, 'success');
 
     // Generate Label
-    const labelEl = generateLabel(product, targetAddress, barcode, copies);
+    const labelEl = generateLabel(product, targetAddress, barcode, copies, validityDate);
 
     // Apply Dimensions (Ensure they are set)
     const w = ui.widthInput.value || '90';
@@ -356,8 +406,8 @@ async function executePrint(copies) {
         // Counter Logic (Runs after dialog closes)
         try {
             if (window.contadorGlobal) {
-                console.log(`📊 Incrementando contador: +${copies}`);
-                const novoValor = await window.contadorGlobal.incrementarContador(copies, 'mercadoria');
+                console.log(`📊 Incrementando contador: +${copies + (validityDate ? 1 : 0)}`);
+                const novoValor = await window.contadorGlobal.incrementarContador(copies + (validityDate ? 1 : 0), 'mercadoria');
                 mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${copies} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
             }
         } catch (err) {
@@ -390,23 +440,91 @@ ui.heightInput.addEventListener('input', updateDimensions);
 // Modal Events
 ui.btnConfirmCopies.addEventListener('click', () => {
     const copies = parseInt(ui.modalInputCopies.value) || 1;
-    executePrint(copies);
-    closeCopiesModal();
+    pendingCopies = copies;
+
+    if (ui.checkValidade.checked) {
+        closeCopiesModal();
+        openValidityModal();
+    } else {
+        executePrint(copies);
+        closeCopiesModal();
+    }
 });
-ui.btnCancelCopies.addEventListener('click', closeCopiesModal);
+
+ui.btnCancelCopies.addEventListener('click', () => {
+    closeCopiesModal();
+    ui.barcodeInput.focus();
+});
+
 ui.modalInputCopies.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         e.preventDefault();
         const copies = parseInt(ui.modalInputCopies.value) || 1;
-        executePrint(copies);
-        closeCopiesModal();
+        pendingCopies = copies;
+
+        if (ui.checkValidade.checked) {
+            closeCopiesModal();
+            openValidityModal();
+        } else {
+            executePrint(copies);
+            closeCopiesModal();
+        }
     }
     if (e.key === 'Escape') closeCopiesModal();
 });
+
+// Validity Modal Events
+ui.btnConfirmValidity.addEventListener('click', () => {
+    const val = ui.modalInputValidity.value.replace(/\D/g, '');
+    if (val.length !== 4) {
+        alert('A validade deve ter 4 dígitos (MMAA). Ex: 0126');
+        ui.modalInputValidity.focus();
+        return;
+    }
+    const month = parseInt(val.slice(0, 2));
+    if (month < 1 || month > 12) {
+        alert('Mês inválido! Digite um mês entre 01 e 12.');
+        ui.modalInputValidity.select();
+        return;
+    }
+    const formatted = val.slice(0, 2) + '/' + val.slice(2);
+    executePrint(pendingCopies, formatted);
+    closeValidityModal();
+});
+
+ui.btnCancelValidity.addEventListener('click', () => {
+    closeValidityModal();
+    // Do we go back to copies or cancel everything?
+    // "Cancelar" usually means cancel everything.
+    ui.barcodeInput.focus();
+});
+
+ui.modalInputValidity.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const val = ui.modalInputValidity.value.replace(/\D/g, '');
+        if (val.length !== 4) {
+            alert('A validade deve ter 4 dígitos (MMAA). Ex: 0126');
+            return;
+        }
+        const month = parseInt(val.slice(0, 2));
+        if (month < 1 || month > 12) {
+            alert('Mês inválido! Digite um mês entre 01 e 12.');
+            ui.modalInputValidity.select();
+            return;
+        }
+        const formatted = val.slice(0, 2) + '/' + val.slice(2);
+        executePrint(pendingCopies, formatted);
+        closeValidityModal();
+    }
+    if (e.key === 'Escape') closeValidityModal();
+});
+
 // Global Escape
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && ui.copiesModal.style.display === 'flex') {
-        closeCopiesModal();
+    if (e.key === 'Escape') {
+        if (ui.copiesModal.style.display === 'flex') closeCopiesModal();
+        if (ui.validityModal.style.display === 'flex') closeValidityModal();
     }
 });
 
