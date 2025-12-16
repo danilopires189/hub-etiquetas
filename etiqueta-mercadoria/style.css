@@ -311,7 +311,7 @@ label {
 }
 
 .label-desc {
-    font-size: 7.5pt;
+    font-size: 13pt;
     font-weight: 800;
     /* Bolder like Termo */
     line-height: 0.9;
@@ -378,7 +378,7 @@ label {
 }
 
 .label-barcode-cod {
-    font-size: 6.5pt;
+    font-size: 13pt;
     font-weight: 600;
     color: #222;
     text-align: left;
