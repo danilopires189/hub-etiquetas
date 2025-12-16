@@ -328,7 +328,7 @@ label {
 
 .label-meta-top {
     text-align: right;
-    font-size: 6.5pt;
+    font-size: 8.5pt;
     width: 35%;
     color: #333;
     font-weight: 600;
@@ -415,7 +415,7 @@ label {
 
 .label-info-right {
     text-align: right;
-    font-size: 6.5pt;
+    font-size: 8.5pt;
     font-weight: 600;
     display: flex;
     flex-direction: column;
@@ -697,4 +697,5 @@ label {
     to {
         width: 0%;
     }
+
 }
