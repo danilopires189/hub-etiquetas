@@ -395,6 +395,7 @@ async function executePrint(copies, validityDate = null) {
         matricula: matricula,
         address: targetAddress.ENDERECO,
         type: destinoType,
+        validity: validityDate,
         timestamp: new Date().toISOString()
     });
 
@@ -601,6 +602,7 @@ function renderHistory(list) {
                 <div class="historico-secondary" style="margin-top: 2px; color: #4b5563;">
                     <span>📍 ${item.address || '---'}</span> • 
                     <span>${(item.type || '').toUpperCase()}</span>
+                    ${item.validity ? ` • <span>📅 Val: ${item.validity}</span>` : ''}
                 </div>
                 <div class="historico-meta">${date}</div>
             </div>
