@@ -475,19 +475,46 @@ ui.modalInputCopies.addEventListener('keydown', (e) => {
 });
 
 // Validity Modal Events
-ui.btnConfirmValidity.addEventListener('click', () => {
-    const val = ui.modalInputValidity.value.replace(/\D/g, '');
+function validateValidityInput(val) {
     if (val.length !== 4) {
-        alert('A validade deve ter 4 dígitos (MMAA). Ex: 0126');
-        ui.modalInputValidity.focus();
-        return;
+        return { valid: false, msg: 'A validade deve ter 4 dígitos (MMAA). Ex: 0126' };
     }
     const month = parseInt(val.slice(0, 2));
+    const yearPart = parseInt(val.slice(2));
+    
     if (month < 1 || month > 12) {
-        alert('Mês inválido! Digite um mês entre 01 e 12.');
+        return { valid: false, msg: 'Mês inválido! Digite um mês entre 01 e 12.' };
+    }
+
+    const year = 2000 + yearPart;
+    const now = new Date();
+    
+    // Calculate month difference
+    // We compare (Year * 12 + MonthIndex)
+    const inputTotalMonths = year * 12 + (month - 1);
+    const currentTotalMonths = now.getFullYear() * 12 + now.getMonth();
+    const diff = inputTotalMonths - currentTotalMonths;
+
+    if (diff < 5) {
+        return { valid: false, msg: 'A validade deve ser de pelo menos 5 meses a partir de hoje.' };
+    }
+    if (diff > 60) {
+        return { valid: false, msg: 'A validade não pode ultrapassar 5 anos.' };
+    }
+
+    return { valid: true };
+}
+
+ui.btnConfirmValidity.addEventListener('click', () => {
+    const val = ui.modalInputValidity.value.replace(/\D/g, '');
+    const validation = validateValidityInput(val);
+
+    if (!validation.valid) {
+        alert(validation.msg);
         ui.modalInputValidity.select();
         return;
     }
+
     const formatted = val.slice(0, 2) + '/' + val.slice(2);
     executePrint(pendingCopies, formatted);
     closeValidityModal();
@@ -504,16 +531,14 @@ ui.modalInputValidity.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         e.preventDefault();
         const val = ui.modalInputValidity.value.replace(/\D/g, '');
-        if (val.length !== 4) {
-            alert('A validade deve ter 4 dígitos (MMAA). Ex: 0126');
-            return;
-        }
-        const month = parseInt(val.slice(0, 2));
-        if (month < 1 || month > 12) {
-            alert('Mês inválido! Digite um mês entre 01 e 12.');
+        const validation = validateValidityInput(val);
+
+        if (!validation.valid) {
+            alert(validation.msg);
             ui.modalInputValidity.select();
             return;
         }
+
         const formatted = val.slice(0, 2) + '/' + val.slice(2);
         executePrint(pendingCopies, formatted);
         closeValidityModal();
