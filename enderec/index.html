@@ -65,61 +65,86 @@
           <span class="title">Outro</span>
         </label>
       </div>
-      <small class="hint">Escolha um tipo um tipo de etiqueta.</small>
+      <small class="hint"></small>
     </div>
 
     <!-- 1) CAMPOS PULMÃO -->
     <div id="pulmaoFields" class="pulmao-fields hide">
-      <div class="field">
+      <div class="field" style="max-width: 110px;">
         <label for="prefixIni">Primeira rua</label>
         <input id="prefixIni" placeholder="ex.: PG01" maxlength="12" />
       </div>
-      <div class="field">
+      <div class="field" style="max-width: 110px;">
         <label for="prefixFim">Última rua</label>
         <input id="prefixFim" placeholder="ex.:PG03" maxlength="12" />
       </div>
 
-      <div class="field">
+      <div class="field" style="max-width: 80px;">
         <label>Bloco fixo</label>
         <input value="001" disabled title="Bloco fixo">
       </div>
 
-      <div class="field">
-        <label for="colIni">Número da primeira coluna </label>
+      <div class="field" style="max-width: 100px;">
+        <label for="colIni">Nº da 1ª coluna</label>
         <input id="colIni" type="number" min="1" max="999" value="1" />
       </div>
 
-      <div class="field">
-        <label for="colFim">Número da última coluna</label>
+      <div class="field" style="max-width: 120px;">
+        <label for="colFim">Nº da última coluna</label>
         <input id="colFim" type="number" min="1" max="999" value="31" />
       </div>
 
       <div class="field">
-        <label> Escolha os níveis</label>
-        <div id="nivels" class="row wrap" style="gap:6px;">
-          <label class="switch"><input type="checkbox" value="T" class="nivel"> <span>T</span></label>
-          <label class="switch"><input type="checkbox" value="1" class="nivel" checked> <span>1</span></label>
-          <label class="switch"><input type="checkbox" value="2" class="nivel" checked> <span>2</span></label>
-          <label class="switch"><input type="checkbox" value="3" class="nivel"> <span>3</span></label>
-          <label class="switch"><input type="checkbox" value="4" class="nivel"> <span>4</span></label>
-          <label class="switch"><input type="checkbox" value="5" class="nivel"> <span>5</span></label>
-          <label class="switch"><input type="checkbox" value="6" class="nivel"> <span>6</span></label>
-          <label class="switch"><input type="checkbox" value="7" class="nivel"> <span>7</span></label>
-          <label class="switch"><input type="checkbox" value="8" class="nivel"> <span>8</span></label>
-          <label class="switch"><input type="checkbox" value="9" class="nivel"> <span>9</span></label>
-          <label class="switch"><input type="checkbox" value="10" class="nivel"> <span>10</span></label>
-          <label class="switch"><input type="checkbox" id="nivAll"> <span>Todos</span></label>
+        <label>Escolha os níveis</label>
+        <div id="nivels"
+          style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 16px; border: 2px solid transparent; border-radius: 14px; background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%); box-shadow: 0 2px 8px rgba(6, 46, 111, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);">
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="T" class="nivel"> <span>T</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="1" class="nivel" checked> <span>1</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="2" class="nivel" checked> <span>2</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="3" class="nivel"> <span>3</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="4" class="nivel"> <span>4</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="5" class="nivel"> <span>5</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="6" class="nivel"> <span>6</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="7" class="nivel"> <span>7</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="8" class="nivel"> <span>8</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="9" class="nivel"> <span>9</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" value="10" class="nivel"> <span>10</span></label>
+          <label class="switch"
+            style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+              type="checkbox" id="nivAll"> <span>Todos</span></label>
         </div>
       </div>
     </div>
 
     <!-- 1b) CAMPOS ESTAÇÃO (prefixos e complemento) -->
     <div id="estacaoFields" class="estacao-fields hide">
-      <div class="field">
+      <div class="field" style="max-width: 100px;">
         <label for="prefixIniE">Primeira estação</label>
         <input id="prefixIniE" placeholder="ex.: M101" maxlength="12" />
       </div>
-      <div class="field">
+      <div class="field" style="max-width: 100px;">
         <label for="prefixFimE">Última estação</label>
         <input id="prefixFimE" placeholder="ex.: M106" maxlength="12" />
       </div>
@@ -132,11 +157,11 @@
     <!-- 1c) CAMPOS OUTRO -->
     <div id="outroFields" class="outro-fields hide">
       <!-- Linha 1: Estação -->
-      <div class="field full">
+      <div class="field" style="max-width: 200px;">
         <label>Estação</label>
         <div class="row">
-          <input id="prefixIniO" placeholder="Início" maxlength="12" style="flex:1" />
-          <input id="prefixFimO" placeholder="Fim" maxlength="12" style="flex:1" />
+          <input id="prefixIniO" placeholder="Início" maxlength="12" style="max-width: 90px;" />
+          <input id="prefixFimO" placeholder="Fim" maxlength="12" style="max-width: 90px;" />
         </div>
       </div>
 
@@ -147,8 +172,8 @@
         <div class="field" style="flex: 1; min-width: 200px;">
           <label>Bloco 1</label>
           <div class="row">
-            <input id="b1Ini" placeholder="Início" maxlength="12" style="flex:1" />
-            <input id="b1Fim" placeholder="Fim" maxlength="12" style="flex:1" />
+            <input id="b1Ini" placeholder="Início" maxlength="12" style="max-width: 90px;" />
+            <input id="b1Fim" placeholder="Fim" maxlength="12" style="max-width: 90px;" />
           </div>
         </div>
 
@@ -156,8 +181,8 @@
         <div class="field" style="flex: 1; min-width: 200px;">
           <label>Bloco 2</label>
           <div class="row">
-            <input id="b2Ini" placeholder="Início" maxlength="12" style="flex:1" />
-            <input id="b2Fim" placeholder="Fim" maxlength="12" style="flex:1" />
+            <input id="b2Ini" placeholder="Início" maxlength="12" style="max-width: 90px;" />
+            <input id="b2Fim" placeholder="Fim" maxlength="12" style="max-width: 90px;" />
           </div>
         </div>
 
@@ -165,22 +190,22 @@
         <div class="field" style="flex: 1; min-width: 200px;">
           <label>Bloco 3</label>
           <div class="row">
-            <input id="b3Ini" placeholder="Início" maxlength="12" style="flex:1" />
-            <input id="b3Fim" placeholder="Fim" maxlength="12" style="flex:1" />
+            <input id="b3Ini" placeholder="Início" maxlength="12" style="max-width: 90px;" />
+            <input id="b3Fim" placeholder="Fim" maxlength="12" style="max-width: 90px;" />
           </div>
         </div>
       </div>
 
       <!-- Linha 3: Separador -->
-      <div class="field">
+      <div class="field" style="max-width: 90px;">
         <label for="separador">Separador</label>
         <input id="separador" placeholder="Padrão: ." value="." maxlength="5" />
       </div>
     </div>
 
     <!-- 2) AJUSTES (comum aos dois tipos) -->
-    <div class="field">
-      <label>Cópias por etiqueta</label>
+    <div class="field" style="max-width: 80px; margin-left: 20px;">
+      <label>Nº de cópias</label>
       <input id="copias" type="number" min="1" value="1" />
     </div>
 
@@ -199,7 +224,7 @@
       </div>
     </div>
 
-    <div class="field">
+    <div class="field" style="display: none;">
       <label for="orient">Orientação</label>
       <select id="orient">
         <option value="h" selected>Horizontal</option>
@@ -208,7 +233,7 @@
       </select>
     </div>
 
-    <div class="field">
+    <div class="field" style="display: none;">
       <label for="logo">Logo na etiqueta</label>
       <div class="row wrap">
         <label class="switch"><input type="checkbox" id="logo" checked><span>Exibir (Pague Menos)</span></label>
@@ -219,7 +244,7 @@
       </div>
     </div>
 
-    <div class="field">
+    <div class="field" style="display: none;">
       <label for="logomm">Tamanho da logo (mm)</label>
       <input id="logomm" type="number" min="6" value="10">
     </div>
