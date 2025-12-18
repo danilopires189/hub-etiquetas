@@ -259,4 +259,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (el) el.addEventListener('input', setVars);
   });
   setVars();
+
+  // Modal de configurações de dimensão e rotação
+  const dimensaoModal = $('#dimensaoModal');
+  const openBtn = $('#openDimensaoModal');
+  const closeBtn = $('#closeDimensaoModal');
+  const saveBtn = $('#saveDimensaoModal');
+
+  if (openBtn) {
+    openBtn.addEventListener('click', () => {
+      dimensaoModal.style.display = 'flex';
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      dimensaoModal.style.display = 'none';
+    });
+  }
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      setVars();
+      dimensaoModal.style.display = 'none';
+    });
+  }
+
+  // Fechar modal clicando fora
+  if (dimensaoModal) {
+    dimensaoModal.addEventListener('click', (e) => {
+      if (e.target === dimensaoModal) {
+        dimensaoModal.style.display = 'none';
+      }
+    });
+  }
 });
