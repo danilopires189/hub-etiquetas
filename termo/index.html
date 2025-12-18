@@ -67,22 +67,34 @@
     <div id="blocoId" class="blocovis animate-slide-in-up">
       <div class="field span3">
         <label for="idEtiqueta">ID da etiqueta</label>
-        <input id="idEtiqueta" type="text" maxlength="23" placeholder="ex.: 22025235002035021200026" />
+        <div style="position: relative;">
+          <input id="idEtiqueta" type="text" maxlength="23" placeholder="ex.: 22025235002035021200026"
+            style="padding-left: 45px;" />
+          <div class="scanner-icon"
+            style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; z-index: 2;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+              </path>
+              <line x1="4" y1="12" x2="20" y2="12"></line>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
 
     <div id="blocoCampos" class="blocohide animate-slide-in-up">
-      <div class="field span2">
+      <div class="field">
         <label for="cd">Informe o CD.</label>
         <input id="cd" type="number" min="1" max="9" list="listCD" placeholder="ex.: 2" step="1" />
         <datalist id="listCD"></datalist>
         <small class="hint"></small>
+      </div>
 
-        <div class="field">
-          <label for="numeroVolume">N° do volume </label>
-          <input id="numeroVolume" type="text" inputmode="numeric" pattern="\d{1,5}" placeholder="ex.: 9" disabled />
-          <small class="hint"></small>
-        </div>
+      <div class="field">
+        <label for="numeroVolume">N° do volume</label>
+        <input id="numeroVolume" type="text" inputmode="numeric" pattern="\d{1,5}" placeholder="ex.: 9" disabled />
+        <small class="hint"></small>
       </div>
 
       <div class="field">
@@ -109,12 +121,12 @@
     </div>
 
     <div class="field">
-      <label for="qtdVolumes">Quantidade de volumes</label>
+      <label for="qtdVolumes">Qtd de volumes</label>
       <input id="qtdVolumes" type="number" min="1" value="2" />
     </div>
 
     <div class="field">
-      <label for="matricula">Matrícula <span class="required">*</span></label>
+      <label for="matricula">Matrícula</label>
       <input id="matricula" type="text" placeholder="ex.: 88885" required />
       <small class="hint">Campo obrigatório para geração de etiquetas</small>
     </div>

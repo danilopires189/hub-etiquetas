@@ -7,7 +7,7 @@ const onlyDigits = (s) => String(s || '').replace(/\D+/g, '');
 function validarMatricula(matricula) {
   // Tratar valores null, undefined e converter para string
   const mat = matricula != null ? String(matricula).trim() : '';
-  
+
   // Verificar se está vazio ou contém apenas espaços
   if (!mat || mat.length === 0) {
     return {
@@ -15,10 +15,10 @@ function validarMatricula(matricula) {
       erro: 'Matrícula é obrigatória. Por favor, informe sua matrícula.'
     };
   }
-  
+
   // Se chegou até aqui, a matrícula é válida
-  return { 
-    valida: true 
+  return {
+    valida: true
   };
 }
 
@@ -360,7 +360,7 @@ function gerar() {
     // Validar matrícula antes de processar qualquer etiqueta
     const matriculaInput = $('#matricula').value;
     const validacaoMatricula = validarMatricula(matriculaInput);
-    
+
     if (!validacaoMatricula.valida) {
       exibirErroMatricula(validacaoMatricula.erro);
       return; // Interromper o processo quando validação falhar
@@ -455,6 +455,7 @@ function gerar() {
         loja: getLojaDesc(parsed.cd, parsed.loja),
         rota: getRotaDesc(parsed.cd, parsed.rota),
         qtdVolumes: totalVol,
+        matricula: mat,
         dataSeparacao: `${dd}/${mm}/${aa}`,
         horaSeparacao: `${hh}:${mi}`,
         timestamp: now.toISOString()
@@ -475,6 +476,7 @@ function gerar() {
         loja: getLojaDesc(cd, loja),
         rota: getRotaDesc(cd, rota),
         qtdVolumes: totalVol,
+        matricula: mat,
         dataSeparacao: `${dd}/${mm}/${aa}`,
         horaSeparacao: `${hh}:${mi}`,
         timestamp: now.toISOString()
@@ -662,6 +664,7 @@ function createTermoHistoryItemHTML(item) {
           <span>Rota: ${item.rota}</span>
         </div>
         <div class="historico-meta">
+          ${item.matricula ? `<span>Matrícula: ${item.matricula}</span>` : ''}
           <span>Separado em: ${item.dataSeparacao} às ${item.horaSeparacao}</span>
         </div>
       </div>
