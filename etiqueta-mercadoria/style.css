@@ -568,7 +568,7 @@ label {
 }
 
 .label-barcode-cod {
-    font-size: 11.25pt;
+    font-size: 09.50pt;
     font-weight: bold;
     color: #222;
     text-align: left;
@@ -577,7 +577,7 @@ label {
 }
 
 .label-barcode-label {
-    font-size: 8pt;
+    font-size: 9pt;
     font-weight: 600;
     color: #666;
     text-align: left;
