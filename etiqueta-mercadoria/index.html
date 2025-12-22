@@ -288,7 +288,17 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- Fallback QR Code library -->
+    <script>
+        // Simple QR Code fallback if main library fails
+        if (typeof QRCode === 'undefined') {
+            console.warn('Main QRCode library failed, loading fallback...');
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+            document.head.appendChild(script);
+        }
+    </script>
     <script src="../shared/barcode.js"></script>
     <!-- Contador Global -->
     <script src="../js/contador-global-centralizado.js"></script>
