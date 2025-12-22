@@ -176,22 +176,49 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
         labelDiv.appendChild(item);
     }
 
+    // QR Code Generation
+    function renderQR(div, text) {
+        div.innerHTML = '';
+        if (window.qrcode) {
+            // TypeNumber 0 (Auto), ErrorCorrectionLevel 'L' (Low) - for max size/readability
+            // Or use type 4, 'M' like avulso if needed. 
+            // 'L' is usually enough for simple codes and scans faster/smaller.
+            // Avulso uses: window.qrcode(4, 'M');
+            const qr = window.qrcode(0, 'M');
+            qr.addData(text);
+            qr.make();
+            const svgTag = qr.createSvgTag({ cellSize: 2, margin: 0 }); // cellSize 2 allows scaling via CSS
+            div.innerHTML = svgTag;
+
+            // Adjust SVG to fit container
+            const svg = div.querySelector('svg');
+            if (svg) {
+                svg.style.width = '100%';
+                svg.style.height = '100%';
+                svg.setAttribute('preserveAspectRatio', 'none'); // Expand to fill
+            }
+        } else {
+            console.error('QR Code library not loaded');
+            div.textContent = 'Err: LibMissing';
+        }
+    }
+
     for (let i = 0; i < copies; i++) {
         const item = document.createElement('div');
         item.className = 'label-badge';
         item.innerHTML = `
             <div class="label-row-top">
-                <div class="label-desc">${product.DESC}</div>
                 <div class="label-meta-top">
                     <div>${dateStr}</div>
                 </div>
+                <div class="label-desc">${product.DESC}</div>
             </div>
             
             <div class="label-row-middle">
                 <div class="label-big-num">${largeNum}</div>
                 <div class="label-barcode-section">
-                    <div class="label-barcode-container">
-                        <svg class="barcode-svg" preserveAspectRatio="none"></svg>
+                    <div class="label-barcode-container" style="justify-content: center;">
+                         <div class="qrcode-div" style="height: 60%; aspect-ratio: 1/1;"></div>
                     </div>
                     <div class="label-barcode-label">COD:</div>
                     <div class="label-barcode-cod">${codFormatted}</div>
@@ -199,9 +226,11 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
             </div>
             
             <div class="label-row-bottom">
-                <div class="label-addr">
-                    ${shortAddr}
-                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 6px;">${inputBarcode}</span>
+                <div class="label-addr" style="display: flex; align-items: baseline; white-space: nowrap; overflow: hidden;">
+                    ${shortAddr.replace(/\s+/g, '')}
+                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 6px; display: inline-block;">
+                        ${inputBarcode.slice(0, -4)}<span style="font-size: 11pt; font-weight: 800;">${inputBarcode.slice(-4)}</span>
+                    </span>
                 </div>
                 <div class="label-info-right">
                     <div class="label-txt">MAT: ${matricula}</div>
@@ -209,21 +238,14 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
             </div>
         `;
 
-        // Render Barcode
-        const svg = item.querySelector('.barcode-svg');
+        // Render QR Code (using product.CODDV or inputBarcode? 
+        // Original code used product.CODDV for barcode: JsBarcode(svg, product.CODDV, ...)
+        // User said: "ao inves de gerar barras gerar qr code do memso tamnho"
+        const qrDiv = item.querySelector('.qrcode-div');
         try {
-            // Using JsBarcode with CODE128 to allow odd-length barcodes without padding
-            // displayValue: false as requested (no legend in image)
-            JsBarcode(svg, product.CODDV, {
-                format: "CODE128",
-                displayValue: false,
-                fontSize: 10,
-                margin: 3,
-                height: 25,
-                width: 1.2
-            });
+            renderQR(qrDiv, product.CODDV);
         } catch (e) {
-            console.warn('Erro ao gerar barcode', e);
+            console.warn('Erro ao gerar QRCode', e);
         }
 
         labelDiv.appendChild(item);
@@ -482,14 +504,14 @@ function validateValidityInput(val) {
     }
     const month = parseInt(val.slice(0, 2));
     const yearPart = parseInt(val.slice(2));
-    
+
     if (month < 1 || month > 12) {
         return { valid: false, msg: 'Mês inválido! Digite um mês entre 01 e 12.' };
     }
 
     const year = 2000 + yearPart;
     const now = new Date();
-    
+
     // Calculate month difference
     // We compare (Year * 12 + MonthIndex)
     const inputTotalMonths = year * 12 + (month - 1);
@@ -707,7 +729,7 @@ function filterHistory() {
         console.error('Error in filterHistory:', error);
         // Fallback: show all data if search fails
         renderHistory(historyData);
-        
+
         // Show user-friendly error message
         const statusMsg = document.querySelector('#status-msg');
         if (statusMsg) {
