@@ -568,11 +568,21 @@ label {
 }
 
 .label-barcode-cod {
-    font-size: 7.5pt;
-    font-weight: 600;
+    font-size: 11.25pt;
+    font-weight: bold;
     color: #222;
     text-align: left;
-    margin-top: 0.5mm;
+    margin-top: 0mm;
+    line-height: 1.0;
+}
+
+.label-barcode-label {
+    font-size: 8pt;
+    font-weight: 600;
+    color: #666;
+    text-align: left;
+    margin-top: 1mm;
+    margin-bottom: 0.2mm;
     line-height: 1.0;
 }
 

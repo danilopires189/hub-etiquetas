@@ -168,7 +168,7 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
                     <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 6px;">${inputBarcode}</span>
                 </div>
                 <div class="label-info-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
-                    <div class="label-txt">COD: ${codFormatted}</div>
+                    <div class="label-txt">${codFormatted}</div>
                     <div class="label-txt">MAT: ${matricula}</div>
                 </div>
             </div>
@@ -193,7 +193,8 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
                     <div class="label-barcode-container">
                         <svg class="barcode-svg" preserveAspectRatio="none"></svg>
                     </div>
-                    <div class="label-barcode-cod">COD: ${codFormatted}</div>
+                    <div class="label-barcode-label">COD:</div>
+                    <div class="label-barcode-cod">${codFormatted}</div>
                 </div>
             </div>
             
