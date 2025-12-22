@@ -575,6 +575,11 @@ document.querySelectorAll('input[name="searchType"]').forEach(r => {
     r.addEventListener('change', filterHistory);
 });
 
+// Text Normalization Utility
+function normalizeSearchTerm(text) {
+    return (text || '').toLowerCase().trim();
+}
+
 // History Logic
 function saveHistory(item) {
     // Add ID
@@ -638,32 +643,82 @@ function renderHistory(list) {
 }
 
 function filterHistory() {
-    const term = $('#search-input').value.toLowerCase();
-    const type = document.querySelector('input[name="searchType"]:checked').value;
+    try {
+        const term = normalizeSearchTerm($('#search-input').value);
+        const type = document.querySelector('input[name="searchType"]:checked').value;
 
-    const filtered = historyData.filter(item => {
-        if (!term) return true;
-
-        const dateStr = new Date(item.timestamp).toLocaleString('pt-BR').toLowerCase();
-
-        if (type === 'all') {
-            return (item.desc || '').toLowerCase().includes(term) ||
-                (item.coddv || '').toLowerCase().includes(term) ||
-                (item.matricula || '').toLowerCase().includes(term) ||
-                dateStr.includes(term);
-        } else if (type === 'matricula') {
-            return (item.matricula || '').toLowerCase().includes(term);
-        } else if (type === 'coddv') {
-            return (item.coddv || '').toLowerCase().includes(term);
-        } else if (type === 'descricao') {
-            return (item.desc || '').toLowerCase().includes(term);
-        } else if (type === 'data') {
-            return dateStr.includes(term);
+        // Early return for empty search - show all results
+        if (!term) {
+            renderHistory(historyData);
+            return;
         }
-        return true;
-    });
 
-    renderHistory(filtered);
+        const filtered = historyData.filter(item => {
+            try {
+                // Normalize all searchable fields with error handling
+                const normalizedFields = {
+                    desc: normalizeSearchTerm(item.desc),
+                    coddv: normalizeSearchTerm(item.coddv),
+                    matricula: normalizeSearchTerm(item.matricula),
+                    barcode: normalizeSearchTerm(item.barcode),
+                    date: ''
+                };
+
+                // Safe date formatting with error handling
+                try {
+                    normalizedFields.date = new Date(item.timestamp).toLocaleString('pt-BR').toLowerCase();
+                } catch (dateError) {
+                    console.warn('Invalid date format for item:', item.id, dateError);
+                    normalizedFields.date = '';
+                }
+
+                // Apply filter logic with performance optimization
+                switch (type) {
+                    case 'all':
+                        // Use some() for early termination when match is found
+                        return Object.values(normalizedFields).some(field => field.includes(term));
+                    case 'ean':
+                        return normalizedFields.barcode.includes(term);
+                    case 'matricula':
+                        return normalizedFields.matricula.includes(term);
+                    case 'coddv':
+                        return normalizedFields.coddv.includes(term);
+                    case 'descricao':
+                        return normalizedFields.desc.includes(term);
+                    case 'data':
+                        return normalizedFields.date.includes(term);
+                    default:
+                        return true;
+                }
+            } catch (itemError) {
+                console.warn('Error processing history item:', item.id, itemError);
+                return false; // Exclude problematic items from results
+            }
+        });
+
+        renderHistory(filtered);
+
+        // Performance monitoring for large datasets
+        if (historyData.length > 1000) {
+            console.log(`Search performance: Filtered ${historyData.length} items to ${filtered.length} results`);
+        }
+
+    } catch (error) {
+        console.error('Error in filterHistory:', error);
+        // Fallback: show all data if search fails
+        renderHistory(historyData);
+        
+        // Show user-friendly error message
+        const statusMsg = document.querySelector('#status-msg');
+        if (statusMsg) {
+            statusMsg.textContent = 'Erro na busca. Mostrando todos os registros.';
+            statusMsg.className = 'status-msg warning';
+            setTimeout(() => {
+                statusMsg.textContent = '';
+                statusMsg.className = 'status-msg';
+            }, 3000);
+        }
+    }
 }
 
 
