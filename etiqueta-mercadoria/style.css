@@ -537,7 +537,7 @@ label {
 
 .label-big-num {
     font-size: 110pt;
-    font-weight: 900;
+    font-weight: normal;
     line-height: 0.6;
     letter-spacing: -5px;
     text-align: left;
