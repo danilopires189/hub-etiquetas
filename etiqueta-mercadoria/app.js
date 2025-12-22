@@ -209,81 +209,21 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
             </div>
         `;
 
-        // Render QR Code - Otimizado para impressão instantânea
-        const svgContainer = item.querySelector('.barcode-svg');
-
-        if (svgContainer) {
-            // Criar QR code usando uma implementação simples
-            const qrData = product.CODDV;
-
-            // Usar múltiplas APIs para garantir carregamento rápido
-            const qrUrls = [
-                `https://api.qrserver.com/v1/create-qr-code/?size=120x30&data=${encodeURIComponent(qrData)}&format=png&margin=0`,
-                `https://chart.googleapis.com/chart?chs=120x30&cht=qr&chl=${encodeURIComponent(qrData)}`,
-                `https://quickchart.io/qr?text=${encodeURIComponent(qrData)}&size=120x30`
-            ];
-
-            // Substituir o SVG por uma imagem simples
-            const img = document.createElement('img');
-            img.className = 'qr-code-img';
-            img.alt = `QR Code: ${product.CODDV}`;
-
-            // Otimizações para carregamento rápido
-            img.loading = 'eager';
-            img.decoding = 'sync';
-            img.crossOrigin = 'anonymous'; // Para evitar problemas de CORS
-
-            // Substituir o SVG pela imagem ANTES de definir o src
-            svgContainer.parentNode.replaceChild(img, svgContainer);
-
-            // Tentar carregar com a primeira URL
-            let urlIndex = 0;
-            const tryLoadQR = () => {
-                if (urlIndex < qrUrls.length) {
-                    img.src = qrUrls[urlIndex];
-                    console.log(`Tentando carregar QR code (tentativa ${urlIndex + 1}):`, qrUrls[urlIndex]);
-                } else {
-                    // Fallback final: canvas com texto
-                    console.warn('Todas as APIs falharam, usando canvas fallback');
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 120;
-                    canvas.height = 30;
-                    canvas.className = 'qr-code-img';
-                    const ctx = canvas.getContext('2d');
-
-                    // Fundo branco
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(0, 0, 120, 30);
-
-                    // Texto do código
-                    ctx.fillStyle = 'black';
-                    ctx.font = 'bold 12px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(qrData, 60, 20);
-
-                    // Substituir a imagem pelo canvas
-                    img.parentNode.replaceChild(canvas, img);
-                }
-            };
-
-            // Evento de sucesso
-            img.onload = function () {
-                console.log('QR code carregado com sucesso:', qrUrls[urlIndex]);
-            };
-
-            // Evento de erro - tenta próxima URL
-            img.onerror = function () {
-                console.warn(`Erro ao carregar QR code da URL ${urlIndex + 1}, tentando próxima...`);
-                urlIndex++;
-                setTimeout(tryLoadQR, 100); // Pequeno delay antes de tentar próxima URL
-            };
-
-            // Iniciar carregamento
-            tryLoadQR();
-
-            console.log('QR Code otimizado iniciado para:', product.CODDV);
-        } else {
-            console.error('Container do código de barras não encontrado');
+        // Render Barcode
+        const svg = item.querySelector('.barcode-svg');
+        try {
+            // Using JsBarcode with CODE128 to allow odd-length barcodes without padding
+            // displayValue: false as requested (no legend in image)
+            JsBarcode(svg, product.CODDV, {
+                format: "CODE128",
+                displayValue: false,
+                fontSize: 10,
+                margin: 3,
+                height: 25,
+                width: 1.2
+            });
+        } catch (e) {
+            console.warn('Erro ao gerar barcode', e);
         }
 
         labelDiv.appendChild(item);
@@ -460,50 +400,8 @@ async function executePrint(copies, validityDate = null) {
         timestamp: new Date().toISOString()
     });
 
-    // Aguardar carregamento completo dos QR codes antes de imprimir
-    showStatus('Aguardando carregamento dos QR codes...', 'info');
-
-    // Função para aguardar carregamento de todas as imagens
-    const waitForQRCodes = () => {
-        return new Promise((resolve) => {
-            const images = labelEl.querySelectorAll('.qr-code-img');
-            let loadedCount = 0;
-            const totalImages = images.length;
-
-            if (totalImages === 0) {
-                resolve(); // Não há imagens para carregar
-                return;
-            }
-
-            const checkComplete = () => {
-                loadedCount++;
-                if (loadedCount >= totalImages) {
-                    resolve();
-                }
-            };
-
-            images.forEach(img => {
-                if (img.complete && img.naturalWidth > 0) {
-                    checkComplete();
-                } else {
-                    img.onload = checkComplete;
-                    img.onerror = checkComplete; // Conta erro como "carregado" para não travar
-                }
-            });
-
-            // Timeout de segurança - não espera mais que 3 segundos
-            setTimeout(() => {
-                console.warn('Timeout aguardando QR codes, imprimindo mesmo assim');
-                resolve();
-            }, 3000);
-        });
-    };
-
-    // Aguardar QR codes e então imprimir
-    await waitForQRCodes();
-    showStatus('QR codes carregados, iniciando impressão...', 'success');
-
     // Print then Counter
+    // Use setTimeout to ensure rendering before print, and make callback async to handle await
     setTimeout(async () => {
         window.print(); // Blocks execution until dialog closes
 
@@ -520,7 +418,7 @@ async function executePrint(copies, validityDate = null) {
 
         ui.barcodeInput.value = ''; // Clear after print
         ui.barcodeInput.focus();
-    }, 500); // Aumentei para 500ms para garantir renderização completa
+    }, 100);
 }
 
 function showStatus(msg, type) {
@@ -584,14 +482,14 @@ function validateValidityInput(val) {
     }
     const month = parseInt(val.slice(0, 2));
     const yearPart = parseInt(val.slice(2));
-
+    
     if (month < 1 || month > 12) {
         return { valid: false, msg: 'Mês inválido! Digite um mês entre 01 e 12.' };
     }
 
     const year = 2000 + yearPart;
     const now = new Date();
-
+    
     // Calculate month difference
     // We compare (Year * 12 + MonthIndex)
     const inputTotalMonths = year * 12 + (month - 1);
@@ -809,7 +707,7 @@ function filterHistory() {
         console.error('Error in filterHistory:', error);
         // Fallback: show all data if search fails
         renderHistory(historyData);
-
+        
         // Show user-friendly error message
         const statusMsg = document.querySelector('#status-msg');
         if (statusMsg) {
@@ -838,12 +736,4 @@ document.querySelectorAll('input[name="destino"]').forEach(r => {
 });
 
 // Boot
-document.addEventListener('DOMContentLoaded', function () {
-    // Check if QRCode library is loaded
-    if (typeof QRCode === 'undefined') {
-        console.error('QRCode library not loaded!');
-    } else {
-        console.log('QRCode library loaded successfully');
-    }
-    init();
-});
+init();

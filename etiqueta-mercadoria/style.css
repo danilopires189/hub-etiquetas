@@ -593,31 +593,6 @@ label {
     display: block;
 }
 
-/* QR Code styling - Otimizado */
-.qr-code-img {
-    height: 100%;
-    width: auto;
-    max-width: 100%;
-    display: block;
-    object-fit: contain;
-    /* Otimizações de performance */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    /* Evita flickering durante carregamento */
-    background-color: white;
-    transition: none;
-}
-
-/* QR Code canvas fallback */
-canvas.qr-code-img {
-    height: 100%;
-    width: auto;
-    max-width: 100%;
-    display: block;
-    object-fit: contain;
-    background-color: white;
-}
-
 /* 3. Footer: Address | Mat | Cod */
 .label-row-bottom {
     display: flex;
