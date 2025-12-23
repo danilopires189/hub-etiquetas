@@ -49,6 +49,19 @@ function curDateTime() {
     return `${d} ${t}`;
 }
 
+// Matricula Validation
+function validateMatricula(matricula) {
+    // Remove any non-numeric characters
+    const cleanMatricula = matricula.replace(/\D/g, '');
+
+    // Check if it's 5 or 6 digits
+    if (cleanMatricula.length < 5 || cleanMatricula.length > 6) {
+        return { valid: false, msg: 'Matrícula inválida!' };
+    }
+
+    return { valid: true, cleaned: cleanMatricula };
+}
+
 // Initialization
 async function init() {
     try {
@@ -283,8 +296,17 @@ async function handleSearch(e) {
     // 1. Validate Matricula
     if (!matricula) {
         showStatus('⚠️ Informe a matrícula antes de continuar!', 'warning');
-        // Flash effect or sound could be added
         ui.matriculaInput.focus();
+        ui.matriculaInput.style.borderColor = 'red';
+        setTimeout(() => ui.matriculaInput.style.borderColor = '', 2000);
+        return;
+    }
+
+    const matriculaValidation = validateMatricula(matricula);
+    if (!matriculaValidation.valid) {
+        showStatus('⚠️ ' + matriculaValidation.msg, 'warning');
+        ui.matriculaInput.focus();
+        ui.matriculaInput.select();
         ui.matriculaInput.style.borderColor = 'red';
         setTimeout(() => ui.matriculaInput.style.borderColor = '', 2000);
         return;
@@ -439,6 +461,7 @@ async function executePrint(copies, validityDate = null) {
         }
 
         ui.barcodeInput.value = ''; // Clear after print
+        ui.matriculaInput.value = ''; // Clear matricula after print
         ui.barcodeInput.focus();
     }, 100);
 }
@@ -460,6 +483,66 @@ function updateDimensions() {
 ui.form.addEventListener('submit', handleSearch);
 ui.widthInput.addEventListener('input', updateDimensions);
 ui.heightInput.addEventListener('input', updateDimensions);
+
+// Matricula Input Events - Real-time validation and formatting
+ui.matriculaInput.addEventListener('input', (e) => {
+    // Only allow numeric characters
+    let value = e.target.value.replace(/\D/g, '');
+
+    // Limit to 6 characters
+    if (value.length > 6) {
+        value = value.slice(0, 6);
+    }
+
+    e.target.value = value;
+
+    // Visual feedback
+    if (value.length > 0) {
+        const validation = validateMatricula(value);
+        if (validation.valid) {
+            e.target.style.borderColor = '#10b981'; // Green
+            e.target.style.backgroundColor = '#f0fdf4'; // Light green
+        } else {
+            e.target.style.borderColor = '#ef4444'; // Red
+            e.target.style.backgroundColor = '#fef2f2'; // Light red
+        }
+    } else {
+        e.target.style.borderColor = '';
+        e.target.style.backgroundColor = '';
+    }
+});
+
+ui.matriculaInput.addEventListener('blur', (e) => {
+    const value = e.target.value.trim();
+    if (value.length > 0) {
+        const validation = validateMatricula(value);
+        if (!validation.valid) {
+            showStatus('⚠️ ' + validation.msg, 'warning');
+        }
+    }
+    // Reset visual feedback on blur
+    setTimeout(() => {
+        e.target.style.borderColor = '';
+        e.target.style.backgroundColor = '';
+    }, 2000);
+});
+
+// Prevent non-numeric input on keypress
+ui.matriculaInput.addEventListener('keypress', (e) => {
+    // Allow backspace, delete, tab, escape, enter
+    if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+        // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (e.keyCode === 65 && e.ctrlKey === true) ||
+        (e.keyCode === 67 && e.ctrlKey === true) ||
+        (e.keyCode === 86 && e.ctrlKey === true) ||
+        (e.keyCode === 88 && e.ctrlKey === true)) {
+        return;
+    }
+    // Ensure that it is a number and stop the keypress
+    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+        e.preventDefault();
+    }
+});
 
 // Modal Events
 ui.btnConfirmCopies.addEventListener('click', () => {
