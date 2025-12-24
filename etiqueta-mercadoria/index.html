@@ -69,7 +69,7 @@
                     <label for="input-barcode">Código de Barras (Bipe aqui)</label>
                     <div style="position: relative;">
                         <input type="text" id="input-barcode" class="input-lg" placeholder="Aguardando leitor..."
-                            autocomplete="off" style="padding-left: 45px; max-width: 300px;">
+                            autocomplete="off" style="padding-left: 45px; max-width: 375px;">
                         <div class="scanner-icon"
                             style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -83,32 +83,44 @@
                     </div>
                 </div>
 
-                <div class="form-group small-group">
-                    <label for="input-matricula">Matrícula</label>
-                    <input type="text" id="input-matricula" class="input-lg" placeholder="00000" required 
-                           maxlength="6" pattern="[0-9]{5,6}" title="Digite 5 ou 6 números">
-                </div>
+                <div style="display: flex; gap: 0.2rem; flex-wrap: wrap;">
+                    <div class="form-group small-group">
+                        <label for="input-matricula">Matrícula</label>
+                        <input type="text" id="input-matricula" class="input-lg" placeholder="00000" required 
+                               maxlength="6" pattern="[0-9]{5,6}" title="Digite 5 ou 6 números">
+                    </div>
 
-                <div class="form-group small-group">
-                    <label style="font-size: 0.8rem;">Destino</label>
-                    <div style="display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.2rem;">
-                        <label
-                            style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
-                            <input type="radio" name="destino" value="pulmao" checked> Pulmão
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
-                            <input type="radio" name="destino" value="separacao"> Separação
-                        </label>
+                    <div class="form-group small-group" style="margin-left: 37.8px;">
+                        <label style="font-size: 0.8rem;">Destino</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.2rem;">
+                            <label
+                                style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
+                                <input type="radio" name="destino" value="pulmao" checked> Pulmão
+                            </label>
+                            <label
+                                style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
+                                <input type="radio" name="destino" value="separacao"> Separação
+                            </label>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group small-group" style="display: flex; align-items: flex-end; padding-bottom: 5px;">
-                    <label
-                        style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
-                        <input type="checkbox" id="check-validade" style="width: 18px; height: 18px;">
-                        Inserir Validade
-                    </label>
+                <div style="display: flex; gap: 0.2rem; flex-wrap: wrap;">
+                    <div class="form-group small-group" style="display: flex; align-items: flex-end; padding-bottom: 5px; margin-left: 37.8px;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                            <input type="checkbox" id="check-validade" style="width: 18px; height: 18px;">
+                            Inserir Validade
+                        </label>
+                    </div>
+
+                    <div class="form-group small-group" style="display: flex; align-items: flex-end; padding-bottom: 5px;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; cursor: not-allowed; font-weight: 600; font-size: 0.9rem; opacity: 0.8;">
+                            <input type="checkbox" id="check-zona" style="width: 18px; height: 18px; cursor: not-allowed;" checked disabled>
+                            <span style="display: block;">Inserir<br>Zona</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div style="display: flex; gap: 1rem; align-items: flex-end;">

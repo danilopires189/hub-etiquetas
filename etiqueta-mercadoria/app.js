@@ -25,7 +25,8 @@ const ui = {
     modalInputValidity: $('#modal-input-validity'),
     btnConfirmValidity: $('#confirm-validity'),
     btnCancelValidity: $('#cancel-validity'),
-    checkValidade: $('#check-validade')
+    checkValidade: $('#check-validade'),
+    checkZona: $('#check-zona')
 };
 
 let pendingData = null;
@@ -145,11 +146,10 @@ const getSeparacaoLargeNum = (address) => {
     return match[0].padStart(3, '0');
 };
 
-function generateLabel(product, addressItem, inputBarcode, copies = 1, validityDate = null) {
+function generateLabel(product, addressItem, inputBarcode, copies = 1, validityDate = null, includeZona = false) {
     const matricula = ui.matriculaInput.value.trim() || '---';
     const dateStr = curDateTime(); // e.g. 01/12/25 00:00
     const codFormatted = formatCODDV(product.CODDV);
-
 
     // Address formatting is now handled outside
     const { largeNum, shortAddr } = addressItem.formatted;
@@ -158,16 +158,52 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
     const labelDiv = document.createElement('div');
     labelDiv.className = 'label-page';
 
-    // Validity Label (Optional, first)
+    // Zone Label (Optional, first)
+    if (includeZona) {
+        // Extract zone from address (characters before the first dot, without spaces)
+        const zoneText = addressItem.ENDERECO.split('.')[0].replace(/\s+/g, '');
+
+        const item = document.createElement('div');
+        item.className = 'label-badge';
+        item.innerHTML = `
+            <div class="label-row-top">
+                <div class="label-meta-top">
+                    <div>${dateStr}</div>
+                </div>
+                <div class="label-desc">${product.DESC}</div>
+            </div>
+            
+            <div class="label-row-middle" style="display: flex; align-items: center; justify-content: flex-start; overflow: hidden;">
+                <!-- Maximized Zone Text, No Barcode -->
+                <div class="label-big-num" style="font-size: 90pt; width: 100%; text-align: left; line-height: 0.8; letter-spacing: -3px; font-family: 'Arial Black', sans-serif;">${zoneText}</div>
+            </div>
+            
+            <div class="label-row-bottom">
+                <div class="label-addr" style="display: flex; align-items: baseline; white-space: nowrap; overflow: hidden;">
+                    ${shortAddr.replace(/\s+/g, '')}
+                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 6px; display: inline-block;">
+                        ${inputBarcode.slice(0, -4)}<span style="font-size: 11pt; font-weight: 800;">${inputBarcode.slice(-4)}</span>
+                    </span>
+                </div>
+                <div class="label-info-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                    <div class="label-txt">${codFormatted}</div>
+                    <div class="label-txt">MAT: ${matricula}</div>
+                </div>
+            </div>
+        `;
+        labelDiv.appendChild(item);
+    }
+
+    // Validity Label (Optional, second)
     if (validityDate) {
         const item = document.createElement('div');
         item.className = 'label-badge';
         item.innerHTML = `
             <div class="label-row-top">
-                <div class="label-desc">${product.DESC}</div>
                 <div class="label-meta-top">
                     <div>${dateStr}</div>
                 </div>
+                <div class="label-desc">${product.DESC}</div>
             </div>
             
             <div class="label-row-middle" style="display: flex; align-items: center; justify-content: flex-start; overflow: hidden;">
@@ -176,9 +212,11 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
             </div>
             
             <div class="label-row-bottom">
-                <div class="label-addr">
-                    ${shortAddr}
-                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 6px;">${inputBarcode}</span>
+                <div class="label-addr" style="display: flex; align-items: baseline; white-space: nowrap; overflow: hidden;">
+                    ${shortAddr.replace(/\s+/g, '')}
+                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 6px; display: inline-block;">
+                        ${inputBarcode.slice(0, -4)}<span style="font-size: 11pt; font-weight: 800;">${inputBarcode.slice(-4)}</span>
+                    </span>
                 </div>
                 <div class="label-info-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
                     <div class="label-txt">${codFormatted}</div>
@@ -416,8 +454,11 @@ async function executePrint(copies, validityDate = null) {
 
     showStatus(`Gerando etiquetas para: ${product.DESC} (${destinoType.toUpperCase()})`, 'success');
 
+    // Zona is always included since checkbox is disabled and checked
+    const includeZona = true;
+
     // Generate Label
-    const labelEl = generateLabel(product, targetAddress, barcode, copies, validityDate);
+    const labelEl = generateLabel(product, targetAddress, barcode, copies, validityDate, includeZona);
 
     // Apply Dimensions (Ensure they are set)
     const w = ui.widthInput.value || '90';
@@ -441,6 +482,7 @@ async function executePrint(copies, validityDate = null) {
         address: targetAddress.ENDERECO,
         type: destinoType,
         validity: validityDate,
+        zona: includeZona,
         timestamp: new Date().toISOString()
     });
 
@@ -452,9 +494,11 @@ async function executePrint(copies, validityDate = null) {
         // Counter Logic (Runs after dialog closes)
         try {
             if (window.contadorGlobal) {
-                console.log(`📊 Incrementando contador: +${copies + (validityDate ? 1 : 0)}`);
-                const novoValor = await window.contadorGlobal.incrementarContador(copies + (validityDate ? 1 : 0), 'mercadoria');
-                mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${copies} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
+                // Calculate total labels: copies + validity (if checked) + zona (always 1)
+                const totalLabels = copies + (validityDate ? 1 : 0) + 1; // +1 for zona (always included)
+                console.log(`📊 Incrementando contador: +${totalLabels}`);
+                const novoValor = await window.contadorGlobal.incrementarContador(totalLabels, 'mercadoria');
+                mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${totalLabels} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
             }
         } catch (err) {
             console.error('Erro ao incrementar contador:', err);
@@ -739,6 +783,7 @@ function renderHistory(list) {
                     <span>📍 ${item.address || '---'}</span> • 
                     <span>${(item.type || '').toUpperCase()}</span>
                     ${item.validity ? ` • <span>📅 Val: ${item.validity}</span>` : ''}
+                    ${item.zona ? ` • <span>🏷️ Zona</span>` : ''}
                 </div>
                 <div class="historico-meta">${date}</div>
             </div>
