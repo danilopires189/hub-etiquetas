@@ -233,6 +233,122 @@ async function init() {
         // Load destino preference
         loadDestinoPreference();
 
+        // Initialize CountdownUI and RefreshTracker
+        window.refreshTracker = new RefreshTracker();
+        window.countdownUI = new CountdownUI();
+
+        // Update info tooltip with last refresh data
+        const lastRefreshTime = window.refreshTracker.getLastRefreshTime();
+        window.countdownUI.updateInfoTooltip(lastRefreshTime);
+
+        console.log('✅ Sistema de contagem regressiva inicializado');
+        console.log('🕐 Novo ícone de relógio moderno implementado!');
+        console.log('ℹ️ Para testar o contador, use: testCountdown()');
+        console.log('ℹ️ Para testar refresh manual, use: testManualRefresh()');
+        console.log('ℹ️ Para testar alternância ícone relógio/contador, use: testIconToggle()');
+        console.log('ℹ️ Para validar sistema completo, use: validateSystem()');
+
+        // Função de teste global
+        window.testCountdown = () => {
+            console.log('🧪 Iniciando teste do contador (10 segundos)');
+            console.log('📝 Verificando: Ícone relógio deve desaparecer e contador deve mostrar "Atualização em andamento"');
+
+            const testTimer = new CountdownTimer(Date.now() + 10000,
+                (minutes, seconds, total) => {
+                    window.countdownUI.updateCountdown(minutes, seconds);
+                    window.countdownUI.setUrgentStyle(total <= 5);
+                    console.log(`⏱️ Atualização em andamento: ${minutes}:${seconds.toString().padStart(2, '0')} (${total}s restantes)`);
+                },
+                () => {
+                    console.log('🧪 Teste concluído - ícone relógio deve reaparecer');
+                    window.countdownUI.hideCountdown();
+                }
+            );
+            testTimer.start(10);
+            window.countdownUI.showCountdown(0, 10);
+        };
+
+        // Função para testar detecção de refresh manual
+        window.testManualRefresh = () => {
+            console.log('🧪 Simulando refresh manual...');
+            window.refreshTracker.recordRefresh(true);
+            const lastRefresh = window.refreshTracker.getLastRefreshTime();
+            window.countdownUI.updateInfoTooltip(lastRefresh);
+            console.log('✅ Refresh manual registrado');
+        };
+
+        // Função para testar alternância entre ícone relógio e contador
+        window.testIconToggle = () => {
+            console.log('🧪 Testando alternância entre ícone relógio e contador...');
+
+            // Verificar estado inicial
+            const infoBtn = document.querySelector('.info-btn');
+            const countdownBtn = document.querySelector('.countdown-btn');
+
+            console.log(`📍 Estado inicial - Ícone relógio: ${infoBtn.style.display !== 'none' ? 'VISÍVEL' : 'OCULTO'}`);
+            console.log(`📍 Estado inicial - Contador: ${countdownBtn.style.display === 'flex' ? 'VISÍVEL' : 'OCULTO'}`);
+
+            // Mostrar contador por 3 segundos
+            window.countdownUI.showCountdown(0, 3);
+            console.log('🔄 Contador ativado - ícone relógio deve estar COMPLETAMENTE OCULTO');
+
+            setTimeout(() => {
+                console.log(`📍 Durante contagem - Ícone relógio: ${infoBtn.style.display !== 'none' && infoBtn.style.visibility !== 'hidden' ? 'VISÍVEL' : 'OCULTO'}`);
+                console.log(`📍 Durante contagem - Contador: ${countdownBtn.style.display === 'flex' ? 'VISÍVEL' : 'OCULTO'}`);
+
+                // Ocultar contador
+                window.countdownUI.hideCountdown();
+                console.log('🔄 Contador desativado - ícone relógio deve estar VISÍVEL');
+
+                setTimeout(() => {
+                    console.log(`📍 Estado final - Ícone relógio: ${infoBtn.style.display !== 'none' && infoBtn.style.visibility !== 'hidden' ? 'VISÍVEL' : 'OCULTO'}`);
+                    console.log(`📍 Estado final - Contador: ${countdownBtn.style.display === 'flex' ? 'VISÍVEL' : 'OCULTO'}`);
+                    console.log('✅ Teste de alternância concluído - ícone relógio moderno funcionando!');
+                }, 500);
+            }, 1500);
+        };
+
+        // Função para validar sistema completo
+        window.validateSystem = () => {
+            console.log('🔍 Validando sistema de contagem regressiva...');
+
+            // Verificar se elementos foram criados
+            const infoBtn = document.querySelector('.info-btn');
+            const countdownBtn = document.querySelector('.countdown-btn');
+
+            if (!infoBtn) {
+                console.error('❌ Ícone de informação não encontrado');
+                return false;
+            }
+
+            if (!countdownBtn) {
+                console.error('❌ Botão contador não encontrado');
+                return false;
+            }
+
+            // Verificar posicionamento
+            const hubBtn = document.querySelector('#btnHub');
+            if (hubBtn && infoBtn.nextElementSibling !== countdownBtn) {
+                console.warn('⚠️ Posicionamento dos elementos pode estar incorreto');
+            }
+
+            // Verificar dados de refresh
+            const refreshData = window.refreshTracker.getRefreshData();
+            if (!refreshData) {
+                console.warn('⚠️ Nenhum dado de refresh encontrado');
+            } else {
+                console.log('✅ Dados de refresh:', refreshData);
+            }
+
+            console.log('✅ Validação do sistema concluída');
+            return true;
+        };
+
+        // Executar validação inicial
+        setTimeout(() => {
+            window.validateSystem();
+        }, 1000);
+
     } catch (err) {
         console.error(err);
         ui.loadingText.textContent = 'Erro ao carregar dados: ' + err.message;
@@ -510,7 +626,7 @@ async function handleSearch(e) {
         // Por enquanto, vamos preparar ambos os endereços disponíveis
         const separacaoList = addressList.filter(a => a.TIPO === 'SEPARACAO');
         const pulmaoList = addressList.filter(a => a.TIPO === 'PULMÃO');
-        
+
         if (separacaoList.length > 0) {
             // Usa SEPARACAO como padrão para preparar os dados
             targetAddress = separacaoList[0];
@@ -529,11 +645,11 @@ async function handleSearch(e) {
             showStatus(`Produto encontrado, mas SEM endereço de SEPARAÇÃO nem PULMÃO.`, 'warning');
             return;
         }
-        
+
         // Armazenar ambas as listas para decisão posterior
         targetAddress.separacaoList = separacaoList;
         targetAddress.pulmaoList = pulmaoList;
-        
+
     } else if (destinoType === 'pulmao') {
         filteredList = addressList.filter(a => a.TIPO === 'PULMÃO');
         if (filteredList.length === 0) {
@@ -622,7 +738,7 @@ async function executePrint(copies, validityDate = null) {
                     largeNum: largeNumVal,
                     shortAddr: shortAddrVal
                 };
-                
+
                 destinoType = 'separacao'; // Para exibição
             }
         } else {
@@ -638,7 +754,7 @@ async function executePrint(copies, validityDate = null) {
                     largeNum: largeNumVal,
                     shortAddr: shortAddrVal
                 };
-                
+
                 destinoType = 'pulmao'; // Para exibição
             }
         }
@@ -1153,16 +1269,503 @@ document.querySelectorAll('input[name="destino"]').forEach(r => {
     });
 });
 
+// ===== COUNTDOWN SYSTEM CLASSES =====
+
+// Classe para gerenciar a lógica de contagem regressiva
+class CountdownTimer {
+    constructor(refreshTime, onUpdate, onComplete) {
+        this.refreshTime = refreshTime;
+        this.onUpdate = onUpdate;
+        this.onComplete = onComplete;
+        this.isActive = false;
+        this.remainingTime = 0;
+        this.intervalId = null;
+        this.startTime = null;
+    }
+
+    start(remainingSeconds) {
+        try {
+            if (this.isActive) {
+                this.stop();
+            }
+
+            // Validação de entrada
+            if (typeof remainingSeconds !== 'number' || remainingSeconds <= 0) {
+                console.error('⚠️ Valor inválido para contagem regressiva:', remainingSeconds);
+                return;
+            }
+
+            this.remainingTime = remainingSeconds;
+            this.startTime = Date.now();
+            this.isActive = true;
+
+            console.log(`⏱️ Iniciando contagem regressiva: ${remainingSeconds} segundos`);
+
+            // Primeira atualização imediata
+            this.updateCountdown();
+
+            // Configurar interval para atualizações
+            this.intervalId = setInterval(() => {
+                try {
+                    this.updateCountdown();
+                } catch (error) {
+                    console.error('⚠️ Erro durante atualização do contador:', error);
+                    this.reset();
+                }
+            }, 1000);
+        } catch (error) {
+            console.error('⚠️ Erro ao iniciar contador:', error);
+            this.reset();
+        }
+    }
+
+    stop() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+        this.isActive = false;
+        console.log('⏹️ Contagem regressiva parada');
+    }
+
+    reset() {
+        this.stop();
+        this.remainingTime = 0;
+        this.startTime = null;
+        console.log('🔄 Contagem regressiva resetada');
+    }
+
+    updateCountdown() {
+        if (!this.isActive) return;
+
+        // Calcular tempo restante baseado no tempo real do sistema
+        const now = Date.now();
+        const elapsed = Math.floor((now - this.startTime) / 1000);
+        const remaining = Math.max(0, this.remainingTime - elapsed);
+
+        // Validação de consistência
+        if (elapsed < 0 || remaining < 0) {
+            console.warn('⚠️ Inconsistência detectada no timer - resetando');
+            this.reset();
+            return;
+        }
+
+        const minutes = Math.floor(remaining / 60);
+        const seconds = remaining % 60;
+
+        // Validação dos valores calculados
+        if (minutes < 0 || seconds < 0 || minutes > 60) {
+            console.warn('⚠️ Valores inválidos calculados - corrigindo');
+            this.reset();
+            return;
+        }
+
+        // Chamar callback de atualização
+        if (this.onUpdate) {
+            try {
+                this.onUpdate(minutes, seconds, remaining);
+            } catch (error) {
+                console.error('⚠️ Erro no callback de atualização:', error);
+            }
+        }
+
+        // Verificar se chegou ao fim
+        if (remaining <= 0) {
+            this.stop();
+            if (this.onComplete) {
+                try {
+                    this.onComplete();
+                } catch (error) {
+                    console.error('⚠️ Erro no callback de conclusão:', error);
+                }
+            }
+        }
+    }
+
+    getRemainingTime() {
+        if (!this.isActive) return { minutes: 0, seconds: 0, total: 0 };
+
+        const now = Date.now();
+        const elapsed = Math.floor((now - this.startTime) / 1000);
+        const remaining = Math.max(0, this.remainingTime - elapsed);
+
+        return {
+            minutes: Math.floor(remaining / 60),
+            seconds: remaining % 60,
+            total: remaining
+        };
+    }
+}
+
+// Classe para gerenciar interface do contador e ícone de informação
+class CountdownUI {
+    constructor() {
+        this.countdownElement = null;
+        this.infoElement = null;
+        this.createElements();
+        this.insertIntoHeader();
+    }
+
+    createElements() {
+        this.createInfoIcon();
+        this.createCountdownButton();
+    }
+
+    createInfoIcon() {
+        this.infoElement = document.createElement('button');
+        this.infoElement.className = 'info-btn';
+        this.infoElement.title = 'Informações da última atualização';
+        this.infoElement.innerHTML = `
+            <svg class="info-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12,6 12,12 16,14"/>
+                <circle cx="12" cy="12" r="1" fill="currentColor"/>
+            </svg>
+            <div class="tooltip">Carregando...</div>
+        `;
+
+        // Estilo inline para garantir funcionamento
+        this.infoElement.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.1));
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 50%;
+            cursor: help;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            margin-right: 8px;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        `;
+
+        // Estilo para hover
+        this.infoElement.addEventListener('mouseenter', () => {
+            this.infoElement.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.15))';
+            this.infoElement.style.color = '#2563eb';
+            this.infoElement.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+            this.infoElement.style.transform = 'scale(1.05)';
+            this.infoElement.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)';
+        });
+
+        this.infoElement.addEventListener('mouseleave', () => {
+            this.infoElement.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.1))';
+            this.infoElement.style.color = '#3b82f6';
+            this.infoElement.style.borderColor = 'rgba(59, 130, 246, 0.2)';
+            this.infoElement.style.transform = 'scale(1)';
+            this.infoElement.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.1)';
+        });
+
+        // Estilo para tooltip
+        const tooltip = this.infoElement.querySelector('.tooltip');
+        tooltip.style.cssText = `
+            position: absolute;
+            bottom: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #1f2937, #374151);
+            color: white;
+            padding: 0.6rem 0.9rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        `;
+
+        // Adicionar seta ao tooltip
+        const arrow = document.createElement('div');
+        arrow.style.cssText = `
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid #1f2937;
+        `;
+        tooltip.appendChild(arrow);
+
+        this.infoElement.addEventListener('mouseenter', () => {
+            tooltip.style.opacity = '1';
+            tooltip.style.transform = 'translateX(-50%) translateY(-2px)';
+        });
+
+        this.infoElement.addEventListener('mouseleave', () => {
+            tooltip.style.opacity = '0';
+            tooltip.style.transform = 'translateX(-50%) translateY(0)';
+        });
+    }
+
+    createCountdownButton() {
+        this.countdownElement = document.createElement('button');
+        this.countdownElement.className = 'countdown-btn';
+        this.countdownElement.innerHTML = `
+            <svg class="countdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            <span class="countdown-label">Atualização em andamento:</span>
+            <span class="countdown-text">1:00</span>
+        `;
+
+        // Estilo inline para garantir funcionamento
+        this.countdownElement.style.cssText = `
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: default;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            margin-right: 8px;
+        `;
+    }
+
+    insertIntoHeader() {
+        const hubButton = document.querySelector('#btnHub');
+        if (hubButton && hubButton.parentNode) {
+            // Inserir ícone de informação antes do botão Hub
+            hubButton.parentNode.insertBefore(this.infoElement, hubButton);
+            // Inserir botão contador antes do botão Hub (inicialmente oculto)
+            hubButton.parentNode.insertBefore(this.countdownElement, hubButton);
+        }
+    }
+
+    showCountdown(minutes, seconds) {
+        // Garantir que o ícone de informação está completamente oculto durante a contagem
+        this.infoElement.style.display = 'none !important';
+        this.infoElement.style.visibility = 'hidden';
+        this.infoElement.style.opacity = '0';
+
+        // Mostrar contador
+        this.countdownElement.style.display = 'flex';
+        this.countdownElement.style.visibility = 'visible';
+        this.countdownElement.style.opacity = '1';
+
+        this.updateCountdown(minutes, seconds);
+
+        console.log('🔄 Contador ativado - ícone relógio OCULTO');
+    }
+
+    hideCountdown() {
+        // Ocultar contador
+        this.countdownElement.style.display = 'none';
+        this.countdownElement.style.visibility = 'hidden';
+        this.countdownElement.style.opacity = '0';
+
+        // Mostrar ícone de informação novamente
+        this.infoElement.style.display = 'flex';
+        this.infoElement.style.visibility = 'visible';
+        this.infoElement.style.opacity = '1';
+
+        // Remover classe urgent se existir
+        this.countdownElement.classList.remove('urgent');
+
+        console.log('🔄 Contador desativado - ícone relógio VISÍVEL');
+    }
+
+    updateCountdown(minutes, seconds) {
+        try {
+            const countdownText = this.countdownElement.querySelector('.countdown-text');
+            if (countdownText) {
+                countdownText.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        } catch (error) {
+            console.error('⚠️ Erro ao atualizar contador na UI:', error);
+        }
+    }
+
+    updateInfoTooltip(lastRefreshDate) {
+        try {
+            const tooltip = this.infoElement.querySelector('.tooltip');
+            if (tooltip && lastRefreshDate) {
+                const formatted = this.formatRefreshTime(lastRefreshDate);
+                tooltip.textContent = `Última atualização: ${formatted}`;
+            } else if (tooltip) {
+                tooltip.textContent = 'Nenhuma atualização registrada';
+            }
+        } catch (error) {
+            console.error('⚠️ Erro ao atualizar tooltip:', error);
+        }
+    }
+
+    setUrgentStyle(isUrgent) {
+        if (isUrgent) {
+            this.countdownElement.classList.add('urgent');
+            // Adicionar animação de pulse via CSS inline
+            this.countdownElement.style.animation = 'pulse 1s infinite';
+            this.countdownElement.style.boxShadow = '0 4px 8px rgba(239, 68, 68, 0.4)';
+        } else {
+            this.countdownElement.classList.remove('urgent');
+            this.countdownElement.style.animation = '';
+            this.countdownElement.style.boxShadow = '0 2px 4px rgba(239, 68, 68, 0.2)';
+        }
+    }
+
+    formatRefreshTime(date) {
+        if (!date) return 'N/A';
+
+        const d = new Date(date);
+        const day = d.getDate().toString().padStart(2, '0');
+        const month = (d.getMonth() + 1).toString().padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = d.getHours().toString().padStart(2, '0');
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        const seconds = d.getSeconds().toString().padStart(2, '0');
+
+        return `${day}/${month}/${year} às ${hours}:${minutes}:${seconds}`;
+    }
+}
+
+// Classe para detectar e registrar atualizações manuais e automáticas
+class RefreshTracker {
+    constructor() {
+        this.storageKey = 'last-refresh-time';
+        this.detectManualRefresh();
+    }
+
+    detectManualRefresh() {
+        // Detecta se a página foi atualizada manualmente
+        const pageLoadTime = new Date();
+        const lastPageLoad = localStorage.getItem('last-page-load');
+
+        // Se existe um registro anterior de carregamento, significa que houve refresh
+        if (lastPageLoad) {
+            const lastLoad = new Date(lastPageLoad);
+            const timeDiff = pageLoadTime.getTime() - lastLoad.getTime();
+
+            // Se o tempo entre carregamentos for menor que 50 minutos, provavelmente foi manual
+            // (considerando que o auto-refresh é de 1 hora)
+            if (timeDiff < 50 * 60 * 1000) {
+                console.log('🔄 Refresh manual detectado');
+                this.recordRefresh(true);
+            } else {
+                console.log('🔄 Refresh automático detectado');
+                this.recordRefresh(false);
+            }
+        } else {
+            // Primeira vez carregando a página
+            console.log('🔄 Primeira carga da página');
+            this.recordRefresh(false);
+        }
+
+        // Atualizar o timestamp de carregamento da página
+        localStorage.setItem('last-page-load', pageLoadTime.toISOString());
+    }
+
+    recordRefresh(isManual = false) {
+        const refreshData = {
+            timestamp: new Date().toISOString(),
+            isManual: isManual,
+            userAgent: navigator.userAgent,
+            pageLoadTime: new Date().toISOString()
+        };
+
+        localStorage.setItem(this.storageKey, JSON.stringify(refreshData));
+
+        const type = isManual ? 'manual' : 'automática';
+        console.log(`📝 Atualização ${type} registrada: ${this.formatRefreshTime(new Date())}`);
+    }
+
+    getLastRefreshTime() {
+        try {
+            const data = localStorage.getItem(this.storageKey);
+            if (data) {
+                const refreshData = JSON.parse(data);
+                return new Date(refreshData.timestamp);
+            }
+        } catch (error) {
+            console.warn('Erro ao recuperar dados de refresh:', error);
+        }
+        return null;
+    }
+
+    formatRefreshTime(date) {
+        if (!date) return 'N/A';
+
+        const d = new Date(date);
+        const day = d.getDate().toString().padStart(2, '0');
+        const month = (d.getMonth() + 1).toString().padStart(2, '0');
+        const hours = d.getHours().toString().padStart(2, '0');
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        const seconds = d.getSeconds().toString().padStart(2, '0');
+
+        return `${day}/${month} às ${hours}:${minutes}:${seconds}`;
+    }
+
+    getRefreshData() {
+        try {
+            const data = localStorage.getItem(this.storageKey);
+            if (data) {
+                return JSON.parse(data);
+            }
+        } catch (error) {
+            console.warn('Erro ao recuperar dados completos de refresh:', error);
+        }
+        return null;
+    }
+}
+
 // Auto-refresh functionality - Refresh page every 1 hour
 function setupAutoRefresh() {
-    const ONE_HOUR = 1 * 60 * 60 * 1000; // 1 hora em milissegundos
-    const THIRTY_SECONDS = 30 * 1000; // 30 segundos em milissegundos
+    // Configuração do sistema
+    const CONFIG = {
+        REFRESH_INTERVAL: 60 * 60 * 1000, // 1 hora em produção
+        TEST_REFRESH_INTERVAL: 60 * 60 * 1000, // 1 hora em teste (ajustado)
+        COUNTDOWN_THRESHOLD: 60 * 1000, // Mostrar contador nos últimos 60s
+        INACTIVITY_THRESHOLD: 30 * 1000, // 30s de inatividade
+        UPDATE_INTERVAL: 1000, // Atualizar contador a cada 1s
+        URGENT_THRESHOLD: 10 * 1000 // Estilo urgente nos últimos 10s
+    };
+
+    // Flag de teste - altere para true para testar com 2 minutos
+    const IS_TEST_MODE = false; // ALTERAR PARA false EM PRODUÇÃO
+
+    const ONE_HOUR = IS_TEST_MODE ? CONFIG.TEST_REFRESH_INTERVAL : CONFIG.REFRESH_INTERVAL;
+    const THIRTY_SECONDS = CONFIG.INACTIVITY_THRESHOLD;
+
+    console.log(`⚙️ Modo: ${IS_TEST_MODE ? 'TESTE (2 minutos)' : 'PRODUÇÃO (1 hora)'}`);
+    console.log(`⏰ Intervalo de atualização: ${ONE_HOUR / 1000 / 60} minutos`);
 
     let lastActivity = Date.now();
+    let countdownTimer = null;
+    let refreshTimeoutId = null;
 
     // Track user activity
     const updateActivity = () => {
         lastActivity = Date.now();
+
+        // Se o contador está ativo, cancelar e resetar
+        if (countdownTimer && countdownTimer.isActive) {
+            console.log('👤 Atividade detectada durante contagem - cancelando contador');
+            countdownTimer.reset();
+            if (window.countdownUI) {
+                window.countdownUI.hideCountdown();
+            }
+
+            // Resetar o timer principal
+            if (refreshTimeoutId) {
+                clearTimeout(refreshTimeoutId);
+            }
+            setupRefreshTimer();
+        }
     };
 
     // Listen for user activity events
@@ -1188,6 +1791,10 @@ function setupAutoRefresh() {
 
         if (timeSinceLastActivity >= THIRTY_SECONDS) {
             console.log('🔄 Atualizando página - usuário inativo por mais de 30 segundos');
+            // Registrar como atualização automática antes do reload
+            if (window.refreshTracker) {
+                window.refreshTracker.recordRefresh(false);
+            }
             window.location.reload();
         } else {
             const remainingWait = THIRTY_SECONDS - timeSinceLastActivity;
@@ -1198,11 +1805,50 @@ function setupAutoRefresh() {
         }
     };
 
-    // Set up automatic refresh check after 1 hour
-    setTimeout(() => {
-        console.log('⏰ Tempo de atualização atingido, verificando atividade do usuário...');
-        checkAndRefresh();
-    }, ONE_HOUR);
+    // Function to start countdown when 60 seconds remain
+    const startCountdown = () => {
+        console.log('⏰ Iniciando contagem regressiva de 60 segundos');
+
+        // Criar callbacks para o contador
+        const onUpdate = (minutes, seconds, totalSeconds) => {
+            if (window.countdownUI) {
+                window.countdownUI.updateCountdown(minutes, seconds);
+
+                // Aplicar estilo urgente nos últimos 10 segundos
+                const isUrgent = totalSeconds <= 10;
+                window.countdownUI.setUrgentStyle(isUrgent);
+            }
+        };
+
+        const onComplete = () => {
+            console.log('⏰ Contagem regressiva concluída - verificando atividade do usuário');
+            checkAndRefresh();
+        };
+
+        // Inicializar contador
+        countdownTimer = new CountdownTimer(Date.now() + 60000, onUpdate, onComplete);
+        countdownTimer.start(60);
+
+        // Mostrar UI do contador
+        if (window.countdownUI) {
+            window.countdownUI.showCountdown(1, 0);
+        }
+    };
+
+    // Function to setup the main refresh timer
+    const setupRefreshTimer = () => {
+        const countdownTime = ONE_HOUR - CONFIG.COUNTDOWN_THRESHOLD; // Tempo até iniciar contagem (59 minutos)
+
+        console.log(`⏰ Timer principal configurado para ${countdownTime / 1000 / 60} minutos`);
+
+        refreshTimeoutId = setTimeout(() => {
+            console.log('⏰ Tempo para contagem regressiva atingido');
+            startCountdown();
+        }, countdownTime);
+    };
+
+    // Set up automatic refresh check after 1 hour minus countdown time
+    setupRefreshTimer();
 
     console.log('⏰ Auto-refresh configurado para 1 hora com detecção de atividade');
 }

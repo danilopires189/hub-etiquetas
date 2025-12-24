@@ -889,6 +889,162 @@ label {
     animation: progress 2s linear forwards;
 }
 
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* ===== COUNTDOWN SYSTEM STYLES ===== */
+
+/* Ícone de informação (sempre visível) - Design moderno com relógio */
+.info-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.1));
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 50%;
+    cursor: help;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    margin-right: 8px;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.info-btn:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 197, 253, 0.15)) !important;
+    color: #2563eb !important;
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.info-btn .tooltip {
+    position: absolute;
+    bottom: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #1f2937, #374151);
+    color: white;
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-btn:hover .tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+}
+
+/* Garantir que o ícone fique oculto durante contagem */
+.info-btn.hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Botão contador (visível durante contagem) */
+.countdown-btn {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: default;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+    margin-right: 8px;
+}
+
+.countdown-btn.show {
+    display: flex !important;
+}
+
+.countdown-btn.urgent {
+    animation: pulse 1s infinite;
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
+}
+
+.countdown-icon, .info-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.countdown-text {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.countdown-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .info-btn {
+        width: 32px;
+        height: 32px;
+        margin-right: 6px;
+    }
+    
+    .countdown-btn {
+        width: auto;
+        height: 28px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .countdown-text {
+        font-size: 0.8rem;
+    }
+    
+    .countdown-label {
+        font-size: 0.7rem;
+        display: none; /* Ocultar texto em telas pequenas para economizar espaço */
+    }
+    
+    .info-btn .tooltip {
+        font-size: 0.7rem;
+        bottom: -35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .countdown-btn {
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .countdown-label {
+        display: none; /* Garantir que está oculto em telas muito pequenas */
+    }
+}
+
 @keyframes progress {
     from {
         width: 100%;
