@@ -230,6 +230,9 @@ async function init() {
         // Update machine button on page load
         updateMachineButton();
 
+        // Load destino preference
+        loadDestinoPreference();
+
     } catch (err) {
         console.error(err);
         ui.loadingText.textContent = 'Erro ao carregar dados: ' + err.message;
@@ -502,7 +505,36 @@ async function handleSearch(e) {
     let filteredList = [], targetAddress = null;
     let largeNumVal = '', shortAddrVal = '';
 
-    if (destinoType === 'pulmao') {
+    if (destinoType === 'automatico') {
+        // Modo Automático: Lógica será aplicada na função executePrint baseada na quantidade
+        // Por enquanto, vamos preparar ambos os endereços disponíveis
+        const separacaoList = addressList.filter(a => a.TIPO === 'SEPARACAO');
+        const pulmaoList = addressList.filter(a => a.TIPO === 'PULMÃO');
+        
+        if (separacaoList.length > 0) {
+            // Usa SEPARACAO como padrão para preparar os dados
+            targetAddress = separacaoList[0];
+            largeNumVal = getPadraoLargeNum(targetAddress.ENDERECO);
+            const p = targetAddress.ENDERECO.split('.');
+            if (p.length > 1) p.pop();
+            shortAddrVal = p.join('.');
+        } else if (pulmaoList.length > 0) {
+            // Usa PULMÃO como fallback
+            targetAddress = pulmaoList[pulmaoList.length - 1];
+            largeNumVal = getLargeSuffix(targetAddress.ENDERECO);
+            const p = targetAddress.ENDERECO.split('.');
+            p.pop();
+            shortAddrVal = p.join('.');
+        } else {
+            showStatus(`Produto encontrado, mas SEM endereço de SEPARAÇÃO nem PULMÃO.`, 'warning');
+            return;
+        }
+        
+        // Armazenar ambas as listas para decisão posterior
+        targetAddress.separacaoList = separacaoList;
+        targetAddress.pulmaoList = pulmaoList;
+        
+    } else if (destinoType === 'pulmao') {
         filteredList = addressList.filter(a => a.TIPO === 'PULMÃO');
         if (filteredList.length === 0) {
             showStatus(`Produto encontrado, mas SEM endereço de PULMÃO.`, 'warning');
@@ -574,32 +606,60 @@ async function executePrint(copies, validityDate = null) {
     if (!pendingData) return;
     let { product, targetAddress, barcode, matricula, destinoType } = pendingData;
 
-    // AJUSTE: Se quantidade = 1 E usuário não selecionou separação, forçar SEPARAÇÃO
-    if (copies === 1 && destinoType !== 'separacao') {
-        // Buscar endereço de separação
-        const addressList = Data.addresses.get(product.CODDV);
-        const separacaoList = addressList.filter(a => a.TIPO === 'SEPARACAO');
+    // NOVAS REGRAS PARA MODO AUTOMÁTICO
+    if (destinoType === 'automatico') {
+        // Regras do modo automático baseadas na quantidade
+        if (copies === 1) {
+            // 1 etiqueta = sempre SEPARAÇÃO (estação)
+            if (targetAddress.separacaoList && targetAddress.separacaoList.length > 0) {
+                targetAddress = targetAddress.separacaoList[0];
+                const largeNumVal = getPadraoLargeNum(targetAddress.ENDERECO);
+                const p = targetAddress.ENDERECO.split('.');
+                if (p.length > 1) p.pop();
+                const shortAddrVal = p.join('.');
 
-        if (separacaoList.length > 0) {
-            targetAddress = separacaoList[0];
-            const largeNumVal = getPadraoLargeNum(targetAddress.ENDERECO);
-            const p = targetAddress.ENDERECO.split('.');
-            if (p.length > 1) p.pop();
-            const shortAddrVal = p.join('.');
+                targetAddress.formatted = {
+                    largeNum: largeNumVal,
+                    shortAddr: shortAddrVal
+                };
+                
+                destinoType = 'separacao'; // Para exibição
+            }
+        } else {
+            // Mais de 1 etiqueta = sempre PULMÃO
+            if (targetAddress.pulmaoList && targetAddress.pulmaoList.length > 0) {
+                targetAddress = targetAddress.pulmaoList[targetAddress.pulmaoList.length - 1];
+                const largeNumVal = getLargeSuffix(targetAddress.ENDERECO);
+                const p = targetAddress.ENDERECO.split('.');
+                p.pop();
+                const shortAddrVal = p.join('.');
 
-            targetAddress.formatted = {
-                largeNum: largeNumVal,
-                shortAddr: shortAddrVal
-            };
-
-            destinoType = 'separacao';
+                targetAddress.formatted = {
+                    largeNum: largeNumVal,
+                    shortAddr: shortAddrVal
+                };
+                
+                destinoType = 'pulmao'; // Para exibição
+            }
         }
+    } else {
+        // Para modos manuais (pulmao/separacao), respeitar a escolha do usuário
+        // Não fazer nenhuma alteração automática - respeitar a escolha
+        console.log(`Modo manual selecionado: ${destinoType.toUpperCase()}`);
     }
 
     // Clear pending
     pendingData = null;
 
-    showStatus(`Gerando etiquetas para: ${product.DESC} (${destinoType.toUpperCase()})`, 'success');
+    // Show appropriate status message
+    let statusMessage = '';
+    if (destinoType === 'automatico') {
+        const actualType = targetAddress.TIPO || 'DESCONHECIDO';
+        statusMessage = `Gerando etiquetas para: ${product.DESC} (AUTOMÁTICO → ${actualType})`;
+    } else {
+        statusMessage = `Gerando etiquetas para: ${product.DESC} (${destinoType.toUpperCase()})`;
+    }
+    showStatus(statusMessage, 'success');
 
     // Zona is always included since checkbox is disabled and checked
     const includeZona = true;
@@ -1059,15 +1119,38 @@ function filterHistory() {
 
 
 // Dynamic Instructions
+// Persistência da escolha de destino
+function saveDestinoPreference(destino) {
+    localStorage.setItem('destino-preference', destino);
+}
+
+function loadDestinoPreference() {
+    const saved = localStorage.getItem('destino-preference');
+    if (saved) {
+        const radio = document.querySelector(`input[name="destino"][value="${saved}"]`);
+        if (radio) {
+            radio.checked = true;
+            updateInstructions();
+        }
+    }
+}
+
 function updateInstructions() {
     const type = document.querySelector('input[name="destino"]:checked').value;
     const target = $('#instruction-target');
     if (target) {
-        target.textContent = `O sistema buscará automaticamente o endereço de ${type.toUpperCase()}.`;
+        if (type === 'automatico') {
+            target.textContent = 'Modo inteligente: 1 etiqueta → SEPARAÇÃO (estação), mais etiquetas → PULMÃO.';
+        } else {
+            target.textContent = `O sistema buscará automaticamente o endereço de ${type.toUpperCase()}.`;
+        }
     }
 }
 document.querySelectorAll('input[name="destino"]').forEach(r => {
-    r.addEventListener('change', updateInstructions);
+    r.addEventListener('change', (e) => {
+        updateInstructions();
+        saveDestinoPreference(e.target.value);
+    });
 });
 
 // Auto-refresh functionality - Refresh page every 1 hour

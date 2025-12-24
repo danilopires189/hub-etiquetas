@@ -51,11 +51,12 @@
                     </svg>
                     Histórico
                 </button>
-                <button id="config-machine-btn" type="button" class="btn btn-ghost" title="Configurar nome da máquina" style="font-size: 0.8rem;">
+                <button id="config-machine-btn" type="button" class="btn btn-ghost" title="Configurar nome da máquina"
+                    style="font-size: 0.8rem;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                        <line x1="8" y1="21" x2="16" y2="21"/>
-                        <line x1="12" y1="17" x2="12" y2="21"/>
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" />
+                        <line x1="12" y1="17" x2="12" y2="21" />
                     </svg>
                     PC
                 </button>
@@ -73,37 +74,45 @@
 
         <div class="card search-card">
             <form id="form-search" class="search-form">
-                <div class="form-group">
-                    <label for="input-barcode">Código de Barras (Bipe aqui)</label>
-                    <div style="position: relative;">
-                        <input type="text" id="input-barcode" class="input-lg" placeholder="Aguardando leitor..."
-                            autocomplete="off" style="padding-left: 45px; max-width: 375px;">
-                        <div class="scanner-icon"
-                            style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
-                                </path>
-                                <line x1="4" y1="12" x2="20" y2="12"></line>
-                            </svg>
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label for="input-barcode">Código de Barras (Bipe aqui)</label>
+                        <div style="position: relative;">
+                            <input type="text" id="input-barcode" class="input-lg" placeholder="Aguardando leitor..."
+                                autocomplete="off" style="padding-left: 45px; width: 280px; max-width: 280px;">
+                            <div class="scanner-icon"
+                                style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                                    </path>
+                                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                                </svg>
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-matricula">Matrícula</label>
+                        <input type="text" id="input-matricula" class="input-lg" placeholder="00000" required
+                            maxlength="6" pattern="[0-9]{5,6}" title="Digite 5 ou 6 números"
+                            style="width: 100px; max-width: 100px;">
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 0.2rem; flex-wrap: wrap;">
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-start;">
+                    <!-- Destino -->
                     <div class="form-group small-group">
-                        <label for="input-matricula">Matrícula</label>
-                        <input type="text" id="input-matricula" class="input-lg" placeholder="00000" required 
-                               maxlength="6" pattern="[0-9]{5,6}" title="Digite 5 ou 6 números">
-                    </div>
-
-                    <div class="form-group small-group" style="margin-left: 37.8px;">
-                        <label style="font-size: 0.8rem;">Destino</label>
-                        <div style="display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.2rem;">
+                        <label style="font-size: 0.8rem; margin-bottom: 0.3rem; display: block;">Destino</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
                             <label
                                 style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
-                                <input type="radio" name="destino" value="pulmao" checked> Pulmão
+                                <input type="radio" name="destino" value="automatico" checked> Automático
+                            </label>
+                            <label
+                                style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
+                                <input type="radio" name="destino" value="pulmao"> Pulmão
                             </label>
                             <label
                                 style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
@@ -111,23 +120,23 @@
                             </label>
                         </div>
                     </div>
-                </div>
 
-                <div style="display: flex; gap: 0.2rem; flex-wrap: wrap;">
-                    <div class="form-group small-group" style="display: flex; align-items: flex-end; padding-bottom: 5px; margin-left: 37.8px;">
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
-                            <input type="checkbox" id="check-validade" style="width: 18px; height: 18px;">
-                            Inserir Validade
-                        </label>
-                    </div>
-
-                    <div class="form-group small-group" style="display: flex; align-items: flex-end; padding-bottom: 5px;">
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; cursor: not-allowed; font-weight: 600; font-size: 0.9rem; opacity: 0.8;">
-                            <input type="checkbox" id="check-zona" style="width: 18px; height: 18px; cursor: not-allowed;" checked disabled>
-                            <span style="display: block;">Inserir<br>Zona</span>
-                        </label>
+                    <!-- Opções -->
+                    <div class="form-group small-group">
+                        <label style="font-size: 0.8rem; margin-bottom: 0.3rem; display: block;">Opções</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                            <label
+                                style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.9rem;">
+                                <input type="checkbox" id="check-validade" style="width: 16px; height: 16px;">
+                                Inserir Validade
+                            </label>
+                            <label
+                                style="display: flex; align-items: center; gap: 0.4rem; cursor: not-allowed; font-size: 0.9rem; opacity: 0.7;">
+                                <input type="checkbox" id="check-zona"
+                                    style="width: 16px; height: 16px; cursor: not-allowed;" checked disabled>
+                                Inserir Zona
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -165,12 +174,15 @@
                             style="font-size: 1rem; padding: 0.5rem;">
                     </div>
                 </div>
-                
+
                 <!-- Nota discreta sobre direcionamento automático -->
-                <div style="margin-top: 0.8rem; padding: 0.5rem; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #e9ecef;">
+                <div
+                    style="margin-top: 0.8rem; padding: 0.5rem; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #e9ecef;">
                     <p style="margin: 0; font-size: 0.75rem; color: #6c757d; line-height: 1.3;">
-                        <strong>Nota:</strong> Por padrão, produtos com 1 etiqueta são direcionados para Separação, 
-                        acima de 1 etiqueta são direcionados ao Pulmão. Ajuste a seleção se necessário.
+                        <strong>Nota:</strong> No modo <strong>Automático</strong>, produtos com 1 etiqueta são
+                        direcionados para Separação (estação), acima de 1 etiqueta são direcionados ao Pulmão. Nos modos
+                        <strong>Pulmão</strong> e <strong>Separação</strong>, a escolha é sempre respeitada independente
+                        da quantidade.
                     </p>
                 </div>
             </div>
