@@ -50,6 +50,120 @@ function curDateTime() {
     return `${d} ${t}`;
 }
 
+// Machine Name Detection - Respect user choice
+function getMachineName() {
+    try {
+        // Check if user has explicitly set a machine name
+        const userConfiguredName = localStorage.getItem('real-machine-name');
+
+        // If user configured something (even empty string), respect that choice
+        if (localStorage.getItem('machine-name-configured') === 'true') {
+            return userConfiguredName ? userConfiguredName.trim().toUpperCase() : '';
+        }
+
+        // If not configured yet, return empty string (blank)
+        return '';
+
+    } catch (error) {
+        console.warn('Erro ao obter nome da máquina:', error);
+        return '';
+    }
+}
+
+// Function to try WebRTC for more detailed network info (async)
+function tryWebRTCMachineName() {
+    try {
+        const pc = new (window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection)({
+            iceServers: []
+        });
+
+        pc.createDataChannel('');
+        pc.createOffer().then(offer => pc.setLocalDescription(offer));
+
+        pc.onicecandidate = function (ice) {
+            if (ice && ice.candidate && ice.candidate.candidate) {
+                const candidate = ice.candidate.candidate;
+                // Look for local IP addresses that might contain machine info
+                const ipMatch = candidate.match(/(\d+\.\d+\.\d+\.\d+)/);
+                if (ipMatch) {
+                    const ip = ipMatch[1];
+                    if (!ip.startsWith('127.') && !ip.startsWith('0.')) {
+                        // Generate machine name from IP
+                        const ipParts = ip.split('.');
+                        const machineName = `NET${ipParts[2]}${ipParts[3]}`;
+                        localStorage.setItem('rtc-machine-name', machineName);
+                        console.log(`🌐 Nome da máquina detectado via WebRTC: ${machineName}`);
+                    }
+                }
+                pc.close();
+            }
+        };
+    } catch (e) {
+        console.log('WebRTC não disponível para detecção de máquina');
+    }
+}
+
+// Function to allow user to set real machine name (one-time setup)
+// Function to allow user to set machine name
+function promptForRealMachineName() {
+    const currentName = localStorage.getItem('real-machine-name') || '';
+    const newName = prompt(
+        `Nome atual: ${currentName || '(em branco)'}\n\n` +
+        `Digite o nome REAL da sua máquina (ex: GOD008):\n` +
+        `Deixe em branco para manter sem nome.`,
+        currentName
+    );
+
+    // User clicked OK (even if empty) - save the choice
+    if (newName !== null) {
+        const formattedName = newName ? newName.trim().toUpperCase() : '';
+        localStorage.setItem('real-machine-name', formattedName);
+        localStorage.setItem('machine-name-configured', 'true');
+
+        if (formattedName) {
+            showStatus(`Nome da máquina configurado: ${formattedName}`, 'success');
+        } else {
+            showStatus('Nome da máquina removido (em branco)', 'success');
+        }
+
+        // Update button text
+        updateMachineButton();
+
+        return formattedName;
+    }
+
+    return currentName;
+}
+
+// Function to update machine button display
+function updateMachineButton() {
+    const machineBtn = $('#config-machine-btn');
+    if (machineBtn) {
+        const currentName = getMachineName();
+        if (currentName) {
+            machineBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                ${currentName.length > 8 ? currentName.slice(0, 8) + '...' : currentName}
+            `;
+            machineBtn.title = `Máquina atual: ${currentName}. Clique para alterar.`;
+        } else {
+            machineBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                PC
+            `;
+            machineBtn.title = 'Nenhuma máquina configurada. Clique para configurar.';
+        }
+    }
+}
+
 // Matricula Validation
 function validateMatricula(matricula) {
     // Remove any non-numeric characters
@@ -109,6 +223,13 @@ async function init() {
         ui.barcodeInput.focus();
         showStatus('Sistema pronto. Bipe o produto.', 'success');
 
+        // Log the detected machine name for verification
+        const detectedMachine = getMachineName();
+        console.log(`🖥️ Máquina: ${detectedMachine || '(em branco)'}`);
+
+        // Update machine button on page load
+        updateMachineButton();
+
     } catch (err) {
         console.error(err);
         ui.loadingText.textContent = 'Erro ao carregar dados: ' + err.message;
@@ -150,6 +271,7 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
     const matricula = ui.matriculaInput.value.trim() || '---';
     const dateStr = curDateTime(); // e.g. 01/12/25 00:00
     const codFormatted = formatCODDV(product.CODDV);
+    const machineName = getMachineName(); // Get machine name for label
 
     // Address formatting is now handled outside
     const { largeNum, shortAddr } = addressItem.formatted;
@@ -169,6 +291,7 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
             <div class="label-row-top">
                 <div class="label-meta-top">
                     <div>${dateStr}</div>
+                    <div style="font-size: 6pt; color: #666; margin-top: 1px;">${machineName}</div>
                 </div>
                 <div class="label-desc">${product.DESC}</div>
             </div>
@@ -202,6 +325,7 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
             <div class="label-row-top">
                 <div class="label-meta-top">
                     <div>${dateStr}</div>
+                    <div style="font-size: 6pt; color: #666; margin-top: 1px;">${machineName}</div>
                 </div>
                 <div class="label-desc">${product.DESC}</div>
             </div>
@@ -261,6 +385,7 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
             <div class="label-row-top">
                 <div class="label-meta-top">
                     <div>${dateStr}</div>
+                    <div style="font-size: 6pt; color: #666; margin-top: 1px;">${machineName}</div>
                 </div>
                 <div class="label-desc">${product.DESC}</div>
             </div>
@@ -447,7 +572,29 @@ function closeValidityModal() {
 
 async function executePrint(copies, validityDate = null) {
     if (!pendingData) return;
-    const { product, targetAddress, barcode, matricula, destinoType } = pendingData;
+    let { product, targetAddress, barcode, matricula, destinoType } = pendingData;
+
+    // AJUSTE: Se quantidade = 1 E usuário não selecionou separação, forçar SEPARAÇÃO
+    if (copies === 1 && destinoType !== 'separacao') {
+        // Buscar endereço de separação
+        const addressList = Data.addresses.get(product.CODDV);
+        const separacaoList = addressList.filter(a => a.TIPO === 'SEPARACAO');
+
+        if (separacaoList.length > 0) {
+            targetAddress = separacaoList[0];
+            const largeNumVal = getPadraoLargeNum(targetAddress.ENDERECO);
+            const p = targetAddress.ENDERECO.split('.');
+            if (p.length > 1) p.pop();
+            const shortAddrVal = p.join('.');
+
+            targetAddress.formatted = {
+                largeNum: largeNumVal,
+                shortAddr: shortAddrVal
+            };
+
+            destinoType = 'separacao';
+        }
+    }
 
     // Clear pending
     pendingData = null;
@@ -473,6 +620,11 @@ async function executePrint(copies, validityDate = null) {
     ui.preview.innerHTML = '';
     ui.preview.appendChild(labelEl.cloneNode(true));
 
+    // Timer para limpar visualização após 10 segundos
+    setTimeout(() => {
+        ui.preview.innerHTML = '<p style="color: #6b7280; font-style: italic;">A etiqueta gerada aparecerá aqui...</p>';
+    }, 10000); // 10 segundos
+
     // History
     saveHistory({
         desc: product.DESC,
@@ -483,6 +635,7 @@ async function executePrint(copies, validityDate = null) {
         type: destinoType,
         validity: validityDate,
         zona: includeZona,
+        machine: getMachineName(),
         timestamp: new Date().toISOString()
     });
 
@@ -527,6 +680,32 @@ function updateDimensions() {
 ui.form.addEventListener('submit', handleSearch);
 ui.widthInput.addEventListener('input', updateDimensions);
 ui.heightInput.addEventListener('input', updateDimensions);
+
+// Barcode Input - Auto advance when barcode is scanned
+let barcodeTimer = null;
+ui.barcodeInput.addEventListener('input', (e) => {
+    const value = e.target.value.trim();
+
+    // Clear any existing timer
+    if (barcodeTimer) {
+        clearTimeout(barcodeTimer);
+    }
+
+    // Only process if we have some content and it looks like a barcode (numbers/letters)
+    if (value.length > 0 && /^[A-Za-z0-9]+$/.test(value)) {
+        // Set a timer - if no more input comes in 150ms, assume barcode scan is complete
+        barcodeTimer = setTimeout(() => {
+            // Focus on matricula field if it's empty, otherwise submit the form
+            if (!ui.matriculaInput.value.trim()) {
+                ui.matriculaInput.focus();
+            } else {
+                // Auto-submit if matricula is already filled
+                ui.form.dispatchEvent(new Event('submit'));
+            }
+            barcodeTimer = null;
+        }, 150);
+    }
+});
 
 // Matricula Input Events - Real-time validation and formatting
 ui.matriculaInput.addEventListener('input', (e) => {
@@ -707,6 +886,9 @@ document.addEventListener('keydown', (e) => {
 // History UI Events
 $('#historico-btn')?.addEventListener('click', showHistory);
 $('#historico-close')?.addEventListener('click', hideHistory);
+$('#config-machine-btn')?.addEventListener('click', () => {
+    promptForRealMachineName();
+});
 $('#historico-modal')?.addEventListener('click', (e) => {
     if (e.target === $('#historico-modal')) hideHistory();
 });
@@ -783,7 +965,7 @@ function renderHistory(list) {
                     <span>📍 ${item.address || '---'}</span> • 
                     <span>${(item.type || '').toUpperCase()}</span>
                     ${item.validity ? ` • <span>📅 Val: ${item.validity}</span>` : ''}
-                    ${item.zona ? ` • <span>🏷️ Zona</span>` : ''}
+                    ${item.machine ? ` • <span>💻 ${item.machine}</span>` : ''}
                 </div>
                 <div class="historico-meta">${date}</div>
             </div>
@@ -811,6 +993,7 @@ function filterHistory() {
                     coddv: normalizeSearchTerm(item.coddv),
                     matricula: normalizeSearchTerm(item.matricula),
                     barcode: normalizeSearchTerm(item.barcode),
+                    machine: normalizeSearchTerm(item.machine),
                     date: ''
                 };
 
@@ -837,6 +1020,8 @@ function filterHistory() {
                         return normalizedFields.desc.includes(term);
                     case 'data':
                         return normalizedFields.date.includes(term);
+                    case 'machine':
+                        return normalizedFields.machine.includes(term);
                     default:
                         return true;
                 }
@@ -885,5 +1070,60 @@ document.querySelectorAll('input[name="destino"]').forEach(r => {
     r.addEventListener('change', updateInstructions);
 });
 
+// Auto-refresh functionality - Refresh page every 1 hour
+function setupAutoRefresh() {
+    const ONE_HOUR = 1 * 60 * 60 * 1000; // 1 hora em milissegundos
+    const THIRTY_SECONDS = 30 * 1000; // 30 segundos em milissegundos
+
+    let lastActivity = Date.now();
+
+    // Track user activity
+    const updateActivity = () => {
+        lastActivity = Date.now();
+    };
+
+    // Listen for user activity events
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click', 'input'];
+    activityEvents.forEach(event => {
+        document.addEventListener(event, updateActivity, true);
+    });
+
+    // Store page load time
+    const pageLoadTime = new Date();
+    localStorage.setItem('last-page-load', pageLoadTime.toISOString());
+
+    // Calculate next refresh time
+    const nextRefreshTime = new Date(pageLoadTime.getTime() + ONE_HOUR);
+
+    console.log(`⏰ Página carregada: ${pageLoadTime.toLocaleString('pt-BR')}`);
+    console.log(`🔄 Próxima atualização: ${nextRefreshTime.toLocaleString('pt-BR')}`);
+
+    // Function to check if user is inactive and refresh if needed
+    const checkAndRefresh = () => {
+        const now = Date.now();
+        const timeSinceLastActivity = now - lastActivity;
+
+        if (timeSinceLastActivity >= THIRTY_SECONDS) {
+            console.log('🔄 Atualizando página - usuário inativo por mais de 30 segundos');
+            window.location.reload();
+        } else {
+            const remainingWait = THIRTY_SECONDS - timeSinceLastActivity;
+            console.log(`⏳ Aguardando inatividade... ${Math.ceil(remainingWait / 1000)}s restantes`);
+
+            // Check again after the remaining time
+            setTimeout(checkAndRefresh, remainingWait + 1000);
+        }
+    };
+
+    // Set up automatic refresh check after 1 hour
+    setTimeout(() => {
+        console.log('⏰ Tempo de atualização atingido, verificando atividade do usuário...');
+        checkAndRefresh();
+    }, ONE_HOUR);
+
+    console.log('⏰ Auto-refresh configurado para 1 hora com detecção de atividade');
+}
+
 // Boot
 init();
+setupAutoRefresh();

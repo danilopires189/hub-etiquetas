@@ -51,6 +51,14 @@
                     </svg>
                     Histórico
                 </button>
+                <button id="config-machine-btn" type="button" class="btn btn-ghost" title="Configurar nome da máquina" style="font-size: 0.8rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    PC
+                </button>
                 <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()"
                     aria-label="Imprimir">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -156,8 +164,14 @@
                         <input type="number" id="input-height" class="input-lg" value="50"
                             style="font-size: 1rem; padding: 0.5rem;">
                     </div>
-
-
+                </div>
+                
+                <!-- Nota discreta sobre direcionamento automático -->
+                <div style="margin-top: 0.8rem; padding: 0.5rem; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #e9ecef;">
+                    <p style="margin: 0; font-size: 0.75rem; color: #6c757d; line-height: 1.3;">
+                        <strong>Nota:</strong> Por padrão, produtos com 1 etiqueta são direcionados para Separação, 
+                        acima de 1 etiqueta são direcionados ao Pulmão. Ajuste a seleção se necessário.
+                    </p>
                 </div>
             </div>
 
