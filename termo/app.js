@@ -291,7 +291,7 @@ function montarEtiqueta({ cd, loja, pedido, seq, rota, volAtual, volTotal, matri
   // Exibir "NÚMERO:" apenas quando houver fracionamento (mais de 1 volume)
   if (Number(volTotal) > 1) {
     const vn = document.createElement('div');
-    vn.className = 'mini';
+    vn.className = 'mini numero-destaque';
     vn.textContent = `NÚMERO: ${toIntStr(numeroVolumeStr, volAtual)}`;
     vbox.appendChild(vn);
 

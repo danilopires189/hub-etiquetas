@@ -571,6 +571,11 @@ svg.barcode {
   font-size: 9pt;
 }
 
+.volume-box .mini.numero-destaque {
+  font-size: 12pt;
+  font-weight: bold;
+}
+
 .legend {
   font-size: 14pt;
   font-weight: 900;
