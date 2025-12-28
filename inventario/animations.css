@@ -1,0 +1,2538 @@
+/* Visual Effects Adaptation - Base Animation Configuration */
+/* Adaptação das animações do módulo etiqueta-mercadoria para o módulo inventário */
+
+/* ========================================
+   CSS VARIABLES - ANIMATION CONFIGURATION
+   ======================================== */
+
+:root {
+  /* Animation Durations */
+  --animation-duration-fast: 0.2s;
+  --animation-duration-normal: 0.3s;
+  --animation-duration-slow: 0.6s;
+  --animation-duration-entry: 0.6s;
+  --animation-duration-hover: 0.3s;
+  --animation-duration-loading: 1s;
+  --animation-duration-feedback: 0.4s;
+  --animation-duration-state: 0.3s;
+
+  /* Animation Easings */
+  --animation-easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --animation-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --animation-easing-linear: linear;
+  --animation-easing-ease-out: ease-out;
+  --animation-easing-ease-in-out: ease-in-out;
+
+  /* Animation Delays */
+  --animation-delay-stagger: 0.05s;
+  --animation-delay-short: 0.1s;
+  --animation-delay-medium: 0.2s;
+  --animation-delay-long: 0.3s;
+
+  /* Transform Values */
+  --transform-hover-button: translateY(-1px);
+  --transform-hover-card: translateY(-4px) scale(1.005);
+  --transform-hover-input: translateY(-2px);
+  --transform-active-button: scale(0.98);
+  --transform-remove-button: rotate(90deg);
+
+  /* Shadow Values */
+  --shadow-hover-button: 0 4px 12px rgba(14, 165, 233, 0.15);
+  --shadow-hover-card: 0 12px 20px -3px rgba(0, 0, 0, 0.1);
+  --shadow-focus-input: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-glassmorphism: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+
+  /* Glassmorphism Values */
+  --glassmorphism-bg: rgba(255, 255, 255, 0.85);
+  --glassmorphism-border: rgba(255, 255, 255, 0.6);
+  --glassmorphism-blur: blur(12px);
+  --glassmorphism-blur-modal: blur(4px);
+
+  /* Color Values for Feedback */
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-primary: #2563eb;
+}
+
+/* ========================================
+   ANIMATION CLASSES SYSTEM
+   ======================================== */
+
+/* Entry Animations */
+.animate-fade-slide-up {
+  animation: fadeSlideUp var(--animation-duration-entry) var(--animation-easing-smooth);
+}
+
+.animate-slide-up-field {
+  animation: slideUpField var(--animation-duration-normal) var(--animation-easing-smooth);
+}
+
+.animate-slide-in-down {
+  animation: slideInDown var(--animation-duration-feedback) var(--animation-easing-ease-out);
+}
+
+.animate-slide-in-up {
+  animation: slideInUp var(--animation-duration-entry) var(--animation-easing-smooth);
+}
+
+.animate-slide-in-right {
+  animation: slideInRight var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+/* Hover Effect Classes */
+.hover-button {
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+.hover-button:hover {
+  transform: var(--transform-hover-button);
+  box-shadow: var(--shadow-hover-button);
+}
+
+.hover-card {
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+.hover-card:hover {
+  transform: var(--transform-hover-card);
+  box-shadow: var(--shadow-hover-card);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.hover-input {
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+.hover-input:hover:not(:disabled) {
+  transform: var(--transform-hover-input);
+  box-shadow: var(--shadow-focus-input);
+}
+
+.focus-input {
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+.focus-input:focus {
+  transform: var(--transform-hover-input);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15), var(--shadow-focus-input);
+  border-color: #2563eb;
+}
+
+/* Loading State Classes */
+.loading-spinner {
+  position: relative;
+}
+
+.loading-spinner::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #e5e7eb;
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin var(--animation-duration-loading) var(--animation-easing-linear) infinite;
+}
+
+.loading-pulse {
+  animation: pulse 2s var(--animation-easing-ease-in-out) infinite;
+}
+
+/* Spinner Component - Adapted from etiqueta-mercadoria */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin var(--animation-duration-loading) var(--animation-easing-linear) infinite;
+}
+
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.spinner-large {
+  width: 60px;
+  height: 60px;
+  border-width: 6px;
+}
+
+/* Loading Overlay - Adapted from etiqueta-mercadoria */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 20000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.loading-overlay .spinner {
+  margin-bottom: 1rem;
+}
+
+.loading-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  text-align: center;
+}
+
+/* Inline Loading States */
+.loading-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loading-inline .spinner {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+/* Button Loading States - Enhanced for Requirements 3.2 */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.8;
+  cursor: not-allowed;
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+/* Internal spinner for buttons */
+.btn-loading::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  animation: spin var(--animation-duration-loading) var(--animation-easing-linear) infinite;
+  z-index: 2;
+}
+
+/* Hide button text during loading */
+.btn-loading .btn-text,
+.btn-loading svg,
+.btn-loading span:not(.loading-text) {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Loading text for buttons */
+.btn-loading .loading-text {
+  opacity: 1;
+  visibility: visible;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.85rem;
+  font-weight: 500;
+  z-index: 1;
+  margin-left: 12px;
+  /* Space for spinner */
+}
+
+/* Small spinner variant for compact buttons */
+.btn-loading.btn-small::before {
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-width: 1.5px;
+}
+
+.btn-loading.btn-small .loading-text {
+  font-size: 0.75rem;
+  margin-left: 8px;
+}
+
+/* Large spinner variant for primary buttons */
+.btn-loading.btn-large::before {
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-width: 2.5px;
+}
+
+.btn-loading.btn-large .loading-text {
+  font-size: 0.9rem;
+  margin-left: 16px;
+}
+
+/* Primary button loading state */
+.btn.primary.btn-loading::before {
+  border-color: rgba(255, 255, 255, 0.4);
+  border-top-color: rgba(255, 255, 255, 1);
+}
+
+/* Ghost button loading state */
+.btn.ghost.btn-loading::before {
+  border-color: rgba(37, 99, 235, 0.3);
+  border-top-color: rgba(37, 99, 235, 0.8);
+}
+
+/* Secondary button loading state */
+.btn.secondary.btn-loading::before {
+  border-color: rgba(107, 114, 128, 0.3);
+  border-top-color: rgba(107, 114, 128, 0.8);
+}
+
+/* Disable hover effects during loading */
+.btn-loading:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Loading pulse effect for critical operations */
+.btn-loading.loading-pulse {
+  animation: loadingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* ========================================
+   PROGRESS TOAST SYSTEM - ADAPTED FROM ETIQUETA-MERCADORIA
+   Requirements: 3.3 - Sistema de toast de progresso
+   ======================================== */
+
+/* Progress Toast Box - The container for progress notifications */
+.toast-progress-box {
+  position: relative;
+  /* Changed to relative to stay in container */
+  z-index: 25000;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+  padding: 0;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 380px;
+  min-width: 300px;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, sans-serif;
+  pointer-events: auto;
+}
+
+.toast-progress-box.show {
+  opacity: 1;
+  transform: translateX(0);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Progress Toast Content Structure */
+.toast-progress-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.toast-progress-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.toast-progress-text {
+  flex: 1;
+}
+
+.toast-progress-title {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.toast-progress-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Progress Toast Cancel Button */
+.toast-progress-cancel {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.toast-progress-cancel:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Progress Bar Container - Adapted from etiqueta-mercadoria */
+.toast-bar-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.toast-progress-bar {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Progress Toast Type Variants */
+.toast-progress-box.loading .toast-progress-bar {
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+}
+
+.toast-progress-box.success .toast-progress-bar {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.toast-progress-box.error .toast-progress-bar {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.toast-progress-box.warning .toast-progress-bar {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.toast-progress-box.info .toast-progress-bar {
+  background: linear-gradient(90deg, #6b7280, #4b5563);
+}
+
+/* Animated Progress Bar - For indeterminate progress */
+.toast-progress-bar.indeterminate {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(37, 99, 235, 0.8) 50%,
+      transparent 100%);
+  background-size: 200% 100%;
+  animation: progressSlide 2s linear infinite;
+  width: 100%;
+}
+
+@keyframes progressSlide {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Progress Fill Animation - For timed operations */
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+/* Progress Toast Entrance Animation */
+.toast-progress {
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Progress Toast Exit Animation */
+.toast-progress.hiding {
+  animation: slideOutRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Multiple Progress Toast Stacking */
+.toast-progress:nth-of-type(1) {
+  top: 20px;
+}
+
+.toast-progress:nth-of-type(2) {
+  top: 90px;
+}
+
+.toast-progress:nth-of-type(3) {
+  top: 160px;
+}
+
+/* Progress Toast Responsive Design */
+@media (max-width: 768px) {
+  .toast-progress {
+    right: 12px;
+    top: 12px;
+    max-width: 350px;
+    min-width: 280px;
+  }
+
+  .toast-progress-content {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .toast-progress-icon {
+    font-size: 20px;
+  }
+
+  .toast-progress-title {
+    font-size: 13px;
+  }
+
+  .toast-progress-subtitle {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toast-progress {
+    right: 8px;
+    top: 8px;
+    left: 8px;
+    max-width: none;
+    min-width: auto;
+  }
+
+  .toast-progress-content {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .toast-progress-icon {
+    font-size: 18px;
+  }
+
+  .toast-progress-title {
+    font-size: 12px;
+  }
+
+  .toast-progress-subtitle {
+    font-size: 10px;
+  }
+
+  .toast-progress-cancel {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+/* ========================================
+   TOAST SYSTEM - ADAPTED FROM ETIQUETA-MERCADORIA
+   Requirements: 4.1, 4.2, 4.5 - Sistema de toast de sucesso e erro
+   ======================================== */
+
+/* Toast Container - For stacking multiple notifications */
+.toast-container {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 25000;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  pointer-events: none;
+}
+
+/* Toast Container for mobile - Top position */
+@media (max-width: 640px) {
+  .toast-container {
+    top: 20px;
+    bottom: auto;
+    left: 20px;
+    right: 20px;
+    flex-direction: column;
+  }
+}
+
+/* Toast Component */
+.toast {
+  position: relative;
+  z-index: 25000;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  padding: 0;
+  opacity: 0;
+  transform: translateX(50px);
+  transition: all var(--animation-duration-normal) var(--animation-easing-smooth);
+  max-width: 350px;
+  min-width: 250px;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, sans-serif;
+  pointer-events: auto;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Toast Content Structure */
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.toast-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Toast Type Variants - Consistent colors (Requirements 4.1, 4.2) */
+.toast.success {
+  background: linear-gradient(135deg, var(--color-success), #059669);
+  color: white;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.toast.error {
+  background: linear-gradient(135deg, var(--color-error), #dc2626);
+  color: white;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.toast.warning {
+  background: linear-gradient(135deg, var(--color-warning), #d97706);
+  color: white;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.toast.info {
+  background: linear-gradient(135deg, var(--color-primary), #1d4ed8);
+  color: white;
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+.toast.loading {
+  background: linear-gradient(135deg, var(--color-primary), #1d4ed8);
+  color: white;
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+/* Toast Progress Bar - For static loading toasts (Requirement 3.3) */
+.toast-bar-wrap {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 16px 12px 16px;
+}
+
+.toast-progress-bar {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+/* Animated progress bar for loading states */
+.toast-progress-bar.animated {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Toast Cancel Button - For cancellable operations */
+.toast-cancel {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+.toast-cancel:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Toast Exit Animation */
+.toast.hiding {
+  animation: slideOutRight var(--animation-duration-normal) var(--animation-easing-smooth) forwards;
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Toast Stacking is now handled by the .toast-container with flexbox */
+
+/* Toast Responsive Design */
+@media (max-width: 768px) {
+  .toast {
+    right: 12px;
+    bottom: 12px;
+    max-width: 320px;
+    min-width: 280px;
+  }
+
+  .toast-content {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .toast-icon {
+    font-size: 18px;
+  }
+
+  .toast-message {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toast {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    max-width: none;
+    min-width: auto;
+  }
+
+  .toast-content {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .toast-icon {
+    font-size: 16px;
+  }
+
+  .toast-message {
+    font-size: 12px;
+  }
+}
+
+/* Feedback Visual Classes - Legacy support */
+.feedback-success {
+  background: linear-gradient(135deg, var(--color-success), #059669);
+  animation: slideInRight var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+.feedback-error {
+  background: linear-gradient(135deg, var(--color-error), #dc2626);
+  animation: slideInRight var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+.feedback-warning {
+  background: linear-gradient(135deg, var(--color-warning), #d97706);
+  animation: slideInRight var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+.feedback-fade-out {
+  animation: fadeOut var(--animation-duration-normal) var(--animation-easing-smooth) forwards;
+}
+
+/* ========================================
+   GLASSMORPHISM EFFECTS - ADAPTED FROM ETIQUETA-MERCADORIA
+   Requirements: 7.1, 7.2, 7.3, 7.5 - Efeitos de glassmorphism
+   ======================================== */
+
+/* Enhanced Glassmorphism Panel - Requirement 7.1 */
+.glassmorphism-panel {
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(245, 250, 255, 0.95) 50%,
+      rgba(240, 249, 255, 0.95) 100%);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 24px;
+  box-shadow:
+    0 20px 60px rgba(6, 46, 111, 0.15),
+    0 8px 16px rgba(14, 165, 233, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  position: relative;
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+/* Animated Border Gradient for Enhanced Glassmorphism */
+.glassmorphism-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 24px;
+  padding: 2px;
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6, #8b5cf6, #0ea5e9);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  background-size: 300% 300%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* Glassmorphism Panel Hover Effect */
+.glassmorphism-panel:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 25px 70px rgba(6, 46, 111, 0.2),
+    0 12px 20px rgba(14, 165, 233, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Standard Glassmorphism Panel - Simpler version */
+.glassmorphism-simple {
+  background: var(--glassmorphism-bg);
+  backdrop-filter: var(--glassmorphism-blur);
+  -webkit-backdrop-filter: var(--glassmorphism-blur);
+  border: 1px solid var(--glassmorphism-border);
+  box-shadow: var(--shadow-glassmorphism);
+  border-radius: 16px;
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+.glassmorphism-simple:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
+}
+
+/* Glassmorphism Modal Overlay - Requirement 7.2 */
+.glassmorphism-modal {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: var(--glassmorphism-blur-modal);
+  -webkit-backdrop-filter: var(--glassmorphism-blur-modal);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--animation-duration-normal) var(--animation-easing-smooth);
+}
+
+.glassmorphism-modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Glassmorphism Modal Content */
+.glassmorphism-modal-content {
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(245, 250, 255, 0.95) 100%);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.25),
+    0 10px 30px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: scale(0.9) translateY(20px);
+  transition: all var(--animation-duration-normal) var(--animation-easing-smooth);
+}
+
+.glassmorphism-modal.show .glassmorphism-modal-content {
+  transform: scale(1) translateY(0);
+}
+
+/* Glassmorphism Floating Elements - Requirement 7.3 */
+.glassmorphism-floating {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  box-shadow:
+    0 8px 32px rgba(31, 38, 135, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.05);
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+.glassmorphism-floating:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 40px rgba(31, 38, 135, 0.15),
+    0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Glassmorphism Button - Ghost style with blur */
+.glassmorphism-button {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 2px solid rgba(230, 236, 255, 0.8);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: var(--brand-primary);
+  cursor: pointer;
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+  box-shadow: 0 2px 8px rgba(6, 46, 111, 0.08);
+}
+
+.glassmorphism-button:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #0ea5e9;
+  color: #0ea5e9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+}
+
+/* Glassmorphism Card Variants */
+.glassmorphism-card-light {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08);
+}
+
+.glassmorphism-card-medium {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+}
+
+.glassmorphism-card-strong {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+}
+
+/* ========================================
+   BUTTON ANIMATIONS - ADAPTED FROM ETIQUETA-MERCADORIA
+   Requirements: 5.1, 5.2, 5.3, 5.4 - Animações de botões
+   ======================================== */
+
+/* Base Button Animation Class - Requirement 5.2 */
+.btn-animated {
+  position: relative;
+  overflow: hidden;
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+.btn-animated:active {
+  transform: var(--transform-active-button);
+  transition-duration: 0.1s;
+}
+
+/* Primary Button with Gradient and Shine - Requirements 5.1, 5.4 */
+.btn-primary-gradient {
+  background: linear-gradient(135deg, #062e6f 0%, #0ea5e9 100%);
+  background-size: 200% 200%;
+  color: white;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 4px 14px rgba(6, 46, 111, 0.35),
+    0 2px 6px rgba(14, 165, 233, 0.25);
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+}
+
+/* Shine Effect for Primary Buttons - Requirement 5.1 */
+.btn-primary-gradient::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent);
+  transform: rotate(45deg);
+  animation: shine 3s infinite;
+  pointer-events: none;
+}
+
+/* Primary Button Hover State - Requirements 5.1, 5.4 */
+.btn-primary-gradient:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 8px 24px rgba(6, 46, 111, 0.45),
+    0 4px 12px rgba(14, 165, 233, 0.35);
+  background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 3s var(--animation-easing-ease-in-out) infinite;
+}
+
+/* Primary Button Active State - Requirement 5.2 */
+.btn-primary-gradient:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 2px 8px rgba(6, 46, 111, 0.3),
+    0 1px 4px rgba(14, 165, 233, 0.2);
+  transition-duration: 0.1s;
+}
+
+/* All Button Types Click Animation - Requirement 5.2 */
+.btn:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-ghost:active,
+.btn-danger:active,
+.btn-success:active {
+  transform: scale(0.98);
+  transition-duration: 0.1s;
+}
+
+/* Remove Button Special Animation - Requirement 5.3 */
+.btn-remove-animated {
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+  transform-origin: center;
+}
+
+.btn-remove-animated:hover {
+  transform: var(--transform-remove-button);
+  background: #f43f5e !important;
+  color: white !important;
+  border-color: #f43f5e !important;
+}
+
+/* Enhanced Remove Button for .btn-remove class */
+.btn-remove {
+  transition: all var(--animation-duration-hover) var(--animation-easing-smooth);
+  transform-origin: center;
+}
+
+.btn-remove:hover {
+  transform: rotate(90deg);
+  background: #f43f5e !important;
+  color: white !important;
+  border-color: #f43f5e !important;
+}
+
+/* Button Gradient Shift Animation - Requirement 5.4 */
+.btn-gradient-shift {
+  background: linear-gradient(135deg, #062e6f 0%, #0ea5e9 50%, #3b82f6 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 4s ease-in-out infinite;
+}
+
+/* Secondary Button Enhanced Animations */
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Ghost Button Enhanced Animations */
+.btn-ghost:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+}
+
+/* Success Button Enhanced Animations */
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+}
+
+/* Danger Button Enhanced Animations */
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
+}
+
+/* ========================================
+   STATE TRANSITION SYSTEM - REQUIREMENT 6.2
+   Transições para campos habilitados/desabilitados
+   ======================================== */
+
+/* Base State Transition Class */
+.state-transition {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* Disabled State Transitions - Requirement 6.2 */
+.state-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  transition: opacity var(--animation-duration-state) var(--animation-easing-smooth),
+    background-color var(--animation-duration-state) var(--animation-easing-smooth),
+    border-color var(--animation-duration-state) var(--animation-easing-smooth),
+    color var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* Enabled State Transitions - Requirement 6.2 */
+.state-enabled {
+  opacity: 1;
+  cursor: auto;
+  pointer-events: auto;
+  transition: opacity var(--animation-duration-state) var(--animation-easing-smooth),
+    background-color var(--animation-duration-state) var(--animation-easing-smooth),
+    border-color var(--animation-duration-state) var(--animation-easing-smooth),
+    color var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* Input Field State Transitions - Requirement 6.2 */
+input[type="text"],
+input[type="number"],
+input[type="search"],
+select,
+textarea {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* Disabled Input States - Enhanced with smooth transitions */
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  opacity: 0.8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* Enabled Input States - Smooth transition back to normal */
+input:not(:disabled),
+select:not(:disabled),
+textarea:not(:disabled) {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* Button State Transitions - Requirement 6.2 */
+.btn {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+.btn:disabled,
+.btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+.btn:not(:disabled):not(.disabled) {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* CD Select State Transitions - Specific for inventario module */
+.cd-select {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+.cd-select:disabled {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+  box-shadow: none;
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+.cd-select:not(:disabled) {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* Search Input State Transitions - Specific for inventario module */
+.search-input {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+.search-input:disabled {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.8;
+  transform: none;
+  box-shadow: none;
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+.search-input:not(:disabled) {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* Search Icon State Transitions */
+.search-icon {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+.search-input:disabled~.search-icon {
+  color: #cbd5e1;
+  opacity: 0.5;
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+.search-input:not(:disabled)~.search-icon {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* CD Status State Transitions */
+.cd-status {
+  transition: opacity var(--animation-duration-state) var(--animation-easing-smooth),
+    background-color var(--animation-duration-state) var(--animation-easing-smooth),
+    color var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* Form Group State Transitions */
+.form-group {
+  transition: opacity var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+.form-group.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  transition: opacity var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+.form-group:not(.disabled) {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity var(--animation-duration-state) var(--animation-easing-smooth);
+}
+
+/* Staggered Animation Classes */
+.stagger-1 {
+  animation-delay: calc(var(--animation-delay-stagger) * 1);
+}
+
+.stagger-2 {
+  animation-delay: calc(var(--animation-delay-stagger) * 2);
+}
+
+.stagger-3 {
+  animation-delay: calc(var(--animation-delay-stagger) * 3);
+}
+
+.stagger-4 {
+  animation-delay: calc(var(--animation-delay-stagger) * 4);
+}
+
+.stagger-5 {
+  animation-delay: calc(var(--animation-delay-stagger) * 5);
+}
+
+.stagger-6 {
+  animation-delay: calc(var(--animation-delay-stagger) * 6);
+}
+
+.stagger-7 {
+  animation-delay: calc(var(--animation-delay-stagger) * 7);
+}
+
+.stagger-8 {
+  animation-delay: calc(var(--animation-delay-stagger) * 8);
+}
+
+/* ========================================
+   KEYFRAME ANIMATIONS
+   ======================================== */
+
+/* Entry Animations */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpField {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Loading Animations */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Button Animations */
+@keyframes gradientShift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes shine {
+  0% {
+    left: -50%;
+  }
+
+  100% {
+    left: 150%;
+  }
+}
+
+/* Feedback Animations */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Product removal animation - Requirement 4.4 */
+.product-item-removing {
+  animation: fadeOut var(--animation-duration-normal) var(--animation-easing-smooth) forwards;
+}
+
+/* Product addition highlight animation - Requirement 4.3 */
+.product-item-added {
+  animation: productHighlight 1s var(--animation-easing-smooth);
+}
+
+@keyframes productHighlight {
+  0% {
+    background-color: rgba(16, 185, 129, 0.1);
+    transform: scale(1);
+  }
+
+  50% {
+    background-color: rgba(16, 185, 129, 0.2);
+    transform: scale(1.02);
+  }
+
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+/* ========================================
+   SECTION SLIDE ANIMATIONS - REQUIREMENT 6.3
+   Animações para mostrar/ocultar seções
+   ======================================== */
+
+/* Section Show/Hide Animation Classes */
+.section-slide-down {
+  animation: slideDown var(--animation-duration-state) var(--animation-easing-smooth);
+  transform-origin: top;
+}
+
+.section-slide-up {
+  animation: slideUp var(--animation-duration-state) var(--animation-easing-smooth);
+  transform-origin: top;
+}
+
+.section-fade-slide-down {
+  animation: fadeSlideDown var(--animation-duration-state) var(--animation-easing-smooth);
+  transform-origin: top;
+}
+
+.section-fade-slide-up {
+  animation: fadeSlideUp var(--animation-duration-state) var(--animation-easing-smooth);
+  transform-origin: top;
+}
+
+/* Section Visibility States with Smooth Transitions */
+.section-hidden {
+  opacity: 0;
+  transform: translateY(-20px) scaleY(0.95);
+  max-height: 0;
+  overflow: hidden;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+  pointer-events: none;
+}
+
+.section-visible {
+  opacity: 1;
+  transform: translateY(0) scaleY(1);
+  max-height: 1000px;
+  /* Large enough to accommodate content */
+  overflow: visible;
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+  pointer-events: auto;
+}
+
+/* Enhanced Section Transitions for Product List */
+.product-list-section {
+  transition: all var(--animation-duration-state) var(--animation-easing-smooth);
+  transform-origin: top center;
+}
+
+.product-list-section.hiding {
+  animation: sectionSlideUp var(--animation-duration-state) var(--animation-easing-smooth) forwards;
+}
+
+.product-list-section.showing {
+  animation: sectionSlideDown var(--animation-duration-state) var(--animation-easing-smooth) forwards;
+}
+
+/* Smooth Height Transitions for Dynamic Content */
+.section-height-transition {
+  transition: max-height var(--animation-duration-state) var(--animation-easing-smooth),
+    opacity var(--animation-duration-state) var(--animation-easing-smooth),
+    transform var(--animation-duration-state) var(--animation-easing-smooth),
+    margin var(--animation-duration-state) var(--animation-easing-smooth),
+    padding var(--animation-duration-state) var(--animation-easing-smooth);
+  overflow: hidden;
+}
+
+/* Section Slide Keyframes */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scaleY(0.95);
+    max-height: 0;
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    max-height: 1000px;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    max-height: 1000px;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scaleY(0.95);
+    max-height: 0;
+  }
+}
+
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+}
+
+@keyframes sectionSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scaleY(0.95);
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    max-height: 1000px;
+    margin-top: 18px;
+    margin-bottom: 18px;
+  }
+}
+
+@keyframes sectionSlideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    max-height: 1000px;
+    margin-top: 18px;
+    margin-bottom: 18px;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scaleY(0.95);
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+/* ========================================
+   BROWSER COMPATIBILITY FALLBACKS - REQUIREMENT 7.4
+   Fallbacks para navegadores que não suportam backdrop-filter
+   ======================================== */
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(12px)) {
+
+  .glassmorphism-panel,
+  .panel {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .glassmorphism-simple {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .glassmorphism-modal {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .glassmorphism-modal-content {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .glassmorphism-floating {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .glassmorphism-button {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 2px solid rgba(148, 163, 184, 0.4);
+  }
+
+  .glassmorphism-card-light {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .glassmorphism-card-medium {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .glassmorphism-card-strong {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .loading-overlay {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .toast-progress {
+    background: white;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+
+  .search-status.success {
+    background: rgba(220, 252, 231, 0.95);
+    backdrop-filter: none;
+  }
+
+  .search-status.error {
+    background: rgba(254, 226, 226, 0.95);
+    backdrop-filter: none;
+  }
+
+  .search-status.warning {
+    background: rgba(254, 243, 199, 0.95);
+    backdrop-filter: none;
+  }
+}
+
+/* Fallback class for JavaScript detection */
+.no-backdrop-filter .glassmorphism-panel,
+.no-backdrop-filter .panel {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+.no-backdrop-filter .glassmorphism-modal {
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.no-backdrop-filter .glassmorphism-modal-content {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.no-backdrop-filter .loading-overlay {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Fallback for older browsers without CSS Grid support */
+@supports not (display: grid) {
+  .product-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .product-item {
+    flex: 1 1 180px;
+    max-width: 200px;
+  }
+}
+
+/* Fallback for browsers without CSS custom properties */
+.no-css-variables .panel {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 16px !important;
+}
+
+.no-css-variables .btn {
+  transition: all 0.3s ease;
+}
+
+.no-css-variables .search-input {
+  transition: all 0.3s ease;
+}
+
+/* Fallback for browsers without transform support */
+@supports not (transform: translateY(-2px)) {
+
+  .panel:hover,
+  .glassmorphism-panel:hover,
+  .hover-card:hover,
+  .hover-button:hover {
+    transform: none;
+    margin-top: -2px;
+    margin-bottom: 2px;
+  }
+}
+
+/* Internet Explorer specific fallbacks */
+@media screen and (-ms-high-contrast: active),
+(-ms-high-contrast: none) {
+
+  .panel,
+  .glassmorphism-panel {
+    background: rgba(255, 255, 255, 0.95) !important;
+    filter: none !important;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  .glassmorphism-modal {
+    background: rgba(0, 0, 0, 0.5) !important;
+    filter: none !important;
+  }
+
+  .loading-overlay {
+    background: rgba(255, 255, 255, 0.95) !important;
+    filter: none !important;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY - REDUCED MOTION SUPPORT - REQUIREMENTS 8.3, 8.4
+   Suporte completo a prefers-reduced-motion mantendo funcionalidade
+   ======================================== */
+
+/* Reduced Motion Preferences - Requirements 8.3, 8.4 */
+@media (prefers-reduced-motion: reduce) {
+
+  /* Disable all animations and transitions - Requirement 8.3 */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Maintain essential functionality while reducing motion - Requirement 8.4 */
+
+  /* Loading indicators - Keep functional but static */
+  .loading-spinner::after,
+  .spinner {
+    animation: none;
+    border: 2px solid var(--color-primary);
+    border-radius: 50%;
+    /* Add visual indicator that it's loading without animation */
+    border-top-color: rgba(37, 99, 235, 0.3);
+    border-right-color: rgba(37, 99, 235, 0.6);
+    border-bottom-color: rgba(37, 99, 235, 0.9);
+    border-left-color: var(--color-primary);
+  }
+
+  /* Button shine effects - Replace with static highlight */
+  .btn-primary-gradient::before {
+    animation: none;
+    opacity: 0.3;
+    background: linear-gradient(45deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent);
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    transform: none;
+  }
+
+  /* Gradient animations - Use static gradients */
+  .btn-gradient-shift {
+    animation: none;
+    background: linear-gradient(135deg, #062e6f 0%, #0ea5e9 50%, #3b82f6 100%);
+    background-position: 50% 50%;
+  }
+
+  /* Glassmorphism border animations - Use static border */
+  .glassmorphism-panel::before {
+    animation: none;
+    background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+    background-size: 100% 100%;
+    background-position: 0% 0%;
+  }
+
+  /* Progress bar animations - Use instant progress updates */
+  .toast-progress-bar.indeterminate {
+    animation: none;
+    background: linear-gradient(90deg,
+        rgba(37, 99, 235, 0.3) 0%,
+        rgba(37, 99, 235, 0.8) 50%,
+        rgba(37, 99, 235, 0.3) 100%);
+    background-size: 100% 100%;
+    background-position: 0% 0%;
+  }
+
+  .toast-progress-bar.animated {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* Loading pulse effects - Use static opacity */
+  .loading-pulse,
+  .btn-loading.loading-pulse {
+    animation: none;
+    opacity: 0.8;
+  }
+
+  /* Entry animations - Show elements immediately but maintain stagger timing for content flow */
+  .animate-fade-slide-up,
+  .animate-slide-up-field,
+  .animate-slide-in-down,
+  .animate-slide-in-up,
+  .animate-slide-in-right {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Maintain stagger timing for content flow without motion */
+  .stagger-1 {
+    opacity: 1;
+  }
+
+  .stagger-2 {
+    opacity: 1;
+  }
+
+  .stagger-3 {
+    opacity: 1;
+  }
+
+  .stagger-4 {
+    opacity: 1;
+  }
+
+  .stagger-5 {
+    opacity: 1;
+  }
+
+  .stagger-6 {
+    opacity: 1;
+  }
+
+  .stagger-7 {
+    opacity: 1;
+  }
+
+  .stagger-8 {
+    opacity: 1;
+  }
+
+  /* Hover effects - Use instant state changes */
+  .hover-card:hover,
+  .hover-button:hover,
+  .hover-input:hover,
+  .focus-input:focus {
+    transition: none;
+    /* Maintain visual feedback without motion */
+    box-shadow: var(--shadow-hover-card);
+    border-color: #2563eb;
+  }
+
+  /* Button active states - Instant feedback */
+  .btn:active,
+  .btn-primary:active,
+  .btn-secondary:active,
+  .btn-ghost:active,
+  .btn-danger:active,
+  .btn-success:active,
+  .btn-animated:active {
+    transition: none;
+    transform: none;
+    /* Use color/opacity changes instead of transforms */
+    opacity: 0.9;
+  }
+
+  /* Remove button - Use color change instead of rotation */
+  .btn-remove:hover,
+  .btn-remove-animated:hover {
+    transition: none;
+    transform: none;
+    background: #f43f5e !important;
+    color: white !important;
+    border-color: #f43f5e !important;
+  }
+
+  /* State transitions - Instant state changes */
+  .state-transition,
+  .state-disabled,
+  .state-enabled {
+    transition: none;
+  }
+
+  /* Section show/hide - Instant visibility changes */
+  .section-slide-down,
+  .section-slide-up,
+  .section-fade-slide-down,
+  .section-fade-slide-up {
+    animation: none;
+  }
+
+  .section-hidden {
+    transition: none;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .section-visible {
+    transition: none;
+    opacity: 1;
+    max-height: none;
+    overflow: visible;
+    pointer-events: auto;
+  }
+
+  /* Toast animations - Instant appearance */
+  .toast,
+  .toast-progress {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .toast.hiding,
+  .toast-progress.hiding {
+    animation: none;
+    opacity: 0;
+    transform: none;
+  }
+
+  /* Product animations - Instant feedback */
+  .product-item-removing {
+    animation: none;
+    opacity: 0;
+  }
+
+  .product-item-added {
+    animation: none;
+    /* Use background color change instead of animation */
+    background-color: rgba(16, 185, 129, 0.1);
+  }
+
+  /* Modal animations - Instant appearance */
+  .glassmorphism-modal.show .glassmorphism-modal-content {
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  /* Maintain functionality indicators without motion */
+
+  /* Loading states - Visual indicators without animation */
+  .btn-loading {
+    transition: none;
+    opacity: 0.8;
+    cursor: not-allowed;
+    /* Add text indicator for loading state */
+    position: relative;
+  }
+
+  .btn-loading::after {
+    content: '⏳';
+    /* Loading emoji as static indicator */
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8em;
+  }
+
+  /* Success/Error states - Use color and icons instead of motion */
+  .toast.success::before {
+    content: '✓';
+    color: white;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .toast.error::before {
+    content: '✗';
+    color: white;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .toast.warning::before {
+    content: '⚠';
+    color: white;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .toast.info::before {
+    content: 'ℹ';
+    color: white;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  /* Progress indicators - Use static visual cues */
+  .toast-progress-bar {
+    transition: none;
+    /* Add pattern to indicate progress without animation */
+    background-image: repeating-linear-gradient(45deg,
+        transparent,
+        transparent 4px,
+        rgba(255, 255, 255, 0.2) 4px,
+        rgba(255, 255, 255, 0.2) 8px);
+  }
+
+  /* Focus indicators - Enhanced visibility without motion */
+  .focus-input:focus {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+    border-color: #2563eb;
+  }
+
+  /* High contrast mode compatibility */
+  @media (prefers-contrast: high) {
+    .btn-loading::after {
+      content: 'Loading...';
+      font-size: 0.7em;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 2px 4px;
+      border-radius: 2px;
+    }
+
+    .toast.success::before,
+    .toast.error::before,
+    .toast.warning::before,
+    .toast.info::before {
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 2px 4px;
+      border-radius: 2px;
+    }
+  }
+}
+
+/* Reduced Motion with Respect for User Preferences */
+@media (prefers-reduced-motion: reduce) and (prefers-color-scheme: dark) {
+
+  /* Dark mode adjustments for reduced motion */
+  .btn-loading::after {
+    content: '⏳';
+    filter: brightness(1.2);
+  }
+
+  .toast.success::before {
+    content: '✓';
+    filter: brightness(1.2);
+  }
+
+  .toast.error::before {
+    content: '✗';
+    filter: brightness(1.2);
+  }
+
+  .toast.warning::before {
+    content: '⚠';
+    filter: brightness(1.2);
+  }
+
+  .toast.info::before {
+    content: 'ℹ';
+    filter: brightness(1.2);
+  }
+}
+
+/* ========================================
+   RESPONSIVE ANIMATION ADAPTATIONS - REQUIREMENTS 8.1, 8.2, 8.5
+   Adaptações para dispositivos móveis com performance otimizada
+   ======================================== */
+
+/* Tablet and Medium Screens - Requirement 8.2 */
+@media (max-width: 1024px) {
+  :root {
+    /* Slightly reduce animation complexity for tablets */
+    --animation-duration-entry: 0.5s;
+    --animation-duration-hover: 0.25s;
+    --animation-duration-loading: 0.8s;
+    --animation-duration-feedback: 0.35s;
+
+    /* Reduce glassmorphism blur for better performance */
+    --glassmorphism-blur: blur(8px);
+    --glassmorphism-blur-modal: blur(3px);
+  }
+
+  /* Reduce shine animation frequency on tablets */
+  .btn-primary-gradient::before {
+    animation-duration: 4s;
+  }
+
+  /* Optimize gradient animations for tablets */
+  .btn-gradient-shift {
+    animation-duration: 5s;
+  }
+}
+
+/* Mobile Devices - Requirements 8.1, 8.2, 8.5 */
+@media (max-width: 768px) {
+  :root {
+    /* Reduce animation durations on mobile for better performance - Requirement 8.5 */
+    --animation-duration-entry: 0.4s;
+    --animation-duration-hover: 0.2s;
+    --animation-duration-feedback: 0.3s;
+    --animation-duration-state: 0.25s;
+    --animation-duration-loading: 0.6s;
+
+    /* Reduce transform intensity on mobile - Requirement 8.2 */
+    --transform-hover-card: translateY(-2px) scale(1.002);
+    --transform-hover-button: translateY(-0.5px);
+    --transform-hover-input: translateY(-1px);
+
+    /* Optimize glassmorphism for mobile performance */
+    --glassmorphism-blur: blur(6px);
+    --glassmorphism-blur-modal: blur(2px);
+
+    /* Reduce shadow complexity on mobile */
+    --shadow-hover-button: 0 2px 8px rgba(14, 165, 233, 0.1);
+    --shadow-hover-card: 0 6px 12px -2px rgba(0, 0, 0, 0.08);
+    --shadow-focus-input: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-glassmorphism: 0 4px 16px 0 rgba(31, 38, 135, 0.08);
+  }
+
+  /* Disable complex animations on mobile - Requirement 8.1 */
+  .btn-primary-gradient::before {
+    animation: none;
+    opacity: 0.2;
+  }
+
+  /* Simplify gradient animations on mobile */
+  .btn-gradient-shift {
+    animation: none;
+    background: linear-gradient(135deg, #062e6f 0%, #0ea5e9 100%);
+  }
+
+  /* Optimize glassmorphism for mobile performance */
+  .glassmorphism-panel::before {
+    animation: none;
+    opacity: 0.3;
+  }
+
+  /* Reduce stagger delays on mobile */
+  .stagger-1 {
+    animation-delay: 0.02s;
+  }
+
+  .stagger-2 {
+    animation-delay: 0.04s;
+  }
+
+  .stagger-3 {
+    animation-delay: 0.06s;
+  }
+
+  .stagger-4 {
+    animation-delay: 0.08s;
+  }
+
+  .stagger-5 {
+    animation-delay: 0.1s;
+  }
+
+  .stagger-6 {
+    animation-delay: 0.12s;
+  }
+
+  .stagger-7 {
+    animation-delay: 0.14s;
+  }
+
+  .stagger-8 {
+    animation-delay: 0.16s;
+  }
+
+  /* Optimize loading animations for mobile */
+  .loading-pulse {
+    animation-duration: 1s;
+  }
+
+  /* Simplify toast animations on mobile */
+  .toast-progress-bar.indeterminate {
+    animation-duration: 1.5s;
+  }
+
+  /* Optimize section transitions for mobile */
+  .section-slide-down,
+  .section-slide-up,
+  .section-fade-slide-down,
+  .section-fade-slide-up {
+    animation-duration: 0.25s;
+  }
+}
+
+/* Small Mobile Devices - Requirements 8.1, 8.5 */
+@media (max-width: 480px) {
+  :root {
+    /* Further reduce animations on very small screens - Requirement 8.5 */
+    --animation-duration-entry: 0.3s;
+    --animation-duration-hover: 0.15s;
+    --animation-duration-feedback: 0.2s;
+    --animation-duration-state: 0.2s;
+    --animation-duration-loading: 0.5s;
+
+    /* Minimal transforms on small screens */
+    --transform-hover-card: translateY(-1px) scale(1.001);
+    --transform-hover-button: none;
+    --transform-hover-input: none;
+
+    /* Minimal glassmorphism on small screens */
+    --glassmorphism-blur: blur(4px);
+    --glassmorphism-blur-modal: blur(1px);
+
+    /* Minimal shadows on small screens */
+    --shadow-hover-button: 0 1px 4px rgba(14, 165, 233, 0.08);
+    --shadow-hover-card: 0 2px 6px rgba(0, 0, 0, 0.06);
+    --shadow-focus-input: 0 1px 4px rgba(0, 0, 0, 0.06);
+    --shadow-glassmorphism: 0 2px 8px 0 rgba(31, 38, 135, 0.06);
+  }
+
+  /* Disable hover transforms on touch devices - Requirement 8.1 */
+  .hover-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-hover-card);
+  }
+
+  .hover-button:hover {
+    transform: none;
+    box-shadow: var(--shadow-hover-button);
+  }
+
+  .hover-input:hover {
+    transform: none;
+    box-shadow: var(--shadow-focus-input);
+  }
+
+  /* Disable complex button animations on small screens */
+  .btn-remove:hover {
+    transform: none;
+    background: #f43f5e !important;
+    color: white !important;
+  }
+
+  .btn-remove-animated:hover {
+    transform: none;
+    background: #f43f5e !important;
+    color: white !important;
+  }
+
+  /* Simplify loading states on small screens */
+  .btn-loading::before {
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-width: 1.5px;
+  }
+
+  /* Disable stagger animations on very small screens */
+  .stagger-1,
+  .stagger-2,
+  .stagger-3,
+  .stagger-4,
+  .stagger-5,
+  .stagger-6,
+  .stagger-7,
+  .stagger-8 {
+    animation-delay: 0s;
+  }
+
+  /* Simplify section transitions */
+  .section-hidden {
+    transition-duration: 0.2s;
+  }
+
+  .section-visible {
+    transition-duration: 0.2s;
+  }
+}
+
+/* Very Small Screens and Low-End Devices - Requirement 8.5 */
+@media (max-width: 320px) {
+  :root {
+    /* Minimal animations for very small screens */
+    --animation-duration-entry: 0.2s;
+    --animation-duration-hover: 0.1s;
+    --animation-duration-feedback: 0.15s;
+    --animation-duration-state: 0.15s;
+    --animation-duration-loading: 0.4s;
+
+    /* No transforms on very small screens */
+    --transform-hover-card: none;
+    --transform-hover-button: none;
+    --transform-hover-input: none;
+
+    /* Minimal glassmorphism */
+    --glassmorphism-blur: blur(2px);
+    --glassmorphism-blur-modal: none;
+
+    /* Minimal shadows */
+    --shadow-hover-button: none;
+    --shadow-hover-card: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-focus-input: none;
+    --shadow-glassmorphism: 0 1px 4px 0 rgba(31, 38, 135, 0.04);
+  }
+
+  /* Disable all complex animations */
+  .animate-fade-slide-up,
+  .animate-slide-up-field,
+  .animate-slide-in-down,
+  .animate-slide-in-up,
+  .animate-slide-in-right {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Disable all hover effects */
+  .hover-card:hover,
+  .hover-button:hover,
+  .hover-input:hover,
+  .focus-input:focus {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Simplify glassmorphism to solid backgrounds */
+  .glassmorphism-panel,
+  .glassmorphism-simple,
+  .glassmorphism-floating {
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* High-DPI Displays Optimization - Requirement 8.5 */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+
+  /* Optimize animations for high-DPI displays */
+  .spinner,
+  .loading-spinner::after {
+    border-width: 1px;
+    /* Thinner borders on high-DPI */
+  }
+
+  /* Optimize glassmorphism borders for high-DPI */
+  .glassmorphism-panel,
+  .glassmorphism-simple,
+  .glassmorphism-floating {
+    border-width: 0.5px;
+  }
+}
+
+/* Touch Device Optimizations - Requirements 8.1, 8.2 */
+@media (hover: none) and (pointer: coarse) {
+
+  /* Disable hover effects on touch devices */
+  .hover-card:hover,
+  .hover-button:hover,
+  .hover-input:hover {
+    transform: none;
+  }
+
+  /* Use active states instead of hover on touch */
+  .hover-card:active {
+    transform: scale(0.98);
+    transition-duration: 0.1s;
+  }
+
+  .hover-button:active {
+    transform: scale(0.95);
+    transition-duration: 0.1s;
+  }
+
+  /* Optimize button loading states for touch */
+  .btn-loading {
+    opacity: 0.7;
+  }
+
+  /* Simplify glassmorphism on touch devices */
+  .glassmorphism-panel::before {
+    animation: none;
+    opacity: 0.2;
+  }
+}
+
+/* Landscape Orientation Optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+
+  /* Reduce vertical animations in landscape mode */
+  .animate-fade-slide-up,
+  .animate-slide-up-field {
+    animation-duration: 0.3s;
+  }
+
+  /* Optimize toast positioning in landscape */
+  .toast {
+    right: 12px;
+    bottom: 12px;
+    max-width: 280px;
+  }
+
+  .toast-progress {
+    right: 12px;
+    top: 12px;
+    max-width: 280px;
+  }
+}
+
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* Use GPU acceleration for better performance */
+.animate-fade-slide-up,
+.animate-slide-up-field,
+.animate-slide-in-down,
+.animate-slide-in-up,
+.animate-slide-in-right,
+.hover-card,
+.hover-button,
+.hover-input,
+.btn-animated {
+  will-change: transform, opacity;
+}
+
+/* Remove will-change after animations complete */
+.animate-fade-slide-up.animation-complete,
+.animate-slide-up-field.animation-complete,
+.animate-slide-in-down.animation-complete,
+.animate-slide-in-up.animation-complete,
+.animate-slide-in-right.animation-complete {
+  will-change: auto;
+}
