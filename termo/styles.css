@@ -510,11 +510,13 @@ select:focus {
   gap: 1mm;
   align-items: end;
   justify-items: center;
+  width: 100%;
 }
 
 svg.barcode {
   width: 100%;
   height: calc(var(--barcode-h-mm) * 1mm);
+  max-width: 100%;
 }
 
 .bartext {

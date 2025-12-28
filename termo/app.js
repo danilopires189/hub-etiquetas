@@ -324,7 +324,7 @@ function montarEtiqueta({ cd, loja, pedido, seq, rota, volAtual, volTotal, matri
 
   // render barcode
   if (window.JsBarcode) {
-    JsBarcode(svg, id, { format: 'CODE128', displayValue: false, margin: 0, width: 1, height: 42 });
+    JsBarcode(svg, id, { format: 'CODE128', displayValue: false, margin: 0, width: 1.5, height: 42 });
   } else {
     const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     t.setAttribute('x', '0'); t.setAttribute('y', '20'); t.textContent = id;
