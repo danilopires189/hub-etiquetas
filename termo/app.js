@@ -18,7 +18,7 @@ function validarMatricula(matricula) {
     }
     return { valida: true };
   }
-  
+
   // Use shared validation system
   const validation = window.UserValidation.validateMatricula(matricula);
   return {
@@ -371,16 +371,16 @@ function gerar() {
     const validation = window.UserValidation.validateBeforeGeneration(matriculaInput, (msg, type) => {
       alert('Erro: ' + msg);
     });
-    
+
     if (!validation) {
       return; // Validation failed, stop processing
     }
-    
+
     // Set current user when matricula is valid
     if (validation.user) {
       window.UserValidation.setCurrentUser(validation.user);
     }
-    
+
     const mat = validation.cleaned;
 
     setVars();
@@ -511,7 +511,7 @@ function gerar() {
 document.addEventListener('DOMContentLoaded', async () => {
   // Initialize user validation system
   await initializeUserValidation();
-  
+
   await loadBase();
 
   const toggle = () => {
@@ -683,7 +683,7 @@ function createTermoHistoryItemHTML(item) {
           <span>Rota: ${item.rota}</span>
         </div>
         <div class="historico-meta">
-          ${item.matricula ? `<span>Matrícula: ${item.matricula}</span>` : ''}
+          ${item.matricula ? `<span>Matrícula: ${item.matricula}${item.nome ? ' - ' + item.nome : ''}</span>` : ''}
           <span>Separado em: ${item.dataSeparacao} às ${item.horaSeparacao}</span>
         </div>
       </div>
@@ -816,8 +816,18 @@ function saveToTermoHistory(config) {
   }
 
   // Adicionar a nova entrada no início
+  // Tentar encontrar o nome do usuário
+  let nomeUsuario = '';
+  if (window.DB_USUARIO && window.DB_USUARIO.BASE_USUARIO) {
+    const usuario = window.DB_USUARIO.BASE_USUARIO.find(u => u.Matricula == config.matricula);
+    if (usuario) {
+      nomeUsuario = usuario.Nome;
+    }
+  }
+
   termoGenerationHistory.unshift({
     ...config,
+    nome: nomeUsuario,
     id: Date.now() + Math.random(), // ID único para evitar conflitos
     uniqueKey
   });
@@ -865,41 +875,41 @@ window.clearTermoSearch = clearTermoSearch;
 async function initializeUserValidation() {
   try {
     console.log('🔄 Inicializando sistema de validação de usuário...');
-    
+
     // Load user database
     const loaded = await window.UserValidation.loadUserDatabase();
     if (!loaded) {
       console.error('❌ Falha ao carregar base de usuários');
       return;
     }
-    
+
     // Initialize responsive layout system
     window.UserGreeting.initResponsiveLayoutSystem();
-    
+
     console.log('✅ Sistema de validação de usuário inicializado');
     console.log(`📊 Total de usuários carregados: ${window.UserValidation.userCount}`);
-    
+
     // Add test function for debugging
     window.testUserValidationTermo = () => {
       console.log('🧪 Testando validação de usuário no módulo termo...');
-      
+
       const matriculaInput = $('#matricula');
       if (!matriculaInput) {
         console.error('❌ Campo matrícula não encontrado');
         return;
       }
-      
+
       // Test with sample matricula
       matriculaInput.value = '81883'; // Sample from BASE_USUARIO.js
       const validation = window.UserValidation.validateMatricula(matriculaInput.value);
       console.log('✅ Resultado da validação:', validation);
-      
+
       if (validation.valid) {
         window.UserValidation.setCurrentUser(validation.user);
         console.log('👋 Saudação atualizada para:', validation.user.Nome);
       }
     };
-    
+
   } catch (error) {
     console.error('❌ Erro na inicialização do sistema de validação:', error);
   }

@@ -262,7 +262,7 @@ function createHistoryItemHTML(item) {
         <div class="historico-secondary">
           <span>Depósito: ${item.deposito}</span>
           <span>Tipo: ${item.tipoMovimentacao}</span>
-          <span>Matrícula: ${item.matricula}</span>
+          <span>Matrícula: ${item.matricula}${item.nome ? ' - ' + item.nome : ''}</span>
         </div>
         <div class="historico-meta">
           <span>${item.dataCriacao} às ${item.horaCriacao}</span>
@@ -332,8 +332,18 @@ function saveToAvulsoHistory(config) {
   }
 
   // Adicionar a nova entrada no início
+  // Tentar encontrar o nome do usuário
+  let nomeUsuario = '';
+  if (window.DB_USUARIO && window.DB_USUARIO.BASE_USUARIO) {
+    const usuario = window.DB_USUARIO.BASE_USUARIO.find(u => u.Matricula == config.matricula);
+    if (usuario) {
+      nomeUsuario = usuario.Nome;
+    }
+  }
+
   avulsoGenerationHistory.unshift({
     ...config,
+    nome: nomeUsuario,
     id: Date.now() + Math.random(), // ID único para evitar conflitos
     uniqueKey
   });
