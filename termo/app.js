@@ -536,6 +536,57 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   setVars();
 
+  // Add real-time matricula validation
+  const matriculaInput = $('#matricula');
+  if (matriculaInput) {
+    let validationTimeout = null;
+
+    matriculaInput.addEventListener('input', (e) => {
+      // Clear previous timeout
+      if (validationTimeout) {
+        clearTimeout(validationTimeout);
+      }
+
+      // Clear any existing error states
+      window.UserValidation.clearFieldError(matriculaInput);
+
+      const matricula = e.target.value.trim();
+
+      // If empty, clear current user and greeting
+      if (!matricula) {
+        window.UserValidation.clearCurrentUser();
+        return;
+      }
+
+      // Debounce validation to avoid excessive calls
+      validationTimeout = setTimeout(() => {
+        const validation = window.UserValidation.validateMatricula(matricula);
+
+        if (validation.valid && validation.user) {
+          // Set current user and update greeting
+          window.UserValidation.setCurrentUser(validation.user);
+          console.log('✅ Usuário validado em tempo real:', validation.user.Nome);
+        } else {
+          // Clear current user if validation fails
+          window.UserValidation.clearCurrentUser();
+        }
+      }, 500); // 500ms debounce
+    });
+
+    // Also validate on blur (when user leaves the field)
+    matriculaInput.addEventListener('blur', (e) => {
+      const matricula = e.target.value.trim();
+      if (matricula) {
+        const validation = window.UserValidation.validateMatricula(matricula);
+        if (!validation.valid) {
+          window.UserValidation.highlightFieldError(matriculaInput, validation.msg, 3000);
+        }
+      }
+    });
+
+    console.log('✅ Validação em tempo real configurada para campo matrícula');
+  }
+
   // Controles do histórico
   $('#termo-historico-btn').addEventListener('click', showTermoHistorico);
   $('#termo-historico-close').addEventListener('click', hideTermoHistorico);
