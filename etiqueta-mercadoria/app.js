@@ -93,15 +93,15 @@ function measureTextDimensions(text, fontSize, fontWeight, fontFamily, maxWidth)
             border: none;
         `;
         measureElement.textContent = text;
-        
+
         document.body.appendChild(measureElement);
-        
+
         const rect = measureElement.getBoundingClientRect();
         const lineHeight = parseFloat(getComputedStyle(measureElement).lineHeight);
         const lines = Math.ceil(rect.height / lineHeight);
-        
+
         document.body.removeChild(measureElement);
-        
+
         return {
             width: rect.width,
             height: rect.height,
@@ -113,7 +113,7 @@ function measureTextDimensions(text, fontSize, fontWeight, fontFamily, maxWidth)
         const avgCharWidth = fontSize * 0.6; // Aproximação
         const charsPerLine = Math.floor(maxWidth / avgCharWidth);
         const estimatedLines = Math.ceil(text.length / charsPerLine);
-        
+
         return {
             width: Math.min(text.length * avgCharWidth, maxWidth),
             height: estimatedLines * fontSize * 1.2,
@@ -124,16 +124,16 @@ function measureTextDimensions(text, fontSize, fontWeight, fontFamily, maxWidth)
 
 function calculateOptimalFontSize(text, maxWidth, maxLines, defaultFontSize, minFontSize) {
     const config = LABEL_CONFIG.description;
-    
+
     // Verificar se o texto cabe com o tamanho padrão
     const defaultMeasurement = measureTextDimensions(
-        text, 
-        defaultFontSize, 
-        config.fontWeight, 
-        config.fontFamily, 
+        text,
+        defaultFontSize,
+        config.fontWeight,
+        config.fontFamily,
         maxWidth
     );
-    
+
     if (defaultMeasurement.lines <= maxLines) {
         return {
             optimalFontSize: defaultFontSize,
@@ -142,23 +142,23 @@ function calculateOptimalFontSize(text, maxWidth, maxLines, defaultFontSize, min
             finalText: text
         };
     }
-    
+
     // Busca binária para encontrar o tamanho ideal
     let low = minFontSize;
     let high = defaultFontSize;
     let bestSize = minFontSize;
     let bestMeasurement = null;
-    
+
     while (low <= high) {
         const mid = Math.floor((low + high) / 2);
         const measurement = measureTextDimensions(
-            text, 
-            mid, 
-            config.fontWeight, 
-            config.fontFamily, 
+            text,
+            mid,
+            config.fontWeight,
+            config.fontFamily,
             maxWidth
         );
-        
+
         if (measurement.lines <= maxLines) {
             bestSize = mid;
             bestMeasurement = measurement;
@@ -167,13 +167,13 @@ function calculateOptimalFontSize(text, maxWidth, maxLines, defaultFontSize, min
             high = mid - 1;
         }
     }
-    
+
     // Se mesmo com o tamanho mínimo não cabe, truncar o texto
     if (!bestMeasurement || bestMeasurement.lines > maxLines) {
         let truncatedText = text;
         let attempts = 0;
         const maxAttempts = 10;
-        
+
         while (attempts < maxAttempts) {
             const measurement = measureTextDimensions(
                 truncatedText + '...',
@@ -182,7 +182,7 @@ function calculateOptimalFontSize(text, maxWidth, maxLines, defaultFontSize, min
                 config.fontFamily,
                 maxWidth
             );
-            
+
             if (measurement.lines <= maxLines) {
                 return {
                     optimalFontSize: minFontSize,
@@ -191,13 +191,13 @@ function calculateOptimalFontSize(text, maxWidth, maxLines, defaultFontSize, min
                     finalText: truncatedText + '...'
                 };
             }
-            
+
             // Remover 10% do texto a cada tentativa
             const removeCount = Math.max(1, Math.floor(truncatedText.length * 0.1));
             truncatedText = truncatedText.slice(0, -removeCount);
             attempts++;
         }
-        
+
         // Fallback final
         return {
             optimalFontSize: minFontSize,
@@ -206,7 +206,7 @@ function calculateOptimalFontSize(text, maxWidth, maxLines, defaultFontSize, min
             finalText: text.slice(0, 20) + '...'
         };
     }
-    
+
     return {
         optimalFontSize: bestSize,
         actualLines: bestMeasurement.lines,
@@ -218,14 +218,14 @@ function calculateOptimalFontSize(text, maxWidth, maxLines, defaultFontSize, min
 function formatDescriptionForLabel(description, containerWidth = null) {
     const config = LABEL_CONFIG.description;
     const width = containerWidth || config.containerWidth;
-    
+
     // Verificar cache primeiro
     const cacheKey = `${description}_${width}`;
     if (descriptionFormatCache.has(cacheKey)) {
         const cached = descriptionFormatCache.get(cacheKey);
         return cached;
     }
-    
+
     try {
         // Validar entrada
         if (!description || typeof description !== 'string') {
@@ -233,14 +233,14 @@ function formatDescriptionForLabel(description, containerWidth = null) {
             descriptionFormatCache.set(cacheKey, fallback);
             return fallback;
         }
-        
+
         const cleanDescription = description.trim();
         if (!cleanDescription) {
             const fallback = '<div class="label-desc">Produto</div>';
             descriptionFormatCache.set(cacheKey, fallback);
             return fallback;
         }
-        
+
         // Calcular tamanho ideal da fonte
         const result = calculateOptimalFontSize(
             cleanDescription,
@@ -249,24 +249,24 @@ function formatDescriptionForLabel(description, containerWidth = null) {
             config.defaultFontSize,
             config.minFontSize
         );
-        
+
         // Gerar HTML com estilo inline
         const formattedHtml = `<div class="label-desc" style="font-size: ${result.optimalFontSize}pt; line-height: 1.2; font-weight: ${config.fontWeight}; font-family: ${config.fontFamily};">${result.finalText}</div>`;
-        
+
         // Armazenar no cache (limitar tamanho do cache)
         if (descriptionFormatCache.size > 100) {
             const firstKey = descriptionFormatCache.keys().next().value;
             descriptionFormatCache.delete(firstKey);
         }
         descriptionFormatCache.set(cacheKey, formattedHtml);
-        
+
         // Log para debug
         if (result.optimalFontSize !== config.defaultFontSize) {
             console.log(`📏 Descrição ajustada: "${cleanDescription.slice(0, 30)}..." | ${config.defaultFontSize}pt → ${result.optimalFontSize}pt | ${result.actualLines} linhas`);
         }
-        
+
         return formattedHtml;
-        
+
     } catch (error) {
         console.warn('Erro na formatação da descrição:', error);
         // Fallback para formatação padrão
@@ -294,7 +294,7 @@ function clearDescriptionFormatCache() {
 // Testing Functions for Description Formatting
 function testDescriptionFormatting() {
     console.log('🧪 Iniciando testes de formatação de descrição...');
-    
+
     const testCases = [
         {
             name: 'Descrição curta',
@@ -332,18 +332,18 @@ function testDescriptionFormatting() {
             expectedFallback: true
         }
     ];
-    
+
     let passedTests = 0;
     let totalTests = testCases.length;
-    
+
     testCases.forEach((testCase, index) => {
         try {
             console.log(`\n📋 Teste ${index + 1}: ${testCase.name}`);
             console.log(`   Entrada: "${testCase.description}"`);
-            
+
             const result = formatDescriptionForLabel(testCase.description);
             console.log(`   Resultado: ${result}`);
-            
+
             // Verificar se é fallback
             if (testCase.expectedFallback) {
                 if (result.includes('Produto')) {
@@ -354,13 +354,13 @@ function testDescriptionFormatting() {
                 }
                 return;
             }
-            
+
             // Extrair font-size do resultado
             const fontSizeMatch = result.match(/font-size:\s*(\d+(?:\.\d+)?)pt/);
             if (fontSizeMatch) {
                 const fontSize = parseFloat(fontSizeMatch[1]);
                 console.log(`   Font-size aplicado: ${fontSize}pt`);
-                
+
                 if (testCase.expectedFontSize === 10 && fontSize === 10) {
                     console.log('   ✅ Font-size padrão mantido');
                     passedTests++;
@@ -376,108 +376,108 @@ function testDescriptionFormatting() {
             } else {
                 console.log('   ❌ Font-size não encontrado no resultado');
             }
-            
+
             // Verificar truncamento se esperado
             if (testCase.expectedTruncated && result.includes('...')) {
                 console.log('   ✅ Texto truncado conforme esperado');
             } else if (testCase.expectedTruncated && !result.includes('...')) {
                 console.log('   ⚠️ Truncamento esperado mas não aplicado');
             }
-            
+
         } catch (error) {
             console.log(`   ❌ Erro no teste: ${error.message}`);
         }
     });
-    
+
     console.log(`\n📊 Resultado dos testes: ${passedTests}/${totalTests} passaram`);
-    
+
     if (passedTests === totalTests) {
         console.log('🎉 Todos os testes passaram!');
     } else {
         console.log('⚠️ Alguns testes falharam. Verifique a implementação.');
     }
-    
+
     return { passed: passedTests, total: totalTests };
 }
 
 function testPerformanceDescriptionFormatting() {
     console.log('⚡ Testando performance da formatação de descrição...');
-    
+
     const longDescription = 'PRODUTO DE TESTE COM DESCRIÇÃO MUITO LONGA PARA TESTAR PERFORMANCE DO SISTEMA DE FORMATAÇÃO AUTOMÁTICA DE FONTE';
     const iterations = 100;
-    
+
     const startTime = performance.now();
-    
+
     for (let i = 0; i < iterations; i++) {
         formatDescriptionForLabel(longDescription);
     }
-    
+
     const endTime = performance.now();
     const totalTime = endTime - startTime;
     const avgTime = totalTime / iterations;
-    
+
     console.log(`📈 Performance: ${iterations} formatações em ${totalTime.toFixed(2)}ms`);
     console.log(`📈 Tempo médio por formatação: ${avgTime.toFixed(2)}ms`);
-    
+
     if (avgTime < 5) {
         console.log('✅ Performance adequada (< 5ms por formatação)');
     } else {
         console.log('⚠️ Performance pode ser melhorada (> 5ms por formatação)');
     }
-    
+
     return { totalTime, avgTime, iterations };
 }
 
 function testCacheEfficiency() {
     console.log('💾 Testando eficiência do cache...');
-    
+
     const testDescription = 'PRODUTO PARA TESTE DE CACHE';
-    
+
     // Primeira formatação (sem cache)
     const startTime1 = performance.now();
     formatDescriptionForLabel(testDescription);
     const endTime1 = performance.now();
     const timeWithoutCache = endTime1 - startTime1;
-    
+
     // Segunda formatação (com cache)
     const startTime2 = performance.now();
     formatDescriptionForLabel(testDescription);
     const endTime2 = performance.now();
     const timeWithCache = endTime2 - startTime2;
-    
+
     console.log(`⏱️ Primeira formatação (sem cache): ${timeWithoutCache.toFixed(2)}ms`);
     console.log(`⏱️ Segunda formatação (com cache): ${timeWithCache.toFixed(2)}ms`);
-    
+
     const improvement = ((timeWithoutCache - timeWithCache) / timeWithoutCache * 100);
     console.log(`📈 Melhoria com cache: ${improvement.toFixed(1)}%`);
-    
+
     if (timeWithCache < timeWithoutCache) {
         console.log('✅ Cache funcionando corretamente');
     } else {
         console.log('⚠️ Cache pode não estar funcionando adequadamente');
     }
-    
+
     return { timeWithoutCache, timeWithCache, improvement };
 }
 
 // Função para executar todos os testes
 function runAllDescriptionTests() {
     console.log('🚀 Executando todos os testes de formatação de descrição...\n');
-    
+
     const functionalTests = testDescriptionFormatting();
     console.log('\n' + '='.repeat(50));
-    
+
     const performanceTests = testPerformanceDescriptionFormatting();
     console.log('\n' + '='.repeat(50));
-    
+
     const cacheTests = testCacheEfficiency();
     console.log('\n' + '='.repeat(50));
-    
+
     console.log('\n📋 Resumo dos testes:');
     console.log(`   Funcionais: ${functionalTests.passed}/${functionalTests.total}`);
     console.log(`   Performance: ${performanceTests.avgTime.toFixed(2)}ms média`);
     console.log(`   Cache: ${cacheTests.improvement.toFixed(1)}% melhoria`);
-    
+
     return {
         functional: functionalTests,
         performance: performanceTests,
@@ -1959,9 +1959,9 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
             </div>
             
             <div class="label-row-bottom">
-                <div class="label-addr" style="display: flex; align-items: baseline; white-space: nowrap; overflow: hidden;">
-                    ${shortAddr.replace(/\s+/g, '')}
-                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 6px; display: inline-block;">
+                <div class="label-addr" style="display: flex; align-items: baseline; white-space: nowrap; overflow: hidden; font-size: 13pt;">
+                    ${addressItem.ENDERECO.replace(/\s+/g, '')}
+                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 10px; display: inline-block;">
                         ${inputBarcode.slice(0, -4)}<span style="font-size: 11pt; font-weight: 800;">${inputBarcode.slice(-4)}</span>
                     </span>
                 </div>
@@ -1993,9 +1993,9 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
             </div>
             
             <div class="label-row-bottom">
-                <div class="label-addr" style="display: flex; align-items: baseline; white-space: nowrap; overflow: hidden;">
-                    ${shortAddr.replace(/\s+/g, '')}
-                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 6px; display: inline-block;">
+                <div class="label-addr" style="display: flex; align-items: baseline; white-space: nowrap; overflow: hidden; font-size: 13pt;">
+                    ${addressItem.ENDERECO.replace(/\s+/g, '')}
+                    <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 10px; display: inline-block;">
                         ${inputBarcode.slice(0, -4)}<span style="font-size: 11pt; font-weight: 800;">${inputBarcode.slice(-4)}</span>
                     </span>
                 </div>
@@ -2038,10 +2038,10 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
     for (let i = 0; i < copies; i++) {
         const item = document.createElement('div');
         item.className = 'label-badge';
-        
+
         // Formatar descrição com ajuste automático de fonte
         const formattedDescription = safeFormatDescription(product.DESC);
-        
+
         item.innerHTML = `
             <div class="label-row-top">
                 <div class="label-meta-top">
@@ -2460,7 +2460,7 @@ ui.barcodeInput.addEventListener('input', (e) => {
 
     // Only process if we have some content and it looks like a barcode (numbers/letters)
     if (value.length > 0 && /^[A-Za-z0-9]+$/.test(value)) {
-        
+
         // If this is the first character, record start time
         if (value.length === 1) {
             inputStartTime = currentTime;
@@ -2470,7 +2470,7 @@ ui.barcodeInput.addEventListener('input', (e) => {
             console.log('📱 Iniciando entrada - detectando método...');
             return; // Don't process yet, wait for more characters
         }
-        
+
         // Detect input method based on timing between characters
         // If time between characters > 50ms, it's likely manual entry
         if (timeSinceLastInput > 50) {
@@ -2482,7 +2482,7 @@ ui.barcodeInput.addEventListener('input', (e) => {
             // Fast input - likely scanner
             ui.barcodeInput.placeholder = "Aguardando leitor...";
             console.log('📱 Entrada rápida detectada - timer ativo');
-            
+
             // Set timer ONLY for fast input (scanner)
             barcodeTimer = setTimeout(() => {
                 console.log('⏰ Timer expirado - processando automaticamente');
@@ -2506,13 +2506,13 @@ ui.barcodeInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         e.preventDefault();
         console.log('⏎ Enter pressionado - processando código imediatamente');
-        
+
         // Clear any pending timer
         if (barcodeTimer) {
             clearTimeout(barcodeTimer);
             barcodeTimer = null;
         }
-        
+
         processBarcode();
     }
 });
@@ -2520,14 +2520,14 @@ ui.barcodeInput.addEventListener('keydown', (e) => {
 // Function to process barcode (extracted for reuse)
 function processBarcode() {
     const value = ui.barcodeInput.value.trim();
-    
+
     if (!value) {
         console.log('⚠️ Campo vazio - nada para processar');
         return;
     }
-    
+
     console.log(`✅ Processando código: ${value}`);
-    
+
     // Focus on matricula field if it's empty, otherwise submit the form
     if (!ui.matriculaInput.value.trim()) {
         ui.matriculaInput.focus();
@@ -2537,7 +2537,7 @@ function processBarcode() {
         ui.form.dispatchEvent(new Event('submit'));
         console.log('📋 Formulário submetido automaticamente');
     }
-    
+
     // Reset state
     isManualEntry = false;
     inputStartTime = 0;
@@ -2786,7 +2786,7 @@ $('#clear-search')?.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize greeting performance optimization
     setTimeout(optimizeGreetingPerformance, 100);
-    
+
     // Initialize responsive layout system
     initResponsiveLayoutSystem();
 });
