@@ -194,7 +194,7 @@ function generate() {
 function setup() {
   // Initialize user validation system first
   initializeUserValidation();
-  
+
   // Carregar dados dos CDs primeiro
   loadDepositos();
 
@@ -205,6 +205,44 @@ function setup() {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { generate(); }
     if (e.key === "p" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); window.print(); }
   });
+
+  // Add real-time matricula validation
+  const matriculaInput = $("#matricula");
+  if (matriculaInput) {
+    let validationTimeout = null;
+
+    matriculaInput.addEventListener('input', (e) => {
+      if (validationTimeout) clearTimeout(validationTimeout);
+      window.UserValidation.clearFieldError(matriculaInput);
+      const matricula = e.target.value.trim();
+
+      if (!matricula) {
+        window.UserValidation.clearCurrentUser();
+        return;
+      }
+
+      validationTimeout = setTimeout(() => {
+        const validation = window.UserValidation.validateMatricula(matricula);
+        if (validation.valid && validation.user) {
+          window.UserValidation.setCurrentUser(validation.user);
+          console.log('✅ Usuário validado em tempo real:', validation.user.Nome);
+        } else {
+          window.UserValidation.clearCurrentUser();
+        }
+      }, 500);
+    });
+
+    matriculaInput.addEventListener('blur', (e) => {
+      const matricula = e.target.value.trim();
+      if (matricula) {
+        const validation = window.UserValidation.validateMatricula(matricula);
+        if (!validation.valid) {
+          window.UserValidation.highlightFieldError(matriculaInput, validation.msg, 3000);
+        }
+      }
+    });
+    console.log('✅ Validação em tempo real configurada para campo matrícula');
+  }
 }
 
 document.addEventListener("DOMContentLoaded", setup);
@@ -212,41 +250,41 @@ document.addEventListener("DOMContentLoaded", setup);
 async function initializeUserValidation() {
   try {
     console.log('🔄 Inicializando sistema de validação de usuário...');
-    
+
     // Load user database
     const loaded = await window.UserValidation.loadUserDatabase();
     if (!loaded) {
       console.error('❌ Falha ao carregar base de usuários');
       return;
     }
-    
+
     // Initialize responsive layout system
     window.UserGreeting.initResponsiveLayoutSystem();
-    
+
     console.log('✅ Sistema de validação de usuário inicializado');
     console.log(`📊 Total de usuários carregados: ${window.UserValidation.userCount}`);
-    
+
     // Add test function for debugging
     window.testUserValidationTransferencia = () => {
       console.log('🧪 Testando validação de usuário no módulo transferencia...');
-      
+
       const matriculaInput = $("#matricula");
       if (!matriculaInput) {
         console.error('❌ Campo matrícula não encontrado');
         return;
       }
-      
+
       // Test with sample matricula
       matriculaInput.value = '81883'; // Sample from BASE_USUARIO.js
       const validation = window.UserValidation.validateMatricula(matriculaInput.value);
       console.log('✅ Resultado da validação:', validation);
-      
+
       if (validation.valid) {
         window.UserValidation.setCurrentUser(validation.user);
         console.log('👋 Saudação atualizada para:', validation.user.Nome);
       }
     };
-    
+
   } catch (error) {
     console.error('❌ Erro na inicialização do sistema de validação:', error);
   }
