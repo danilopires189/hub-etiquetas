@@ -5,6 +5,149 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// Função para filtrar campos vazios dos endereços excluídos
+function filterEmptyFields(excludedAddress) {
+  const filtered = {
+    endereco: excludedAddress.endereco,
+    displayFields: ['endereco']
+  };
+
+  // Adicionar data de exclusão se não for vazia
+  if (excludedAddress.exclusao && excludedAddress.exclusao !== '-' && excludedAddress.exclusao.trim() !== '') {
+    filtered.exclusao = excludedAddress.exclusao;
+    filtered.displayFields.push('exclusao');
+  }
+
+  // Adicionar motivo se não for vazio
+  if (excludedAddress.motivo && excludedAddress.motivo !== '-' && excludedAddress.motivo.trim() !== '') {
+    filtered.motivo = excludedAddress.motivo;
+    filtered.displayFields.push('motivo');
+  }
+
+  return filtered;
+}
+
+// Função para determinar se deve usar layout de colunas
+function shouldUseColumnLayout(excludedAddresses) {
+  // Usar layout de colunas quando houver mais de 1 endereço
+  return excludedAddresses && excludedAddresses.length > 1;
+}
+
+// Função para distribuir endereços alternadamente entre três colunas
+function distributeAlternately(addresses) {
+  const leftColumn = [];
+  const centerColumn = [];
+  const rightColumn = [];
+  
+  addresses.forEach((address, index) => {
+    const columnIndex = index % 3;
+    if (columnIndex === 0) {
+      leftColumn.push(address);
+    } else if (columnIndex === 1) {
+      centerColumn.push(address);
+    } else {
+      rightColumn.push(address);
+    }
+  });
+  
+  return { leftColumn, centerColumn, rightColumn };
+}
+
+// Função para gerar HTML dos endereços excluídos
+function generateExcludedAddressesHTML(excludedAddresses, cdDisplayName) {
+  if (!excludedAddresses || excludedAddresses.length === 0) {
+    return `
+      <div style="margin-top: 20px; border-top: 2px solid #10b981; padding-top: 15px;">
+        <div style="color: #10b981; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+          ✅ HISTÓRICO DE EXCLUSÕES: Nenhum endereço excluído para este produto no ${cdDisplayName}.
+        </div>
+      </div>
+    `;
+  }
+
+  // Filtrar campos vazios
+  const filteredAddresses = excludedAddresses.map(filterEmptyFields);
+  
+  // Determinar layout
+  const useColumnLayout = shouldUseColumnLayout(excludedAddresses);
+  
+  let html = `
+    <div style="margin-top: 20px; border-top: 2px solid #dc2626; padding-top: 15px;">
+      <div style="color: #dc2626; font-weight: bold; margin-bottom: 10px;">
+        ⚠️ ATENÇÃO - HISTÓRICO DE ENDEREÇOS EXCLUÍDOS (${excludedAddresses.length}):
+      </div>
+  `;
+
+  if (useColumnLayout) {
+    // Layout de três colunas - distribuição alternada
+    const { leftColumn, centerColumn, rightColumn } = distributeAlternately(filteredAddresses);
+
+    html += `
+      <div class="excluded-addresses-grid">
+        <div class="excluded-column">
+          ${leftColumn.map(excluded => generateExcludedAddressItem(excluded)).join('')}
+        </div>
+        <div class="excluded-column">
+          ${centerColumn.map(excluded => generateExcludedAddressItem(excluded)).join('')}
+        </div>
+        <div class="excluded-column">
+          ${rightColumn.map(excluded => generateExcludedAddressItem(excluded)).join('')}
+        </div>
+      </div>
+    `;
+  } else {
+    // Layout de tabela tradicional
+    html += `
+      <table class="excluded-addresses-table">
+        <thead>
+          <tr>
+            <th>Endereço Excluído</th>
+            <th>Data de Exclusão</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    filteredAddresses.forEach(excluded => {
+      html += `
+        <tr>
+          <td><strong>${escapeHtml(excluded.endereco)}</strong></td>
+          <td>${excluded.exclusao ? escapeHtml(excluded.exclusao) : '-'}</td>
+          <td>${excluded.motivo ? escapeHtml(excluded.motivo) : '-'}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+        </tbody>
+      </table>
+    `;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+// Função para gerar item individual de endereço excluído
+function generateExcludedAddressItem(excluded) {
+  let html = `
+    <div class="excluded-item">
+      <div class="excluded-address"><strong>${escapeHtml(excluded.endereco)}</strong></div>
+  `;
+
+  if (excluded.exclusao) {
+    html += `<div class="excluded-date">Data: ${escapeHtml(excluded.exclusao)}</div>`;
+  }
+
+  if (excluded.motivo) {
+    html += `<div class="excluded-reason">Motivo: ${escapeHtml(excluded.motivo)}</div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
 function toast(msg, type = 'info', duration = 5000) {
   let container = document.getElementById('toast-container');
   if (!container) {
@@ -1807,50 +1950,8 @@ function generateSingleSheetHTML(product, sheetNumber, totalSheets, timestamp) {
   let excludedAddressesHTML = '';
   if (dataIndexer) {
     const excludedAddresses = dataIndexer.getExcludedAddresses(product.CODDV, APP_STATE.selectedCD);
-
-    if (excludedAddresses.length > 0) {
-      excludedAddressesHTML = `
-        <div style="margin-top: 20px; border-top: 2px solid #dc2626; padding-top: 15px;">
-          <div style="color: #dc2626; font-weight: bold; margin-bottom: 10px;">
-            ⚠️ ATENÇÃO - HISTÓRICO DE ENDEREÇOS EXCLUÍDOS (${excludedAddresses.length}):
-          </div>
-          <table class="excluded-addresses-table">
-            <thead>
-              <tr>
-                <th>Endereço Excluído</th>
-                <th>Data de Exclusão</th>
-                <th>Motivo</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      excludedAddresses.forEach(excluded => {
-        excludedAddressesHTML += `
-          <tr>
-            <td><strong>${escapeHtml(excluded.endereco)}</strong></td>
-            <td>${escapeHtml(excluded.exclusao)}</td>
-            <td>${escapeHtml(excluded.motivo || '-')}</td>
-          </tr>
-        `;
-      });
-
-      excludedAddressesHTML += `
-            </tbody>
-          </table>
-        </div>
-      `;
-    } else {
-      // Sem endereços excluídos - mostrar aviso positivo
-      const cdDisplayName = APP_STATE.selectedCDName || APP_STATE.selectedCD;
-      excludedAddressesHTML = `
-        <div style="margin-top: 20px; border-top: 2px solid #10b981; padding-top: 15px;">
-          <div style="color: #10b981; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-            ✅ HISTÓRICO DE EXCLUSÕES: Nenhum endereço excluído para este produto no ${cdDisplayName}.
-          </div>
-        </div>
-      `;
-    }
+    const cdDisplayName = APP_STATE.selectedCDName || APP_STATE.selectedCD;
+    excludedAddressesHTML = generateExcludedAddressesHTML(excludedAddresses, cdDisplayName);
   } else {
     // DataIndexer não disponível
     excludedAddressesHTML = `

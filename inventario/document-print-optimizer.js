@@ -22,6 +22,53 @@ const DEFAULT_CONFIG = {
   }
 };
 
+// Funções utilitárias para endereços excluídos
+function filterEmptyFieldsPrint(excludedAddress) {
+  const filtered = {
+    endereco: excludedAddress.endereco,
+    displayFields: ['endereco']
+  };
+
+  // Adicionar data de exclusão se não for vazia
+  if (excludedAddress.exclusao && excludedAddress.exclusao !== '-' && excludedAddress.exclusao.trim() !== '') {
+    filtered.exclusao = excludedAddress.exclusao;
+    filtered.displayFields.push('exclusao');
+  }
+
+  // Adicionar motivo se não for vazio
+  if (excludedAddress.motivo && excludedAddress.motivo !== '-' && excludedAddress.motivo.trim() !== '') {
+    filtered.motivo = excludedAddress.motivo;
+    filtered.displayFields.push('motivo');
+  }
+
+  return filtered;
+}
+
+function shouldUseColumnLayoutPrint(excludedAddresses) {
+  // Usar layout de colunas quando houver mais de 1 endereço
+  return excludedAddresses && excludedAddresses.length > 1;
+}
+
+// Função para distribuir endereços alternadamente entre três colunas - versão para impressão
+function distributeAlternatelyPrint(addresses) {
+  const leftColumn = [];
+  const centerColumn = [];
+  const rightColumn = [];
+  
+  addresses.forEach((address, index) => {
+    const columnIndex = index % 3;
+    if (columnIndex === 0) {
+      leftColumn.push(address);
+    } else if (columnIndex === 1) {
+      centerColumn.push(address);
+    } else {
+      rightColumn.push(address);
+    }
+  });
+  
+  return { leftColumn, centerColumn, rightColumn };
+}
+
 /**
  * Classe principal para otimização de documentos
  */
@@ -292,20 +339,64 @@ class DocumentPrintOptimizer {
       `;
     }
 
-    return `
-      <div class="product-section excluded-section warning">
-        <h3>⚠️ Endereços Excluídos (${excludedAddresses.length})</h3>
-        <div class="excluded-list">
-          ${excludedAddresses.map(excluded => `
-            <div class="excluded-item">
-              <div class="excluded-address">${this.escapeHtml(excluded.endereco)}</div>
-              <div class="excluded-date">${this.escapeHtml(excluded.exclusao)}</div>
-              <div class="excluded-reason">${this.escapeHtml(excluded.motivo || '-')}</div>
+    // Filtrar campos vazios
+    const filteredAddresses = excludedAddresses.map(filterEmptyFieldsPrint);
+    
+    // Determinar layout
+    const useColumnLayout = shouldUseColumnLayoutPrint(excludedAddresses);
+
+    if (useColumnLayout) {
+      // Layout de três colunas para impressão - distribuição alternada
+      const { leftColumn, centerColumn, rightColumn } = distributeAlternatelyPrint(filteredAddresses);
+
+      return `
+        <div class="product-section excluded-section warning">
+          <h3>⚠️ Endereços Excluídos (${excludedAddresses.length})</h3>
+          <div class="excluded-grid-print">
+            <div class="excluded-column-print">
+              ${leftColumn.map(excluded => this.generateExcludedItemPrint(excluded)).join('')}
             </div>
-          `).join('')}
+            <div class="excluded-column-print">
+              ${centerColumn.map(excluded => this.generateExcludedItemPrint(excluded)).join('')}
+            </div>
+            <div class="excluded-column-print">
+              ${rightColumn.map(excluded => this.generateExcludedItemPrint(excluded)).join('')}
+            </div>
+          </div>
         </div>
-      </div>
+      `;
+    } else {
+      // Layout tradicional
+      return `
+        <div class="product-section excluded-section warning">
+          <h3>⚠️ Endereços Excluídos (${excludedAddresses.length})</h3>
+          <div class="excluded-list">
+            ${filteredAddresses.map(excluded => this.generateExcludedItemPrint(excluded)).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  /**
+   * Gera item individual de endereço excluído para impressão
+   */
+  generateExcludedItemPrint(excluded) {
+    let html = `
+      <div class="excluded-item">
+        <div class="excluded-address">${this.escapeHtml(excluded.endereco)}</div>
     `;
+
+    if (excluded.exclusao) {
+      html += `<div class="excluded-date">Data: ${this.escapeHtml(excluded.exclusao)}</div>`;
+    }
+
+    if (excluded.motivo) {
+      html += `<div class="excluded-reason">Motivo: ${this.escapeHtml(excluded.motivo)}</div>`;
+    }
+
+    html += `</div>`;
+    return html;
   }
 
   /**
@@ -497,6 +588,33 @@ class DocumentPrintOptimizer {
           border: 1px solid #e0f2fe;
           border-radius: 4px;
           font-size: ${this.config.fontSizes?.small || '11px'};
+        }
+
+        /* Estilos para layout de três colunas dos endereços excluídos - impressão */
+        .excluded-grid-print {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 8px;
+          margin-top: 6px;
+        }
+
+        .excluded-column-print {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .excluded-address {
+          font-weight: bold;
+          color: #991b1b;
+          margin-bottom: 2px;
+        }
+
+        .excluded-date,
+        .excluded-reason {
+          font-size: ${this.config.fontSizes?.small || '10px'};
+          color: #7f1d1d;
+          margin-bottom: 1px;
         }
         
         .barcode-code {
