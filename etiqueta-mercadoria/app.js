@@ -62,7 +62,7 @@ function curDateTime() {
 // Label Description Formatting Utils
 const LABEL_CONFIG = {
     description: {
-        defaultFontSize: 9, // pt (reduzido de 10pt para 9pt)
+        defaultFontSize: 12, // pt (10pt para 12pt)
         minFontSize: 8,      // pt
         maxLines: 2,
         fontWeight: 800,
