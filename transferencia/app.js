@@ -201,47 +201,68 @@ function setup() {
   // Configurar event listeners
   $("#btnGerar").addEventListener("click", generate);
   $("#btnImprimir").addEventListener("click", () => window.print());
+
+  // Shortcut keys
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { generate(); }
     if (e.key === "p" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); window.print(); }
   });
 
   // Add real-time matricula validation
-  const matriculaInput = $("#matricula");
+  // Use getElementById for consistency and safety
+  const matriculaInput = document.getElementById("matricula");
   if (matriculaInput) {
     let validationTimeout = null;
 
     matriculaInput.addEventListener('input', (e) => {
-      if (validationTimeout) clearTimeout(validationTimeout);
-      window.UserValidation.clearFieldError(matriculaInput);
+      console.log('📝 Matrícula input (Transferencia):', e.target.value);
+      // Clear previous timeout
+      if (validationTimeout) {
+        clearTimeout(validationTimeout);
+      }
+
+      // Clear any existing error states
+      if (window.UserValidation && window.UserValidation.clearFieldError) {
+        window.UserValidation.clearFieldError(matriculaInput);
+      }
+
       const matricula = e.target.value.trim();
 
+      // If empty, clear current user and greeting
       if (!matricula) {
-        window.UserValidation.clearCurrentUser();
+        if (window.UserValidation) window.UserValidation.clearCurrentUser();
         return;
       }
 
+      // Debounce validation to avoid excessive calls
       validationTimeout = setTimeout(() => {
+        if (!window.UserValidation) return;
+
         const validation = window.UserValidation.validateMatricula(matricula);
+
         if (validation.valid && validation.user) {
+          // Set current user and update greeting
           window.UserValidation.setCurrentUser(validation.user);
           console.log('✅ Usuário validado em tempo real:', validation.user.Nome);
         } else {
+          // Clear current user if validation fails
           window.UserValidation.clearCurrentUser();
         }
-      }, 500);
+      }, 500); // 500ms debounce
     });
 
+    // Also validate on blur (when user leaves the field)
     matriculaInput.addEventListener('blur', (e) => {
       const matricula = e.target.value.trim();
-      if (matricula) {
+      if (matricula && window.UserValidation) {
         const validation = window.UserValidation.validateMatricula(matricula);
         if (!validation.valid) {
           window.UserValidation.highlightFieldError(matriculaInput, validation.msg, 3000);
         }
       }
     });
-    console.log('✅ Validação em tempo real configurada para campo matrícula');
+
+    console.log('✅ Validação em tempo real configurada para campo matrícula (Transferencia)');
   }
 }
 
