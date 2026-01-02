@@ -143,74 +143,102 @@ body {
   animation: fadeSlideUp 0.6s ease-out;
 }
 
-/* Painel de Configurações */
+/* Painel de Configurações - Versão Discreta */
 .config-panel {
-  max-width: 1200px;
-  margin: 20px auto;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
-  backdrop-filter: blur(12px) saturate(180%);
-  padding: 24px;
-  border-radius: 16px;
-  border: 2px solid rgba(14, 165, 233, 0.2);
-  box-shadow: 
-    0 8px 32px rgba(14, 165, 233, 0.1),
-    0 4px 12px rgba(6, 46, 111, 0.08);
-  animation: slideInUp 0.4s ease-out;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  max-width: 900px;
+  margin: 10px auto;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  animation: slideInUp 0.3s ease-out;
 }
 
 .config-header {
-  text-align: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid rgba(14, 165, 233, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: max-content;
 }
 
 .config-header h3 {
-  margin: 0 0 8px 0;
-  font-size: 20px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #062e6f, #0ea5e9);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 
 .config-header p {
-  margin: 0;
-  color: #64748b;
-  font-size: 14px;
-  font-weight: 500;
+  display: none;
 }
 
 .config-controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  align-items: end;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.config-controls .field {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  animation: none;
+}
+
+.config-controls label {
+  font-size: 12px;
+  margin: 0;
+  white-space: nowrap;
+  color: #64748b;
+}
+
+.config-controls input,
+.config-controls select {
+  padding: 6px 12px;
+  font-size: 13px;
+  width: auto;
+  height: 32px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: none;
+}
+
+.config-controls button#aplicarConfig {
+  padding: 6px 16px;
+  font-size: 13px;
+  height: 32px;
+  border-radius: 6px;
+  background: white;
+  color: #0ea5e9;
+  border: 1px solid #0ea5e9;
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+.config-controls button#aplicarConfig:hover {
+  background: #0ea5e9;
+  color: white;
 }
 
 .config-hint {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(14, 165, 233, 0.1);
-  text-align: center;
-}
-
-.config-hint small {
-  color: #64748b;
-  font-weight: 500;
-  font-size: 13px;
+  display: none;
 }
 
 /* Painel de controles com glassmorphism */
@@ -699,7 +727,13 @@ svg.barcode {
 
   .app-header,
   .panel.controls,
-  .app-footer {
+  .config-panel,
+  .app-footer,
+  #screen-ui,
+  #user-greeting,
+  #pedido-direto-historico-modal,
+  .btn,
+  .footer-links {
     display: none !important;
   }
 
