@@ -2088,6 +2088,79 @@ function generateLabel(product, addressItem, inputBarcode, copies = 1, validityD
         labelDiv.appendChild(item);
     }
 
+    // Add extra Zone and Validity labels at the end if copies > 1
+    if (copies > 1) {
+        // Extra Zone Label at the end (if includeZona is true)
+        if (includeZona) {
+            const zoneText = addressItem.ENDERECO.split('.')[0].replace(/\s+/g, '');
+
+            const item = document.createElement('div');
+            item.className = 'label-badge';
+            item.innerHTML = `
+                <div class="label-row-top">
+                    <div class="label-meta-top">
+                        <div>${dateStr}</div>
+                        <div style="font-size: 7pt; color: #333; margin-top: 1px; font-weight: bold;">${machineInfo}</div>
+                    </div>
+                    ${safeFormatDescription(product.DESC)}
+                </div>
+                
+                <div class="label-row-middle" style="display: flex; align-items: center; justify-content: flex-start; overflow: hidden;">
+                    <!-- Maximized Zone Text, No Barcode -->
+                    <div class="label-big-num" style="font-size: 90pt; width: 100%; text-align: left; line-height: 0.8; letter-spacing: -3px; font-family: 'Arial Black', sans-serif;">${zoneText}</div>
+                </div>
+                
+                <div class="label-row-bottom">
+                    <div class="label-addr" style="display: flex; align-items: baseline; white-space: nowrap; overflow: hidden; font-size: 13pt;">
+                        ${addressItem.ENDERECO.replace(/\s+/g, '')}
+                        <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 10px; display: inline-block;">
+                            ${inputBarcode.slice(0, -4)}<span style="font-size: 11pt; font-weight: 800;">${inputBarcode.slice(-4)}</span>
+                        </span>
+                    </div>
+                    <div class="label-info-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                        <div class="label-txt">${codFormatted}</div>
+                        <div class="label-txt">MAT: ${matricula}</div>
+                    </div>
+                </div>
+            `;
+            labelDiv.appendChild(item);
+        }
+
+        // Extra Validity Label at the end (if validityDate is provided)
+        if (validityDate) {
+            const item = document.createElement('div');
+            item.className = 'label-badge';
+            item.innerHTML = `
+                <div class="label-row-top">
+                    <div class="label-meta-top">
+                        <div>${dateStr}</div>
+                        <div style="font-size: 7pt; color: #333; margin-top: 1px; font-weight: bold;">${machineInfo}</div>
+                    </div>
+                    ${safeFormatDescription(product.DESC)}
+                </div>
+                
+                <div class="label-row-middle" style="display: flex; align-items: center; justify-content: flex-start; overflow: hidden;">
+                    <!-- Maximized Validity Date, No Barcode -->
+                    <div class="label-big-num" style="font-size: 87pt; width: 100%; text-align: left; line-height: 0.8; letter-spacing: -3px; font-family: 'Arial Black', sans-serif;">${validityDate}</div>
+                </div>
+                
+                <div class="label-row-bottom">
+                    <div class="label-addr" style="display: flex; align-items: baseline; white-space: nowrap; overflow: hidden; font-size: 13pt;">
+                        ${addressItem.ENDERECO.replace(/\s+/g, '')}
+                        <span style="font-size: 8pt; font-weight: 600; font-family: sans-serif; margin-left: 10px; display: inline-block;">
+                            ${inputBarcode.slice(0, -4)}<span style="font-size: 11pt; font-weight: 800;">${inputBarcode.slice(-4)}</span>
+                        </span>
+                    </div>
+                    <div class="label-info-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                        <div class="label-txt">${codFormatted}</div>
+                        <div class="label-txt">MAT: ${matricula}</div>
+                    </div>
+                </div>
+            `;
+            labelDiv.appendChild(item);
+        }
+    }
+
     return labelDiv;
 }
 
