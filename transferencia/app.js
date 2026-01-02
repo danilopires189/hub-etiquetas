@@ -187,6 +187,17 @@ function generate() {
     preview.appendChild(page);
   }
 
+  // Save to History
+  saveToTransferenciaHistory({
+    origem: o.nome,
+    destino: d.nome,
+    nf: v.nf,
+    serie: v.serie,
+    qtd: v.qtd,
+    matricula: matricula,
+    dataCriacao: nowStr()
+  });
+
   // scroll to preview
   window.scrollTo({ top: $("#preview").offsetTop - 10, behavior: 'smooth' });
 }
@@ -310,3 +321,283 @@ async function initializeUserValidation() {
     console.error('❌ Erro na inicialização do sistema de validação:', error);
   }
 }
+
+/* ====== HISTÓRICO DE TRANSFERÊNCIA ====== */
+let transferenciaHistory = [];
+
+// Carregar histórico salvo
+function loadTransferenciaHistory() {
+  try {
+    const saved = localStorage.getItem('transferencia-history');
+    if (saved) {
+      transferenciaHistory = JSON.parse(saved);
+      // Limpar registros muito antigos (mais de 90 dias)
+      cleanOldTransferenciaRecords();
+    }
+  } catch (e) {
+    console.warn('Erro ao carregar histórico:', e);
+    transferenciaHistory = [];
+  }
+}
+
+function cleanOldTransferenciaRecords() {
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+  const originalLength = transferenciaHistory.length;
+  transferenciaHistory = transferenciaHistory.filter(item => {
+    try {
+      if (!item.dataCriacao) return false;
+      const parts = item.dataCriacao.split(' '); // DD/MM/YY HH:mm
+      const dateParts = parts[0].split('/');
+      const year = 2000 + parseInt(dateParts[2]);
+      const month = parseInt(dateParts[1]) - 1;
+      const day = parseInt(dateParts[0]);
+
+      const itemDate = new Date(year, month, day);
+      return itemDate >= ninetyDaysAgo;
+    } catch (e) {
+      return true;
+    }
+  });
+
+  if (originalLength !== transferenciaHistory.length) {
+    localStorage.setItem('transferencia-history', JSON.stringify(transferenciaHistory));
+  }
+}
+
+function saveToTransferenciaHistory(historyData) {
+  // Evitar duplicatas exatas recentes
+  const isDuplicate = transferenciaHistory.slice(0, 10).some(item =>
+    item.nf === historyData.nf &&
+    item.serie === historyData.serie &&
+    item.qtd === historyData.qtd &&
+    item.origem === historyData.origem &&
+    item.destino === historyData.destino
+  );
+
+  if (isDuplicate) {
+    console.log('Duplicate history item ignored');
+    return;
+  }
+
+  // Tentar resolver nome de usuário
+  if (!historyData.nome && historyData.matricula && window.DB_USUARIO && window.DB_USUARIO.BASE_USUARIO) {
+    const user = window.DB_USUARIO.BASE_USUARIO.find(u => u.Matricula == historyData.matricula);
+    if (user) {
+      historyData.nome = user.Nome;
+    } else if (window.UserValidation && window.UserValidation.currentUser) {
+      historyData.nome = window.UserValidation.currentUser.Nome;
+    }
+  }
+
+  transferenciaHistory.unshift({
+    ...historyData,
+    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    timestamp: Date.now()
+  });
+
+  if (transferenciaHistory.length > 500) {
+    transferenciaHistory = transferenciaHistory.slice(0, 500);
+  }
+
+  try {
+    localStorage.setItem('transferencia-history', JSON.stringify(transferenciaHistory));
+    console.log('✅ Histórico salvo (localStorage)');
+  } catch (e) {
+    console.warn('⚠️ Erro ao salvar histórico:', e.message);
+  }
+}
+
+/* UI Functions */
+function showTransferenciaHistorico() {
+  const modal = $('#transferencia-historico-modal');
+
+  // Reset search
+  const searchSection = $('#transferencia-search-section');
+  const toggleBtn = $('#transferencia-toggle-search');
+  const searchInput = $('#transferencia-search-input');
+
+  if (searchSection) searchSection.style.display = 'none';
+  if (toggleBtn) toggleBtn.classList.remove('active');
+  if (searchInput) searchInput.value = '';
+
+  clearTransferenciaSearch();
+
+  renderTransferenciaHistoryList(transferenciaHistory);
+  modal.style.display = 'flex';
+
+  setTimeout(() => $('#transferencia-historico-close').focus(), 100);
+}
+
+function hideTransferenciaHistorico() {
+  $('#transferencia-historico-modal').style.display = 'none';
+}
+
+function renderTransferenciaHistoryList(list) {
+  const container = $('#transferencia-historico-list');
+  container.innerHTML = '';
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="historico-loading">
+        Nenhum registro encontrado no histórico.
+      </div>
+    `;
+    return;
+  }
+
+  const html = list.map(item => createHistoryItemHTML(item)).join('');
+  container.innerHTML = html;
+}
+
+function createHistoryItemHTML(item) {
+  const nomeDisplay = item.nome ? ` - ${item.nome}` : '';
+
+  return `
+    <div class="historico-item">
+      <div class="historico-info">
+        <div class="historico-primary">
+          <span class="historico-badge">${item.qtd} vol${item.qtd > 1 ? 's' : ''}</span>
+          <strong>NF: ${item.nf}</strong>
+          <span style="color: var(--neutral-400)">|</span>
+          <span>Série: ${item.serie}</span>
+        </div>
+        
+        <div class="historico-secondary">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span title="Origem">📤 ${getCleanCDName(item.origem)}</span>
+            <span>➜</span>
+            <span title="Destino">📥 ${getCleanCDName(item.destino)}</span>
+          </div>
+        </div>
+        
+        <div class="historico-meta">
+          <span>📅 ${item.dataCriacao}</span>
+          ${item.matricula ? `<span style="margin-left: 8px;">👤 ${item.matricula}${nomeDisplay}</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function getCleanCDName(fullName) {
+  if (!fullName) return '';
+  return fullName;
+}
+
+/* Search Functions */
+function setupTransferenciaSearchEvents() {
+  const searchInput = $('#transferencia-search-input');
+  const clearBtn = $('#transferencia-clear-search');
+  const toggleBtn = $('#transferencia-toggle-search');
+  const searchSection = $('#transferencia-search-section');
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const isVisible = searchSection.style.display !== 'none';
+      searchSection.style.display = isVisible ? 'none' : 'block';
+      toggleBtn.classList.toggle('active');
+      if (!isVisible) setTimeout(() => searchInput.focus(), 100);
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase().trim();
+      clearBtn.style.opacity = term ? '1' : '0';
+      clearBtn.style.visibility = term ? 'visible' : 'hidden';
+      performTransferenciaSearch(term);
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.style.opacity = '0';
+      clearBtn.style.visibility = 'hidden';
+      performTransferenciaSearch('');
+      searchInput.focus();
+    });
+  }
+
+  const radios = document.querySelectorAll('input[name="searchType"]');
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      performTransferenciaSearch(searchInput ? searchInput.value.toLowerCase().trim() : '');
+    });
+  });
+}
+
+function performTransferenciaSearch(term) {
+  if (!term) {
+    renderTransferenciaHistoryList(transferenciaHistory);
+    return;
+  }
+
+  const searchTypeEl = document.querySelector('input[name="searchType"]:checked');
+  const searchType = searchTypeEl ? searchTypeEl.value : 'all';
+
+  const filtered = transferenciaHistory.filter(item => {
+    const sTerm = term.toLowerCase();
+
+    const fields = {
+      nf: (item.nf || '').toLowerCase(),
+      cd: ((item.origem || '') + ' ' + (item.destino || '')).toLowerCase(),
+      matricula: (item.matricula || '').toLowerCase()
+    };
+
+    if (searchType === 'all') {
+      return Object.values(fields).some(val => val.includes(sTerm));
+    } else {
+      return fields[searchType] ? fields[searchType].includes(sTerm) : false;
+    }
+  });
+
+  renderTransferenciaHistoryList(filtered);
+}
+
+function clearTransferenciaSearch() {
+  const radios = document.querySelectorAll('input[name="searchType"]');
+  if (radios.length) radios[0].checked = true;
+  performTransferenciaSearch('');
+}
+
+// Inicialização extra
+document.addEventListener('DOMContentLoaded', () => {
+  // Carregar histórico
+  loadTransferenciaHistory();
+
+  // Event Listeners do Histórico
+  const btnHistory = $('#transferencia-historico-btn');
+  const btnClose = $('#transferencia-historico-close');
+  const modal = $('#transferencia-historico-modal');
+
+  if (btnHistory) btnHistory.addEventListener('click', showTransferenciaHistorico);
+  if (btnClose) btnClose.addEventListener('click', hideTransferenciaHistorico);
+
+  // Fechar ao clicar fora
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) hideTransferenciaHistorico();
+    });
+  }
+
+  // Busca
+  setupTransferenciaSearchEvents();
+
+  // Atalho de teclado (Ctrl+H)
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
+      e.preventDefault();
+      if (modal.style.display === 'flex') {
+        hideTransferenciaHistorico();
+      } else {
+        showTransferenciaHistorico();
+      }
+    }
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      hideTransferenciaHistorico();
+    }
+  });
+});

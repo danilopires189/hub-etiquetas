@@ -651,6 +651,8 @@ function renderPedidoDiretoHistoryList(data) {
 }
 
 function createHistoryItemHTML(item) {
+  const nomeDisplay = item.nome ? ` - ${item.nome}` : '';
+
   return `
     <div class="historico-item">
       <div class="historico-info">
@@ -660,9 +662,10 @@ function createHistoryItemHTML(item) {
         </div>
         <div class="historico-secondary">
           <span>CD: ${item.cd}</span>
-          <span>Loja: ${item.loja}</span>
-          <span>Rota: ${item.rota}</span>
-          <span>Matrícula: ${item.matricula || '-'}</span>
+          <span>Loja: ${item.lojaFull || item.loja}</span>
+          <span>Seq: ${item.seq}</span>
+          <span>Rota: ${item.rotaFull || item.rota}</span>
+          <span>Matrícula: ${item.matricula || '-'}${nomeDisplay}</span>
         </div>
         <div class="historico-meta">
           <span>${item.dataCriacao} às ${item.horaCriacao}</span>
