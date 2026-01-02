@@ -12,6 +12,62 @@ const toIntStr = (v, fallback = 0) => {
 // Fallback embutido (injetado no index.html)
 let BASE = window.BASE_EMBED || { cds: [], lojas: {}, rotas: {} };
 
+/* ===== Estado Global do Histórico ===== */
+let pedidoDiretoHistory = JSON.parse(localStorage.getItem('pedido-direto-history') || '[]');
+
+// Limpar duplicatas do histórico existente na inicialização
+function cleanDuplicatePedidoDiretoHistory() {
+  const uniqueHistory = [];
+  const seen = new Set();
+
+  // Ordenar por timestamp (mais recente primeiro)
+  const sortedHistory = [...pedidoDiretoHistory].sort((a, b) =>
+    new Date(b.timestamp || 0) - new Date(a.timestamp || 0)
+  );
+
+  for (const item of sortedHistory) {
+    // Criar chave única mais específica
+    const key = `${item.pedido}-${item.loja}-${item.cd}-${item.rota}`;
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      if (!item.id) item.id = Date.now() + Math.random();
+      uniqueHistory.push(item);
+    }
+  }
+
+  if (uniqueHistory.length !== pedidoDiretoHistory.length) {
+    pedidoDiretoHistory = uniqueHistory.slice(0, 50);
+    try {
+      localStorage.setItem('pedido-direto-history', JSON.stringify(pedidoDiretoHistory));
+      console.log(`Histórico limpo: ${sortedHistory.length - uniqueHistory.length} duplicatas removidas`);
+    } catch (e) {
+      console.warn('Erro ao salvar histórico limpo:', e);
+    }
+  }
+}
+
+// Limpeza automática por idade (90 dias)
+function cleanOldPedidoDiretoRecords() {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - 90);
+
+  const cleaned = pedidoDiretoHistory.filter(item => {
+    const itemDate = new Date(item.timestamp);
+    return itemDate >= cutoffDate;
+  });
+
+  if (cleaned.length !== pedidoDiretoHistory.length) {
+    console.log(`Removidos ${pedidoDiretoHistory.length - cleaned.length} registros antigos`);
+    pedidoDiretoHistory = cleaned;
+    try {
+      localStorage.setItem('pedido-direto-history', JSON.stringify(pedidoDiretoHistory));
+    } catch (e) {
+      console.warn('Erro ao salvar histórico após limpeza:', e);
+    }
+  }
+}
+
 async function loadBase() {
   try {
     const resp = await fetch('../data_base/BASE_LOJAS.json', { cache: 'no-store' });
@@ -255,6 +311,32 @@ function gerar() {
 
     etiquetas.forEach(e => preview.appendChild(e));
 
+    // Salvar no histórico
+    console.log('🔄 Salvando no histórico...');
+    const now = new Date();
+    const mm = pad(String(now.getMonth() + 1), 2);
+    const dd = pad(String(now.getDate()), 2);
+    const yy = String(now.getFullYear()).slice(-2);
+    const hh = pad(String(now.getHours()), 2);
+    const mi = pad(String(now.getMinutes()), 2);
+
+    const historyData = {
+      cd: cd.trim(),
+      loja: lojaNum,
+      lojaFull: loja,
+      pedido: pedido.trim(),
+      seq: onlyDigits(seq),
+      rota: rotaNum,
+      rotaFull: rota,
+      matricula: matricula,
+      qtdVolumes: totalVol,
+      dataCriacao: `${dd}/${mm}/20${yy}`,
+      horaCriacao: `${hh}:${mi}`,
+      timestamp: new Date().toISOString()
+    };
+
+    saveToPedidoDiretoHistory(historyData);
+
     // Mostrar painel de configurações após gerar
     const painelConfig = document.querySelector('#painelConfiguracoes');
     if (painelConfig) {
@@ -366,9 +448,274 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // Event listeners do Histórico
+  const histBtn = document.getElementById('pedido-direto-historico-btn');
+  if (histBtn) {
+    histBtn.addEventListener('click', showPedidoDiretoHistorico);
+  }
+
+  const closeBtn = document.getElementById('pedido-direto-historico-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', hidePedidoDiretoHistorico);
+  }
+
+  const toggleSearchBtn = document.getElementById('pedido-direto-toggle-search');
+  if (toggleSearchBtn) {
+    toggleSearchBtn.addEventListener('click', () => {
+      const searchSection = document.getElementById('pedido-direto-search-section');
+      if (searchSection) {
+        const isHidden = searchSection.style.display === 'none';
+        searchSection.style.display = isHidden ? 'block' : 'none';
+        toggleSearchBtn.classList.toggle('active', isHidden);
+        if (isHidden) {
+          const input = document.getElementById('pedido-direto-search-input');
+          if (input) input.focus();
+        }
+      }
+    });
+  }
+
+  // Shortcuts
+  document.addEventListener('keydown', (ev) => {
+    if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'h') {
+      ev.preventDefault();
+      showPedidoDiretoHistorico();
+    }
+    if (ev.key === 'Escape') {
+      hidePedidoDiretoHistorico();
+    }
+  });
+
   setVars();
+
+  // Inicialização do histórico
+  try {
+    cleanDuplicatePedidoDiretoHistory();
+    cleanOldPedidoDiretoRecords();
+    console.log('📊 Histórico inicializado:', pedidoDiretoHistory.length, 'registros');
+  } catch (error) {
+    console.warn('⚠️ Erro na inicialização do histórico:', error);
+    pedidoDiretoHistory = [];
+  }
+
   console.log('✅ Pedido Direto - Carregamento concluído');
 });
+
+/* ===== Funções do Histórico ===== */
+function showPedidoDiretoHistorico() {
+  const modal = document.getElementById('pedido-direto-historico-modal');
+  cleanOldPedidoDiretoRecords();
+
+  // Reset fields
+  const searchSection = document.getElementById('pedido-direto-search-section');
+  const toggleBtn = document.getElementById('pedido-direto-toggle-search');
+  if (searchSection) searchSection.style.display = 'none';
+  if (toggleBtn) toggleBtn.classList.remove('active');
+
+  const searchInput = document.getElementById('pedido-direto-search-input');
+  if (searchInput) searchInput.value = '';
+  clearPedidoDiretoSearch();
+
+  renderPedidoDiretoHistoryList(pedidoDiretoHistory);
+  modal.style.display = 'flex';
+
+  setupPedidoDiretoSearchEvents();
+
+  const close = document.getElementById('pedido-direto-historico-close');
+  if (close) close.focus();
+}
+
+function hidePedidoDiretoHistorico() {
+  const modal = document.getElementById('pedido-direto-historico-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function setupPedidoDiretoSearchEvents() {
+  const searchInput = document.getElementById('pedido-direto-search-input');
+  const clearButton = document.getElementById('pedido-direto-clear-search');
+  const filterRadios = document.querySelectorAll('input[name="searchType"]');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      performPedidoDiretoSearch();
+      if (clearButton) {
+        const hasText = e.target.value.trim().length > 0;
+        clearButton.style.opacity = hasText ? '1' : '0';
+        clearButton.style.visibility = hasText ? 'visible' : 'hidden';
+      }
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') clearPedidoDiretoSearch();
+    });
+  }
+
+  if (clearButton) {
+    clearButton.addEventListener('click', clearPedidoDiretoSearch);
+  }
+
+  filterRadios.forEach(radio => {
+    radio.addEventListener('change', performPedidoDiretoSearch);
+  });
+}
+
+function performPedidoDiretoSearch() {
+  const searchInput = document.getElementById('pedido-direto-search-input');
+  const term = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  const type = document.querySelector('input[name="searchType"]:checked')?.value || 'all';
+
+  let filtered = [...pedidoDiretoHistory];
+
+  if (term) {
+    filtered = pedidoDiretoHistory.filter(item => {
+      switch (type) {
+        case 'pedido': return item.pedido && item.pedido.includes(term);
+        case 'rota': return item.rotaFull && item.rotaFull.toLowerCase().includes(term);
+        case 'cd': return item.cd && item.cd.includes(term);
+        case 'all':
+        default:
+          return (
+            (item.pedido && item.pedido.includes(term)) ||
+            (item.rotaFull && item.rotaFull.toLowerCase().includes(term)) ||
+            (item.lojaFull && item.lojaFull.toLowerCase().includes(term)) ||
+            (item.cd && item.cd.includes(term))
+          );
+      }
+    });
+  }
+
+  renderPedidoDiretoHistoryList(filtered);
+}
+
+function clearPedidoDiretoSearch() {
+  const searchInput = document.getElementById('pedido-direto-search-input');
+  const clearBtn = document.getElementById('pedido-direto-clear-search');
+
+  if (searchInput) searchInput.value = '';
+
+  if (clearBtn) {
+    clearBtn.style.opacity = '0';
+    clearBtn.style.visibility = 'hidden';
+  }
+
+  const allFilter = document.querySelector('input[name="searchType"][value="all"]');
+  if (allFilter) allFilter.checked = true;
+
+  renderPedidoDiretoHistoryList(pedidoDiretoHistory);
+  if (searchInput) searchInput.focus();
+}
+
+function renderPedidoDiretoHistoryList(data) {
+  const list = document.getElementById('pedido-direto-historico-list');
+  if (!list) return;
+
+  if (data.length === 0) {
+    const searchInput = document.getElementById('pedido-direto-search-input');
+    const isSearching = searchInput && searchInput.value.trim() !== '';
+
+    if (isSearching) {
+      list.innerHTML = `
+        <div style="text-align: center; padding: 3rem;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+          <p style="color: var(--neutral-500); font-size: var(--text-base); margin-bottom: 0.5rem;">Nenhum resultado encontrado</p>
+          <p style="color: var(--neutral-400); font-size: var(--text-sm);">Tente ajustar os termos de busca</p>
+        </div>
+      `;
+    } else {
+      list.innerHTML = `
+        <div style="text-align: center; padding: 3rem;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+          <p style="color: var(--neutral-500); font-size: var(--text-base); margin-bottom: 0.5rem;">Nenhum histórico encontrado</p>
+          <p style="color: var(--neutral-400); font-size: var(--text-sm);">Gere algumas etiquetas para ver o histórico aqui</p>
+        </div>
+      `;
+    }
+  } else {
+    list.innerHTML = data.map((item, index) => {
+      return createHistoryItemHTML(item).replace('class="historico-item"', `class="historico-item" style="animation-delay: ${index * 0.05}s"`);
+    }).join('');
+
+    const total = pedidoDiretoHistory.length;
+    const showing = data.length;
+    const isFiltered = total !== showing;
+
+    list.innerHTML += `
+      <div style="text-align: center; padding: 1rem; margin-top: 1rem; border-top: 1px solid var(--neutral-200);">
+        <small style="color: var(--neutral-500);">
+          ${isFiltered ? `Mostrando ${showing} de ${total}` : `${total}`} 
+          ${total === 1 ? 'registro' : 'registros'} no histórico
+        </small>
+      </div>
+    `;
+  }
+}
+
+function createHistoryItemHTML(item) {
+  return `
+    <div class="historico-item">
+      <div class="historico-info">
+        <div class="historico-primary">
+          <strong>Pedido: ${item.pedido}</strong>
+          <span class="historico-badge">${item.qtdVolumes} ${Number(item.qtdVolumes) === 1 ? 'volume' : 'volumes'}</span>
+        </div>
+        <div class="historico-secondary">
+          <span>CD: ${item.cd}</span>
+          <span>Loja: ${item.loja}</span>
+          <span>Rota: ${item.rota}</span>
+          <span>Matrícula: ${item.matricula || '-'}</span>
+        </div>
+        <div class="historico-meta">
+          <span>${item.dataCriacao} às ${item.horaCriacao}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function saveToPedidoDiretoHistory(config) {
+  const uniqueKey = `${config.pedido}-${config.loja}-${config.cd}-${config.rota}`;
+
+  const existingIdx = pedidoDiretoHistory.findIndex(item => {
+    const itemKey = `${item.pedido}-${item.loja}-${item.cd}-${item.rota}`;
+    return itemKey === uniqueKey;
+  });
+
+  if (existingIdx !== -1) {
+    pedidoDiretoHistory.splice(existingIdx, 1);
+  }
+
+  // Tentar resolver nome de usuário
+  if (window.DB_USUARIO && window.DB_USUARIO.BASE_USUARIO) {
+    const user = window.DB_USUARIO.BASE_USUARIO.find(u => u.Matricula == config.matricula);
+    if (user) config.nome = user.Nome;
+  }
+
+  pedidoDiretoHistory.unshift({
+    ...config,
+    id: Date.now() + Math.random(),
+    uniqueKey
+  });
+
+  if (pedidoDiretoHistory.length > 50) {
+    pedidoDiretoHistory = pedidoDiretoHistory.slice(0, 50);
+  }
+
+  cleanOldPedidoDiretoRecords();
+
+  try {
+    localStorage.setItem('pedido-direto-history', JSON.stringify(pedidoDiretoHistory));
+    console.log('✅ Histórico salvo (localStorage)');
+  } catch (e) {
+    console.warn('⚠️ Erro ao salvar histórico:', e);
+    // Emergency cleanup
+    if (e.name === 'QuotaExceededError') {
+      pedidoDiretoHistory = pedidoDiretoHistory.slice(0, 10);
+      try {
+        localStorage.setItem('pedido-direto-history', JSON.stringify(pedidoDiretoHistory));
+      } catch (e2) { }
+    }
+  }
+}
 
 // User Validation System Initialization
 async function initializeUserValidation() {
