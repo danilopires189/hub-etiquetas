@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Autenticação Supabase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Teste de Autenticação Supabase</h1>
+        
+        <div class="test-section info">
+            <h3>📋 Informações de Teste</h3>
+            <p><strong>Email:</strong> danilo_pires189@hotmail.com</p>
+            <p><strong>Senha:</strong> Danilo189</p>
+            <p><strong>URL:</strong> <span id="supabaseUrl">Carregando...</span></p>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Testes de Conectividade</h3>
+            <button onclick="testConnection()">Testar Conexão</button>
+            <button onclick="testApiKey()">Testar Chave API</button>
+            <div id="connectionResults"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔐 Teste de Autenticação</h3>
+            <button onclick="testLogin()">Testar Login</button>
+            <button onclick="testSignUp()">Testar Cadastro</button>
+            <button onclick="checkSession()">Verificar Sessão</button>
+            <div id="authResults"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Teste de Dados</h3>
+            <button onclick="testDatabase()">Testar Banco de Dados</button>
+            <button onclick="testCounter()">Testar Contador</button>
+            <div id="dataResults"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 Log de Atividades</h3>
+            <button onclick="clearLog()">Limpar Log</button>
+            <pre id="logArea">Aguardando testes...</pre>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+
+        // Configuração do Supabase
+        const SUPABASE_URL = 'https://jomwkkhhhekbyanftpoc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvbXdra2hoaGVrYnlhbmZ0cG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY0NTU0NzQsImV4cCI6MjA1MjAzMTQ3NH0.MhG-apUJHKOJCijFDecR1A_Q_hfNtHL';
+
+        // Criar cliente Supabase
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Função para log
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logArea = document.getElementById('logArea');
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logArea.textContent += `[${timestamp}] ${icon} ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(`${icon} ${message}`);
+        }
+
+        // Função para mostrar resultados
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = content;
+            element.className = `test-section ${type}`;
+        }
+
+        // Testar conexão básica
+        window.testConnection = async function() {
+            log('Testando conexão com Supabase...');
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                    method: 'HEAD',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (response.ok) {
+                    log('Conexão com Supabase OK', 'success');
+                    showResult('connectionResults', '✅ Conexão estabelecida com sucesso', 'success');
+                } else {
+                    log(`Erro na conexão: HTTP ${response.status}`, 'error');
+                    showResult('connectionResults', `❌ Erro HTTP ${response.status}: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`Erro de rede: ${error.message}`, 'error');
+                showResult('connectionResults', `❌ Erro de rede: ${error.message}`, 'error');
+            }
+        };
+
+        // Testar chave API
+        window.testApiKey = async function() {
+            log('Testando chave API...');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('global_counter')
+                    .select('total_count')
+                    .limit(1);
+
+                if (error) {
+                    log(`Erro na API: ${error.message}`, 'error');
+                    showResult('connectionResults', `❌ Erro na API: ${error.message}`, 'error');
+                } else {
+                    log('Chave API válida', 'success');
+                    showResult('connectionResults', `✅ API funcionando. Contador: ${data[0]?.total_count || 'N/A'}`, 'success');
+                }
+            } catch (error) {
+                log(`Erro inesperado: ${error.message}`, 'error');
+                showResult('connectionResults', `❌ Erro: ${error.message}`, 'error');
+            }
+        };
+
+        // Testar login
+        window.testLogin = async function() {
+            log('Testando login...');
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'danilo_pires189@hotmail.com',
+                    password: 'Danilo189'
+                });
+
+                if (error) {
+                    log(`Erro no login: ${error.message}`, 'error');
+                    showResult('authResults', `❌ Erro no login: ${error.message}`, 'error');
+                } else {
+                    log('Login realizado com sucesso', 'success');
+                    showResult('authResults', `✅ Login OK. Usuário: ${data.user.email}`, 'success');
+                }
+            } catch (error) {
+                log(`Erro inesperado no login: ${error.message}`, 'error');
+                showResult('authResults', `❌ Erro: ${error.message}`, 'error');
+            }
+        };
+
+        // Testar cadastro (caso o usuário não exista)
+        window.testSignUp = async function() {
+            log('Testando cadastro...');
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: 'danilo_pires189@hotmail.com',
+                    password: 'Danilo189'
+                });
+
+                if (error) {
+                    log(`Erro no cadastro: ${error.message}`, 'error');
+                    showResult('authResults', `❌ Erro no cadastro: ${error.message}`, 'error');
+                } else {
+                    log('Cadastro realizado', 'success');
+                    showResult('authResults', `✅ Cadastro OK. Confirme o email se necessário.`, 'success');
+                }
+            } catch (error) {
+                log(`Erro inesperado no cadastro: ${error.message}`, 'error');
+                showResult('authResults', `❌ Erro: ${error.message}`, 'error');
+            }
+        };
+
+        // Verificar sessão atual
+        window.checkSession = async function() {
+            log('Verificando sessão...');
+            
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+
+                if (error) {
+                    log(`Erro ao verificar sessão: ${error.message}`, 'error');
+                    showResult('authResults', `❌ Erro: ${error.message}`, 'error');
+                } else if (session) {
+                    log('Sessão ativa encontrada', 'success');
+                    showResult('authResults', `✅ Sessão ativa: ${session.user.email}`, 'success');
+                } else {
+                    log('Nenhuma sessão ativa', 'info');
+                    showResult('authResults', `ℹ️ Nenhuma sessão ativa`, 'info');
+                }
+            } catch (error) {
+                log(`Erro inesperado: ${error.message}`, 'error');
+                showResult('authResults', `❌ Erro: ${error.message}`, 'error');
+            }
+        };
+
+        // Testar banco de dados
+        window.testDatabase = async function() {
+            log('Testando acesso ao banco...');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('global_counter')
+                    .select('*')
+                    .limit(1);
+
+                if (error) {
+                    log(`Erro no banco: ${error.message}`, 'error');
+                    showResult('dataResults', `❌ Erro: ${error.message}`, 'error');
+                } else {
+                    log('Acesso ao banco OK', 'success');
+                    showResult('dataResults', `✅ Banco OK. Dados: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                }
+            } catch (error) {
+                log(`Erro inesperado: ${error.message}`, 'error');
+                showResult('dataResults', `❌ Erro: ${error.message}`, 'error');
+            }
+        };
+
+        // Testar contador
+        window.testCounter = async function() {
+            log('Testando função do contador...');
+            
+            try {
+                const { data, error } = await supabase.rpc('get_counter_stats');
+
+                if (error) {
+                    log(`Erro na função: ${error.message}`, 'error');
+                    showResult('dataResults', `❌ Erro: ${error.message}`, 'error');
+                } else {
+                    log('Função do contador OK', 'success');
+                    showResult('dataResults', `✅ Função OK. Stats: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                }
+            } catch (error) {
+                log(`Erro inesperado: ${error.message}`, 'error');
+                showResult('dataResults', `❌ Erro: ${error.message}`, 'error');
+            }
+        };
+
+        // Limpar log
+        window.clearLog = function() {
+            document.getElementById('logArea').textContent = 'Log limpo.\n';
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('supabaseUrl').textContent = SUPABASE_URL;
+            log('Sistema de teste carregado');
+            log('Clique nos botões para executar os testes');
+        });
+    </script>
+</body>
+</html>
