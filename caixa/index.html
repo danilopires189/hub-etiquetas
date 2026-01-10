@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pague Menos • Etiquetas de Caixa</title>
+  <link rel="icon" href="../assets/pm.png" />
+  <link rel="stylesheet" href="../shared/design-system.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fade-in">
+  
+  <div class="screen-container">
+    <header class="app-header">
+    <div class="brand">
+      <div class="brand-logos">
+        <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary" onerror="this.style.display='none'">
+        <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary" onerror="this.style.display='none'">
+      </div>
+      <div class="brand-text">
+        <h1>Pague Menos</h1>
+        <span class="app-subtitle">Etiquetas • Caixa</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9,22 9,12 15,12 15,22" />
+        </svg>
+        Hub
+      </button>
+      <button id="historico-btn" type="button" class="btn btn-ghost" title="Ver histórico">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14,2 14,8 20,8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10,9 9,9 8,9" />
+        </svg>
+        Histórico
+      </button>
+      <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()"
+        aria-label="Imprimir">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6,9 6,2 18,2 18,9" />
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+          <rect x="6" y="14" width="12" height="8" />
+        </svg>
+        Imprimir
+      </button>
+
+    </div>
+  </header>
+
+  <section class="panel controls">
+    <div class="field">
+      <label for="base">
+        Etiqueta Inicial
+        <span class="tooltip"
+          data-tooltip="Digite apenas números. O dígito verificador será calculado automaticamente.">ℹ️</span>
+      </label>
+      <input id="base" placeholder="ex.: 564742" inputmode="numeric" />
+      <div class="field-validation" id="base-validation"></div>
+      <div class="field-info" id="base-info"></div>
+    </div>
+
+    <div class="field">
+      <label for="qtd">
+        Quantidade
+        <span class="tooltip" data-tooltip="Quantos números sequenciais serão gerados">ℹ️</span>
+      </label>
+      <input id="qtd" type="number" min="1" max="1000" value="10" />
+      <div class="field-validation" id="qtd-validation"></div>
+      <div class="field-info" id="qtd-info"></div>
+    </div>
+
+    <div class="field">
+      <label for="copias">
+        Cópias por número
+        <span class="tooltip" data-tooltip="Quantas etiquetas iguais para cada número">ℹ️</span>
+      </label>
+      <input id="copias" type="number" min="1" max="50" value="2" />
+      <div class="field-validation" id="copias-validation"></div>
+    </div>
+
+    <div class="field">
+      <label>Largura × Altura (mm)</label>
+      <div class="row">
+        <input id="wmm" type="number" min="20" value="85" />
+        <input id="hmm" type="number" min="15" value="80" />
+      </div>
+    </div>
+
+    <div class="field" style="display: none;">
+      <label>Texto (pt) | Coluna (mm)</label>
+      <div class="row">
+        <input id="tpt" type="number" min="8" value="27" />
+        <input id="colmm" type="number" min="6" value="12" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="orient">Orientação</label>
+      <select id="orient">
+        <option value="h">Horizontal</option>
+        <option value="vcw" selected>Vertical 90° (horário)</option>
+        <option value="vccw">Vertical -90° (anti-horário)</option>
+      </select>
+    </div>
+
+
+    <div class="field" style="display: none;">
+
+      <label for="logo">Logo na etiqueta</label>
+      <div class="row wrap">
+        <label class="switch"><input type="checkbox" id="logo" checked><span>Exibir (Pague Menos)</span></label>
+
+        <span class="hint">Opacidade (%)</span>
+        <input id="logoop" class="num" type="number" min="0" max="100" step="1" value="100"
+          title="Opacidade da logo em %">
+        <label class="switch"><input type="checkbox" id="logoPrintOff"><span>Ocultar logo na impressão</span></label>
+      </div>
+    </div>
+
+    <div class="field" style="display: none;">
+      <label for="logomm">Tamanho da logo (mm)</label>
+      <input id="logomm" type="number" min="6" value="10">
+    </div>
+
+    <div class="field" style="display: none;">
+      <label for="safeicon">Ícone de transparência</label>
+      <div class="row wrap">
+        <label class="switch"><input type="checkbox" id="safeicon" checked><span>Exibir</span></label>
+        <span class="hint">Intensidade (%)</span>
+        <input id="transpop" class="num" type="number" min="10" max="70" step="1" value="0"
+          title="Opacidade do ícone em %">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="labelType">
+        Tipo de etiqueta
+        <span class="tooltip"
+          data-tooltip="Ambas - Gera tudo | Interna - Gera etiqueta sem barras | Externa - Gera etiqueta com barras">ℹ️</span>
+      </label>
+      <select id="labelType">
+        <option value="external" selected>Externa</option>
+        <option value="internal">Interna</option>
+        <option value="both">Ambas</option>
+      </select>
+    </div>
+
+    <div class="field full">
+      <div class="generation-controls">
+        <button id="gerar" class="btn btn-primary" onclick="gerar()">Gerar etiquetas</button>
+        <div class="generation-info">
+          <span id="total-labels">0 etiquetas</span>
+        </div>
+      </div>
+      <div class="progress-container" id="progress-container" style="display: none;">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span class="progress-text" id="progress-text">Gerando...</span>
+      </div>
+    </div>
+  </section>
+
+
+
+  <main id="preview" class="preview"></main>
+
+  <!-- Modal do Histórico -->
+  <div id="historico-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Histórico de Gerações</h3>
+        <button class="modal-close" id="historico-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="historico-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="limpar-historico" class="btn btn-ghost">Limpar Histórico</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-info">
+          <p class="footer-title">Sistema de Etiquetas Pague Menos</p>
+          <p class="footer-subtitle">Desenvolvido por Danilo Pires</p>
+        </div>
+        <div class="footer-links">
+          <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="footer-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+            </svg>
+            Suporte
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+
+  <!-- Contador Global Centralizado -->
+  <script src="../js/contador-global-centralizado.js"></script>
+
+  <script>
+    // Configurar contador para tipo 'caixa'
+    window.addEventListener('DOMContentLoaded', async () => {
+      console.log('📦 Aplicação de Etiquetas de Caixa carregada');
+
+      // Aguardar contador estar pronto
+      setTimeout(async () => {
+        if (window.contadorGlobal) {
+          console.log('✅ Contador Global disponível');
+
+          // Interceptar geração de etiquetas para contar
+          const originalGerar = window.gerar;
+          window.gerar = async function () {
+            try {
+              // Obter quantidade de etiquetas que serão geradas
+              const qtd = parseInt(document.getElementById('qtd').value) || 0;
+              const copias = parseInt(document.getElementById('copias').value) || 1;
+              const totalEtiquetas = qtd * copias;
+
+              console.log(`📊 Gerando ${totalEtiquetas} etiquetas (${qtd} × ${copias})`);
+
+              if (totalEtiquetas > 0) {
+                // Incrementar contador global antes de gerar
+                const novoValor = await window.contadorGlobal.incrementarContador(totalEtiquetas, 'caixa');
+                console.log(`✅ Contador incrementado: +${totalEtiquetas} caixa = ${novoValor}`);
+
+                // Mostrar popup de sucesso
+                mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${totalEtiquetas} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
+
+                // Feedback visual discreto
+                const valorFormatado = novoValor.toLocaleString('pt-BR');
+                console.log(`📊 Total atual: ${valorFormatado} etiquetas`);
+              }
+
+              // Executar função original de geração
+              if (originalGerar) {
+                return originalGerar.call(this);
+              }
+            } catch (error) {
+              console.error('❌ Erro ao incrementar contador:', error);
+              alert(`❌ Erro no contador: ${error.message}\nContinuando com geração...`);
+              // Continuar com geração mesmo se contador falhar
+              if (originalGerar) {
+                return originalGerar.call(this);
+              }
+            }
+          };
+        } else {
+          console.warn('⚠️ Contador Global não disponível');
+        }
+      }, 2000);
+    });
+
+    // Função para mostrar popup de sucesso
+    function mostrarPopupSucesso(titulo, subtitulo) {
+      // Criar popup
+      const popup = document.createElement('div');
+      popup.id = 'popup-sucesso';
+      popup.innerHTML = `
+        <div class="popup-content">
+          <div class="popup-icon">✅</div>
+          <div class="popup-text">
+            <div class="popup-titulo">${titulo}</div>
+            <div class="popup-subtitulo">${subtitulo}</div>
+          </div>
+        </div>
+      `;
+
+      // Adicionar ao body
+      document.body.appendChild(popup);
+
+      // Mostrar com animação
+      setTimeout(() => {
+        popup.classList.add('show');
+      }, 100);
+
+      // Remover após 2 segundos
+      setTimeout(() => {
+        popup.classList.remove('show');
+        setTimeout(() => {
+          if (popup.parentNode) {
+            popup.parentNode.removeChild(popup);
+          }
+        }, 300);
+      }, 2000);
+    }
+  </script>
+
+  <style>
+    /* Popup de Sucesso */
+    #popup-sucesso {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      border: 1px solid #e2e8f0;
+      padding: 0;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 320px;
+      overflow: hidden;
+    }
+
+    #popup-sucesso.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .popup-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+    }
+
+    .popup-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .popup-text {
+      flex: 1;
+    }
+
+    .popup-titulo {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .popup-subtitulo {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    /* Barra de progresso */
+    #popup-sucesso::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #10b981, #059669);
+      width: 100%;
+      animation: progress 2s linear forwards;
+    }
+
+    @keyframes progress {
+      from {
+        width: 100%;
+      }
+
+      to {
+        width: 0%;
+      }
+    }
+
+    /* Responsivo */
+    @media (max-width: 640px) {
+      #popup-sucesso {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+      }
+    }
+  </style>
+  </div>
+</body>
+
+</html>
