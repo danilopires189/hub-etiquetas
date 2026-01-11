@@ -1796,7 +1796,7 @@ function generateAllSheetsHTML(products, totalSheets) {
           display: flex;
           justify-content: space-between;
           margin: 10px 0;
-          font-size: 22px;
+          font-size: 11px;
         }
         
         .product-section {
@@ -1889,6 +1889,19 @@ function generateAllSheetsHTML(products, totalSheets) {
           .sheet { 
             margin: 0; 
             border: none; 
+          }
+          
+          /* Forçar tamanhos de fonte na impressão */
+          .sheet-info {
+            font-size: 11px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            margin: 10px 0 !important;
+          }
+          
+          .sheet-info div {
+            font-size: 11px !important;
+            font-weight: normal !important;
           }
         }
       </style>
@@ -2144,7 +2157,7 @@ function generateSingleSheetHTML(product, sheetNumber, totalSheets, timestamp) {
           </div>
         </div>
         
-        <div style="margin-top: 15px; font-size: 11px;">
+        <div style="margin-top: 15px; font-size: 15px;">
           <div><strong>Responsável:</strong> ________________________________</div>
           <div style="margin-top: 8px;"><strong>Assinatura:</strong> ________________________________</div>
         </div>

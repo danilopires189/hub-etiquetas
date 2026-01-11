@@ -13,7 +13,7 @@ const DEFAULT_CONFIG = {
     title: '16px', // Reduzindo tamanhos de fonte
     subtitle: '12px',
     body: '10px',
-    small: '9px'
+    small: '9px' // Voltando ao tamanho original para data/hora
   },
   colors: {
     primary: '#2563eb',
@@ -213,8 +213,8 @@ class DocumentPrintOptimizer {
           <h1 class="page-title">RELATÓRIO DE INVENTÁRIO</h1>
           <div class="page-subtitle">${cdDisplayName}</div>
           <div class="page-info">
-            <span>Página ${pageNumber} de ${totalPages}</span>
-            <span>${timestamp}</span>
+            <span class="page-number">Página ${pageNumber} de ${totalPages}</span>
+            <span class="page-timestamp">${timestamp}</span>
           </div>
         </div>
       </div>
@@ -524,10 +524,20 @@ class DocumentPrintOptimizer {
         }
         
         .page-info {
-          font-size: ${this.config.fontSizes?.small || '22px'};
+          font-size: ${this.config.fontSizes?.small || '9px'};
           color: ${this.config.colors?.secondary || '#64748b'};
           display: flex;
           justify-content: space-between;
+        }
+        
+        .page-number {
+          font-size: 15px;
+          font-weight: 600;
+        }
+        
+        .page-timestamp {
+          font-size: ${this.config.fontSizes?.small || '9px'};
+          font-weight: normal;
         }
         
         ${layoutCSS}
@@ -877,6 +887,24 @@ class DocumentPrintOptimizer {
             overflow: hidden !important;
             max-height: calc(277mm - 120px) !important;
             min-height: 0 !important;
+          }
+          
+          /* Forçar tamanhos de fonte na impressão */
+          .page-info {
+            font-size: 9px !important;
+            color: #64748b !important;
+            display: flex !important;
+            justify-content: space-between !important;
+          }
+          
+          .page-number {
+            font-size: 15px !important;
+            font-weight: 600 !important;
+          }
+          
+          .page-timestamp {
+            font-size: 9px !important;
+            font-weight: normal !important;
           }
           
           .count-input, .verify-input { 
