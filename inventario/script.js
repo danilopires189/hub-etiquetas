@@ -948,14 +948,23 @@ function handleCDSelection(cd) {
 
   if (cd) {
     coddvInput.disabled = false;
-    coddvInput.placeholder = `Digite o CODDV (ou múltiplos separados por vírgula)...`;
+    coddvInput.placeholder = `Digite o CODDV (ou múltiplos separados por espaço ou vírgula)...`;
     btnBuscar.disabled = false;
     coddvInput.focus();
+    
+    // Mostrar a nota de estoque virtual quando o campo estiver habilitado
+    toggleVirtualStockHelp();
   } else {
     coddvInput.disabled = true;
     coddvInput.placeholder = 'Selecione um CD primeiro';
     coddvInput.value = '';
     btnBuscar.disabled = true;
+    
+    // Esconder a nota quando não há CD selecionado
+    const virtualStockHelp = $('#virtualStockHelp');
+    if (virtualStockHelp) {
+      virtualStockHelp.style.display = 'none';
+    }
   }
 
   // Limpar lista se CD mudou e há produtos
@@ -1048,6 +1057,9 @@ function handleProductSearch() {
 
   // Limpar campo de busca imediatamente
   coddvInput.value = '';
+  
+  // Mostrar novamente a nota de estoque virtual
+  toggleVirtualStockHelp();
 
   // Processar produtos um por vez com delay
   processProductsOneByOne(coddvs, btnBuscar, coddvInput);
@@ -1059,6 +1071,21 @@ function getVirtualStock(coddv) {
     return window.VIRTUAL_STOCK_MAP.get(coddv);
   }
   return null;
+}
+
+// Função para controlar a visibilidade da nota de estoque virtual
+function toggleVirtualStockHelp() {
+  const coddvInput = $('#coddvInput');
+  const virtualStockHelp = $('#virtualStockHelp');
+  
+  if (!coddvInput || !virtualStockHelp) return;
+  
+  // Mostrar a nota apenas quando o campo estiver vazio
+  if (coddvInput.value.trim() === '') {
+    virtualStockHelp.style.display = 'block';
+  } else {
+    virtualStockHelp.style.display = 'none';
+  }
 }
 
 // Função para processar produtos um por vez
@@ -1716,6 +1743,22 @@ function generateAllSheetsHTML(products, totalSheets) {
           margin: 0;
           padding: 0;
           line-height: 1.4;
+          /* Centralização da página na tela */
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          min-height: 100vh;
+          background: #f5f5f5;
+        }
+        
+        .page-container {
+          background: white;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          margin: 20px;
+          border-radius: 8px;
+          overflow: hidden;
+          max-width: 210mm;
+          width: 100%;
         }
         
         .sheet {
@@ -1753,7 +1796,7 @@ function generateAllSheetsHTML(products, totalSheets) {
           display: flex;
           justify-content: space-between;
           margin: 10px 0;
-          font-size: 11px;
+          font-size: 22px;
         }
         
         .product-section {
@@ -1832,12 +1875,26 @@ function generateAllSheetsHTML(products, totalSheets) {
         }
         
         @media print {
-          body { margin: 0; }
-          .sheet { margin: 0; border: none; }
+          body { 
+            display: block !important;
+            background: white !important;
+            margin: 0; 
+          }
+          .page-container {
+            margin: 0 auto !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            max-width: none !important;
+          }
+          .sheet { 
+            margin: 0; 
+            border: none; 
+          }
         }
       </style>
     </head>
     <body>
+      <div class="page-container">
   `;
 
   products.forEach((product, index) => {
@@ -1847,6 +1904,7 @@ function generateAllSheetsHTML(products, totalSheets) {
   });
 
   allSheetsHTML += `
+      </div>
     </body>
     </html>
   `;
@@ -2258,6 +2316,10 @@ function setupInterface() {
         coddvInput.select();
       }
     });
+    
+    // Controlar visibilidade da nota de estoque virtual
+    coddvInput.addEventListener('input', toggleVirtualStockHelp);
+    coddvInput.addEventListener('change', toggleVirtualStockHelp);
   }
 
   if (btnBuscar) {

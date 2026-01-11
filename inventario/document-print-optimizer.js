@@ -258,7 +258,7 @@ class DocumentPrintOptimizer {
           </div>
           <div class="footer-field" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; visibility: visible;">
             <label class="footer-label" style="font-size: 11px; font-weight: bold; color: #000; text-align: center; display: block; visibility: visible; margin-bottom: 3px;">Estoque Virtual:</label>
-            <div class="footer-input-box footer-virtual-stock-box" style="border: 2px solid #000; height: 35px; width: 100%; max-width: 100px; background: white; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; text-align: center; line-height: 1; padding: 0 5px; box-sizing: border-box; visibility: visible;">${virtualStockFormatted}</div>
+            <div class="footer-input-box footer-virtual-stock-box" style="border: 2px solid #000; height: 35px; width: 100%; max-width: 100px; background: white; border-radius: 3px; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: bold; font-size: 16px; text-align: center; line-height: 1; padding: 0 5px; box-sizing: border-box; visibility: visible;">${virtualStockFormatted}</div>
           </div>
         </div>
       </div>
@@ -453,6 +453,11 @@ class DocumentPrintOptimizer {
           padding: 0;
           line-height: 1.4;
           font-size: ${this.config.fontSizes?.body || '12px'};
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          min-height: 100vh;
+          background: #f5f5f5;
         }
         
         .page {
@@ -466,6 +471,9 @@ class DocumentPrintOptimizer {
           flex-direction: column;
           min-height: 277mm;
           max-height: 277mm;
+          background: white;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          margin: 20px;
         }
         
         .page:last-child {
@@ -516,7 +524,7 @@ class DocumentPrintOptimizer {
         }
         
         .page-info {
-          font-size: ${this.config.fontSizes?.small || '11px'};
+          font-size: ${this.config.fontSizes?.small || '22px'};
           color: ${this.config.colors?.secondary || '#64748b'};
           display: flex;
           justify-content: space-between;
@@ -842,12 +850,15 @@ class DocumentPrintOptimizer {
           
           body { 
             margin: 0 !important; 
+            padding: 0 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            display: block !important;
+            background: white !important;
           }
           
           .page { 
-            margin: 0 !important; 
+            margin: 0 auto !important; 
             border: none !important; 
             height: auto !important;
             min-height: 277mm !important;
@@ -857,6 +868,8 @@ class DocumentPrintOptimizer {
             flex-direction: column !important;
             position: relative !important;
             overflow: hidden !important;
+            box-shadow: none !important;
+            background: white !important;
           }
           
           .page-content {
@@ -877,7 +890,10 @@ class DocumentPrintOptimizer {
             print-color-adjust: exact !important;
             height: 35px !important;
             width: 100% !important;
-            display: block !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
             visibility: visible !important;
           }
           
@@ -938,6 +954,15 @@ class DocumentPrintOptimizer {
           
           .footer-virtual-stock-box {
             max-width: 100px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            font-weight: bold !important;
+            font-size: 16px !important;
+            line-height: 1 !important;
+            padding: 0 5px !important;
+            box-sizing: border-box !important;
           }
           
           /* Force footer to always appear */

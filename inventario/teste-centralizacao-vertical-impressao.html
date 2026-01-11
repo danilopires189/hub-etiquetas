@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Centralização Vertical na Impressão</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .before, .after {
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .before {
+            background: #fef2f2;
+            border: 2px solid #fca5a5;
+        }
+        
+        .after {
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+        }
+        
+        /* Simulação do problema ANTES */
+        .footer-wrong {
+            border: 3px solid #000;
+            padding: 15px 10px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin: 10px 0;
+        }
+        
+        .footer-field-wrong {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+        }
+        
+        .footer-input-box-wrong {
+            border: 2px solid #000;
+            height: 35px;
+            width: 100%;
+            max-width: 100px;
+            background: white;
+            border-radius: 3px;
+            /* PROBLEMA: sem centralização vertical */
+            display: block;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 2px 5px; /* Texto fica no topo */
+            box-sizing: border-box;
+        }
+        
+        /* Simulação da solução DEPOIS */
+        .footer-correct {
+            border: 3px solid #000;
+            padding: 15px 10px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin: 10px 0;
+        }
+        
+        .footer-field-correct {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+        }
+        
+        .footer-input-box-correct {
+            border: 2px solid #000;
+            height: 35px;
+            width: 100%;
+            max-width: 100px;
+            background: white;
+            border-radius: 3px;
+            /* SOLUÇÃO: centralização perfeita */
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            font-weight: bold;
+            font-size: 16px;
+            line-height: 1;
+            padding: 0 5px;
+            box-sizing: border-box;
+        }
+        
+        .footer-label {
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            text-align: center;
+        }
+        
+        .filled {
+            background: #e8f5e8;
+            color: #2d5a2d;
+        }
+        
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        /* Estilos específicos para impressão */
+        @media print {
+            body {
+                background: white !important;
+                margin: 0;
+                padding: 10px;
+            }
+            
+            .test-section {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+            
+            .footer-input-box-correct {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                font-weight: bold !important;
+                font-size: 16px !important;
+                line-height: 1 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Teste - Centralização Vertical na Impressão</h1>
+    
+    <div class="test-section">
+        <h2 class="success">✅ Problema Identificado e Corrigido:</h2>
+        <p>O estoque virtual estava aparecendo no <strong>topo da caixa na impressão</strong>, não centralizado verticalmente.</p>
+        
+        <h3>🔧 Ajustes Implementados:</h3>
+        <ul>
+            <li>✅ Adicionado <code class="highlight">display: flex !important</code> nos estilos de impressão</li>
+            <li>✅ Adicionado <code class="highlight">align-items: center !important</code> para centralização vertical</li>
+            <li>✅ Adicionado <code class="highlight">justify-content: center !important</code> para centralização horizontal</li>
+            <li>✅ Adicionado <code class="highlight">text-align: center !important</code> como fallback</li>
+            <li>✅ Ajustado <code class="highlight">line-height: 1 !important</code> para melhor alinhamento</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔍 Comparação Visual:</h2>
+        
+        <div class="comparison-grid">
+            <div class="before">
+                <h4>❌ ANTES (Problema na Impressão)</h4>
+                <div class="footer-wrong">
+                    <div class="footer-field-wrong">
+                        <div class="footer-label">Conferido por:</div>
+                        <div class="footer-input-box-wrong"></div>
+                    </div>
+                    <div class="footer-field-wrong">
+                        <div class="footer-label">Data:</div>
+                        <div class="footer-input-box-wrong"></div>
+                    </div>
+                    <div class="footer-field-wrong">
+                        <div class="footer-label">Estoque Virtual:</div>
+                        <div class="footer-input-box-wrong filled">10.007</div>
+                    </div>
+                </div>
+                <p><small>❌ Valor no topo da caixa (problema na impressão)</small></p>
+            </div>
+            
+            <div class="after">
+                <h4>✅ DEPOIS (Corrigido)</h4>
+                <div class="footer-correct">
+                    <div class="footer-field-correct">
+                        <div class="footer-label">Conferido por:</div>
+                        <div class="footer-input-box-correct"></div>
+                    </div>
+                    <div class="footer-field-correct">
+                        <div class="footer-label">Data:</div>
+                        <div class="footer-input-box-correct"></div>
+                    </div>
+                    <div class="footer-field-correct">
+                        <div class="footer-label">Estoque Virtual:</div>
+                        <div class="footer-input-box-correct filled">10.007</div>
+                    </div>
+                </div>
+                <p><small>✅ Valor perfeitamente centralizado (vertical + horizontal)</small></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Teste com Diferentes Valores:</h2>
+        
+        <h4>Valor pequeno (15) - Centralizado:</h4>
+        <div class="footer-correct">
+            <div class="footer-field-correct">
+                <div class="footer-label">Conferido por:</div>
+                <div class="footer-input-box-correct"></div>
+            </div>
+            <div class="footer-field-correct">
+                <div class="footer-label">Data:</div>
+                <div class="footer-input-box-correct"></div>
+            </div>
+            <div class="footer-field-correct">
+                <div class="footer-label">Estoque Virtual:</div>
+                <div class="footer-input-box-correct filled">15</div>
+            </div>
+        </div>
+        
+        <h4>Valor médio (1.250) - Centralizado:</h4>
+        <div class="footer-correct">
+            <div class="footer-field-correct">
+                <div class="footer-label">Conferido por:</div>
+                <div class="footer-input-box-correct"></div>
+            </div>
+            <div class="footer-field-correct">
+                <div class="footer-label">Data:</div>
+                <div class="footer-input-box-correct"></div>
+            </div>
+            <div class="footer-field-correct">
+                <div class="footer-label">Estoque Virtual:</div>
+                <div class="footer-input-box-correct filled">1.250</div>
+            </div>
+        </div>
+        
+        <h4>Valor grande (10.007) - Centralizado:</h4>
+        <div class="footer-correct">
+            <div class="footer-field-correct">
+                <div class="footer-label">Conferido por:</div>
+                <div class="footer-input-box-correct"></div>
+            </div>
+            <div class="footer-field-correct">
+                <div class="footer-label">Data:</div>
+                <div class="footer-input-box-correct"></div>
+            </div>
+            <div class="footer-field-correct">
+                <div class="footer-label">Estoque Virtual:</div>
+                <div class="footer-input-box-correct filled">10.007</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔧 Código CSS Corrigido:</h2>
+        <pre style="background: #f0f0f0; padding: 15px; border-radius: 5px; font-size: 12px; overflow-x: auto;">
+/* Estilos de impressão corrigidos */
+@media print {
+  .footer-input-box { 
+    border: 2px solid #000 !important;
+    background: white !important;
+    height: 35px !important;
+    width: 100% !important;
+    
+    /* CENTRALIZAÇÃO VERTICAL E HORIZONTAL */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    
+    visibility: visible !important;
+  }
+  
+  .footer-virtual-stock-box {
+    max-width: 100px !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+    padding: 0 5px !important;
+    box-sizing: border-box !important;
+  }
+}</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 Benefícios da Correção:</h2>
+        <ul>
+            <li>✅ <strong>Centralização perfeita:</strong> Vertical e horizontal na impressão</li>
+            <li>✅ <strong>Consistência:</strong> Mesmo visual na tela e na impressão</li>
+            <li>✅ <strong>Legibilidade:</strong> Valor claramente visível no centro da caixa</li>
+            <li>✅ <strong>Profissionalismo:</strong> Layout limpo e organizado</li>
+            <li>✅ <strong>Compatibilidade:</strong> Funciona em diferentes impressoras</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Como Testar a Correção:</h2>
+        <ol>
+            <li>Adicione um produto com estoque virtual: <code>86-10007</code></li>
+            <li>Gere o relatório de inventário</li>
+            <li>Use <strong>Ctrl+P</strong> para abrir a pré-visualização de impressão</li>
+            <li>Verifique que o valor <strong>10.007</strong> está centralizado vertical e horizontalmente</li>
+            <li>Imprima uma página de teste para confirmar</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h2>⚠️ Importante:</h2>
+        <p>Se ainda estiver vendo o problema, faça um <strong>refresh forçado</strong> (Ctrl+F5) para limpar o cache do navegador e carregar as correções.</p>
+    </div>
+    
+    <p><a href="index.html">← Voltar ao Sistema de Inventário</a></p>
+</body>
+</html>

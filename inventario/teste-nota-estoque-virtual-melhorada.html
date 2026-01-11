@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Nota de Estoque Virtual Melhorada</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .improvement {
+            color: #3b82f6;
+            font-weight: bold;
+        }
+        
+        .demo-container {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            background: #f9fafb;
+        }
+        
+        .search-demo {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .demo-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .demo-button {
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .demo-button:hover {
+            background: #1d4ed8;
+        }
+        
+        .virtual-stock-help-demo {
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            transition: all 0.3s ease;
+            display: block;
+            margin-top: 15px;
+        }
+        
+        .help-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .help-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .help-icon {
+            color: #3b82f6;
+            flex-shrink: 0;
+        }
+        
+        .help-title {
+            font-weight: 600;
+            color: #1e40af;
+            font-size: 0.9rem;
+        }
+        
+        .help-description {
+            color: #374151;
+            margin: 0 0 0.5rem 0;
+            font-size: 0.85rem;
+        }
+        
+        .help-examples {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+        }
+        
+        .example-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+        }
+        
+        .example-code {
+            background: #f1f5f9;
+            color: #1e40af;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border: 1px solid #e2e8f0;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .example-desc {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+        
+        .help-multiple {
+            background: #f8fafc;
+            padding: 0.5rem;
+            border-radius: 8px;
+            border-left: 3px solid #3b82f6;
+            font-size: 0.8rem;
+            color: #374151;
+            margin-top: 0.5rem;
+        }
+        
+        .help-multiple .example-code {
+            background: white;
+            margin-left: 0.5rem;
+        }
+        
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .before, .after {
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .before {
+            background: #fef2f2;
+            border: 2px solid #fca5a5;
+        }
+        
+        .after {
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Teste - Nota de Estoque Virtual Melhorada</h1>
+    
+    <div class="test-section">
+        <h2 class="success">✅ Melhorias Implementadas:</h2>
+        <ul>
+            <li class="improvement">✅ <strong>Mensagem desnecessária removida:</strong> "O estoque virtual aparecerá centralizado no rodapé da folha de impressão"</li>
+            <li class="improvement">✅ <strong>Separadores corrigidos:</strong> Aceita espaços OU vírgulas para múltiplos produtos</li>
+            <li class="improvement">✅ <strong>Visibilidade inteligente:</strong> Nota desaparece ao digitar e reaparece quando campo está vazio</li>
+            <li class="improvement">✅ <strong>Controle automático:</strong> Esconde quando CD não está selecionado</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔍 Comparação: Antes vs Depois</h2>
+        
+        <div class="comparison-grid">
+            <div class="before">
+                <h4>❌ ANTES</h4>
+                <ul style="font-size: 0.85rem;">
+                    <li>Nota sempre visível (poluição visual)</li>
+                    <li>Mensagem desnecessária sobre rodapé</li>
+                    <li>Apenas vírgulas como separador</li>
+                    <li>Sem controle de visibilidade</li>
+                </ul>
+            </div>
+            
+            <div class="after">
+                <h4>✅ DEPOIS</h4>
+                <ul style="font-size: 0.85rem;">
+                    <li>Nota aparece apenas quando necessário</li>
+                    <li>Informação limpa e objetiva</li>
+                    <li>Espaços OU vírgulas como separadores</li>
+                    <li>Controle inteligente de visibilidade</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Demonstração Interativa:</h2>
+        
+        <div class="demo-container">
+            <h4>Simule o comportamento da nota:</h4>
+            
+            <div class="search-demo">
+                <input type="text" class="demo-input" id="demoInput" placeholder="Digite algo para ver a nota desaparecer...">
+                <button class="demo-button" onclick="clearDemo()">Buscar</button>
+            </div>
+            
+            <div id="demoHelp" class="virtual-stock-help-demo">
+                <div class="help-content">
+                    <div class="help-header">
+                        <svg class="help-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <path d="M12 17h.01"/>
+                        </svg>
+                        <span class="help-title">💡 Dica: Estoque Virtual</span>
+                    </div>
+                    <div class="help-details">
+                        <p class="help-description">
+                            Para incluir o <strong>estoque virtual</strong> na folha de impressão, informe o CODDV seguido de hífen e o valor:
+                        </p>
+                        <div class="help-examples">
+                            <div class="example-item">
+                                <code class="example-code">86-1500</code>
+                                <span class="example-desc">→ Produto 86 com estoque virtual de 1.500 unidades</span>
+                            </div>
+                            <div class="example-item">
+                                <code class="example-code">87-250</code>
+                                <span class="example-desc">→ Produto 87 com estoque virtual de 250 unidades</span>
+                            </div>
+                            <div class="example-item">
+                                <code class="example-code">88</code>
+                                <span class="example-desc">→ Produto 88 sem estoque virtual (campo ficará vazio)</span>
+                            </div>
+                        </div>
+                        <div class="help-multiple">
+                            <strong>Múltiplos produtos:</strong> <code class="example-code">86-1500 87-250 88</code> ou <code class="example-code">86-1500, 87-250, 88</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">
+                👆 Digite no campo acima para ver a nota desaparecer. Clique em "Buscar" para limpar e ver a nota reaparecer.
+            </p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔧 Funcionalidades Implementadas:</h2>
+        
+        <h4>1. Controle de Visibilidade:</h4>
+        <pre style="background: #f0f0f0; padding: 15px; border-radius: 5px; font-size: 12px; overflow-x: auto;">
+function toggleVirtualStockHelp() {
+  const coddvInput = $('#coddvInput');
+  const virtualStockHelp = $('#virtualStockHelp');
+  
+  // Mostrar apenas quando campo estiver vazio
+  if (coddvInput.value.trim() === '') {
+    virtualStockHelp.style.display = 'block';
+  } else {
+    virtualStockHelp.style.display = 'none';
+  }
+}</pre>
+        
+        <h4>2. Event Listeners:</h4>
+        <ul style="font-size: 0.85rem;">
+            <li><code class="highlight">input</code> - Monitora digitação em tempo real</li>
+            <li><code class="highlight">change</code> - Monitora mudanças no campo</li>
+            <li><code class="highlight">após busca</code> - Reexibe quando campo é limpo</li>
+        </ul>
+        
+        <h4>3. Separadores Aceitos:</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 10px 0;">
+            <div>
+                <strong>✅ Com espaços:</strong>
+                <code class="example-code">86-1500 87-250 88</code>
+            </div>
+            <div>
+                <strong>✅ Com vírgulas:</strong>
+                <code class="example-code">86-1500, 87-250, 88</code>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 Benefícios das Melhorias:</h2>
+        <ul>
+            <li>✅ <strong>Interface mais limpa:</strong> Nota aparece apenas quando necessário</li>
+            <li>✅ <strong>Melhor UX:</strong> Não polui a tela durante o uso</li>
+            <li>✅ <strong>Informação precisa:</strong> Removida mensagem desnecessária</li>
+            <li>✅ <strong>Flexibilidade:</strong> Aceita diferentes separadores</li>
+            <li>✅ <strong>Comportamento intuitivo:</strong> Controle automático de visibilidade</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Como Testar no Sistema:</h2>
+        <ol>
+            <li>Selecione um CD - a nota aparece</li>
+            <li>Digite algo no campo de busca - a nota desaparece</li>
+            <li>Limpe o campo - a nota reaparece</li>
+            <li>Teste com espaços: <code>86-1500 87-250</code></li>
+            <li>Teste com vírgulas: <code>86-1500, 87-250</code></li>
+        </ol>
+    </div>
+    
+    <p><a href="index.html">← Voltar ao Sistema de Inventário</a></p>
+    
+    <script>
+        const demoInput = document.getElementById('demoInput');
+        const demoHelp = document.getElementById('demoHelp');
+        
+        function toggleDemoHelp() {
+            if (demoInput.value.trim() === '') {
+                demoHelp.style.display = 'block';
+            } else {
+                demoHelp.style.display = 'none';
+            }
+        }
+        
+        function clearDemo() {
+            demoInput.value = '';
+            toggleDemoHelp();
+        }
+        
+        demoInput.addEventListener('input', toggleDemoHelp);
+        demoInput.addEventListener('change', toggleDemoHelp);
+    </script>
+</body>
+</html>

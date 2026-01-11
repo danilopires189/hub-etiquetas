@@ -145,7 +145,7 @@
             <div class="search-input-group">
               <div class="search-input-wrapper">
                 <input id="coddvInput" type="text" autocomplete="off"
-                  placeholder="Digite o CODDV (ex: 86 ou 86-10 para estoque virtual, múltiplos: 86-10, 87, 88-5)..."
+                  placeholder="Digite o CODDV (ex: 86 ou 86-10 para estoque virtual, múltiplos: 86-10 87 88-5)..."
                   disabled class="search-input" />
                 <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="11" cy="11" r="8" />
@@ -168,6 +168,46 @@
           </div>
 
           <div id="searchStatus" class="search-status animate-slide-in-down" hidden></div>
+
+          <!-- Nota sobre Estoque Virtual -->
+          <div id="virtualStockHelp" class="virtual-stock-help animate-slide-up-field stagger-3"
+            style="margin-top: 1rem;">
+            <div class="help-content">
+              <div class="help-header">
+                <svg class="help-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                  <path d="M12 17h.01" />
+                </svg>
+                <span class="help-title">💡 Dica: Estoque Virtual</span>
+              </div>
+              <div class="help-details">
+                <p class="help-description">
+                  Para incluir o <strong>estoque virtual</strong> na folha de impressão, informe o CODDV seguido de
+                  hífen e o valor:
+                </p>
+                <div class="help-examples">
+                  <div class="example-item">
+                    <code class="example-code">86-1500</code>
+                    <span class="example-desc">→ Produto 86 com estoque virtual de 1.500 unidades</span>
+                  </div>
+                  <div class="example-item">
+                    <code class="example-code">87-250</code>
+                    <span class="example-desc">→ Produto 87 com estoque virtual de 250 unidades</span>
+                  </div>
+                  <div class="example-item">
+                    <code class="example-code">88</code>
+                    <span class="example-desc">→ Produto 88 sem estoque virtual (campo ficará vazio)</span>
+                  </div>
+                </div>
+                <div class="help-multiple">
+                  <strong>Múltiplos produtos:</strong> <code class="example-code">86-1500 87-250 88</code> ou <code
+                    class="example-code">86-1500, 87-250, 88</code>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Quick Actions removidas - não necessárias -->
         </div>

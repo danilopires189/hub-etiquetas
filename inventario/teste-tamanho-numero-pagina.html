@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Tamanho do Número da Página</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .before, .after {
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .before {
+            background: #fef2f2;
+            border: 2px solid #fca5a5;
+        }
+        
+        .after {
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+        }
+        
+        .mock-header {
+            border: 2px solid #333;
+            padding: 15px;
+            background: #f9f9f9;
+            text-align: center;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+        
+        .page-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 8px 0;
+        }
+        
+        .page-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 10px 0;
+        }
+        
+        .page-info-old {
+            font-size: 11px;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .page-info-new {
+            font-size: 22px;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .demo-container {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .size-comparison {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        
+        .size-label {
+            font-weight: bold;
+            min-width: 80px;
+        }
+        
+        .size-11px {
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        .size-22px {
+            font-size: 22px;
+            color: #64748b;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h1>📏 Teste - Tamanho do Número da Página</h1>
+    
+    <div class="test-section">
+        <h2 class="success">✅ Tamanho da Fonte Aumentado:</h2>
+        <p>O tamanho da fonte da informação do número da página foi <strong>dobrado</strong> de 11px para 22px.</p>
+        
+        <h3>🔧 Alterações Realizadas:</h3>
+        <ul>
+            <li>✅ <strong>document-print-optimizer.js:</strong> <code class="highlight">.page-info</code> - font-size: 11px → 22px</li>
+            <li>✅ <strong>script.js:</strong> <code class="highlight">.sheet-info</code> - font-size: 11px → 22px</li>
+            <li>✅ <strong>Peso da fonte:</strong> Adicionado font-weight: 600 para melhor legibilidade</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔍 Comparação Visual:</h2>
+        
+        <div class="comparison-grid">
+            <div class="before">
+                <h4>❌ ANTES (11px)</h4>
+                <div class="mock-header">
+                    <div class="page-title">RELATÓRIO DE INVENTÁRIO</div>
+                    <div class="page-subtitle">CD01 - Fortaleza/CE</div>
+                    <div class="page-info-old">
+                        <span>Página 1 de 5</span>
+                        <span>11/01/2026 14:30</span>
+                    </div>
+                </div>
+                <p><small>❌ Fonte muito pequena, difícil de ler</small></p>
+            </div>
+            
+            <div class="after">
+                <h4>✅ DEPOIS (22px)</h4>
+                <div class="mock-header">
+                    <div class="page-title">RELATÓRIO DE INVENTÁRIO</div>
+                    <div class="page-subtitle">CD01 - Fortaleza/CE</div>
+                    <div class="page-info-new">
+                        <span>Página 1 de 5</span>
+                        <span>11/01/2026 14:30</span>
+                    </div>
+                </div>
+                <p><small>✅ Fonte maior, muito mais legível</small></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📏 Comparação de Tamanhos:</h2>
+        
+        <div class="demo-container">
+            <h4>Visualização lado a lado:</h4>
+            
+            <div class="size-comparison">
+                <div class="size-label">11px:</div>
+                <div class="size-11px">Página 1 de 5</div>
+            </div>
+            
+            <div class="size-comparison">
+                <div class="size-label">22px:</div>
+                <div class="size-22px">Página 1 de 5</div>
+            </div>
+            
+            <p style="font-size: 0.85rem; color: #64748b; margin-top: 15px;">
+                📊 <strong>Diferença:</strong> O novo tamanho é exatamente o dobro do anterior, tornando a informação muito mais visível.
+            </p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔧 Código CSS Alterado:</h2>
+        
+        <h4>1. document-print-optimizer.js:</h4>
+        <pre style="background: #f0f0f0; padding: 15px; border-radius: 5px; font-size: 12px; overflow-x: auto;">
+.page-info {
+  font-size: <span style="background: #fca5a5; padding: 2px 4px;">11px</span> → <span style="background: #86efac; padding: 2px 4px;">22px</span>;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+}</pre>
+        
+        <h4>2. script.js:</h4>
+        <pre style="background: #f0f0f0; padding: 15px; border-radius: 5px; font-size: 12px; overflow-x: auto;">
+.sheet-info {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+  font-size: <span style="background: #fca5a5; padding: 2px 4px;">11px</span> → <span style="background: #86efac; padding: 2px 4px;">22px</span>;
+}</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 Benefícios da Alteração:</h2>
+        <ul>
+            <li>✅ <strong>Melhor legibilidade:</strong> Número da página muito mais visível</li>
+            <li>✅ <strong>Facilita identificação:</strong> Usuário encontra rapidamente a página atual</li>
+            <li>✅ <strong>Profissionalismo:</strong> Layout mais equilibrado e legível</li>
+            <li>✅ <strong>Acessibilidade:</strong> Melhor para pessoas com dificuldades visuais</li>
+            <li>✅ <strong>Impressão:</strong> Informação clara mesmo em impressoras de baixa qualidade</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>📋 Onde Aparece:</h2>
+        <ul>
+            <li><strong>Relatório de Inventário:</strong> Cabeçalho de cada página</li>
+            <li><strong>Folhas Individuais:</strong> Informação de página no topo</li>
+            <li><strong>Documentos Otimizados:</strong> Sistema de paginação</li>
+            <li><strong>Impressão:</strong> Mantém o tamanho aumentado</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Como Testar:</h2>
+        <ol>
+            <li>Adicione alguns produtos à lista</li>
+            <li>Gere o relatório de inventário</li>
+            <li>Observe que a informação "Página X de Y" está muito maior</li>
+            <li>Compare com versões anteriores se disponível</li>
+            <li>Teste a impressão para confirmar o tamanho</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Especificações Técnicas:</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 15px 0;">
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; text-align: center;">
+                <strong>Tamanho Anterior</strong><br>
+                <span style="font-size: 24px; color: #ef4444;">11px</span>
+            </div>
+            <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; text-align: center;">
+                <strong>Tamanho Atual</strong><br>
+                <span style="font-size: 24px; color: #10b981;">22px</span>
+            </div>
+            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; text-align: center;">
+                <strong>Aumento</strong><br>
+                <span style="font-size: 24px; color: #f59e0b;">100%</span>
+            </div>
+        </div>
+    </div>
+    
+    <p><a href="index.html">← Voltar ao Sistema de Inventário</a></p>
+</body>
+</html>

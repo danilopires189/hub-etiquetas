@@ -916,14 +916,40 @@ input:disabled {
 
 /* KEEP PRINT STYLES BELOW THIS LINE */
 
+/* Centralização da página de impressão na tela */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+/* Container da página com visual melhorado */
+.page-container {
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
 /* Print Styles for Inventory Sheets */
 @media print {
   body {
+    display: block !important;
+    background: white !important;
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
     font-size: 12px;
     line-height: 1.4;
+  }
+  
+  .page-container {
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
   }
 
   .sheet {
@@ -1268,4 +1294,146 @@ Badge de estoque virtual na lista de produtos */
   flex-direction: column;
   gap: 2px;
   flex: 1;
+}
+/* E
+stilos para a nota de ajuda sobre estoque virtual */
+.virtual-stock-help {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  transition: all 0.3s ease;
+  display: none; /* Inicialmente escondida */
+}
+
+.virtual-stock-help:hover {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.help-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.help-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.help-icon {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.help-title {
+  font-weight: 600;
+  color: #1e40af;
+  font-size: 0.9rem;
+}
+
+.help-description {
+  color: #374151;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+}
+
+.help-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+  padding-left: 1rem;
+}
+
+.example-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.example-code {
+  background: #f1f5f9;
+  color: #1e40af;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  font-size: 0.8rem;
+  border: 1px solid #e2e8f0;
+  min-width: 60px;
+  text-align: center;
+}
+
+.example-desc {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.help-multiple {
+  background: #f8fafc;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+  font-size: 0.8rem;
+  color: #374151;
+  margin-top: 0.5rem;
+}
+
+.help-multiple .example-code {
+  background: white;
+  margin-left: 0.5rem;
+}
+
+.help-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #fffbeb;
+  border: 1px solid #fbbf24;
+  border-radius: 8px;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  color: #92400e;
+  margin-top: 0.5rem;
+}
+
+.help-note svg {
+  color: #f59e0b;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* Responsividade para a nota de ajuda */
+@media (max-width: 768px) {
+  .virtual-stock-help {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .help-examples {
+    padding-left: 0.5rem;
+  }
+  
+  .example-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .example-code {
+    min-width: auto;
+  }
+  
+  .help-multiple {
+    padding: 0.4rem;
+  }
 }
