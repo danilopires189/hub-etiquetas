@@ -14,7 +14,7 @@
   --animation-duration-hover: 0.3s;
   --animation-duration-loading: 1s;
   --animation-duration-feedback: 0.4s;
-  --animation-duration-state: 0.3s;
+  --animation-duration-state: 0.8s;
 
   /* Animation Easings */
   --animation-easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
@@ -1492,7 +1492,7 @@ textarea:not(:disabled) {
 /* Section Visibility States with Smooth Transitions */
 .section-hidden {
   opacity: 0;
-  transform: translateY(-20px) scaleY(0.95);
+  transform: translateY(-30px) scaleY(0.9);
   max-height: 0;
   overflow: hidden;
   margin-top: 0;
@@ -1593,10 +1593,12 @@ textarea:not(:disabled) {
 @keyframes sectionSlideDown {
   from {
     opacity: 0;
-    transform: translateY(-20px) scaleY(0.95);
+    transform: translateY(-30px) scaleY(0.9);
     max-height: 0;
     margin-top: 0;
     margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   to {
@@ -1605,6 +1607,8 @@ textarea:not(:disabled) {
     max-height: 1000px;
     margin-top: 18px;
     margin-bottom: 18px;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 }
 
@@ -1615,14 +1619,18 @@ textarea:not(:disabled) {
     max-height: 1000px;
     margin-top: 18px;
     margin-bottom: 18px;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 
   to {
     opacity: 0;
-    transform: translateY(-20px) scaleY(0.95);
+    transform: translateY(-30px) scaleY(0.9);
     max-height: 0;
     margin-top: 0;
     margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }
 

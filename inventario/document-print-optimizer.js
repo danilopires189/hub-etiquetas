@@ -89,7 +89,7 @@ class DocumentPrintOptimizer {
   /**
    * Gera documento otimizado para impressão
    */
-  generateOptimizedDocument(productList, cd) {
+  generateOptimizedDocument(productList, cd, selectedTipo = null) {
     if (!this.dataAggregator) {
       throw new Error('DocumentPrintOptimizer não foi inicializado com dataIndexer');
     }
@@ -114,21 +114,22 @@ class DocumentPrintOptimizer {
     const layout = this.layoutEngine.calculateLayout(aggregatedProducts);
 
     // Gerar documento HTML
-    const documentHTML = this.generateDocumentHTML(layout, cd);
+    const documentHTML = this.generateDocumentHTML(layout, cd, selectedTipo);
 
     return {
       html: documentHTML,
       totalPages: layout.totalPages,
       totalProducts: products.length,
       timestamp: new Date(),
-      cd: cd
+      cd: cd,
+      selectedTipo: selectedTipo
     };
   }
 
   /**
    * Gera HTML completo do documento
    */
-  generateDocumentHTML(layout, cd) {
+  generateDocumentHTML(layout, cd, selectedTipo = null) {
     const timestamp = new Date().toLocaleString('pt-BR');
     
     // Validar layout antes de gerar
@@ -151,7 +152,7 @@ class DocumentPrintOptimizer {
 
     // Gerar cada página
     layout.pages.forEach((page, index) => {
-      html += this.generatePageHTML(page, index + 1, layout.totalPages, cd, timestamp);
+      html += this.generatePageHTML(page, index + 1, layout.totalPages, cd, timestamp, selectedTipo);
     });
 
     html += `
@@ -165,13 +166,13 @@ class DocumentPrintOptimizer {
   /**
    * Gera HTML de uma página individual
    */
-  generatePageHTML(page, pageNumber, totalPages, cd, timestamp) {
+  generatePageHTML(page, pageNumber, totalPages, cd, timestamp, selectedTipo = null) {
     const logoHTML = this.generateLogoHTML();
     const headerHTML = this.generatePageHeader(pageNumber, totalPages, cd, timestamp, logoHTML);
     
     // Pegar o primeiro produto da página para o rodapé (sistema usa 1 produto por página)
     const firstProduct = page.products && page.products.length > 0 ? page.products[0] : null;
-    const footerHTML = this.generatePageFooter(firstProduct);
+    const footerHTML = this.generatePageFooter(firstProduct, selectedTipo);
     
     console.log(`📄 Gerando página ${pageNumber} - Rodapé incluído:`, footerHTML.includes('page-footer'));
     
@@ -231,7 +232,7 @@ class DocumentPrintOptimizer {
   /**
    * Gera HTML do rodapé da página
    */
-  generatePageFooter(product = null) {
+  generatePageFooter(product = null, selectedTipo = null) {
     console.log('🦶 Gerando rodapé da página...');
     
     // Formatar estoque virtual com separador de milhares (ponto)
@@ -245,25 +246,42 @@ class DocumentPrintOptimizer {
       }
     }
     
+    // Determinar marcação das opções SOBRA/FALTA
+    const sobraChecked = selectedTipo === 'sobra' ? '☑' : '☐';
+    const faltaChecked = selectedTipo === 'falta' ? '☑' : '☐';
+    
     const footerHTML = `
       <div class="page-footer" style="position: relative; bottom: 0; margin-top: auto; padding: 15px 10px; border-top: 3px solid #000; background: #f8f9fa; min-height: 60px; flex-shrink: 0; page-break-inside: avoid; break-inside: avoid; display: block; visibility: visible; opacity: 1; z-index: 999;">
-        <div class="footer-section" style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 5px 0; width: 100%; visibility: visible;">
+        <div class="footer-section" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 5px 0; width: 100%; visibility: visible;">
           <div class="footer-field" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; visibility: visible;">
             <label class="footer-label" style="font-size: 11px; font-weight: bold; color: #000; text-align: center; display: block; visibility: visible; margin-bottom: 3px;">Conferido por:</label>
-            <div class="footer-input-box" style="border: 2px solid #000; height: 35px; width: 100%; max-width: 150px; background: white; border-radius: 3px; display: block; visibility: visible;"></div>
+            <div class="footer-input-box" style="border: 2px solid #000; height: 35px; width: 100%; max-width: 140px; background: white; border-radius: 3px; display: block; visibility: visible;"></div>
           </div>
           <div class="footer-field" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; visibility: visible;">
             <label class="footer-label" style="font-size: 11px; font-weight: bold; color: #000; text-align: center; display: block; visibility: visible; margin-bottom: 3px;">Data:</label>
-            <div class="footer-input-box footer-date-box" style="border: 2px solid #000; height: 35px; width: 100%; max-width: 120px; background: white; border-radius: 3px; display: block; visibility: visible;"></div>
+            <div class="footer-input-box footer-date-box" style="border: 2px solid #000; height: 35px; width: 100%; max-width: 110px; background: white; border-radius: 3px; display: block; visibility: visible;"></div>
+          </div>
+          <div class="footer-field" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; visibility: visible;">
+            <label class="footer-label" style="font-size: 11px; font-weight: bold; color: #64748b; text-align: center; display: block; visibility: visible; margin-bottom: 3px;">Tipo:</label>
+            <div class="footer-tipo-container" style="display: flex; gap: 8px; align-items: center; justify-content: center; visibility: visible;">
+              <div class="footer-tipo-option" style="display: flex; align-items: center; gap: 3px; font-size: 10px; font-weight: bold; color: #000;">
+                <span style="font-size: 18px; color: #10b981;">${sobraChecked}</span>
+                <span>SOBRA</span>
+              </div>
+              <div class="footer-tipo-option" style="display: flex; align-items: center; gap: 3px; font-size: 10px; font-weight: bold; color: #000;">
+                <span style="font-size: 18px; color: #ef4444;">${faltaChecked}</span>
+                <span>FALTA</span>
+              </div>
+            </div>
           </div>
           <div class="footer-field" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; visibility: visible;">
             <label class="footer-label" style="font-size: 11px; font-weight: bold; color: #000; text-align: center; display: block; visibility: visible; margin-bottom: 3px;">Estoque Virtual:</label>
-            <div class="footer-input-box footer-virtual-stock-box" style="border: 2px solid #000; height: 35px; width: 100%; max-width: 100px; background: white; border-radius: 3px; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: bold; font-size: 16px; text-align: center; line-height: 1; padding: 0 5px; box-sizing: border-box; visibility: visible;">${virtualStockFormatted}</div>
+            <div class="footer-input-box footer-virtual-stock-box" style="border: 2px solid #000; height: 35px; width: 100%; max-width: 90px; background: white; border-radius: 3px; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: bold; font-size: 14px; text-align: center; line-height: 1; padding: 0 5px; box-sizing: border-box; visibility: visible;">${virtualStockFormatted}</div>
           </div>
         </div>
       </div>
     `;
-    console.log('✅ Rodapé gerado com estilos inline para garantir impressão');
+    console.log('✅ Rodapé gerado com layout SOBRA/FALTA e estilos inline para garantir impressão');
     return footerHTML;
   }
 
@@ -453,10 +471,6 @@ class DocumentPrintOptimizer {
           padding: 0;
           line-height: 1.4;
           font-size: ${this.config.fontSizes?.body || '12px'};
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          min-height: 100vh;
           background: #f5f5f5;
         }
         
@@ -464,7 +478,7 @@ class DocumentPrintOptimizer {
           page-break-after: always;
           height: 277mm;
           width: 190mm;
-          padding: 10mm;
+          padding: 5mm 10mm 10mm 10mm;
           position: relative;
           box-sizing: border-box;
           display: flex;
@@ -473,7 +487,7 @@ class DocumentPrintOptimizer {
           max-height: 277mm;
           background: white;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
-          margin: 20px;
+          margin: 20px auto;
         }
         
         .page:last-child {
@@ -483,7 +497,7 @@ class DocumentPrintOptimizer {
         .page-content {
           flex: 1;
           overflow: hidden;
-          max-height: calc(277mm - 60mm - 80px);
+          max-height: calc(277mm - 40mm - 60px);
           min-height: 0;
         }
         
@@ -492,8 +506,8 @@ class DocumentPrintOptimizer {
           align-items: center;
           gap: 10px;
           border-bottom: 2px solid #333;
-          padding-bottom: 8px;
-          margin-bottom: 15px;
+          padding-bottom: 5px;
+          margin-bottom: 8px;
         }
         
         .header-logo {
@@ -501,7 +515,7 @@ class DocumentPrintOptimizer {
         }
         
         .page-logo {
-          height: 70px;
+          height: 50px;
           width: auto;
         }
         
@@ -570,14 +584,14 @@ class DocumentPrintOptimizer {
         }
         
         .product-code {
-          font-size: ${this.config.fontSizes?.small || '10px'};
+          font-size: 11px;
           color: ${this.config.colors?.secondary || '#64748b'};
           font-weight: bold;
           margin-bottom: 3px;
         }
         
         .product-barcodes {
-          font-size: ${this.config.fontSizes?.small || '10px'};
+          font-size: 11px;
           color: ${this.config.colors?.secondary || '#64748b'};
           font-weight: bold;
           margin-top: 3px;
@@ -590,7 +604,7 @@ class DocumentPrintOptimizer {
           border: 1px solid #e0f2fe;
           margin: 0 2px;
           font-family: 'Courier New', monospace;
-          font-weight: normal;
+          font-weight: bold;
         }
         
         .product-barcodes .no-barcode {

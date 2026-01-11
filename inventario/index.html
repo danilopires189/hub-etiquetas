@@ -104,31 +104,50 @@
 
     <section class="panel search animate-fade-slide-up">
       <div class="field full">
-        <!-- CD Selection - Compact Style -->
+        <!-- CD Selection with integrated Tipo Flag -->
         <div class="cd-selector animate-slide-up-field stagger-1">
-          <label for="cdSelect">Depósito</label>
-          <div class="cd-select-container">
-            <svg class="cd-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 21h18" />
-              <path d="M5 21V7l8-4v18" />
-              <path d="M19 21V11l-6-4" />
-              <path d="M9 9v.01" />
-              <path d="M9 12v.01" />
-              <path d="M9 15v.01" />
-              <path d="M9 18v.01" />
-            </svg>
-            <select id="cdSelect" class="cd-select" disabled>
-              <option value="">--</option>
-              <option value="1">CD01 - Fortaleza/CE</option>
-              <option value="2">CD02 - Hidrolândia/GO</option>
-              <option value="3">CD03 - Jaboatão/PE</option>
-              <option value="4">CD04 - Simões Filho/BA</option>
-              <option value="5">CD05 - Contagem/MG</option>
-              <option value="6">CD06 - Benevides/PA</option>
-              <option value="7">CD07 - São Luís/MA</option>
-              <option value="8">CD08 - Guarulhos/SP</option>
-              <option value="9">CD09 - Aquiraz/CE</option>
-            </select>
+          <div class="cd-row">
+            <div class="cd-left">
+              <label for="cdSelect">Depósito</label>
+              <div class="cd-select-container">
+                <svg class="cd-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18" />
+                  <path d="M5 21V7l8-4v18" />
+                  <path d="M19 21V11l-6-4" />
+                  <path d="M9 9v.01" />
+                  <path d="M9 12v.01" />
+                  <path d="M9 15v.01" />
+                  <path d="M9 18v.01" />
+                </svg>
+                <select id="cdSelect" class="cd-select" disabled>
+                  <option value="">--</option>
+                  <option value="1">CD01 - Fortaleza/CE</option>
+                  <option value="2">CD02 - Hidrolândia/GO</option>
+                  <option value="3">CD03 - Jaboatão/PE</option>
+                  <option value="4">CD04 - Simões Filho/BA</option>
+                  <option value="5">CD05 - Contagem/MG</option>
+                  <option value="6">CD06 - Benevides/PA</option>
+                  <option value="7">CD07 - São Luís/MA</option>
+                  <option value="8">CD08 - Guarulhos/SP</option>
+                  <option value="9">CD09 - Aquiraz/CE</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Flag de Tipo integrado à direita -->
+            <div id="tipoFlag" class="tipo-flag-inline" style="display: none;">
+              <label class="tipo-label">Tipo:</label>
+              <div class="tipo-options">
+                <div class="tipo-option" data-tipo="sobra">
+                  <input type="radio" id="tipoSobra" name="tipoInventario" value="sobra">
+                  <label for="tipoSobra" class="tipo-button">SOBRA</label>
+                </div>
+                <div class="tipo-option" data-tipo="falta">
+                  <input type="radio" id="tipoFalta" name="tipoInventario" value="falta">
+                  <label for="tipoFalta" class="tipo-button">FALTA</label>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -144,9 +163,8 @@
           <div class="search-container">
             <div class="search-input-group">
               <div class="search-input-wrapper">
-                <input id="coddvInput" type="text" autocomplete="off"
-                  placeholder=". . ."
-                  disabled class="search-input" />
+                <input id="coddvInput" type="text" autocomplete="off" placeholder=". . ." disabled
+                  class="search-input" />
                 <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.35-4.35" />

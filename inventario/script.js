@@ -463,6 +463,7 @@ const $ = (sel) => document.querySelector(sel);
 let APP_STATE = {
   selectedCD: null,
   selectedCDName: null,
+  selectedTipo: null, // 'sobra', 'falta' ou null
   productList: new Map(), // CODDV -> Product Object
   isLoading: false,
   databaseReady: false
@@ -942,6 +943,19 @@ function handleCDSelection(cd) {
   APP_STATE.selectedCD = cd;
   APP_STATE.selectedCDName = cdDisplayName;
 
+  // Mostrar/esconder flag de tipo
+  const tipoFlag = $('#tipoFlag');
+  if (cd && tipoFlag) {
+    tipoFlag.style.display = 'block';
+    // Resetar seleção de tipo quando CD muda
+    APP_STATE.selectedTipo = null;
+    const radioButtons = tipoFlag.querySelectorAll('input[type="radio"]');
+    radioButtons.forEach(radio => radio.checked = false);
+  } else if (tipoFlag) {
+    tipoFlag.style.display = 'none';
+    APP_STATE.selectedTipo = null;
+  }
+
   // Habilitar/desabilitar campo de busca
   const coddvInput = $('#coddvInput');
   const btnBuscar = $('#btnBuscar');
@@ -951,7 +965,7 @@ function handleCDSelection(cd) {
     coddvInput.placeholder = `Digite o CODDV (ou múltiplos separados por espaço ou vírgula)...`;
     btnBuscar.disabled = false;
     coddvInput.focus();
-    
+
     // Mostrar a nota de estoque virtual quando o campo estiver habilitado
     toggleVirtualStockHelp();
   } else {
@@ -959,7 +973,7 @@ function handleCDSelection(cd) {
     coddvInput.placeholder = 'Selecione um CD primeiro';
     coddvInput.value = '';
     btnBuscar.disabled = true;
-    
+
     // Esconder a nota quando não há CD selecionado
     const virtualStockHelp = $('#virtualStockHelp');
     if (virtualStockHelp) {
@@ -1022,7 +1036,7 @@ function handleProductSearch() {
         if (parts.length === 2) {
           const productCode = parts[0].trim();
           const virtualStock = parts[1].trim();
-          
+
           // Validar se o estoque virtual é um número válido
           if (productCode && !isNaN(virtualStock) && parseInt(virtualStock) >= 0) {
             // Armazenar o estoque virtual para este produto
@@ -1030,9 +1044,9 @@ function handleProductSearch() {
               window.VIRTUAL_STOCK_MAP = new Map();
             }
             window.VIRTUAL_STOCK_MAP.set(productCode, parseInt(virtualStock));
-            
+
             console.log(`📦 Estoque virtual definido: ${productCode} = ${virtualStock}`);
-            
+
             return productCode;
           }
         }
@@ -1057,7 +1071,7 @@ function handleProductSearch() {
 
   // Limpar campo de busca imediatamente
   coddvInput.value = '';
-  
+
   // Mostrar novamente a nota de estoque virtual
   toggleVirtualStockHelp();
 
@@ -1077,11 +1091,11 @@ function getVirtualStock(coddv) {
 function toggleVirtualStockHelp() {
   const coddvInput = $('#coddvInput');
   const virtualStockHelp = $('#virtualStockHelp');
-  
+
   if (!coddvInput || !virtualStockHelp) return;
-  
-  // Mostrar a nota apenas quando o campo estiver vazio
-  if (coddvInput.value.trim() === '') {
+
+  // Mostrar a nota apenas quando o campo estiver vazio E não houver produtos na lista
+  if (coddvInput.value.trim() === '' && APP_STATE.productList.size === 0) {
     virtualStockHelp.style.display = 'block';
   } else {
     virtualStockHelp.style.display = 'none';
@@ -1221,7 +1235,7 @@ function finalizeBatchProcessing(addedCount, skippedCount, errorCount, errors, b
 function addProductToList(product, addresses) {
   // Obter estoque virtual se disponível
   const virtualStock = getVirtualStock(product.CODDV);
-  
+
   const productData = {
     ...product,
     addresses: addresses,
@@ -1236,6 +1250,9 @@ function addProductToList(product, addresses) {
 
   renderProductList();
   updateUI();
+
+  // Atualizar visibilidade da nota de estoque virtual
+  toggleVirtualStockHelp();
 
   // Apply highlight animation to newly added product (Requirement 4.3)
   setTimeout(() => {
@@ -1263,9 +1280,37 @@ function addProductToList(product, addresses) {
   }
 }
 
+// Função auxiliar para aplicar animação de recolhimento da lista
+function applyListCollapseAnimation(callback) {
+  const productList = $('#productList');
+
+  if (productList) {
+    productList.classList.add('collapsing');
+
+    // Aguardar a animação de recolhimento antes de executar callback
+    setTimeout(() => {
+      if (callback) callback();
+
+      // Remover classe de recolhimento e aplicar classe de collapsed
+      productList.classList.remove('collapsing');
+      productList.classList.add('collapsed');
+
+      // Remover a classe collapsed após um tempo para voltar ao normal
+      setTimeout(() => {
+        productList.classList.remove('collapsed');
+      }, 1200);
+
+    }, 2000); // Tempo da animação de recolhimento (2 segundos)
+  } else {
+    // Fallback caso não encontre o elemento
+    if (callback) callback();
+  }
+}
+
 function removeProductFromList(coddv) {
   if (APP_STATE.productList.has(coddv)) {
     const product = APP_STATE.productList.get(coddv);
+    const isLastProduct = APP_STATE.productList.size === 1;
 
     // Apply fadeOut animation before removing (Requirement 4.4)
     const productElement = document.querySelector(`[data-coddv="${coddv}"]`);
@@ -1277,10 +1322,26 @@ function removeProductFromList(coddv) {
             APP_STATE.productList.delete(coddv);
             console.log(`➖ Produto removido: ${coddv} - ${product.DESC}`);
 
-            renderProductList();
-            updateUI();
+            // Se for o último produto, aplicar animação de recolhimento
+            if (isLastProduct) {
+              applyListCollapseAnimation(() => {
+                renderProductList();
+                updateUI();
 
-            toast(`Produto removido: ${coddv}`, 'info');
+                // Atualizar visibilidade da nota de estoque virtual
+                toggleVirtualStockHelp();
+
+                toast(`Último produto removido: ${coddv}`, 'info');
+              });
+            } else {
+              renderProductList();
+              updateUI();
+
+              // Atualizar visibilidade da nota de estoque virtual
+              toggleVirtualStockHelp();
+
+              toast(`Produto removido: ${coddv}`, 'info');
+            }
           }
         });
       } else {
@@ -1291,10 +1352,26 @@ function removeProductFromList(coddv) {
           APP_STATE.productList.delete(coddv);
           console.log(`➖ Produto removido: ${coddv} - ${product.DESC}`);
 
-          renderProductList();
-          updateUI();
+          // Se for o último produto, aplicar animação de recolhimento
+          if (isLastProduct) {
+            applyListCollapseAnimation(() => {
+              renderProductList();
+              updateUI();
 
-          toast(`Produto removido: ${coddv}`, 'info');
+              // Atualizar visibilidade da nota de estoque virtual
+              toggleVirtualStockHelp();
+
+              toast(`Último produto removido: ${coddv}`, 'info');
+            });
+          } else {
+            renderProductList();
+            updateUI();
+
+            // Atualizar visibilidade da nota de estoque virtual
+            toggleVirtualStockHelp();
+
+            toast(`Produto removido: ${coddv}`, 'info');
+          }
         }, 300); // Match animation duration
       }
     } else {
@@ -1302,20 +1379,42 @@ function removeProductFromList(coddv) {
       APP_STATE.productList.delete(coddv);
       console.log(`➖ Produto removido: ${coddv} - ${product.DESC}`);
 
-      renderProductList();
-      updateUI();
+      // Se for o último produto, aplicar animação de recolhimento
+      if (isLastProduct) {
+        applyListCollapseAnimation(() => {
+          renderProductList();
+          updateUI();
 
-      toast(`Produto removido: ${coddv}`, 'info');
+          // Atualizar visibilidade da nota de estoque virtual
+          toggleVirtualStockHelp();
+
+          toast(`Último produto removido: ${coddv}`, 'info');
+        });
+      } else {
+        renderProductList();
+        updateUI();
+
+        // Atualizar visibilidade da nota de estoque virtual
+        toggleVirtualStockHelp();
+
+        toast(`Produto removido: ${coddv}`, 'info');
+      }
     }
   }
 }
 
 function clearProductList() {
-  APP_STATE.productList.clear();
-  renderProductList();
-  updateUI();
+  // Usar a função auxiliar para aplicar a animação
+  applyListCollapseAnimation(() => {
+    APP_STATE.productList.clear();
+    renderProductList();
+    updateUI();
 
-  toast('Lista limpa', 'info');
+    // Atualizar visibilidade da nota de estoque virtual
+    toggleVirtualStockHelp();
+
+    toast('Lista limpa', 'info');
+  });
 }
 
 // Renderização da lista de produtos
@@ -1346,7 +1445,7 @@ function renderProductList() {
     const addressCount = product.addresses ? product.addresses.length : 0;
     const staggerClass = `animate-slide-up-field stagger-${Math.min(index + 1, 8)}`;
     const virtualStockDisplay = product.virtualStock ? `<span class="virtual-stock-badge" title="Estoque Virtual">📦 ${product.virtualStock}</span>` : '';
-    
+
     return `
     <div class="product-item hover-card ${staggerClass}" data-coddv="${product.CODDV}">
       <div class="product-info">
@@ -1578,7 +1677,7 @@ function generateOptimizedDocument() {
 
       // Gerar documento otimizado
       console.log('🔄 Gerando documento...');
-      const result = optimizer.generateOptimizedDocument(APP_STATE.productList, APP_STATE.selectedCD);
+      const result = optimizer.generateOptimizedDocument(APP_STATE.productList, APP_STATE.selectedCD, APP_STATE.selectedTipo);
 
       if (!result || !result.html) {
         throw new Error('Falha na geração do documento - resultado inválido');
@@ -1645,7 +1744,7 @@ function generateOptimizedDocument() {
                   userAgent: navigator.userAgent
                 }
               };
-              
+
               window.supabaseManager.saveLabelGeneration(labelData).then(() => {
                 console.log('✅ Geração de inventário registrada no Supabase');
               }).catch(error => {
@@ -1743,18 +1842,13 @@ function generateAllSheetsHTML(products, totalSheets) {
           margin: 0;
           padding: 0;
           line-height: 1.4;
-          /* Centralização da página na tela */
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          min-height: 100vh;
           background: #f5f5f5;
         }
         
         .page-container {
           background: white;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
-          margin: 20px;
+          margin: 20px auto;
           border-radius: 8px;
           overflow: hidden;
           max-width: 210mm;
@@ -2311,6 +2405,23 @@ function setupInterface() {
     });
   }
 
+  // Event listeners para flag de tipo (com funcionalidade de desmarcar)
+  const tipoRadios = document.querySelectorAll('input[name="tipoInventario"]');
+  tipoRadios.forEach(radio => {
+    radio.addEventListener('click', (e) => {
+      // Se já estava selecionado, desmarcar
+      if (APP_STATE.selectedTipo === e.target.value) {
+        e.target.checked = false;
+        APP_STATE.selectedTipo = null;
+        console.log('🏷️ Tipo desmarcado');
+      } else {
+        // Selecionar novo tipo
+        APP_STATE.selectedTipo = e.target.value;
+        console.log(`🏷️ Tipo selecionado: ${APP_STATE.selectedTipo}`);
+      }
+    });
+  });
+
   // Event listeners para busca de produto
   const coddvInput = $('#coddvInput');
   const btnBuscar = $('#btnBuscar');
@@ -2329,7 +2440,7 @@ function setupInterface() {
         coddvInput.select();
       }
     });
-    
+
     // Controlar visibilidade da nota de estoque virtual
     coddvInput.addEventListener('input', toggleVirtualStockHelp);
     coddvInput.addEventListener('change', toggleVirtualStockHelp);
@@ -2358,20 +2469,18 @@ function setupInterface() {
             btnLimparLista.disabled = true;
           }
 
-          // Simular delay para mostrar loading
+          // Executar clearProductList que já tem sua própria animação
+          clearProductList();
+
+          // Remover loading do botão após a animação completa (2000ms + 1200ms)
           setTimeout(() => {
-            try {
-              clearProductList();
-            } finally {
-              // Remover loading do botão
-              if (loadingManager) {
-                loadingManager.hideButtonLoading(btnLimparLista);
-              } else {
-                btnLimparLista.classList.remove('btn-loading');
-                btnLimparLista.disabled = false;
-              }
+            if (loadingManager) {
+              loadingManager.hideButtonLoading(btnLimparLista);
+            } else {
+              btnLimparLista.classList.remove('btn-loading');
+              btnLimparLista.disabled = false;
             }
-          }, 200);
+          }, 3400); // Tempo total da animação + margem de segurança
         }
       }
     });
@@ -2425,7 +2534,7 @@ function showSectionWithAnimation(section, callback = null) {
   setTimeout(() => {
     section.classList.remove('showing');
     if (callback) callback();
-  }, 300); // Duração da animação (--animation-duration-state)
+  }, 800); // Duração da animação (--animation-duration-state = 0.8s)
 }
 
 /**
@@ -2447,7 +2556,7 @@ function hideSectionWithAnimation(section, callback = null) {
     section.style.display = 'none';
     section.classList.remove('hiding');
     if (callback) callback();
-  }, 300); // Duração da animação (--animation-duration-state)
+  }, 800); // Duração da animação (--animation-duration-state = 0.8s)
 }
 
 /**

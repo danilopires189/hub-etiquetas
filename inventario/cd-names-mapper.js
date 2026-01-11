@@ -120,7 +120,7 @@ function getCDInfo(cdCode) {
 /**
  * Formata o nome do CD para uso em relatórios
  * @param {string|number} cdCode - Código do CD
- * @returns {string} Nome formatado para relatórios
+ * @returns {string} Nome formatado para relatórios (nome completo com cidade/estado)
  */
 function getCDReportName(cdCode) {
   const info = getCDInfo(cdCode);
@@ -128,7 +128,8 @@ function getCDReportName(cdCode) {
     return `Centro de Distribuição ${cdCode || 'Desconhecido'}`;
   }
   
-  return `Centro de Distribuição ${info.displayName}`;
+  // Retorna o nome completo: "CD0X - Cidade/Estado"
+  return info.displayName;
 }
 
 // Exportar para uso em outros módulos

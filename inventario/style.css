@@ -591,6 +591,23 @@ input:disabled {
   align-items: start;
 }
 
+/* Animação de recolhimento lento da lista */
+.product-list.collapsing {
+  max-height: 100px;
+  min-height: 100px;
+  opacity: 0.7;
+  transform: scale(0.98);
+  transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-list.collapsed {
+  max-height: 100px;
+  min-height: 100px;
+  opacity: 1;
+  transform: scale(1);
+  transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Card Items - Grid Style */
 .product-item {
   background: white;
@@ -615,6 +632,24 @@ input:disabled {
   /* Apply slideUpField animation with staggered delay */
   animation: slideUpField 0.5s ease-out backwards;
 }
+
+/* Animação de fade out para itens quando a lista está sendo limpa */
+.product-list.collapsing .product-item {
+  opacity: 0;
+  transform: scale(0.9) translateY(10px);
+  transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animação escalonada para os itens desaparecerem */
+.product-list.collapsing .product-item:nth-child(1) { transition-delay: 0s; }
+.product-list.collapsing .product-item:nth-child(2) { transition-delay: 0.15s; }
+.product-list.collapsing .product-item:nth-child(3) { transition-delay: 0.3s; }
+.product-list.collapsing .product-item:nth-child(4) { transition-delay: 0.45s; }
+.product-list.collapsing .product-item:nth-child(5) { transition-delay: 0.6s; }
+.product-list.collapsing .product-item:nth-child(6) { transition-delay: 0.75s; }
+.product-list.collapsing .product-item:nth-child(7) { transition-delay: 0.9s; }
+.product-list.collapsing .product-item:nth-child(8) { transition-delay: 1.05s; }
+.product-list.collapsing .product-item:nth-child(n+9) { transition-delay: 1.2s; }
 
 .product-item::before {
   content: '';
@@ -918,10 +953,6 @@ input:disabled {
 
 /* Centralização da página de impressão na tela */
 body {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
   background: #f5f5f5;
 }
 
@@ -929,7 +960,7 @@ body {
 .page-container {
   background: white;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  margin: 20px;
+  margin: 20px auto;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -1435,5 +1466,108 @@ stilos para a nota de ajuda sobre estoque virtual */
   
   .help-multiple {
     padding: 0.4rem;
+  }
+}
+/* CD Selector with integrated Tipo Flag */
+.cd-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 2rem;
+  width: 100%;
+}
+
+.cd-left {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Flag de Tipo Inline */
+.tipo-flag-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.tipo-flag-inline .tipo-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.tipo-flag-inline .tipo-options {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tipo-option {
+  position: relative;
+}
+
+.tipo-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.tipo-button {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+  user-select: none;
+}
+
+.tipo-button:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.tipo-option input[type="radio"]:checked + .tipo-button {
+  border-color: var(--primary-color, #2563eb);
+  background: var(--primary-color, #2563eb);
+  color: white;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.tipo-option[data-tipo="sobra"] input[type="radio"]:checked + .tipo-button {
+  border-color: #10b981;
+  background: #10b981;
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.tipo-option[data-tipo="falta"] input[type="radio"]:checked + .tipo-button {
+  border-color: #ef4444;
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .cd-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .tipo-flag-inline {
+    align-items: center;
+  }
+  
+  .tipo-flag-inline .tipo-options {
+    justify-content: center;
   }
 }
