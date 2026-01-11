@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar Tabela Application History - Supabase</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+        .status.error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+        .status.warning {
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fcd34d;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        .sql-section {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .sql-code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗄️ Configurar Tabela Application History</h1>
+        
+        <div class="status info">
+            <strong>ℹ️ Informação:</strong> Este script criará a tabela <code>application_history</code> no Supabase para armazenar o histórico de gerações de etiquetas.
+        </div>
+
+        <div>
+            <button id="setupBtn" onclick="runSetup()">🚀 Configurar Tabela Automaticamente</button>
+            <button id="checkBtn" onclick="checkTable()">🔍 Verificar Tabela Existente</button>
+            <button id="testBtn" onclick="testTable()" disabled>🧪 Testar Inserção</button>
+        </div>
+
+        <div id="status"></div>
+        <div id="log" class="log" style="display: none;"></div>
+
+        <div class="sql-section">
+            <h3>📝 SQL Manual (caso necessário)</h3>
+            <p>Se a configuração automática falhar, execute este SQL no painel do Supabase:</p>
+            <div class="sql-code" id="sqlCode">Carregando SQL...</div>
+            <button onclick="copySql()">📋 Copiar SQL</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        
+        // Configuração do Supabase
+        const SUPABASE_CONFIG = {
+            url: 'https://jomwkkhhhekbyanftpoc.supabase.co',
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvbXdra2hoaGVrYnlhbmZ0cG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5OTMxNjMsImV4cCI6MjA4MzU2OTE2M30.hWo1X0j5XcDPtsG1JdBTMY_kTTFi6ff6Xw3uqZdEPvc',
+            serviceRoleKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvbXdra2hoaGVrYnlhbmZ0cG9jIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Nzk5MzE2MywiZXhwIjoyMDgzNTY5MTYzfQ.bJyJN70qG0VGlGlwndp3fqWcAk4bNsDyvQ9qyqEfxKE'
+        };
+
+        // Criar cliente Supabase
+        const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+        // SQL para criar a tabela
+        const SQL_SCHEMA = `-- Schema para histórico de aplicações
+-- Execute este SQL no painel do Supabase se a configuração automática falhar
+
+-- Tabela para armazenar histórico de gerações de etiquetas por aplicação
+CREATE TABLE IF NOT EXISTS application_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_type VARCHAR(50) NOT NULL,
+    
+    -- Dados específicos da geração
+    base_number VARCHAR(20),
+    quantity INTEGER NOT NULL,
+    copies INTEGER NOT NULL,
+    label_type VARCHAR(20),
+    orientation VARCHAR(10),
+    ultimo_numero VARCHAR(20),
+    proximo_numero VARCHAR(20),
+    total_labels INTEGER,
+    
+    -- Dados específicos do termo (termolábeis)
+    etiqueta_id VARCHAR(50),
+    pedido VARCHAR(20),
+    data_pedido VARCHAR(20),
+    loja VARCHAR(100),
+    rota VARCHAR(100),
+    qtd_volumes INTEGER,
+    matricula VARCHAR(20),
+    data_separacao VARCHAR(20),
+    hora_separacao VARCHAR(20),
+    
+    -- Metadados
+    user_session_id UUID,
+    metadata JSONB DEFAULT '{}',
+    
+    -- Controle de sincronização
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    synced_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    local_id VARCHAR(255),
+    unique_key VARCHAR(255),
+    
+    -- Constraint para evitar duplicatas
+    CONSTRAINT application_history_unique_key UNIQUE (application_type, unique_key)
+);
+
+-- Índices para otimização
+CREATE INDEX IF NOT EXISTS idx_application_history_type ON application_history(application_type);
+CREATE INDEX IF NOT EXISTS idx_application_history_created_at ON application_history(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_application_history_local_id ON application_history(local_id);
+CREATE INDEX IF NOT EXISTS idx_application_history_unique_key ON application_history(unique_key);
+CREATE INDEX IF NOT EXISTS idx_application_history_etiqueta_id ON application_history(etiqueta_id);
+CREATE INDEX IF NOT EXISTS idx_application_history_pedido ON application_history(pedido);
+
+-- RLS (Row Level Security)
+ALTER TABLE application_history ENABLE ROW LEVEL SECURITY;
+
+-- Políticas de acesso
+DROP POLICY IF EXISTS "Allow anonymous access to application_history" ON application_history;
+CREATE POLICY "Allow anonymous access to application_history" 
+ON application_history FOR ALL 
+TO anon 
+USING (true) 
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow authenticated access to application_history" ON application_history;
+CREATE POLICY "Allow authenticated access to application_history" 
+ON application_history FOR ALL 
+TO authenticated 
+USING (true) 
+WITH CHECK (true);`;
+
+        // Funções globais
+        window.log = function(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const statusDiv = document.getElementById('status');
+            
+            logDiv.style.display = 'block';
+            logDiv.innerHTML += `[${new Date().toLocaleTimeString()}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            const statusClass = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            statusDiv.innerHTML = `<div class="status ${statusClass}">${message}</div>`;
+        };
+
+        window.runSetup = async function() {
+            const btn = document.getElementById('setupBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Configurando...';
+            
+            log('🔄 Iniciando configuração da tabela application_history...');
+            
+            try {
+                // Verificar se a tabela já existe
+                log('🔍 Verificando se a tabela já existe...');
+                const { data: existingData, error: checkError } = await supabase
+                    .from('application_history')
+                    .select('count(*)')
+                    .limit(1);
+                
+                if (!checkError) {
+                    log('✅ Tabela application_history já existe e está acessível!', 'success');
+                    document.getElementById('testBtn').disabled = false;
+                    btn.textContent = '✅ Tabela Já Configurada';
+                    return;
+                }
+                
+                log('📋 Tabela não existe ou não está acessível. Tentando criar...');
+                log('⚠️ ATENÇÃO: A criação automática pode não funcionar. Use o SQL manual se necessário.', 'warning');
+                
+                // Tentar inserir um registro de teste para forçar a criação da tabela
+                const testEntry = {
+                    application_type: 'setup_test',
+                    quantity: 1,
+                    copies: 1,
+                    unique_key: `setup-test-${Date.now()}`,
+                    metadata: { setup: true, timestamp: new Date().toISOString() }
+                };
+                
+                const { data: insertData, error: insertError } = await supabase
+                    .from('application_history')
+                    .insert(testEntry)
+                    .select();
+                
+                if (insertError) {
+                    log(`❌ Erro ao criar/acessar tabela: ${insertError.message}`, 'error');
+                    log('📝 Execute o SQL manual no painel do Supabase (veja abaixo)', 'warning');
+                    btn.textContent = '❌ Falha - Use SQL Manual';
+                    return;
+                }
+                
+                log('✅ Tabela criada e testada com sucesso!', 'success');
+                
+                // Limpar dados de teste
+                if (insertData && insertData[0]) {
+                    await supabase
+                        .from('application_history')
+                        .delete()
+                        .eq('id', insertData[0].id);
+                    log('🧹 Dados de teste removidos');
+                }
+                
+                document.getElementById('testBtn').disabled = false;
+                btn.textContent = '✅ Configuração Concluída';
+                
+            } catch (error) {
+                log(`❌ Erro durante configuração: ${error.message}`, 'error');
+                btn.textContent = '❌ Erro - Tente Novamente';
+                btn.disabled = false;
+            }
+        };
+
+        window.checkTable = async function() {
+            const btn = document.getElementById('checkBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Verificando...';
+            
+            log('🔍 Verificando status da tabela application_history...');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('application_history')
+                    .select('count(*)')
+                    .limit(1);
+                
+                if (error) {
+                    log(`❌ Tabela não existe ou não está acessível: ${error.message}`, 'error');
+                    log('📝 Execute o SQL manual no painel do Supabase', 'warning');
+                } else {
+                    log('✅ Tabela application_history existe e está acessível!', 'success');
+                    document.getElementById('testBtn').disabled = false;
+                }
+                
+            } catch (error) {
+                log(`❌ Erro ao verificar tabela: ${error.message}`, 'error');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = '🔍 Verificar Tabela Existente';
+        };
+
+        window.testTable = async function() {
+            const btn = document.getElementById('testBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Testando...';
+            
+            log('🧪 Testando inserção na tabela application_history...');
+            
+            try {
+                const testEntry = {
+                    application_type: 'test',
+                    quantity: 5,
+                    copies: 2,
+                    unique_key: `test-${Date.now()}`,
+                    metadata: { 
+                        test: true, 
+                        timestamp: new Date().toISOString(),
+                        source: 'setup_test'
+                    }
+                };
+                
+                const { data: insertData, error: insertError } = await supabase
+                    .from('application_history')
+                    .insert(testEntry)
+                    .select();
+                
+                if (insertError) {
+                    log(`❌ Erro no teste de inserção: ${insertError.message}`, 'error');
+                    btn.textContent = '❌ Teste Falhou';
+                    btn.disabled = false;
+                    return;
+                }
+                
+                log('✅ Inserção bem-sucedida!', 'success');
+                log(`📊 Dados inseridos: ${JSON.stringify(insertData[0], null, 2)}`);
+                
+                // Testar consulta
+                const { data: queryData, error: queryError } = await supabase
+                    .from('application_history')
+                    .select('*')
+                    .eq('application_type', 'test')
+                    .limit(5);
+                
+                if (queryError) {
+                    log(`⚠️ Erro na consulta: ${queryError.message}`, 'warning');
+                } else {
+                    log(`✅ Consulta bem-sucedida! Encontrados ${queryData.length} registros de teste`);
+                }
+                
+                // Limpar dados de teste
+                if (insertData && insertData[0]) {
+                    const { error: deleteError } = await supabase
+                        .from('application_history')
+                        .delete()
+                        .eq('id', insertData[0].id);
+                    
+                    if (deleteError) {
+                        log(`⚠️ Erro ao limpar teste: ${deleteError.message}`, 'warning');
+                    } else {
+                        log('🧹 Dados de teste removidos com sucesso');
+                    }
+                }
+                
+                log('🎉 Tabela application_history está funcionando perfeitamente!', 'success');
+                btn.textContent = '✅ Teste Concluído';
+                
+            } catch (error) {
+                log(`❌ Erro durante teste: ${error.message}`, 'error');
+                btn.textContent = '❌ Erro no Teste';
+            }
+            
+            btn.disabled = false;
+        };
+
+        window.copySql = function() {
+            navigator.clipboard.writeText(SQL_SCHEMA).then(() => {
+                log('📋 SQL copiado para a área de transferência!', 'success');
+            }).catch(() => {
+                log('❌ Erro ao copiar SQL', 'error');
+            });
+        };
+
+        // Carregar SQL na página
+        document.getElementById('sqlCode').textContent = SQL_SCHEMA;
+        
+        // Log inicial
+        log('🚀 Sistema de configuração carregado. Clique em "Configurar Tabela" para começar.');
+    </script>
+</body>
+</html>
