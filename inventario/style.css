@@ -1170,3 +1170,102 @@ input:disabled {
     page-break-inside: avoid;
   }
 }
+/* Esti
+lo para o campo de estoque virtual */
+.virtual-stock-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+  margin-left: 8px;
+}
+
+.virtual-stock-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.virtual-stock-input {
+  padding: 8px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: white;
+  transition: all 0.2s ease;
+  text-align: center;
+  width: 100%;
+}
+
+.virtual-stock-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.virtual-stock-input:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Ajuste no layout do grupo de busca para acomodar o campo de estoque virtual */
+.search-input-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  min-width: 250px;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  .search-input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .virtual-stock-input-wrapper {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+  
+  .search-btn {
+    margin-top: 8px;
+  }
+}/* 
+Badge de estoque virtual na lista de produtos */
+.virtual-stock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-top: 4px;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  transition: all 0.2s ease;
+}
+
+.virtual-stock-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Ajuste no layout do item do produto para acomodar o badge */
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}

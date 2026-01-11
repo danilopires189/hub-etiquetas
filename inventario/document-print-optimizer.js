@@ -107,7 +107,7 @@ class DocumentPrintOptimizer {
 
     // Agregar dados completos para cada produto
     const aggregatedProducts = products.map(product => 
-      this.dataAggregator.aggregateProductData(product.CODDV, cd)
+      this.dataAggregator.aggregateProductData(product, cd)
     );
 
     // Calcular layout otimizado
@@ -168,7 +168,10 @@ class DocumentPrintOptimizer {
   generatePageHTML(page, pageNumber, totalPages, cd, timestamp) {
     const logoHTML = this.generateLogoHTML();
     const headerHTML = this.generatePageHeader(pageNumber, totalPages, cd, timestamp, logoHTML);
-    const footerHTML = this.generatePageFooter();
+    
+    // Pegar o primeiro produto da página para o rodapé (sistema usa 1 produto por página)
+    const firstProduct = page.products && page.products.length > 0 ? page.products[0] : null;
+    const footerHTML = this.generatePageFooter(firstProduct);
     
     console.log(`📄 Gerando página ${pageNumber} - Rodapé incluído:`, footerHTML.includes('page-footer'));
     
@@ -228,8 +231,20 @@ class DocumentPrintOptimizer {
   /**
    * Gera HTML do rodapé da página
    */
-  generatePageFooter() {
+  generatePageFooter(product = null) {
     console.log('🦶 Gerando rodapé da página...');
+    
+    // Formatar estoque virtual com separador de milhares (ponto)
+    let virtualStockFormatted = '';
+    if (product && product.virtualStock) {
+      const stockValue = parseInt(product.virtualStock);
+      if (!isNaN(stockValue)) {
+        virtualStockFormatted = stockValue.toLocaleString('pt-BR').replace(/,/g, '.');
+      } else {
+        virtualStockFormatted = product.virtualStock;
+      }
+    }
+    
     const footerHTML = `
       <div class="page-footer" style="position: relative; bottom: 0; margin-top: auto; padding: 15px 10px; border-top: 3px solid #000; background: #f8f9fa; min-height: 60px; flex-shrink: 0; page-break-inside: avoid; break-inside: avoid; display: block; visibility: visible; opacity: 1; z-index: 999;">
         <div class="footer-section" style="display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 5px 0; width: 100%; visibility: visible;">
@@ -243,7 +258,7 @@ class DocumentPrintOptimizer {
           </div>
           <div class="footer-field" style="display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; visibility: visible;">
             <label class="footer-label" style="font-size: 11px; font-weight: bold; color: #000; text-align: center; display: block; visibility: visible; margin-bottom: 3px;">Estoque Virtual:</label>
-            <div class="footer-input-box footer-virtual-stock-box" style="border: 2px solid #000; height: 35px; width: 100%; max-width: 100px; background: white; border-radius: 3px; display: block; visibility: visible;"></div>
+            <div class="footer-input-box footer-virtual-stock-box" style="border: 2px solid #000; height: 35px; width: 100%; max-width: 100px; background: white; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; text-align: center; line-height: 1; padding: 0 5px; box-sizing: border-box; visibility: visible;">${virtualStockFormatted}</div>
           </div>
         </div>
       </div>
@@ -1440,8 +1455,10 @@ class DataAggregator {
   /**
    * Agrega todos os dados de um produto
    */
-  aggregateProductData(coddv, cd) {
-    const product = this.getProductDetails(coddv);
+  aggregateProductData(originalProduct, cd) {
+    // Se receber um produto original com dados completos, usar seus dados
+    const coddv = originalProduct.CODDV || originalProduct.coddv || originalProduct;
+    const product = typeof originalProduct === 'object' ? originalProduct : this.getProductDetails(coddv);
     const barcodes = this.getAllBarcodes(coddv);
     const addresses = this.getAddresses(coddv, cd);
     const excludedAddresses = this.getExcludedAddresses(coddv, cd);
@@ -1453,7 +1470,8 @@ class DataAggregator {
       barcodes: barcodes,
       addresses: addresses,
       excludedAddresses: excludedAddresses,
-      totalQuantity: totalQuantity
+      totalQuantity: totalQuantity,
+      virtualStock: originalProduct.virtualStock || null // Incluir estoque virtual se disponível
     };
   }
 

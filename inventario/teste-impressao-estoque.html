@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Impressão Estoque Virtual</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .example {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #2563eb;
+        }
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .info {
+            color: #2563eb;
+            font-weight: bold;
+        }
+        .mock-document {
+            border: 2px solid #000;
+            padding: 20px;
+            margin: 10px 0;
+            background: white;
+        }
+        .footer-field {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        .footer-label {
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .footer-input-box {
+            border: 2px solid #000;
+            height: 35px;
+            width: 100px;
+            background: white;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .filled {
+            background: #e8f5e8;
+            color: #2d5a2d;
+        }
+        .empty {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🖨️ Teste - Comportamento na Impressão</h1>
+    
+    <div class="test-section">
+        <h2>📋 Como funciona na impressão:</h2>
+        
+        <div class="example">
+            <h3 class="success">Cenário 1: Usuário digitou "86-10"</h3>
+            <p><strong>Entrada:</strong> <code>86-10</code></p>
+            <p><strong>Resultado na impressão:</strong></p>
+            <div class="mock-document">
+                <p><strong>Produto 86</strong></p>
+                <div class="footer-field">
+                    <div class="footer-label">Estoque Virtual:</div>
+                    <div class="footer-input-box filled">10</div>
+                </div>
+            </div>
+            <p>✅ <strong>Campo preenchido automaticamente com o valor informado</strong></p>
+        </div>
+        
+        <div class="example">
+            <h3 class="info">Cenário 2: Usuário digitou apenas "86"</h3>
+            <p><strong>Entrada:</strong> <code>86</code></p>
+            <p><strong>Resultado na impressão:</strong></p>
+            <div class="mock-document">
+                <p><strong>Produto 86</strong></p>
+                <div class="footer-field">
+                    <div class="footer-label">Estoque Virtual:</div>
+                    <div class="footer-input-box empty">&nbsp;</div>
+                </div>
+            </div>
+            <p>✅ <strong>Campo vazio para o usuário preencher manualmente</strong></p>
+        </div>
+        
+        <div class="example">
+            <h3 class="success">Cenário 3: Múltiplos produtos mistos</h3>
+            <p><strong>Entrada:</strong> <code>86-10, 87, 88-5</code></p>
+            <p><strong>Resultado na impressão:</strong></p>
+            <div class="mock-document">
+                <p><strong>Produto 86</strong></p>
+                <div class="footer-field">
+                    <div class="footer-label">Estoque Virtual:</div>
+                    <div class="footer-input-box filled">10</div>
+                </div>
+                <br><br>
+                <p><strong>Produto 87</strong></p>
+                <div class="footer-field">
+                    <div class="footer-label">Estoque Virtual:</div>
+                    <div class="footer-input-box empty">&nbsp;</div>
+                </div>
+                <br><br>
+                <p><strong>Produto 88</strong></p>
+                <div class="footer-field">
+                    <div class="footer-label">Estoque Virtual:</div>
+                    <div class="footer-input-box filled">5</div>
+                </div>
+            </div>
+            <p>✅ <strong>Cada produto com seu comportamento específico</strong></p>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 Comportamento Implementado:</h2>
+        <ul>
+            <li>✅ <strong>Com estoque informado:</strong> Campo preenchido automaticamente</li>
+            <li>✅ <strong>Sem estoque informado:</strong> Campo vazio para preenchimento manual</li>
+            <li>✅ <strong>Múltiplos produtos:</strong> Cada um com seu comportamento individual</li>
+            <li>✅ <strong>Compatibilidade:</strong> Mantém o comportamento original quando não informado</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>💡 Código Responsável:</h2>
+        <p>No arquivo <code>document-print-optimizer.js</code>:</p>
+        <pre style="background: #f0f0f0; padding: 10px; border-radius: 5px;">
+${product.virtualStock || ''}
+        </pre>
+        <p>Esta linha garante que:</p>
+        <ul>
+            <li>Se <code>product.virtualStock</code> existe → mostra o valor</li>
+            <li>Se <code>product.virtualStock</code> é null/undefined → mostra vazio</li>
+        </ul>
+    </div>
+    
+    <p><a href="index.html">← Voltar ao Sistema de Inventário</a></p>
+</body>
+</html>

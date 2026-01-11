@@ -1001,10 +1001,35 @@ function handleProductSearch() {
   }
 
   // Processar múltiplos CODDVs (separados por vírgula, espaço ou quebra de linha)
+  // Agora também suporta formato CODDV-ESTOQUE (ex: 86-10)
   const coddvs = input
     .split(/[,\s\n]+/)
     .map(coddv => coddv.trim())
-    .filter(coddv => coddv.length > 0);
+    .filter(coddv => coddv.length > 0)
+    .map(coddv => {
+      // Verificar se o código contém hífen para estoque virtual
+      if (coddv.includes('-')) {
+        const parts = coddv.split('-');
+        if (parts.length === 2) {
+          const productCode = parts[0].trim();
+          const virtualStock = parts[1].trim();
+          
+          // Validar se o estoque virtual é um número válido
+          if (productCode && !isNaN(virtualStock) && parseInt(virtualStock) >= 0) {
+            // Armazenar o estoque virtual para este produto
+            if (!window.VIRTUAL_STOCK_MAP) {
+              window.VIRTUAL_STOCK_MAP = new Map();
+            }
+            window.VIRTUAL_STOCK_MAP.set(productCode, parseInt(virtualStock));
+            
+            console.log(`📦 Estoque virtual definido: ${productCode} = ${virtualStock}`);
+            
+            return productCode;
+          }
+        }
+      }
+      return coddv;
+    });
 
   if (coddvs.length === 0) {
     showSearchStatus('Digite pelo menos um CODDV válido', 'warning');
@@ -1026,6 +1051,14 @@ function handleProductSearch() {
 
   // Processar produtos um por vez com delay
   processProductsOneByOne(coddvs, btnBuscar, coddvInput);
+}
+
+// Função para obter o estoque virtual de um produto
+function getVirtualStock(coddv) {
+  if (window.VIRTUAL_STOCK_MAP && window.VIRTUAL_STOCK_MAP.has(coddv)) {
+    return window.VIRTUAL_STOCK_MAP.get(coddv);
+  }
+  return null;
 }
 
 // Função para processar produtos um por vez
@@ -1159,16 +1192,20 @@ function finalizeBatchProcessing(addedCount, skippedCount, errorCount, errors, b
 
 // Gerenciamento da lista de produtos
 function addProductToList(product, addresses) {
+  // Obter estoque virtual se disponível
+  const virtualStock = getVirtualStock(product.CODDV);
+  
   const productData = {
     ...product,
     addresses: addresses,
     addedAt: new Date(),
-    cd: APP_STATE.selectedCD
+    cd: APP_STATE.selectedCD,
+    virtualStock: virtualStock // Adicionar estoque virtual aos dados do produto
   };
 
   APP_STATE.productList.set(product.CODDV, productData);
 
-  console.log(`➕ Produto adicionado: ${product.CODDV} - ${product.DESC}`);
+  console.log(`➕ Produto adicionado: ${product.CODDV} - ${product.DESC}${virtualStock ? ` (Estoque Virtual: ${virtualStock})` : ''}`);
 
   renderProductList();
   updateUI();
@@ -1190,7 +1227,13 @@ function addProductToList(product, addresses) {
     }
   }, 100);
 
-  toast(`Produto adicionado: ${product.CODDV}`, 'success');
+  const toastMessage = `Produto adicionado: ${product.CODDV}${virtualStock ? ` (Estoque Virtual: ${virtualStock})` : ''}`;
+  toast(toastMessage, 'success');
+
+  // Limpar o mapa de estoque virtual após adicionar o produto
+  if (window.VIRTUAL_STOCK_MAP && window.VIRTUAL_STOCK_MAP.has(product.CODDV)) {
+    window.VIRTUAL_STOCK_MAP.delete(product.CODDV);
+  }
 }
 
 function removeProductFromList(coddv) {
@@ -1275,11 +1318,14 @@ function renderProductList() {
   productList.innerHTML = products.map((product, index) => {
     const addressCount = product.addresses ? product.addresses.length : 0;
     const staggerClass = `animate-slide-up-field stagger-${Math.min(index + 1, 8)}`;
+    const virtualStockDisplay = product.virtualStock ? `<span class="virtual-stock-badge" title="Estoque Virtual">📦 ${product.virtualStock}</span>` : '';
+    
     return `
     <div class="product-item hover-card ${staggerClass}" data-coddv="${product.CODDV}">
       <div class="product-info">
         <div class="product-coddv">${product.CODDV}</div>
         <div class="product-desc">${escapeHtml(product.DESC)}</div>
+        ${virtualStockDisplay}
       </div>
       <div class="product-actions">
         <span class="address-count" title="${addressCount} endereço(s)">${addressCount} end.</span>
