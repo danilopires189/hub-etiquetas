@@ -936,7 +936,7 @@ function saveSearchToHistory(coddv) {
 }
 
 // Gerenciamento de CD
-function handleCDSelection(cd) {
+async function handleCDSelection(cd) {
   const cdDisplayName = window.CDMapper ? window.CDMapper.getCDDisplayName(cd) : cd;
   console.log(`📦 CD selecionado: ${cd} (${cdDisplayName})`);
 
@@ -983,12 +983,20 @@ function handleCDSelection(cd) {
 
   // Limpar lista se CD mudou e há produtos
   if (APP_STATE.productList.size > 0) {
-    const confirmClear = confirm(
-      'Alterar o CD irá limpar a lista atual de produtos. Deseja continuar?'
+    const confirmClear = await showConfirm(
+      'Alterar o CD irá limpar a lista atual de produtos. Deseja continuar?',
+      'Alterar Depósito'
     );
 
     if (confirmClear) {
       clearProductList();
+      // Mostrar sucesso após limpar
+      setTimeout(async () => {
+        await showSuccess(
+          'Lista limpa com sucesso!',
+          'Depósito Alterado'
+        );
+      }, 500);
     } else {
       // Reverter seleção de CD
       const cdSelect = $('#cdSelect');
@@ -2400,8 +2408,8 @@ function setupInterface() {
   // Event listeners para seleção de CD
   const cdSelect = $('#cdSelect');
   if (cdSelect) {
-    cdSelect.addEventListener('change', (e) => {
-      handleCDSelection(e.target.value);
+    cdSelect.addEventListener('change', async (e) => {
+      await handleCDSelection(e.target.value);
     });
   }
 
@@ -2455,10 +2463,11 @@ function setupInterface() {
   const btnGerarOtimizado = $('#btnGerarOtimizado');
 
   if (btnLimparLista) {
-    btnLimparLista.addEventListener('click', () => {
+    btnLimparLista.addEventListener('click', async () => {
       if (APP_STATE.productList.size > 0) {
-        const confirmClear = confirm(
-          `Tem certeza que deseja limpar a lista com ${APP_STATE.productList.size} produto(s)?`
+        const confirmClear = await showConfirm(
+          `Tem certeza que deseja limpar a lista com ${APP_STATE.productList.size} produto(s)?`,
+          'Limpar Lista'
         );
         if (confirmClear) {
           // Mostrar loading no botão
@@ -2473,13 +2482,19 @@ function setupInterface() {
           clearProductList();
 
           // Remover loading do botão após a animação completa (2000ms + 1200ms)
-          setTimeout(() => {
+          setTimeout(async () => {
             if (loadingManager) {
               loadingManager.hideButtonLoading(btnLimparLista);
             } else {
               btnLimparLista.classList.remove('btn-loading');
               btnLimparLista.disabled = false;
             }
+
+            // Mostrar modal de sucesso
+            await showSuccess(
+              'Lista limpa com sucesso!',
+              'Lista Limpa'
+            );
           }, 3400); // Tempo total da animação + margem de segurança
         }
       }
@@ -2689,3 +2704,259 @@ document.addEventListener('systemStartupComplete', () => {
     }, 800);
   }
 });
+
+// ===== SISTEMA DE MODAL PROFISSIONAL =====
+
+class ModalSystem {
+  constructor() {
+    this.overlay = null;
+    this.container = null;
+    this.isOpen = false;
+    this.currentResolve = null;
+    this.init();
+  }
+
+  init() {
+    this.overlay = document.getElementById('modalOverlay');
+    this.container = document.getElementById('modalContainer');
+
+    if (!this.overlay || !this.container) {
+      console.error('❌ Elementos do modal não encontrados');
+      return;
+    }
+
+    // Fechar modal ao clicar no overlay
+    this.overlay.addEventListener('click', (e) => {
+      if (e.target === this.overlay) {
+        this.close(false);
+      }
+    });
+
+    // Fechar modal com ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.isOpen) {
+        this.close(false);
+      }
+    });
+  }
+
+  show(options = {}) {
+    return new Promise((resolve) => {
+      this.currentResolve = resolve;
+
+      const {
+        title = 'Confirmação',
+        message = '',
+        type = 'info', // success, error, warning, info, question
+        buttons = [{ text: 'OK', type: 'primary', value: true }],
+        closable = true
+      } = options;
+
+      // Configurar conteúdo
+      this.setIcon(type);
+      this.setTitle(title);
+      this.setMessage(message);
+      this.setButtons(buttons);
+
+      // Mostrar modal
+      this.overlay.classList.add('show');
+      this.isOpen = true;
+
+      // Focar no primeiro botão
+      setTimeout(() => {
+        const firstButton = this.container.querySelector('.modal-btn');
+        if (firstButton) {
+          firstButton.focus();
+        }
+      }, 100);
+    });
+  }
+
+  setIcon(type) {
+    const iconEl = document.getElementById('modalIcon');
+    const icons = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+      info: 'ℹ️',
+      question: '❓'
+    };
+
+    iconEl.textContent = icons[type] || icons.info;
+    iconEl.className = `modal-icon ${type}`;
+  }
+
+  setTitle(title) {
+    document.getElementById('modalTitle').textContent = title;
+  }
+
+  setMessage(message) {
+    const messageEl = document.getElementById('modalMessage');
+    if (typeof message === 'string') {
+      messageEl.textContent = message;
+    } else {
+      messageEl.innerHTML = message;
+    }
+  }
+
+  setButtons(buttons) {
+    const footer = document.getElementById('modalFooter');
+    footer.innerHTML = '';
+
+    buttons.forEach((button, index) => {
+      const btn = document.createElement('button');
+      btn.className = `modal-btn ${button.type || 'secondary'}`;
+      btn.textContent = button.text;
+      btn.onclick = () => this.close(button.value !== undefined ? button.value : button.text);
+
+      // Primeiro botão recebe foco
+      if (index === 0) {
+        btn.setAttribute('data-primary', 'true');
+      }
+
+      footer.appendChild(btn);
+    });
+  }
+
+  close(result = false) {
+    if (!this.isOpen) return;
+
+    this.overlay.classList.remove('show');
+    this.isOpen = false;
+
+    if (this.currentResolve) {
+      this.currentResolve(result);
+      this.currentResolve = null;
+    }
+  }
+
+  // Métodos de conveniência
+  alert(message, title = 'Aviso', type = 'info') {
+    return this.show({
+      title,
+      message,
+      type,
+      buttons: [{ text: 'OK', type: 'primary', value: true }]
+    });
+  }
+
+  confirm(message, title = 'Confirmação', type = 'question') {
+    return this.show({
+      title,
+      message,
+      type,
+      buttons: [
+        { text: 'Cancelar', type: 'secondary', value: false },
+        { text: 'OK', type: 'primary', value: true }
+      ]
+    });
+  }
+
+  success(message, title = 'Sucesso') {
+    return this.show({
+      title,
+      message,
+      type: 'success',
+      buttons: [{ text: 'OK', type: 'success', value: true }]
+    });
+  }
+
+  error(message, title = 'Erro') {
+    return this.show({
+      title,
+      message,
+      type: 'error',
+      buttons: [{ text: 'OK', type: 'danger', value: true }]
+    });
+  }
+
+  warning(message, title = 'Atenção') {
+    return this.show({
+      title,
+      message,
+      type: 'warning',
+      buttons: [{ text: 'OK', type: 'primary', value: true }]
+    });
+  }
+}
+
+// Inicializar sistema de modal
+let modalSystem = null;
+
+// Inicializar quando DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+  modalSystem = new ModalSystem();
+  console.log('✅ Sistema de Modal inicializado');
+});
+
+// Funções globais para substituir alert/confirm nativos
+window.showAlert = async (message, title, type) => {
+  if (!modalSystem) {
+    console.warn('⚠️ Modal system não inicializado, usando alert nativo');
+    alert(message);
+    return true;
+  }
+  return await modalSystem.alert(message, title, type);
+};
+
+window.showConfirm = async (message, title, type) => {
+  if (!modalSystem) {
+    console.warn('⚠️ Modal system não inicializado, usando confirm nativo');
+    return confirm(message);
+  }
+  return await modalSystem.confirm(message, title, type);
+};
+
+window.showSuccess = async (message, title) => {
+  if (!modalSystem) {
+    console.warn('⚠️ Modal system não inicializado, usando alert nativo');
+    alert(message);
+    return true;
+  }
+  return await modalSystem.success(message, title);
+};
+
+window.showError = async (message, title) => {
+  if (!modalSystem) {
+    console.warn('⚠️ Modal system não inicializado, usando alert nativo');
+    alert(message);
+    return true;
+  }
+  return await modalSystem.error(message, title);
+};
+
+window.showWarning = async (message, title) => {
+  if (!modalSystem) {
+    console.warn('⚠️ Modal system não inicializado, usando alert nativo');
+    alert(message);
+    return true;
+  }
+  return await modalSystem.warning(message, title);
+};
+
+// ===== EXEMPLOS DE USO DO SISTEMA DE MODAL =====
+
+// Função para testar os modais (pode ser removida em produção)
+window.testModals = async function() {
+      console.log('🧪 Testando sistema de modais...');
+
+      // Teste de alerta simples
+      await showAlert('Este é um alerta simples!', 'Teste de Alerta');
+
+      // Teste de confirmação
+      const confirmed = await showConfirm('Você confirma esta ação?', 'Teste de Confirmação');
+      console.log('Confirmação:', confirmed);
+
+      // Teste de sucesso
+      await showSuccess('Operação realizada com sucesso!', 'Sucesso');
+
+      // Teste de erro
+      await showError('Ocorreu um erro na operação!', 'Erro');
+
+      // Teste de aviso
+      await showWarning('Esta é uma mensagem de aviso!', 'Atenção');
+
+      console.log('✅ Testes de modal concluídos');
+    };
+
+// Para testar os modais, execute no console: testModals()
