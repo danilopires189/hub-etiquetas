@@ -234,16 +234,23 @@ class DocumentPrintOptimizer {
    */
   generatePageFooter(product = null, selectedTipo = null) {
     console.log('🦶 Gerando rodapé da página...');
+    console.log('🦶 Produto recebido:', product);
+    console.log('🦶 Estoque virtual do produto:', product?.virtualStock);
     
     // Formatar estoque virtual com separador de milhares (ponto)
     let virtualStockFormatted = '';
-    if (product && product.virtualStock) {
+    if (product && product.virtualStock !== null && product.virtualStock !== undefined) {
       const stockValue = parseInt(product.virtualStock);
+      console.log('🦶 Valor do estoque após parseInt:', stockValue);
       if (!isNaN(stockValue)) {
         virtualStockFormatted = stockValue.toLocaleString('pt-BR').replace(/,/g, '.');
+        console.log('🦶 Estoque virtual formatado:', virtualStockFormatted);
       } else {
         virtualStockFormatted = product.virtualStock;
+        console.log('🦶 Usando valor original do estoque:', virtualStockFormatted);
       }
+    } else {
+      console.log('🦶 Nenhum estoque virtual encontrado');
     }
     
     // Determinar marcação das opções SOBRA/FALTA
@@ -1538,7 +1545,7 @@ class DataAggregator {
       addresses: addresses,
       excludedAddresses: excludedAddresses,
       totalQuantity: totalQuantity,
-      virtualStock: originalProduct.virtualStock || null // Incluir estoque virtual se disponível
+      virtualStock: originalProduct.virtualStock !== undefined ? originalProduct.virtualStock : null // Incluir estoque virtual se disponível
     };
   }
 

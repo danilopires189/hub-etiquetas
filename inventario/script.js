@@ -1241,12 +1241,12 @@ function addProductToList(product, addresses) {
     addresses: addresses,
     addedAt: new Date(),
     cd: APP_STATE.selectedCD,
-    virtualStock: virtualStock // Adicionar estoque virtual aos dados do produto
+    virtualStock: virtualStock !== null && virtualStock !== undefined ? virtualStock : null // Adicionar estoque virtual aos dados do produto
   };
 
   APP_STATE.productList.set(product.CODDV, productData);
 
-  console.log(`➕ Produto adicionado: ${product.CODDV} - ${product.DESC}${virtualStock ? ` (Estoque Virtual: ${virtualStock})` : ''}`);
+  console.log(`➕ Produto adicionado: ${product.CODDV} - ${product.DESC}${(virtualStock !== null && virtualStock !== undefined) ? ` (Estoque Virtual: ${virtualStock})` : ''}`);
 
   renderProductList();
   updateUI();
@@ -1271,7 +1271,7 @@ function addProductToList(product, addresses) {
     }
   }, 100);
 
-  const toastMessage = `Produto adicionado: ${product.CODDV}${virtualStock ? ` (Estoque Virtual: ${virtualStock})` : ''}`;
+  const toastMessage = `Produto adicionado: ${product.CODDV}${(virtualStock !== null && virtualStock !== undefined) ? ` (Estoque Virtual: ${virtualStock})` : ''}`;
   toast(toastMessage, 'success');
 
   // Limpar o mapa de estoque virtual após adicionar o produto
@@ -1444,7 +1444,7 @@ function renderProductList() {
   productList.innerHTML = products.map((product, index) => {
     const addressCount = product.addresses ? product.addresses.length : 0;
     const staggerClass = `animate-slide-up-field stagger-${Math.min(index + 1, 8)}`;
-    const virtualStockDisplay = product.virtualStock ? `<span class="virtual-stock-badge" title="Estoque Virtual">📦 ${product.virtualStock}</span>` : '';
+    const virtualStockDisplay = (product.virtualStock !== null && product.virtualStock !== undefined) ? `<span class="virtual-stock-badge" title="Estoque Virtual">📦 ${product.virtualStock}</span>` : '';
 
     return `
     <div class="product-item hover-card ${staggerClass}" data-coddv="${product.CODDV}">
