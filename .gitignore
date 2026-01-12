@@ -1,0 +1,30 @@
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Arquivos de desenvolvimento
+.vscode/
+.kiro/
+node_modules/
+
+# Arquivos de teste
+*test*.html
+*test*.js
+*.test.js
+
+# Arquivos de documentação de desenvolvimento
+CHANGELOG*.md
+*README*.txt
+*README*.md
+*GUIDE*.md
+
+# Arquivos de backup
+*.bak
+*~

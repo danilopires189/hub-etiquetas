@@ -1,0 +1,437 @@
+/* User Validation System - Shared Styles */
+/* Consistent styling across all modules */
+
+/* User Greeting Component - Positioned above header */
+.user-greeting-top {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: default;
+    min-height: 40px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Greeting text container */
+.greeting-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Animated wave emoji */
+.greeting-wave {
+    display: inline-block;
+    animation: wave 2s ease-in-out infinite;
+    transform-origin: 70% 70%;
+    font-size: 16px;
+}
+
+@keyframes wave {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+    20%, 40%, 60%, 80% { transform: rotate(10deg); }
+}
+
+/* Hover effects for interactive greeting */
+.user-greeting-top:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.user-greeting-top[data-truncated="true"]:hover {
+    cursor: help;
+}
+
+/* Tooltip for truncated names */
+.tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    margin-bottom: 8px;
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+}
+
+.user-greeting-top:hover .tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+}
+
+/* Focus styles for accessibility */
+.user-greeting-top:focus {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .user-greeting-top {
+        padding: 6px 12px;
+        font-size: 13px;
+        margin-bottom: 8px;
+        min-height: 36px;
+    }
+    
+    .greeting-wave {
+        font-size: 14px;
+    }
+    
+    .tooltip {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+    
+    /* Mobile error message adjustments */
+    .validation-error-message {
+        font-size: 11px;
+        padding: 3px 6px;
+        margin-top: 3px;
+    }
+    
+    .validation-loading::after {
+        width: 14px;
+        height: 14px;
+        right: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-greeting-top {
+        padding: 4px 8px;
+        font-size: 12px;
+        margin-bottom: 6px;
+        min-height: 32px;
+    }
+    
+    .greeting-text {
+        gap: 6px;
+    }
+    
+    .greeting-wave {
+        font-size: 13px;
+    }
+    
+    /* Small screen error handling */
+    .validation-error-message {
+        font-size: 10px;
+        padding: 2px 4px;
+        margin-top: 2px;
+        border-radius: 3px;
+    }
+    
+    .validation-error {
+        border-width: 1px !important;
+    }
+    
+    .validation-loading::after {
+        width: 12px;
+        height: 12px;
+        right: 4px;
+        border-width: 1px;
+    }
+}
+
+/* Error state styling for matricula fields */
+.matricula-error {
+    border-color: #f44336 !important;
+    box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2) !important;
+}
+
+/* Enhanced error handling and visual feedback styles */
+.validation-error {
+    border-color: #f44336 !important;
+    border-width: 2px !important;
+    border-style: solid !important;
+    box-shadow: 0 0 5px rgba(244, 67, 54, 0.3) !important;
+    animation: errorPulse 0.5s ease-in-out;
+}
+
+@keyframes errorPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/* Error message styling */
+.validation-error-message {
+    color: #f44336;
+    font-size: 12px;
+    margin-top: 4px;
+    padding: 4px 8px;
+    background: #ffebee;
+    border: 1px solid #ffcdd2;
+    border-radius: 4px;
+    position: relative;
+    z-index: 1000;
+    display: block;
+    animation: errorSlideIn 0.3s ease-out;
+}
+
+@keyframes errorSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Error message with icon */
+.validation-error-message::before {
+    content: '⚠️';
+    margin-right: 6px;
+    font-size: 11px;
+}
+
+/* Error state for different input types */
+input.validation-error,
+select.validation-error,
+textarea.validation-error {
+    background-color: #fff5f5;
+}
+
+/* Focus state for error fields */
+.validation-error:focus {
+    outline: 2px solid #f44336;
+    outline-offset: 2px;
+    box-shadow: 0 0 8px rgba(244, 67, 54, 0.4) !important;
+}
+
+/* Error recovery animation */
+.validation-error.recovering {
+    animation: errorRecovery 0.5s ease-out;
+}
+
+@keyframes errorRecovery {
+    0% { 
+        border-color: #f44336;
+        background-color: #fff5f5;
+    }
+    100% { 
+        border-color: #4CAF50;
+        background-color: #f1f8e9;
+    }
+}
+
+/* Success state after error recovery */
+.validation-success {
+    border-color: #4CAF50 !important;
+    border-width: 2px !important;
+    border-style: solid !important;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3) !important;
+    background-color: #f1f8e9;
+    animation: successPulse 0.5s ease-in-out;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.01); }
+    100% { transform: scale(1); }
+}
+
+/* Loading state during validation */
+.validation-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.validation-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ccc;
+    border-top: 2px solid #2196F3;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Loading state for validation */
+.validating {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Success state for valid matricula */
+.matricula-valid {
+    border-color: #4CAF50 !important;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2) !important;
+}
+
+/* Animation for greeting entrance */
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-greeting-top.entering {
+    animation: slideInFromTop 0.5s ease-out;
+}
+
+/* Animation for greeting exit */
+@keyframes slideOutToTop {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.user-greeting-top.exiting {
+    animation: slideOutToTop 0.3s ease-in;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .user-greeting-top {
+        background: #000;
+        color: #fff;
+        border: 2px solid #fff;
+    }
+    
+    .tooltip {
+        background: #fff;
+        color: #000;
+        border: 1px solid #000;
+    }
+    
+    .tooltip::after {
+        border-top-color: #fff;
+    }
+    
+    /* High contrast error styles */
+    .validation-error {
+        border-color: #ff0000 !important;
+        background-color: #fff !important;
+        box-shadow: 0 0 0 3px #ff0000 !important;
+    }
+    
+    .validation-error-message {
+        background: #fff;
+        color: #ff0000;
+        border: 2px solid #ff0000;
+        font-weight: bold;
+    }
+    
+    .validation-success {
+        border-color: #00ff00 !important;
+        background-color: #fff !important;
+        box-shadow: 0 0 0 3px #00ff00 !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .greeting-wave {
+        animation: none;
+    }
+    
+    .user-greeting-top,
+    .tooltip {
+        transition: none;
+    }
+    
+    .user-greeting-top.entering,
+    .user-greeting-top.exiting {
+        animation: none;
+    }
+    
+    /* Disable error animations for reduced motion */
+    .validation-error {
+        animation: none;
+    }
+    
+    .validation-error-message {
+        animation: none;
+    }
+    
+    .validation-error.recovering {
+        animation: none;
+    }
+    
+    .validation-success {
+        animation: none;
+    }
+    
+    .validation-loading::after {
+        animation: none;
+        content: '⏳';
+        border: none;
+        width: auto;
+        height: auto;
+    }
+}
+
+/* Print styles - hide greeting in print */
+@media print {
+    .user-greeting-top {
+        display: none !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .user-greeting-top {
+        background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+        box-shadow: 0 2px 8px rgba(46, 125, 50, 0.4);
+    }
+    
+    .user-greeting-top:hover {
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.5);
+    }
+}
