@@ -1,15 +1,15 @@
--- CORREÇÃO FINAL: REMOVENDO CASTS DE UUID E AJUSTANDO FORMATOS DE DATA
--- Este script resolve o erro "invalid input syntax for type uuid" 
--- e mantém a compatibilidade com IDs de 6 caracteres (VARCHAR).
+-- CORREÇÃO FINAL: VALIDADE OBRIGATÓRIA E REMOÇÃO DE CASTS UUID
+-- Este script torna a validade obrigatória no banco de dados
+-- e mantém a compatibilidade com IDs alfanuméricos de 6 caracteres.
 
 BEGIN;
 
--- 1. Recriar função alocar_produto_fralda
+-- 1. Recriar função alocar_produto_fralda com validação de obrigatoriedade
 CREATE OR REPLACE FUNCTION alocar_produto_fralda(
     p_endereco VARCHAR,
     p_coddv VARCHAR,
     p_descricao_produto TEXT,
-    p_validade VARCHAR DEFAULT NULL,
+    p_validade VARCHAR DEFAULT NULL, -- Mantemos default para evitar erro de assinatura, mas validamos interno
     p_usuario VARCHAR DEFAULT NULL,
     p_matricula VARCHAR DEFAULT NULL,
     p_cd INTEGER DEFAULT 2
@@ -20,7 +20,12 @@ DECLARE
     v_count INTEGER;
     v_data_hora TEXT;
 BEGIN
-    -- Capturar data/hora no formato BR (Consistência com o Patch de IDs)
+    -- VALIDAR OBRIGATORIEDADE DA VALIDADE
+    IF p_validade IS NULL OR p_validade = '' THEN
+        RAISE EXCEPTION 'A validade do produto é obrigatória (formato MMAA)';
+    END IF;
+
+    -- Capturar data/hora no formato BR
     v_data_hora := TO_CHAR(NOW() AT TIME ZONE 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI:SS');
 
     -- Buscar ID do endereço
@@ -41,7 +46,7 @@ BEGIN
         RAISE EXCEPTION 'Produto % já está alocado neste endereço', p_coddv;
     END IF;
     
-    -- Inserir alocação (REMOVIDO ::UUID para suportar IDs alfanuméricos)
+    -- Inserir alocação
     INSERT INTO alocacoes_fraldas (
         endereco_id, endereco, coddv, descricao_produto, 
         validade, usuario, matricula, cd, data_alocacao, created_at, updated_at
@@ -79,7 +84,7 @@ CREATE OR REPLACE FUNCTION transferir_produto_fralda(
     p_cd INTEGER DEFAULT 2
 ) RETURNS VARCHAR AS $$
 DECLARE
-    v_endereco_destino_id VARCHAR;
+    v_endereco_id_destino VARCHAR;
     v_alocacao_id VARCHAR;
     v_descricao TEXT;
     v_validade VARCHAR;
@@ -89,11 +94,11 @@ BEGIN
     v_data_hora := TO_CHAR(NOW() AT TIME ZONE 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI:SS');
 
     -- Buscar ID do endereço destino
-    SELECT id INTO v_endereco_destino_id
+    SELECT id INTO v_endereco_id_destino
     FROM enderecos_fraldas
     WHERE endereco = p_endereco_destino AND cd = p_cd AND ativo = TRUE;
     
-    IF v_endereco_destino_id IS NULL THEN
+    IF v_endereco_id_destino IS NULL THEN
         RAISE EXCEPTION 'Endereço destino não encontrado: %', p_endereco_destino;
     END IF;
     
@@ -105,19 +110,24 @@ BEGIN
     IF v_alocacao_id IS NULL THEN
         RAISE EXCEPTION 'Produto % não está alocado no endereço origem %', p_coddv, p_endereco_origem;
     END IF;
+
+    -- Validar validade na transferência (caso o dado original esteja nulo por ser antigo)
+    IF v_validade IS NULL OR v_validade = '' THEN
+        RAISE EXCEPTION 'Não é possível transferir: este produto não possui validada cadastrada. Desaloque e aloque novamente informando a validade.';
+    END IF;
     
     -- Desativar alocação antiga
     UPDATE alocacoes_fraldas
     SET ativo = FALSE, updated_at = v_data_hora
     WHERE id = v_alocacao_id;
     
-    -- Criar nova alocação no destino (REMOVIDO ::UUID)
+    -- Criar nova alocação no destino
     INSERT INTO alocacoes_fraldas (
         endereco_id, endereco, coddv, descricao_produto, 
         validade, usuario, matricula, cd, data_alocacao, created_at, updated_at
     )
     VALUES (
-        v_endereco_destino_id, p_endereco_destino, p_coddv, v_descricao, 
+        v_endereco_id_destino, p_endereco_destino, p_coddv, v_descricao, 
         v_validade, p_usuario, p_matricula, p_cd, v_data_hora, v_data_hora, v_data_hora
     )
     RETURNING id INTO v_nova_alocacao_id;
