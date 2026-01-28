@@ -1299,6 +1299,42 @@ function closeMobileAddressModal() {
   };
 }
 
+// Update mobile action buttons visibility
+function updateMobileActionButtons(produto) {
+  if (!isMobileDevice()) return;
+  
+  const btnAlocar = document.getElementById('btnAlocarMobile');
+  const btnAdicionar = document.getElementById('btnAdicionarMaisMobile');
+  const btnTransferir = document.getElementById('btnTransferirMobile');
+  const btnDesalocar = document.getElementById('btnDesalocarMobile');
+  const mobileActions = document.getElementById('mobileActions');
+  
+  if (!btnAlocar || !btnAdicionar || !btnTransferir || !btnDesalocar || !mobileActions) return;
+  
+  if (!produto) {
+    mobileActions.classList.add('hide');
+    return;
+  }
+  
+  const status = obterStatusProduto(produto.CODDV);
+  
+  mobileActions.classList.remove('hide');
+  
+  if (status.alocado) {
+    // Product is allocated - show secondary actions
+    btnAlocar.classList.add('hide');
+    btnAdicionar.classList.remove('hide');
+    btnTransferir.classList.remove('hide');
+    btnDesalocar.classList.remove('hide');
+  } else {
+    // Product is available - show allocate action
+    btnAlocar.classList.remove('hide');
+    btnAdicionar.classList.add('hide');
+    btnTransferir.classList.add('hide');
+    btnDesalocar.classList.add('hide');
+  }
+}
+
 // Validate mobile address input
 async function validateMobileAddress() {
   const addressInput = $('#mobileAddressInput');
@@ -4397,6 +4433,257 @@ window.toggleDropdownAlocar = toggleDropdownAlocar;
 window.alocarEmListaEnderecos = alocarEmListaEnderecos;
 window.alocarBuscandoEnderecos = alocarBuscandoEnderecos;
 window.fecharDropdown = fecharDropdown;
+
+/* ===== Mobile Transfer Functions ===== */
+
+// Open mobile transfer modal for products in multiple addresses
+function openMobileTransferModal() {
+  console.log('📱 Abrindo modal de transferência mobile');
+  
+  if (!produtoAtual) {
+    showMobileToast('Nenhum produto selecionado.', 'warning');
+    return;
+  }
+  
+  const status = obterStatusProduto(produtoAtual.CODDV);
+  
+  if (!status.alocado) {
+    showMobileToast('Produto não está alocado.', 'warning');
+    return;
+  }
+  
+  // Update product info in modal
+  const descElement = document.getElementById('mobileTransferProductDesc');
+  const coddvElement = document.getElementById('mobileTransferProductCoddv');
+  
+  if (descElement) descElement.textContent = produtoAtual.DESC;
+  if (coddvElement) coddvElement.textContent = produtoAtual.CODDV;
+  
+  // Populate address list
+  populateMobileTransferAddressList(status.enderecos);
+  
+  // Show modal
+  const modal = document.getElementById('mobileTransferModal');
+  if (modal) {
+    modal.classList.remove('hide');
+  }
+}
+window.openMobileTransferModal = openMobileTransferModal;
+
+// Close mobile transfer modal
+function closeMobileTransferModal() {
+  const modal = document.getElementById('mobileTransferModal');
+  if (modal) {
+    modal.classList.add('hide');
+  }
+}
+window.closeMobileTransferModal = closeMobileTransferModal;
+
+// Populate transfer address list
+function populateMobileTransferAddressList(enderecos) {
+  const container = document.getElementById('mobileTransferAddressList');
+  if (!container) return;
+  
+  // Sort addresses
+  const enderecosOrdenados = [...enderecos].sort();
+  
+  container.innerHTML = enderecosOrdenados.map(endereco => {
+    const info = formatarInfoEndereco(endereco);
+    return `
+      <div class="mobile-address-item" onclick="selectMobileTransferAddress('${endereco}')" style="cursor: pointer;">
+        <div class="address-text" style="font-weight: 800;">${endereco}</div>
+        <div class="transfer-icon" style="color: var(--mobile-primary);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14"/>
+            <path d="M12 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Select address for transfer
+async function selectMobileTransferAddress(endereco) {
+  console.log('📱 Endereço selecionado para transferência:', endereco);
+  
+  // Close transfer modal
+  closeMobileTransferModal();
+  
+  // Redirect to transfer flow
+  const params = new URLSearchParams({
+    produto: produtoAtual.CODDV,
+    desc: produtoAtual.DESC,
+    enderecoAtual: endereco,
+    acao: 'transferir'
+  });
+  
+  window.location.href = `enderecos.html?${params.toString()}`;
+}
+window.selectMobileTransferAddress = selectMobileTransferAddress;
+
+// Execute transfer on mobile - wrapper for existing function
+function executarTransferenciaMobile() {
+  console.log('📱 Executando transferência mobile');
+  
+  if (!produtoAtual) {
+    showMobileToast('Nenhum produto selecionado.', 'warning');
+    return;
+  }
+  
+  const status = obterStatusProduto(produtoAtual.CODDV);
+  
+  if (!status.alocado) {
+    showMobileToast('Produto não está alocado.', 'warning');
+    return;
+  }
+  
+  // If product is in multiple addresses, show selection modal
+  if (status.multiplos) {
+    openMobileTransferModal();
+  } else {
+    // Single address, go directly to transfer
+    const params = new URLSearchParams({
+      produto: produtoAtual.CODDV,
+      desc: produtoAtual.DESC,
+      enderecoAtual: status.endereco,
+      acao: 'transferir'
+    });
+    
+    window.location.href = `enderecos.html?${params.toString()}`;
+  }
+}
+window.executarTransferenciaMobile = executarTransferenciaMobile;
+
+// Execute deallocation on mobile
+async function executarDesalocacaoMobile() {
+  console.log('📱 Executando desalocação mobile');
+  
+  if (!produtoAtual) {
+    showMobileToast('Nenhum produto selecionado.', 'warning');
+    return;
+  }
+  
+  const status = obterStatusProduto(produtoAtual.CODDV);
+  
+  if (!status.alocado) {
+    showMobileToast('Produto não está alocado.', 'warning');
+    return;
+  }
+  
+  // If product is in multiple addresses, show selection modal
+  if (status.multiplos) {
+    openMobileDeallocationModal(status.enderecos);
+  } else {
+    // Single address, confirm and deallocate
+    const confirmado = await customConfirm(
+      `Deseja realmente desalocar o produto?\\n\\nProduto: ${produtoAtual.DESC}\\nEndereço: ${status.endereco}`,
+      'Confirmar Desalocação'
+    );
+    
+    if (confirmado) {
+      await executarDesalocacao(status.endereco);
+    }
+  }
+}
+window.executarDesalocacaoMobile = executarDesalocacaoMobile;
+
+// Open mobile deallocation modal
+function openMobileDeallocationModal(enderecos) {
+  console.log('📱 Abrindo modal de desalocação mobile');
+  
+  // Update product info in modal
+  const descElement = document.getElementById('mobileDeallocationProductDesc');
+  const coddvElement = document.getElementById('mobileDeallocationProductCoddv');
+  
+  if (descElement) descElement.textContent = produtoAtual.DESC;
+  if (coddvElement) coddvElement.textContent = produtoAtual.CODDV;
+  
+  // Populate address list
+  populateMobileDeallocationAddressList(enderecos);
+  
+  // Show modal
+  const modal = document.getElementById('mobileDeallocationModal');
+  if (modal) {
+    modal.classList.remove('hide');
+  }
+}
+window.openMobileDeallocationModal = openMobileDeallocationModal;
+
+// Close mobile deallocation modal
+function closeMobileDeallocationModal() {
+  const modal = document.getElementById('mobileDeallocationModal');
+  if (modal) {
+    modal.classList.add('hide');
+  }
+}
+window.closeMobileDeallocationModal = closeMobileDeallocationModal;
+
+// Populate deallocation address list
+function populateMobileDeallocationAddressList(enderecos) {
+  const container = document.getElementById('mobileDeallocationAddressList');
+  if (!container) return;
+  
+  // Sort addresses
+  const enderecosOrdenados = [...enderecos].sort();
+  
+  container.innerHTML = enderecosOrdenados.map(endereco => {
+    return `
+      <div class="mobile-address-item" onclick="selectMobileDeallocationAddress('${endereco}')" style="cursor: pointer;">
+        <div class="address-text" style="font-weight: 800;">${endereco}</div>
+        <div class="remove-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18"/>
+            <path d="M6 6l12 12"/>
+          </svg>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Select address for deallocation
+async function selectMobileDeallocationAddress(endereco) {
+  console.log('📱 Endereço selecionado para desalocação:', endereco);
+  
+  // Close modal
+  closeMobileDeallocationModal();
+  
+  // Execute deallocation
+  await executarDesalocacao(endereco);
+}
+window.selectMobileDeallocationAddress = selectMobileDeallocationAddress;
+
+// Confirm deallocation from all addresses
+async function confirmDeallocationFromAll() {
+  console.log('📱 Desalocando de todos os endereços');
+  
+  if (!produtoAtual) return;
+  
+  const status = obterStatusProduto(produtoAtual.CODDV);
+  
+  const confirmado = await customConfirm(
+    `Deseja realmente desalocar o produto de TODOS os ${status.enderecos.length} endereços?\\n\\nProduto: ${produtoAtual.DESC}`,
+    'Desalocar de Todos'
+  );
+  
+  if (!confirmado) return;
+  
+  // Close modal
+  closeMobileDeallocationModal();
+  
+  // Deallocate from all addresses
+  for (const endereco of status.enderecos) {
+    await executarDesalocacao(endereco, false);
+  }
+  
+  // Show success message
+  showMobileToast(`Produto desalocado de ${status.enderecos.length} endereços.`, 'success');
+  
+  // Refresh display
+  exibirProduto(produtoAtual);
+}
+window.confirmDeallocationFromAll = confirmDeallocationFromAll;
 
 /* ===== Boot ===== */
 if (document.readyState === 'loading') {
