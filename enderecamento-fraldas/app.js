@@ -4510,15 +4510,8 @@ async function selectMobileTransferAddress(endereco) {
   // Close transfer modal
   closeMobileTransferModal();
   
-  // Redirect to transfer flow
-  const params = new URLSearchParams({
-    produto: produtoAtual.CODDV,
-    desc: produtoAtual.DESC,
-    enderecoAtual: endereco,
-    acao: 'transferir'
-  });
-  
-  window.location.href = `enderecos.html?${params.toString()}`;
+  // Open address modal for destination (same page flow)
+  openMobileAddressModal('transfer', endereco);
 }
 window.selectMobileTransferAddress = selectMobileTransferAddress;
 
@@ -4542,15 +4535,8 @@ function executarTransferenciaMobile() {
   if (status.multiplos) {
     openMobileTransferModal();
   } else {
-    // Single address, go directly to transfer
-    const params = new URLSearchParams({
-      produto: produtoAtual.CODDV,
-      desc: produtoAtual.DESC,
-      enderecoAtual: status.endereco,
-      acao: 'transferir'
-    });
-    
-    window.location.href = `enderecos.html?${params.toString()}`;
+    // Single address, open destination modal directly
+    openMobileAddressModal('transfer', status.endereco);
   }
 }
 window.executarTransferenciaMobile = executarTransferenciaMobile;
