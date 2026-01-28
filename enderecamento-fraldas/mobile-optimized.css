@@ -844,61 +844,11 @@
         color: #0c4a6e;
     }
 
-    /* ========== BOTÕES DE AÇÃO COMPACTOS ========== */
-    /* Botões desktop que aparecem no mobile - diminuir texto */
-    .produto-acoes {
-        display: flex !important;
-        gap: 4px !important;
-        flex-wrap: nowrap !important;
-        justify-content: center;
-        padding: 0.5rem;
-    }
-
+    /* ========== REMOVER BOTÕES DUPLICADOS NO MOBILE ========== */
+    /* Esconder os botões desktop (.btn-acao) no mobile */
+    .produto-acoes,
     .btn-acao {
-        min-width: 28px !important;
-        width: auto !important;
-        height: 32px !important;
-        padding: 0 8px !important;
-        font-size: 0.65rem !important;
-        font-weight: 700 !important;
-        border-radius: 8px !important;
-        white-space: nowrap;
-        text-transform: uppercase;
-        letter-spacing: 0;
-    }
-
-    /* Botões com texto - versão compacta */
-    .btn-acao.btn-alocar,
-    .btn-acao.btn-transferir,
-    .btn-acao.btn-adicionar-mais,
-    .btn-acao.btn-desalocar {
-        min-width: 60px !important;
-        max-width: 85px !important;
-        padding: 0 6px !important;
-        font-size: 0.6rem !important;
-        gap: 2px;
-    }
-
-    /* Esconder ícones nos botões para ganhar espaço */
-    .btn-acao svg {
         display: none !important;
-    }
-
-    /* Adicionar texto visível aos botões */
-    .btn-acao.btn-alocar::after {
-        content: 'ALOCAR';
-    }
-
-    .btn-acao.btn-transferir::after {
-        content: 'TRANSF';
-    }
-
-    .btn-acao.btn-adicionar-mais::after {
-        content: 'ADD+';
-    }
-
-    .btn-acao.btn-desalocar::after {
-        content: 'DESAL';
     }
 
     /* Container de ações do produto */
