@@ -507,21 +507,9 @@ class SistemaEnderecamentoSupabase {
             throw new Error('Endereço de destino não cadastrado');
         }
 
-        // Validar se origem e destino são diferentes
-        if (enderecoOrigemUpper === enderecoDestinoUpper) {
-            throw new Error('Endereço de origem e destino são iguais');
-        }
-
         const produtosDestino = this.obterProdutosNoEndereco(enderecoDestinoUpper);
-        
-        // Verificar capacidade
         if (produtosDestino.length >= 2) {
             throw new Error('Endereço de destino já possui 2 produtos');
-        }
-
-        // Verificar se produto já existe no destino
-        if (produtosDestino.some(p => p.coddv === produtoCoddv)) {
-            throw new Error(`O produto ${produtoCoddv} já está alocado no endereço de destino.`);
         }
 
         if (this.isConnected && !this.modoOffline) {
@@ -547,12 +535,6 @@ class SistemaEnderecamentoSupabase {
 
             } catch (error) {
                 console.error('❌ Erro na transferência:', error);
-                
-                // Tratamento amigável para erro de duplicidade
-                if (error.code === '23505' || (error.message && error.message.includes('unique_produto_endereco'))) {
-                    throw new Error(`Este produto já está cadastrado no endereço de destino.`);
-                }
-                
                 throw error;
             }
         } else {
