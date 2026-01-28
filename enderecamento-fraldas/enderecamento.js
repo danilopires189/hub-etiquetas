@@ -7,9 +7,9 @@ class SistemaEnderecamento {
         this.historicoEnderecos = JSON.parse(localStorage.getItem('historico_enderecos') || '[]');
     }
 
-    // Validar formato do endereço: PF[01-15].001.[001-019].A0[T,1,2,4,5,6]
+    // Validar formato do endereço: PF[01-15].001.[001-019].A0[T,1,2,3,4,5,6]
     validarFormatoEndereco(endereco) {
-        const regex = /^PF(0[1-9]|1[0-5])\.001\.(0(0[1-9]|1[0-9])|019)\.A0[T12456]$/;
+        const regex = /^PF(0[1-9]|1[0-5])\.001\.(0(0[1-9]|1[0-9])|019)\.A0[T123456]$/;
         return regex.test(endereco.toUpperCase());
     }
 
@@ -27,10 +27,10 @@ class SistemaEnderecamento {
             throw new Error('Coluna deve estar entre 001 e 019');
         }
         
-        // Validar nível (T, 1, 2, 4, 5, 6)
-        const niveisValidos = ['T', '1', '2', '4', '5', '6'];
+        // Validar nível (T, 1, 2, 3, 4, 5, 6)
+        const niveisValidos = ['T', '1', '2', '3', '4', '5', '6'];
         if (!niveisValidos.includes(nivel.toString())) {
-            throw new Error('Nível deve ser T, 1, 2, 4, 5 ou 6');
+            throw new Error('Nível deve ser T, 1, 2, 3, 4, 5 ou 6');
         }
         
         // Formatar endereço
@@ -47,7 +47,7 @@ class SistemaEnderecamento {
         const enderecoUpper = endereco.toUpperCase();
         
         if (!this.validarFormatoEndereco(enderecoUpper)) {
-            throw new Error('Formato de endereço inválido. Use: PF[01-15].001.[001-019].A0[T,1,2,4,5,6]');
+            throw new Error('Formato de endereço inválido. Use: PF[01-15].001.[001-019].A0[T,1,2,3,4,5,6]');
         }
         
         if (this.enderecosCadastrados[enderecoUpper]) {

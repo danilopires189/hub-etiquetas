@@ -271,7 +271,7 @@ class SistemaEnderecamentoSupabase {
      * Validar formato do endereço
      */
     validarFormatoEndereco(endereco) {
-        const regex = /^PF(0[1-9]|1[0-5])\.001\.(0(0[1-9]|1[0-9])|019)\.A0[T12456]$/;
+        const regex = /^PF(0[1-9]|1[0-5])\.001\.(0(0[1-9]|1[0-9])|019)\.A0[T123456]$/;
         return regex.test(endereco.toUpperCase());
     }
 
@@ -289,9 +289,9 @@ class SistemaEnderecamentoSupabase {
             throw new Error('Coluna deve estar entre 001 e 019');
         }
 
-        const niveisValidos = ['T', '1', '2', '4', '5', '6'];
+        const niveisValidos = ['T', '1', '2', '3', '4', '5', '6'];
         if (!niveisValidos.includes(nivel.toString())) {
-            throw new Error('Nível deve ser T, 1, 2, 4, 5 ou 6');
+            throw new Error('Nível deve ser T, 1, 2, 3, 4, 5 ou 6');
         }
 
         const zonaFormatada = `PF${zona.toString().padStart(2, '0')}`;
