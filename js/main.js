@@ -1,17 +1,11 @@
 /**
  * Main entry point for Hub de Etiquetas
- * This file orchestrates the loading of all modules with optimizations
+ * Orchestrates loading of all modules with performance optimizations
  * Works with ES modules for Vercel deployment
+ * @version 2.0.0
  */
 
-console.log('🚀 Hub de Etiquetas - Carregando módulos otimizados...');
-
-// MODO EMERGÊNCIA - Cached Egress Crítico!
-import '../shared/emergency-optimization.js';
-import '../shared/supabase-plan-checker.js';
-import '../shared/console-commands.js';
-
-// Import core optimizations first
+// Core optimizations (loaded first for performance)
 import '../shared/cache-manager.js';
 import '../shared/lazy-loader.js';
 import '../shared/database-optimizer.js';
@@ -20,57 +14,41 @@ import '../shared/supabase-batch-processor.js';
 import '../shared/supabase-debouncer.js';
 import '../shared/contador-migration.js';
 
-// Import contador global OTIMIZADO (side-effect - creates window.contadorGlobal)
+// Global counter (creates window.contadorGlobal)
 import './contador-global-otimizado.js';
 
-// Import utils (side-effect - adds functions to window)
+// Utilities (adds functions to window)
 import '../shared/utils.js';
 
-// Import landing page logic (side-effect - self-initializing)
+// Landing page logic (self-initializing)
 import './landing.js';
 
-// Import Supabase integration (non-blocking, async) with optimization
-// Using dynamic import to prevent blocking if it fails
+// Supabase integration (non-blocking, async)
 setTimeout(() => {
     import('../supabase/init.js')
         .then(() => {
-            console.log('✅ Supabase integration loaded');
-
-            // Integrar com otimizadores
+            // Integrate with optimizers
             if (window.syncOptimizer && window.supabaseManager) {
-                console.log('🔗 Integrando Supabase com Sync Optimizer');
-            }
-
-            if (window.supabaseBatchProcessor) {
-                console.log('📦 Batch Processor integrado');
-            }
-
-            if (window.supabaseDebouncer) {
-                console.log('⏱️ Debouncer integrado');
+                window.syncOptimizer.setSupabaseManager(window.supabaseManager);
             }
         })
-        .catch(err => console.warn('⚠️ Supabase init falhou (não crítico):', err.message));
+        .catch(() => {
+            // Silent fail - Supabase is not critical for basic functionality
+        });
 }, 100);
 
-// Configurar lazy loading para elementos da página
+// Page initialization
 document.addEventListener('DOMContentLoaded', () => {
-    // EMERGÊNCIA: Logs no console apenas (sem alerta visual)
-    if (window.emergencyOptimization) {
-        const stats = window.emergencyOptimization.getEmergencyStats();
-        console.log('🚨 MODO EMERGÊNCIA ATIVO:', stats);
-        console.log(`📊 Taxa de bloqueio: ${stats.blockRate} - Cached egress sendo reduzido`);
-    }
-
-    // Observar cards de aplicações para lazy loading
+    // Configure lazy loading for app cards
     const appCards = document.querySelectorAll('.app-card');
     appCards.forEach(card => {
         const appName = card.dataset.app;
-        if (appName) {
+        if (appName && window.lazyLoader) {
             window.lazyLoader.observe(card, `${appName}-module`);
         }
     });
 
-    // Configurar limpeza automática de cache a cada 15 minutos (mais frequente)
+    // Automatic cache cleanup every 15 minutes
     setInterval(() => {
         if (window.cacheManager) {
             window.cacheManager.clearExpiredCache();
@@ -79,18 +57,4 @@ document.addEventListener('DOMContentLoaded', () => {
             window.databaseOptimizer.clearUnusedData();
         }
     }, 15 * 60 * 1000);
-
-    // Mostrar estatísticas de otimização no console (sempre ativo em emergência)
-    setTimeout(() => {
-        console.log('📊 Estatísticas de Otimização (EMERGÊNCIA):');
-        console.log('Cache:', window.cacheManager?.getStats());
-        console.log('Database:', window.databaseOptimizer?.getStats());
-        console.log('Sync:', window.syncOptimizer?.getStats());
-        console.log('Lazy Loading:', window.lazyLoader?.getStats());
-        console.log('Batch Processor:', window.supabaseBatchProcessor?.getStats());
-        console.log('Debouncer:', window.supabaseDebouncer?.getStats());
-        console.log('Emergência:', window.emergencyOptimization?.getEmergencyStats());
-    }, 2000);
 });
-
-console.log('✅ Módulos principais carregados com otimizações EMERGENCIAIS');

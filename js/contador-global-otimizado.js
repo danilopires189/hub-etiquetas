@@ -1,25 +1,26 @@
-// Sistema de Contador Global OTIMIZADO
-// Reduz drasticamente as consultas ao banco de dados
+/**
+ * Sistema de Contador Global Otimizado
+ * Gerencia a contagem de etiquetas com sincronização em batch
+ * @version 2.0.0
+ */
 
 class ContadorGlobalOtimizado {
   constructor() {
     this.config = this.detectarConfiguracao();
     this.valorInicial = 134456;
-    this.chaveStorage = 'contador_global_centralizado_v2';
-    this.intervaloSync = 600000; // 10 minutos (aumentado de 5min)
+    this.chaveStorage = 'contador_global_v2';
+    this.intervaloSync = 600000; // 10 minutos
     this.isOnline = navigator.onLine;
-    this.operacoesPendentes = [];
     this.supabaseIntegrated = false;
-    
-    // OTIMIZAÇÕES
+
+    // Otimizações de batch
     this.batchPendente = [];
     this.ultimoFlush = Date.now();
-    this.flushInterval = 10000; // 10 segundos para flush
-    this.maxBatchSize = 20; // Máximo 20 operações por lote
+    this.flushInterval = 10000; // 10 segundos
+    this.maxBatchSize = 20;
     this.debounceTimeout = null;
     this.syncInProgress = false;
 
-    console.log('🌐 Contador Global OTIMIZADO inicializado');
     this.inicializar();
   }
 
@@ -39,7 +40,7 @@ class ContadorGlobalOtimizado {
     }
 
     return {
-      owner: 'SEU_USUARIO_GITHUB', repo: 'SEU_REPOSITORIO',
+      owner: 'danilopires189', repo: 'hub-etiquetas',
       branch: 'main', autoDetectado: false, isGitHubPages: false
     };
   }
@@ -48,22 +49,18 @@ class ContadorGlobalOtimizado {
     try {
       await this.carregarEstadoLocal();
 
-      // OTIMIZAÇÃO: Sincronização inicial apenas uma vez
+      // Sincronização inicial com delay
       setTimeout(async () => {
         if (window.supabaseManager && !this.syncInProgress) {
-          await this.sincronizarComSupabaseOtimizado();
+          await this.sincronizarComSupabase();
         }
-      }, 1000); // Delay maior para evitar múltiplas tentativas
+      }, 1000);
 
       this.configurarMonitoramentoConectividade();
-      this.iniciarSincronizacaoOtimizada();
+      this.iniciarSincronizacaoPeriodica();
       this.iniciarFlushAutomatico();
 
-      console.log('✅ Contador Global OTIMIZADO pronto');
-      console.log(`📊 Valor atual: ${this.valorAtual} etiquetas`);
-
     } catch (error) {
-      console.warn('⚠️ Erro na inicialização:', error.message);
       this.valorAtual = this.valorInicial;
       this.ultimaAtualizacao = new Date().toISOString();
     }
@@ -77,7 +74,6 @@ class ContadorGlobalOtimizado {
         this.valorAtual = parsed.totalEtiquetas || this.valorInicial;
         this.ultimaAtualizacao = parsed.ultimaAtualizacao;
         this.batchPendente = parsed.batchPendente || [];
-        console.log(`📱 Estado local carregado: ${this.valorAtual} etiquetas`);
       } else {
         this.valorAtual = this.valorInicial;
         this.ultimaAtualizacao = new Date().toISOString();
@@ -85,7 +81,6 @@ class ContadorGlobalOtimizado {
         await this.salvarEstadoLocal();
       }
     } catch (error) {
-      console.warn('⚠️ Erro ao carregar estado local:', error);
       this.valorAtual = this.valorInicial;
       this.ultimaAtualizacao = new Date().toISOString();
       this.batchPendente = [];
@@ -100,15 +95,13 @@ class ContadorGlobalOtimizado {
         batchPendente: this.batchPendente,
         timestamp: Date.now()
       };
-
       localStorage.setItem(this.chaveStorage, JSON.stringify(dados));
     } catch (error) {
-      console.warn('⚠️ Erro ao salvar estado local:', error);
+      // Silent fail - localStorage may be full
     }
   }
 
-  // OTIMIZAÇÃO: Sincronização com debounce e cache
-  async sincronizarComSupabaseOtimizado() {
+  async sincronizarComSupabase() {
     if (!window.supabaseManager || this.syncInProgress) {
       return;
     }
@@ -119,14 +112,12 @@ class ContadorGlobalOtimizado {
       // Verificar cache primeiro
       const cacheKey = 'contador_stats_cache';
       const cached = window.cacheManager?.get(cacheKey);
-      
-      if (cached && (Date.now() - cached.timestamp) < 30000) { // Cache de 30s
-        console.log('📦 Usando stats do cache');
+
+      if (cached && (Date.now() - cached.timestamp) < 30000) {
         this.syncInProgress = false;
         return;
       }
 
-      console.log('🔄 Sincronizando com Supabase (otimizado)...');
       const stats = await window.supabaseManager.getCounterStats();
 
       if (stats && typeof stats.total_count === 'number') {
@@ -136,7 +127,7 @@ class ContadorGlobalOtimizado {
           this.valorAtual = valorRemoto;
           this.ultimaAtualizacao = stats.last_updated || new Date().toISOString();
           await this.salvarEstadoLocal();
-          
+
           this.dispararEvento('atualizado', {
             valor: this.valorAtual,
             fonte: 'servidor'
@@ -145,27 +136,23 @@ class ContadorGlobalOtimizado {
 
         // Salvar no cache
         if (window.cacheManager) {
-          window.cacheManager.set(cacheKey, {
-            stats,
-            timestamp: Date.now()
-          });
+          window.cacheManager.set(cacheKey, { stats, timestamp: Date.now() });
         }
       }
     } catch (error) {
-      console.warn('⚠️ Erro na sincronização otimizada:', error);
+      // Silent fail - will retry on next sync
     } finally {
       this.syncInProgress = false;
     }
   }
 
-  // OTIMIZAÇÃO PRINCIPAL: Incremento com batch e debounce
   async incrementar(quantidade = 1, tipo = 'geral') {
     try {
       if (quantidade <= 0) {
         throw new Error('Quantidade deve ser positiva');
       }
 
-      // Incrementar localmente IMEDIATAMENTE (UX responsiva)
+      // Incrementar localmente primeiro (UX responsiva)
       const valorAnterior = this.valorAtual;
       this.valorAtual += quantidade;
       this.ultimaAtualizacao = new Date().toISOString();
@@ -182,70 +169,53 @@ class ContadorGlobalOtimizado {
       // Salvar estado local
       await this.salvarEstadoLocal();
 
-      // Disparar eventos imediatamente para UX
+      // Disparar eventos para UX
       this.dispararEventos(quantidade, tipo, valorAnterior);
 
-      // OTIMIZAÇÃO: Usar debouncer se disponível
+      // Usar debouncer se disponível
       if (window.supabaseDebouncer) {
         window.supabaseDebouncer.debounceCounterUpdate(quantidade, tipo);
-        console.log(`📊 Contador adicionado ao debouncer: +${quantidade} ${tipo}`);
       } else {
-        // Fallback: processar batch com debounce manual
         this.processarBatchComDebounce();
       }
 
-      console.log(`📈 Contador incrementado localmente: +${quantidade} ${tipo} = ${this.valorAtual}`);
       return this.valorAtual;
 
     } catch (error) {
-      console.error('❌ Erro ao incrementar contador:', error);
       throw error;
     }
   }
 
-  // Processar batch com debounce manual
   processarBatchComDebounce() {
-    // Cancelar timeout anterior
     if (this.debounceTimeout) {
       clearTimeout(this.debounceTimeout);
     }
 
-    // Agendar processamento
     this.debounceTimeout = setTimeout(async () => {
       await this.processarBatch();
-    }, 3000); // 3 segundos de debounce
+    }, 3000);
   }
 
-  // Processar batch de operações
   async processarBatch() {
     if (this.batchPendente.length === 0 || !this.supabaseIntegrated || !window.supabaseManager) {
       return;
     }
 
     try {
-      // Calcular total do batch
       const totalIncremento = this.batchPendente.reduce((sum, op) => sum + op.quantidade, 0);
       const tipos = [...new Set(this.batchPendente.map(op => op.tipo))];
-      const tipoMaisComum = tipos[0]; // Usar o primeiro tipo
+      const tipoMaisComum = tipos[0];
 
-      console.log(`📦 Processando batch: ${this.batchPendente.length} operações, +${totalIncremento} total`);
-
-      // UMA ÚNICA consulta para todo o batch
       await window.supabaseManager.updateGlobalCounter(totalIncremento, tipoMaisComum);
 
-      // Limpar batch processado
       this.batchPendente = [];
       await this.salvarEstadoLocal();
 
-      console.log(`✅ Batch processado: +${totalIncremento} enviado ao Supabase`);
-
     } catch (error) {
-      console.warn('⚠️ Erro ao processar batch:', error);
-      // Manter operações no batch para tentar novamente
+      // Manter operações no batch para retry
     }
   }
 
-  // Disparar eventos para UX
   dispararEventos(quantidade, tipo, valorAnterior) {
     this.dispararEvento('incremento', {
       quantidade, tipo, valorAnterior,
@@ -271,27 +241,18 @@ class ContadorGlobalOtimizado {
     }
   }
 
-  // Flush automático do batch
   iniciarFlushAutomatico() {
     setInterval(async () => {
       if (this.batchPendente.length > 0) {
-        console.log('⏰ Flush automático do batch');
         await this.processarBatch();
       }
     }, this.flushInterval);
   }
 
-  // Sincronização periódica otimizada
-  iniciarSincronizacaoOtimizada() {
-    // OTIMIZAÇÃO: Intervalo muito maior e apenas se necessário
+  iniciarSincronizacaoPeriodica() {
     setInterval(async () => {
       if (this.isOnline && !this.syncInProgress) {
-        // Só sincronizar se houver atividade recente
-        const tempoSemAtividade = Date.now() - this.ultimaAtualizacao;
-        if (tempoSemAtividade < this.intervaloSync) {
-          console.log('🔄 Sincronização periódica otimizada...');
-          await this.sincronizarComSupabaseOtimizado();
-        }
+        await this.sincronizarComSupabase();
       }
     }, this.intervaloSync);
   }
@@ -299,26 +260,22 @@ class ContadorGlobalOtimizado {
   configurarMonitoramentoConectividade() {
     window.addEventListener('online', () => {
       this.isOnline = true;
-      console.log('🌐 Conectividade restaurada - processando batch pendente');
       setTimeout(() => this.processarBatch(), 1000);
     });
 
     window.addEventListener('offline', () => {
       this.isOnline = false;
-      console.log('📱 Modo offline - operações serão acumuladas');
     });
   }
 
-  // Forçar flush imediato (para uso manual)
   async forcarFlush() {
-    console.log('🚀 Flush forçado do contador');
     await this.processarBatch();
     if (window.supabaseDebouncer) {
       await window.supabaseDebouncer.flushAll();
     }
   }
 
-  // Métodos de compatibilidade
+  // API Pública
   dispararEvento(tipo, dados) {
     const evento = new CustomEvent(`contador-${tipo}`, { detail: dados });
     window.dispatchEvent(evento);
@@ -338,12 +295,10 @@ class ContadorGlobalOtimizado {
 
   enableSupabaseIntegration() {
     this.supabaseIntegrated = true;
-    console.log('✅ Integração Supabase habilitada no contador otimizado');
   }
 
   disableSupabaseIntegration() {
     this.supabaseIntegrated = false;
-    console.log('⚠️ Integração Supabase desabilitada no contador otimizado');
   }
 
   isSupabaseIntegrated() {
@@ -356,20 +311,15 @@ class ContadorGlobalOtimizado {
       ultimaAtualizacao: this.ultimaAtualizacao,
       batchPendente: this.batchPendente.length,
       isOnline: this.isOnline,
-      configuracao: this.config,
-      otimizacoes: {
-        flushInterval: this.flushInterval,
-        maxBatchSize: this.maxBatchSize,
-        intervaloSync: this.intervaloSync
-      }
+      configuracao: this.config
     };
   }
 }
 
-// Substituir contador global pela versão otimizada
+// Instância global
 window.contadorGlobal = new ContadorGlobalOtimizado();
 
-// API global mantida para compatibilidade
+// API global para compatibilidade
 window.HubEtiquetas = {
   incrementarContador: (quantidade, tipo) => window.contadorGlobal.incrementarContador(quantidade, tipo),
   obterContador: () => window.contadorGlobal.obterContador(),
@@ -378,5 +328,3 @@ window.HubEtiquetas = {
   disponivel: () => true,
   forcarFlush: () => window.contadorGlobal.forcarFlush()
 };
-
-console.log('🚀 Sistema de Contador Global OTIMIZADO carregado');

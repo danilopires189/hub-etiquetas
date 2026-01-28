@@ -1,30 +1,56 @@
-# Arquivos do sistema
+# =============================================
+# Hub de Etiquetas - .gitignore
+# =============================================
+
+# === Sistema Operacional ===
 .DS_Store
 Thumbs.db
+desktop.ini
+*.swp
+*.swo
 
-# Logs
+# === Logs ===
 *.log
+npm-debug.log*
 
-# Arquivos temporários
+# === Arquivos Temporários ===
 *.tmp
 *.temp
+*.cache
 
-# Arquivos de desenvolvimento
+# === Desenvolvimento ===
 .vscode/
+.idea/
 .kiro/
+*.sublime-*
+
+# === Dependências ===
 node_modules/
 
-# Arquivos de teste
+# === Testes Locais ===
 *test*.html
 *test*.js
 *.test.js
+*.spec.js
+__tests__/
+coverage/
 
-# Arquivos de documentação de desenvolvimento
-CHANGELOG*.md
-*README*.txt
-*README*.md
-*GUIDE*.md
-
-# Arquivos de backup
+# === Backups ===
 *.bak
 *~
+*.orig
+
+# === Build (se aplicável) ===
+dist/
+build/
+.next/
+out/
+
+# === Variáveis de Ambiente ===
+.env
+.env.local
+.env.*.local
+
+# === Não ignorar ===
+!README.md
+!CHANGELOG.md
