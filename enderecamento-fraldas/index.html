@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="../shared/components.css">
     <link rel="stylesheet" href="../shared/mobile-dark-mode.css">
     <link rel="stylesheet" href="./styles.css">
-    <link rel="stylesheet" href="./mobile-optimized.css">
     <script>
         // Only load scanner CSS on desktop devices
         if (window.innerWidth > 768 && !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -258,16 +257,6 @@
                             </svg>
                             Adicionar
                         </button>
-                        <button type="button" id="btnTransferirMobile"
-                            class="action-btn-mobile btn-transferir-mobile hide"
-                            onclick="executarTransferenciaMobile()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M5 12h14" />
-                                <path d="M12 5l7 7-7 7" />
-                            </svg>
-                            Transferir
-                        </button>
                         <button type="button" id="btnDesalocarMobile" class="action-btn-mobile btn-desalocar-mobile"
                             onclick="executarDesalocacaoMobile()">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -321,8 +310,8 @@
         <!-- Base de dados local (produtos) -->
         <script src="../data_base/BASE_BARRAS.js"></script>
 
-        <!-- Contador global otimizado -->
-        <script src="../js/contador-global-otimizado.js"></script>
+        <!-- Contador global -->
+        <script src="../js/contador-global-centralizado.js"></script>
 
         <!-- Sistema de Endereçamento com Supabase (Substitui o enderecamento.js) -->
         <script type="module" src="./enderecamento-supabase.js"></script>
@@ -518,35 +507,6 @@
                     <button class="btn btn-danger" id="btnDeallocationFromAll" onclick="confirmDeallocationFromAll()">
                         Desalocar de Todos
                     </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mobile Address Selection Modal for Transfer -->
-        <div id="mobileTransferModal" class="mobile-modal-overlay hide">
-            <div class="mobile-modal">
-                <div class="mobile-modal-header" style="background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);">
-                    <h3 id="mobileTransferTitle">Selecionar Endereço de Origem</h3>
-                    <button class="mobile-modal-close" onclick="closeMobileTransferModal()">×</button>
-                </div>
-                <div class="mobile-modal-content">
-                    <div class="mobile-product-info" id="mobileTransferProductInfo">
-                        <strong>Produto:</strong> <span id="mobileTransferProductDesc"></span><br>
-                        <strong>CODDV:</strong> <span id="mobileTransferProductCoddv"></span>
-                    </div>
-
-                    <div class="mobile-deallocation-info"
-                        style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); border-color: #7dd3fc;">
-                        <p style="color: #0369a1;">Este produto está alocado em múltiplos endereços. Selecione de qual
-                            endereço deseja transferir:</p>
-                    </div>
-
-                    <div class="mobile-address-list" id="mobileTransferAddressList">
-                        <!-- Address list will be populated dynamically -->
-                    </div>
-                </div>
-                <div class="mobile-modal-footer">
-                    <button class="btn btn-ghost" onclick="closeMobileTransferModal()">Cancelar</button>
                 </div>
             </div>
         </div>
