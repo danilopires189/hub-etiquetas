@@ -357,10 +357,8 @@ class SistemaEnderecamentoSupabase {
             p_cd: this.cd
         };
 
-        // Adicionar validade se informada
-        if (validade) {
-            params.p_validade = validade;
-        }
+        // Adicionar validade ao objeto de parâmetros
+        params.p_validade = validade;
 
         if (this.isConnected && !this.modoOffline) {
             try {

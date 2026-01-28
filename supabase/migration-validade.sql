@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION alocar_produto_fralda(
     p_endereco VARCHAR,
     p_coddv VARCHAR,
     p_descricao_produto TEXT,
-    p_validade VARCHAR,
+    p_validade VARCHAR DEFAULT NULL, -- Tornado opcional para evitar erros de assinatura
     p_usuario VARCHAR DEFAULT NULL,
     p_matricula VARCHAR DEFAULT NULL,
     p_cd INTEGER DEFAULT 2
