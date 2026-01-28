@@ -1424,9 +1424,13 @@ async function executeMobileAllocation(address) {
   console.log('📱 Executando alocação mobile para endereço:', address);
 
   try {
+    // Solicitar validade antes de prosseguir
+    const validade = await solicitarValidade();
+    if (!validade) return;
+
     // Use optimized addressing system
     if (window.sistemaEnderecamento) {
-      await window.sistemaEnderecamento.alocarProduto(address, produtoAtual.CODDV, produtoAtual.DESC);
+      await window.sistemaEnderecamento.alocarProduto(address, produtoAtual.CODDV, produtoAtual.DESC, validade);
     }
 
     // Update legacy system
@@ -1464,6 +1468,20 @@ async function executeMobileTransfer(sourceAddress, destinationAddress) {
   console.log('📱 Executando transferência mobile:', { sourceAddress, destinationAddress });
 
   try {
+    // Buscar validade atual do produto
+    let validade = null;
+    if (window.sistemaEnderecamento && window.sistemaEnderecamento.cacheAlocacoes[sourceAddress]) {
+      const aloc = window.sistemaEnderecamento.cacheAlocacoes[sourceAddress].find(p => p.coddv === produtoAtual.CODDV);
+      if (aloc) validade = aloc.validade;
+    }
+
+    // Se não tiver validade (dados antigos), solicitar
+    if (!validade) {
+      showMobileToast('Este produto não possui validade cadastrada. Informe para transferir.', 'info');
+      validade = await solicitarValidade();
+      if (!validade) return;
+    }
+
     // Use optimized addressing system
     if (window.sistemaEnderecamento) {
       await window.sistemaEnderecamento.transferirProduto(sourceAddress, destinationAddress);
@@ -2435,6 +2453,72 @@ function formatarInfoEndereco(endereco) {
   };
 }
 
+/* ===== Controle de Validade (Novo) ===== */
+function mostrarModalValidade() {
+  const modal = document.getElementById('modalValidade');
+  const input = document.getElementById('inputValidade');
+  const feedback = document.getElementById('validadeFeedback');
+
+  if (!modal || !input) return;
+
+  input.value = '';
+  feedback.style.display = 'none';
+  modal.classList.add('active');
+
+  // Máscara MMAA
+  input.oninput = (e) => {
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length > 4) v = v.substring(0, 4);
+    e.target.value = v;
+  };
+
+  setTimeout(() => input.focus(), 300);
+}
+
+function fecharModalValidade() {
+  const modal = document.getElementById('modalValidade');
+  if (modal) modal.classList.remove('active');
+  if (window._resolveValidade) {
+    window._resolveValidade(null);
+    window._resolveValidade = null;
+  }
+}
+
+function solicitarValidade() {
+  return new Promise((resolve) => {
+    mostrarModalValidade();
+    window._resolveValidade = resolve;
+
+    const btn = document.getElementById('btnConfirmarValidade');
+    const input = document.getElementById('inputValidade');
+    const feedback = document.getElementById('validadeFeedback');
+
+    btn.onclick = () => {
+      const val = input.value;
+      if (val.length !== 4) {
+        feedback.style.display = 'block';
+        return;
+      }
+
+      // Validar mês (01-12)
+      const mes = parseInt(val.substring(0, 2));
+      if (mes < 1 || mes > 12) {
+        feedback.textContent = 'Mês inválido (01-12)';
+        feedback.style.display = 'block';
+        return;
+      }
+
+      modal.classList.remove('active');
+      window._resolveValidade = null;
+      resolve(val);
+    };
+
+    input.onkeypress = (e) => {
+      if (e.key === 'Enter') btn.click();
+    };
+  });
+}
+
 /* ===== Fluxo de Alocação por Endereço ===== */
 let enderecoDestino = null;
 
@@ -2532,8 +2616,12 @@ async function verificarAlocacaoEnderecoDestino(produto) {
 
 async function alocarNoEnderecoDestino(produto, endereco) {
   try {
+    // Solicitar validade antes de prosseguir
+    const validade = await solicitarValidade();
+    if (!validade) return;
+
     if (window.sistemaEnderecamento) {
-      await window.sistemaEnderecamento.alocarProduto(endereco, produto.CODDV, produto.DESC);
+      await window.sistemaEnderecamento.alocarProduto(endereco, produto.CODDV, produto.DESC, validade);
     }
 
     // Atualizar legado
@@ -2557,8 +2645,12 @@ async function alocarNoEnderecoDestino(produto, endereco) {
 
 async function adicionarEmMaisEnderecoDestino(produto, endereco) {
   try {
+    // Solicitar validade antes de prosseguir
+    const validade = await solicitarValidade();
+    if (!validade) return;
+
     if (window.sistemaEnderecamento) {
-      await window.sistemaEnderecamento.adicionarProdutoEmMaisEnderecos(endereco, produto.CODDV, produto.DESC);
+      await window.sistemaEnderecamento.adicionarProdutoEmMaisEnderecos(endereco, produto.CODDV, produto.DESC, validade);
     }
 
     // Atualizar legado (manter compatibilidade)
@@ -2582,6 +2674,20 @@ async function adicionarEmMaisEnderecoDestino(produto, endereco) {
 
 async function transferirParaEnderecoDestino(produto, origem, destino) {
   try {
+    // Buscar validade atual do produto
+    let validade = null;
+    if (window.sistemaEnderecamento && window.sistemaEnderecamento.cacheAlocacoes[origem]) {
+      const aloc = window.sistemaEnderecamento.cacheAlocacoes[origem].find(p => p.coddv === produto.CODDV);
+      if (aloc) validade = aloc.validade;
+    }
+
+    // Se não tiver validade (dados antigos), solicitar
+    if (!validade) {
+      showToast('Este produto não possui validade cadastrada. Informe para transferir.', 'info');
+      validade = await solicitarValidade();
+      if (!validade) return;
+    }
+
     if (window.sistemaEnderecamento) {
       await window.sistemaEnderecamento.transferirProduto(origem, destino);
     }
@@ -3191,7 +3297,7 @@ function limparCampos() {
 }
 
 // Função para alocar produto
-function alocarProduto() {
+async function alocarProduto() {
   if (!produtoAtual) {
     showToast('Selecione um produto para continuar.', 'warning');
     return;
@@ -3375,7 +3481,7 @@ function toggleDropdownAlocar() {
 }
 
 // Função para alocar em lista de endereços
-function alocarEmListaEnderecos() {
+async function alocarEmListaEnderecos() {
   console.log('📋 alocarEmListaEnderecos chamada');
 
   if (!produtoAtual) {
@@ -3401,7 +3507,7 @@ function alocarEmListaEnderecos() {
 }
 
 // Função para alocar buscando endereços
-function alocarBuscandoEnderecos() {
+async function alocarBuscandoEnderecos() {
   console.log('🔍 alocarBuscandoEnderecos chamada');
 
   if (!produtoAtual) {
@@ -3901,7 +4007,11 @@ async function selecionarEnderecoParaAdicionar(endereco) {
   if (confirmar) {
     try {
       if (window.sistemaEnderecamento) {
-        await window.sistemaEnderecamento.adicionarProdutoEmMaisEnderecos(endereco, produtoAtual.CODDV, produtoAtual.DESC);
+        // Solicitar validade antes de prosseguir
+        const validade = await solicitarValidade();
+        if (!validade) return;
+
+        await window.sistemaEnderecamento.adicionarProdutoEmMaisEnderecos(endereco, produtoAtual.CODDV, produtoAtual.DESC, validade);
       }
 
       // Atualizar sistema legado
@@ -4111,7 +4221,9 @@ function alocarProdutoNoEndereco(endereco) {
         if (opcao) {
           // Adicionar em mais um endereço (permitir múltiplos)
           console.log('➕ Adicionando produto em mais um endereço...');
-          await window.sistemaEnderecamento.adicionarProdutoEmMaisEnderecos(endereco, produtoAtual.CODDV, produtoAtual.DESC);
+          const validade = await solicitarValidade();
+          if (!validade) return;
+          await window.sistemaEnderecamento.adicionarProdutoEmMaisEnderecos(endereco, produtoAtual.CODDV, produtoAtual.DESC, validade);
 
           const info = formatarInfoEndereco(endereco);
           showToast(`Produto adicionado com sucesso!\n\nProduto: ${produtoAtual.DESC}\nNovo endereço: ${endereco}\n(${info.formatado})\n\nO produto continua nos endereços anteriores.`, 'success');
@@ -4126,32 +4238,44 @@ function alocarProdutoNoEndereco(endereco) {
 
           // Se há múltiplos endereços, desalocar de todos primeiro
           if (todosEnderecos.length > 1) {
+            let validadeExistente = null;
+            if (window.sistemaEnderecamento.cacheAlocacoes[enderecoOrigem]) {
+              const aloc = window.sistemaEnderecamento.cacheAlocacoes[enderecoOrigem].find(p => p.coddv === produtoAtual.CODDV);
+              if (aloc) validadeExistente = aloc.validade;
+            }
+
             for (const enderecoAtual of todosEnderecos) {
               await window.sistemaEnderecamento.desalocarProduto(enderecoAtual, produtoAtual.CODDV);
             }
+
+            if (!validadeExistente) {
+              validadeExistente = await solicitarValidade();
+              if (!validadeExistente) return;
+            }
+
             // Depois alocar no novo endereço
-            await window.sistemaEnderecamento.alocarProduto(endereco, produtoAtual.CODDV, produtoAtual.DESC);
+            await window.sistemaEnderecamento.alocarProduto(endereco, produtoAtual.CODDV, produtoAtual.DESC, validadeExistente);
           } else {
             // Transferência simples
             await window.sistemaEnderecamento.transferirProduto(enderecoOrigem, endereco);
           }
 
-          const infoOrigem = formatarInfoEndereco(enderecoOrigem);
           const infoDestino = formatarInfoEndereco(endereco);
-
-          showToast(`Transferência realizada com sucesso!\n\nProduto: ${produtoAtual.DESC}\n\nDe: ${todosEnderecos.join(', ')}\n\nPara: ${endereco}\n(${infoDestino.formatado})`, 'success');
+          showToast(`Transferência realizada com sucesso!\n\nProduto: ${produtoAtual.DESC}\n\nPara: ${endereco}\n(${infoDestino.formatado})`, 'success');
 
           await adicionarHistorico('TRANSFERÊNCIA', produtoAtual, enderecoOrigem, endereco);
         }
       } else {
         // Nova alocação
         console.log('➕ Realizando nova alocação...');
-        await window.sistemaEnderecamento.alocarProduto(endereco, produtoAtual.CODDV, produtoAtual.DESC);
-        console.log('✅ Alocação concluída no Supabase!');
-        await adicionarHistorico('ALOCAÇÃO', produtoAtual, null, endereco);
+        const validade = await solicitarValidade();
+        if (!validade) return;
+        await window.sistemaEnderecamento.alocarProduto(endereco, produtoAtual.CODDV, produtoAtual.DESC, validade);
 
         const info = formatarInfoEndereco(endereco);
-        showToast(`Alocação realizada com sucesso!\n\nProduto: ${produtoAtual.DESC}\nCODDV: ${produtoAtual.CODDV}\nEndereço: ${endereco}\nLocalização: ${info.formatado}`, 'success');
+        showToast(`Alocação realizada com sucesso!\n\nProduto: ${produtoAtual.DESC}\nEndereço: ${endereco}\n(${info.formatado})`, 'success');
+
+        await adicionarHistorico('ALOCAÇÃO', produtoAtual, null, endereco);
       }
 
       // Atualizar sistema legado (manter compatibilidade)
@@ -4359,9 +4483,13 @@ async function executeMobileAddition(address) {
   console.log('📱 Executando adição extra mobile para endereço:', address);
 
   try {
+    // Solicitar validade antes de prosseguir
+    const validade = await solicitarValidade();
+    if (!validade) return;
+
     // Use optimized addressing system
     if (window.sistemaEnderecamento) {
-      await window.sistemaEnderecamento.adicionarProdutoEmMaisEnderecos(address, produtoAtual.CODDV, produtoAtual.DESC);
+      await window.sistemaEnderecamento.adicionarProdutoEmMaisEnderecos(address, produtoAtual.CODDV, produtoAtual.DESC, validade);
     }
 
     // Update legacy system

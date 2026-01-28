@@ -539,6 +539,35 @@
                 <div class="mobile-toast-message" id="mobileToastMessage"></div>
             </div>
         </div>
+        <!-- Modal de Validade -->
+        <div id="modalValidade" class="modal-overlay">
+            <div class="modal animate-pop-in">
+                <div class="modal-header">
+                    <h3 class="modal-title">Validade do Produto</h3>
+                    <button class="modal-close" onclick="fecharModalValidade()">×</button>
+                </div>
+                <div class="modal-body">
+                    <p>Informe a validade do produto para continuar:</p>
+                    <div class="field" style="margin-top: 15px;">
+                        <label for="inputValidade">Validade (MMAA)</label>
+                        <input type="text" id="inputValidade" placeholder="Ex: 1225" maxlength="4"
+                            style="font-size: 1.5rem; text-align: center; letter-spacing: 5px; height: 60px;">
+                        <div id="validadeFeedback" class="field-error"
+                            style="display: none; color: #dc2626; font-size: 0.85rem; margin-top: 5px;">
+                            Formato inválido. Use MMAA (ex: 1225 para Dez/2025)
+                        </div>
+                    </div>
+                    <div
+                        style="background: #fef3c7; border: 1px solid #fbbf24; padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; color: #92400e;">
+                        ⚠️ <strong>Atenção:</strong> A validade é obrigatória para este CD.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" onclick="fecharModalValidade()">Cancelar</button>
+                    <button class="btn btn-primary" id="btnConfirmarValidade">Confirmar</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scanner Mobile - Only load on desktop -->
