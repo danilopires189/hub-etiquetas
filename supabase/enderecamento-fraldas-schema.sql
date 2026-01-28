@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS enderecos_fraldas (
     zona VARCHAR(4) NOT NULL,          -- PF01 a PF15
     bloco VARCHAR(3) NOT NULL DEFAULT '001',
     coluna VARCHAR(3) NOT NULL,        -- 001 a 019
-    nivel VARCHAR(3) NOT NULL,         -- A0T, A01, A02, A04, A05, A06
+    nivel VARCHAR(3) NOT NULL,         -- A0T, A01, A02, A03, A04, A05, A06
     descricao TEXT DEFAULT 'Endereço de fralda',
     ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS enderecos_fraldas (
     CONSTRAINT check_zona CHECK (zona ~ '^PF(0[1-9]|1[0-5])$'),
     CONSTRAINT check_bloco CHECK (bloco = '001'),
     CONSTRAINT check_coluna CHECK (coluna ~ '^(0(0[1-9]|1[0-9])|019)$'),
-    CONSTRAINT check_nivel CHECK (nivel IN ('A0T', 'A01', 'A02', 'A04', 'A05', 'A06'))
+    CONSTRAINT check_nivel CHECK (nivel IN ('A0T', 'A01', 'A02', 'A03', 'A04', 'A05', 'A06'))
 );
 
 -- Índices para otimização

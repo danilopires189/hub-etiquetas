@@ -2,8 +2,8 @@
 -- Zona: PF01 a PF15 (15 zonas)
 -- Bloco: 001 (fixo)
 -- Coluna: 001 a 019 (19 colunas)
--- Nível: A0T, A01, A02, A04, A05, A06 (6 níveis)
--- Total: 15 × 19 × 6 = 1.710 endereços
+-- Nível: A0T, A01, A02, A03, A04, A05, A06 (7 níveis)
+-- Total: 15 × 19 × 7 = 2.394 endereços
 
 -- Limpar tabela antes de inserir (opcional - remova se quiser manter dados existentes)
 -- TRUNCATE TABLE enderecos_fraldas CASCADE;
@@ -22,6 +22,7 @@ SELECT
         WHEN 'A0T' THEN 'Térreo'
         WHEN 'A01' THEN '1º Andar'
         WHEN 'A02' THEN '2º Andar'
+        WHEN 'A03' THEN '3º Andar'
         WHEN 'A04' THEN '4º Andar'
         WHEN 'A05' THEN '5º Andar'
         WHEN 'A06' THEN '6º Andar'
@@ -30,7 +31,7 @@ SELECT
 FROM 
     generate_series(1, 15) AS zona,
     generate_series(1, 19) AS coluna,
-    unnest(ARRAY['A0T', 'A01', 'A02', 'A04', 'A05', 'A06']) AS nivel
+    unnest(ARRAY['A0T', 'A01', 'A02', 'A03', 'A04', 'A05', 'A06']) AS nivel
 ON CONFLICT (endereco) DO NOTHING;
 
 -- Verificar quantidade inserida
@@ -56,6 +57,7 @@ SELECT
         WHEN 'A0T' THEN 'Térreo'
         WHEN 'A01' THEN '1º Andar'
         WHEN 'A02' THEN '2º Andar'
+        WHEN 'A03' THEN '3º Andar'
         WHEN 'A04' THEN '4º Andar'
         WHEN 'A05' THEN '5º Andar'
         WHEN 'A06' THEN '6º Andar'
