@@ -1219,6 +1219,7 @@ let mobileModalState = {
   mode: null, // 'allocate' or 'transfer'
   sourceAddress: null,
   validatedAddress: null,
+  validatedValidity: null,
   isValidating: false
 };
 
@@ -1295,8 +1296,37 @@ function closeMobileAddressModal() {
     mode: null,
     sourceAddress: null,
     validatedAddress: null,
+    validatedValidity: null,
     isValidating: false
   };
+
+  // Reset form
+  const addressInput = $('#mobileAddressInput');
+  const validityInput = $('#mobileValidityInput');
+  const validitySection = $('#mobileValiditySection');
+  const confirmBtn = $('#btnConfirmMobileAllocation');
+
+  if (addressInput) {
+    addressInput.value = '';
+    addressInput.classList.remove('valid', 'invalid');
+  }
+
+  if (validityInput) {
+    validityInput.value = '';
+    validityInput.classList.remove('valid', 'invalid');
+  }
+
+  if (validitySection) {
+    validitySection.classList.add('hide');
+  }
+
+  if (confirmBtn) {
+    confirmBtn.disabled = true;
+  }
+
+  hideMobileAddressFeedback();
+  hideMobileValidityFeedback();
+  hideMobileAddressSuggestions();
 }
 
 // Validate mobile address input
@@ -1304,6 +1334,7 @@ async function validateMobileAddress() {
   const addressInput = $('#mobileAddressInput');
   const validateBtn = $('#btnValidateAddress');
   const confirmBtn = $('#btnConfirmMobileAllocation');
+  const validitySection = $('#mobileValiditySection');
 
   const address = addressInput.value.trim().toUpperCase();
 
@@ -1366,8 +1397,17 @@ async function validateMobileAddress() {
     addressInput.classList.add('valid');
     addressInput.classList.remove('invalid');
     mobileModalState.validatedAddress = address;
-    confirmBtn.disabled = false;
     hideMobileAddressSuggestions();
+
+    // Show validity section
+    if (validitySection) {
+      validitySection.classList.remove('hide');
+      // Focus on validity input
+      const validityInput = $('#mobileValidityInput');
+      if (validityInput) {
+        setTimeout(() => validityInput.focus(), 300);
+      }
+    }
 
     console.log('📱 Endereço validado com sucesso:', address);
 
@@ -1379,9 +1419,62 @@ async function validateMobileAddress() {
     showMobileAddressFeedback(error.message, 'error');
     mobileModalState.validatedAddress = null;
     confirmBtn.disabled = true;
+
+    // Hide validity section on error
+    if (validitySection) {
+      validitySection.classList.add('hide');
+    }
   } finally {
     mobileModalState.isValidating = false;
     validateBtn.disabled = false;
+  }
+}
+
+// Validate mobile validity input
+function validateMobileValidity() {
+  const validityInput = $('#mobileValidityInput');
+  const confirmBtn = $('#btnConfirmMobileAllocation');
+
+  if (!validityInput) return false;
+
+  const validity = validityInput.value.trim();
+
+  // Validate MMAA format (Month 01-12, Year 24-99)
+  const regex = /^(0[1-9]|1[0-2])([2-9][0-9])$/;
+  const isValid = regex.test(validity);
+
+  if (isValid) {
+    validityInput.classList.add('valid');
+    validityInput.classList.remove('invalid');
+    showMobileValidityFeedback('Validade válida.', 'success');
+    mobileModalState.validatedValidity = validity;
+    confirmBtn.disabled = false;
+  } else {
+    validityInput.classList.add('invalid');
+    validityInput.classList.remove('valid');
+    showMobileValidityFeedback('Formato inválido. Use MMAA (ex: 0526).', 'error');
+    mobileModalState.validatedValidity = null;
+    confirmBtn.disabled = true;
+  }
+
+  return isValid;
+}
+
+// Show mobile validity feedback
+function showMobileValidityFeedback(message, type) {
+  const feedback = $('#mobileValidityFeedback');
+  if (!feedback) return;
+
+  feedback.textContent = message;
+  feedback.className = `mobile-validity-feedback ${type}`;
+  feedback.style.display = 'block';
+}
+
+// Hide mobile validity feedback
+function hideMobileValidityFeedback() {
+  const feedback = $('#mobileValidityFeedback');
+  if (feedback) {
+    feedback.style.display = 'none';
   }
 }
 
@@ -1392,11 +1485,21 @@ async function confirmMobileAllocation() {
     return;
   }
 
+  // Check if validity is required and validated
+  const validitySection = $('#mobileValiditySection');
+  if (validitySection && !validitySection.classList.contains('hide')) {
+    if (!mobileModalState.validatedValidity) {
+      showMobileToast('Por favor, informe uma validade válida.', 'error');
+      return;
+    }
+  }
+
   const address = mobileModalState.validatedAddress;
+  const validity = mobileModalState.validatedValidity;
   const mode = mobileModalState.mode;
   const sourceAddress = mobileModalState.sourceAddress;
 
-  console.log('📱 Confirmando alocação mobile:', { mode, address, sourceAddress });
+  console.log('📱 Confirmando alocação mobile:', { mode, address, sourceAddress, validity });
 
   try {
     if (mode === 'transfer') {
@@ -1404,10 +1507,10 @@ async function confirmMobileAllocation() {
       await executeMobileTransfer(sourceAddress, address);
     } else if (mode === 'add') {
       // Add product to additional address
-      await executeMobileAddition(address);
+      await executeMobileAddition(address, validity);
     } else {
       // Allocate product to address
-      await executeMobileAllocation(address);
+      await executeMobileAllocation(address, validity);
     }
 
     // Close modal on success
@@ -1420,17 +1523,13 @@ async function confirmMobileAllocation() {
 }
 
 // Execute mobile allocation
-async function executeMobileAllocation(address) {
-  console.log('📱 Executando alocação mobile para endereço:', address);
+async function executeMobileAllocation(address, validity) {
+  console.log('📱 Executando alocação mobile para endereço:', address, 'com validade:', validity);
 
   try {
-    // Solicitar validade antes de prosseguir
-    const validade = await solicitarValidade();
-    if (!validade) return;
-
     // Use optimized addressing system
     if (window.sistemaEnderecamento) {
-      await window.sistemaEnderecamento.alocarProduto(address, produtoAtual.CODDV, produtoAtual.DESC, validade);
+      await window.sistemaEnderecamento.alocarProduto(address, produtoAtual.CODDV, produtoAtual.DESC, validity);
     }
 
     // Update legacy system
@@ -1442,8 +1541,9 @@ async function executeMobileAllocation(address) {
 
     // Show success message
     const info = formatarInfoEndereco(address);
+    const validityFormatted = `${validity.substring(0, 2)}/20${validity.substring(2)}`;
     showMobileToast(
-      `Alocação realizada com sucesso!\n\nProduto: ${produtoAtual.DESC}\nEndereço: ${address}\n(${info.formatado})`,
+      `Alocação realizada com sucesso!\n\nProduto: ${produtoAtual.DESC}\nEndereço: ${address}\n(${info.formatado})\nValidade: ${validityFormatted}`,
       'success'
     );
 
@@ -1521,8 +1621,11 @@ async function executeMobileTransfer(sourceAddress, destinationAddress) {
 // Show mobile address feedback
 function showMobileAddressFeedback(message, type) {
   const feedback = $('#mobileAddressFeedback');
-  feedback.textContent = message;
-  feedback.className = `mobile-address-feedback ${type}`;
+  if (feedback) {
+    feedback.textContent = message;
+    feedback.className = `mobile-address-feedback ${type}`;
+    feedback.style.display = 'block';
+  }
 }
 
 // Clear mobile address feedback
@@ -1530,6 +1633,16 @@ function clearMobileAddressFeedback() {
   const feedback = $('#mobileAddressFeedback');
   feedback.textContent = '';
   feedback.className = 'mobile-address-feedback';
+}
+
+// Hide mobile address feedback
+function hideMobileAddressFeedback() {
+  const feedback = $('#mobileAddressFeedback');
+  if (feedback) {
+    feedback.style.display = 'none';
+    feedback.textContent = '';
+    feedback.className = 'mobile-address-feedback';
+  }
 }
 
 // Show mobile address suggestions
@@ -2142,6 +2255,48 @@ document.addEventListener('DOMContentLoaded', function () {
       hideMobileAddressSuggestions();
       mobileModalState.validatedAddress = null;
       $('#btnConfirmMobileAllocation').disabled = true;
+
+      // Hide validity section when address changes
+      const validitySection = $('#mobileValiditySection');
+      if (validitySection) {
+        validitySection.classList.add('hide');
+      }
+    });
+  }
+
+  // Add event listeners for mobile validity input
+  const validityInput = $('#mobileValidityInput');
+  if (validityInput) {
+    // Validate on input change
+    validityInput.addEventListener('input', function (e) {
+      // Remove non-numeric characters
+      e.target.value = e.target.value.replace(/\D/g, '');
+
+      // Clear previous validation state
+      this.classList.remove('valid', 'invalid');
+      hideMobileValidityFeedback();
+
+      // Validate if has 4 characters
+      if (e.target.value.length === 4) {
+        validateMobileValidity();
+      } else {
+        mobileModalState.validatedValidity = null;
+        $('#btnConfirmMobileAllocation').disabled = true;
+      }
+    });
+
+    // Validate on Enter key
+    validityInput.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (validateMobileValidity()) {
+          // If validity is valid, focus on confirm button
+          const confirmBtn = $('#btnConfirmMobileAllocation');
+          if (confirmBtn && !confirmBtn.disabled) {
+            confirmBtn.focus();
+          }
+        }
+      }
     });
   }
 
@@ -4479,17 +4634,13 @@ async function executarAdicaoExtraMobile() {
 window.executarAdicaoExtraMobile = executarAdicaoExtraMobile;
 
 // Execute mobile addition (add to extra address)
-async function executeMobileAddition(address) {
-  console.log('📱 Executando adição extra mobile para endereço:', address);
+async function executeMobileAddition(address, validity) {
+  console.log('📱 Executando adição extra mobile para endereço:', address, 'com validade:', validity);
 
   try {
-    // Solicitar validade antes de prosseguir
-    const validade = await solicitarValidade();
-    if (!validade) return;
-
     // Use optimized addressing system
     if (window.sistemaEnderecamento) {
-      await window.sistemaEnderecamento.adicionarProdutoEmMaisEnderecos(address, produtoAtual.CODDV, produtoAtual.DESC, validade);
+      await window.sistemaEnderecamento.adicionarProdutoEmMaisEnderecos(address, produtoAtual.CODDV, produtoAtual.DESC, validity);
     }
 
     // Update legacy system
@@ -4501,8 +4652,9 @@ async function executeMobileAddition(address) {
 
     // Show success message
     const info = formatarInfoEndereco(address);
+    const validityFormatted = `${validity.substring(0, 2)}/20${validity.substring(2)}`;
     showMobileToast(
-      `Produto adicionado com sucesso!\n\nNovo endereço: ${address}\n(${info.formatado})`,
+      `Produto adicionado com sucesso!\n\nNovo endereço: ${address}\n(${info.formatado})\nValidade: ${validityFormatted}`,
       'success'
     );
 

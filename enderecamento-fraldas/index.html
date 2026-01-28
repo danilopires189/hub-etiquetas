@@ -469,6 +469,19 @@
                         <div class="mobile-address-feedback" id="mobileAddressFeedback"></div>
                         <div class="mobile-address-suggestions" id="mobileAddressSuggestions"></div>
                     </div>
+
+                    <!-- Seção de Validade (aparece após validação do endereço) -->
+                    <div class="mobile-validity-section hide" id="mobileValiditySection">
+                        <label for="mobileValidityInput">Validade do Produto</label>
+                        <div class="mobile-input-group">
+                            <input type="text" id="mobileValidityInput" placeholder="MMAA (ex: 0526)" maxlength="4"
+                                inputmode="numeric" autocomplete="off">
+                        </div>
+                        <div class="mobile-validity-feedback" id="mobileValidityFeedback"></div>
+                        <div class="mobile-validity-hint">
+                            <small>Formato: MMAA (Mês e Ano - ex: 0526 para Maio/2026)</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="mobile-modal-footer">
                     <button class="btn btn-ghost" onclick="closeMobileAddressModal()">Cancelar</button>
