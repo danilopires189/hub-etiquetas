@@ -464,6 +464,20 @@
     <script src="../data_base/BASE_END.js"></script>
     <script src="../data_base/BASE_USUARIO.js"></script>
     <script src="app.js"></script>
+    
+    <!-- Correções de Performance e Impressão -->
+    <script src="browser-fixes.js"></script>
+    <script src="optimize-rendering.js"></script>
+    <script src="fix-performance-print.js"></script>
+    
+    <!-- Script de Testes (apenas em modo debug) -->
+    <script>
+        if (window.location.search.includes('debug=true') || window.location.search.includes('test=true')) {
+            const testScript = document.createElement('script');
+            testScript.src = 'test-corrections.js';
+            document.head.appendChild(testScript);
+        }
+    </script>
 </body>
 
 </html>
