@@ -694,6 +694,69 @@ class EnderecoApp {
         return typeof dataStr === 'string' ? dataStr : 'Data inválida';
     }
 
+    // Formatar validade para exibição
+    formatarValidade(validade) {
+        if (!validade || validade === '' || validade === null) {
+            return 'Não informada';
+        }
+
+        // Se já está no formato MM/AAAA, retornar como está
+        if (validade.includes('/')) {
+            return validade;
+        }
+
+        // Se está no formato MMAA, converter para MM/20AA
+        if (validade.length === 4 && /^\d{4}$/.test(validade)) {
+            return `${validade.substring(0, 2)}/20${validade.substring(2)}`;
+        }
+
+        // Retornar como está se não conseguir formatar
+        return validade;
+    }
+
+    // Obter status da validade (vencida, próxima do vencimento, etc.)
+    obterStatusValidade(validade) {
+        if (!validade || validade === '' || validade === null) {
+            return 'nao-informada';
+        }
+
+        try {
+            let mes, ano;
+
+            // Se está no formato MM/AAAA
+            if (validade.includes('/')) {
+                const partes = validade.split('/');
+                mes = parseInt(partes[0]);
+                ano = parseInt(partes[1]);
+            }
+            // Se está no formato MMAA
+            else if (validade.length === 4 && /^\d{4}$/.test(validade)) {
+                mes = parseInt(validade.substring(0, 2));
+                ano = parseInt('20' + validade.substring(2));
+            }
+            else {
+                return 'nao-informada';
+            }
+
+            // Data de vencimento (último dia do mês)
+            const dataVencimento = new Date(ano, mes, 0); // mes 0-based, dia 0 = último dia do mês anterior
+            const hoje = new Date();
+            const proximoMes = new Date();
+            proximoMes.setMonth(proximoMes.getMonth() + 1);
+
+            if (dataVencimento < hoje) {
+                return 'vencida';
+            } else if (dataVencimento < proximoMes) {
+                return 'proxima-vencimento';
+            } else {
+                return 'valida';
+            }
+        } catch (error) {
+            console.warn('Erro ao verificar status da validade:', error);
+            return 'nao-informada';
+        }
+    }
+
     // Configurar eventos (Simplificado Global)
     configurarEventos() {
         console.log('🔧 Configurando eventos via Delegação Global Simplificada...');
@@ -1170,21 +1233,27 @@ class EnderecoApp {
 
                 produtosHTML = produtosOrdenados.map(p => {
                     const dataAlocacao = this.formatarDataAlocacao(p.data_alocacao || p.dataAlocacao);
+                    const validadeFormatada = this.formatarValidade(p.validade);
+                    const statusValidade = this.obterStatusValidade(p.validade);
                     return `
                         <div class="endereco-produto">
                             <div class="produto-coddv">CODDV: ${p.coddv}</div>
                             <div class="produto-desc">${p.descricaoProduto || p.descricao_produto}</div>
                             <div class="produto-data">📅 ${dataAlocacao}</div>
+                            <div class="produto-validade ${statusValidade}">📆 Validade: ${validadeFormatada}</div>
                         </div>
                     `;
                 }).join('');
             } else if (endereco.coddv) {
                 const dataAlocacao = this.formatarDataAlocacao(endereco.dataAlocacao || endereco.data_alocacao);
+                const validadeFormatada = this.formatarValidade(endereco.validade);
+                const statusValidade = this.obterStatusValidade(endereco.validade);
                 produtosHTML = `
                     <div class="endereco-produto">
                         <div class="produto-coddv">CODDV: ${endereco.coddv}</div>
                         <div class="produto-desc">${endereco.descricaoProduto}</div>
                         <div class="produto-data">📅 ${dataAlocacao}</div>
+                        <div class="produto-validade ${statusValidade}">📆 Validade: ${validadeFormatada}</div>
                     </div>
                 `;
             }
@@ -1278,11 +1347,14 @@ class EnderecoApp {
             const htmlResultados = resultadosLimitados.map(resultado => {
                 const produtosHtml = resultado.produtos.map(p => {
                     const dataAlocacao = this.formatarDataAlocacao(p.data_alocacao || p.dataAlocacao);
+                    const validadeFormatada = this.formatarValidade(p.validade);
+                    const statusValidade = this.obterStatusValidade(p.validade);
                     return `
                     <div class="endereco-produto">
                         <div class="produto-coddv">CODDV: ${p.coddv}</div>
                         <div class="produto-desc">${p.descricao_produto || p.descricaoProduto}</div>
                         <div class="produto-data">📅 ${dataAlocacao}</div>
+                        <div class="produto-validade ${statusValidade}">📆 Validade: ${validadeFormatada}</div>
                     </div>
                 `;
                 }).join('');
