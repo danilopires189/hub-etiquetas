@@ -804,4 +804,148 @@
         letter-spacing: 1px;
         text-align: center;
     }
+
+    /* ========== MÚLTIPLOS ENDEREÇOS - NEGRITO ========== */
+    .endereco-list-mobile,
+    .endereco-lista-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .endereco-item-mobile {
+        font-family: 'SF Mono', 'Consolas', 'Courier New', monospace;
+        font-weight: 800 !important;
+        font-size: 1rem;
+        color: #0c4a6e;
+        background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        border: 2px solid #a7f3d0;
+        text-align: center;
+        letter-spacing: 1px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Destaque adicional para múltiplos endereços */
+    .produto-endereco.multiplos .endereco-item-mobile,
+    .endereco-count+.endereco-list-mobile .endereco-item-mobile,
+    .produto-endereco span,
+    .produto-endereco div[style*="font-family"] {
+        font-weight: 800 !important;
+        font-size: 0.95rem;
+        color: #0c4a6e;
+    }
+
+    /* ========== BOTÕES DE AÇÃO COMPACTOS ========== */
+    /* Botões desktop que aparecem no mobile - diminuir texto */
+    .produto-acoes {
+        display: flex !important;
+        gap: 4px !important;
+        flex-wrap: nowrap !important;
+        justify-content: center;
+        padding: 0.5rem;
+    }
+
+    .btn-acao {
+        min-width: 28px !important;
+        width: auto !important;
+        height: 32px !important;
+        padding: 0 8px !important;
+        font-size: 0.65rem !important;
+        font-weight: 700 !important;
+        border-radius: 8px !important;
+        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0;
+    }
+
+    /* Botões com texto - versão compacta */
+    .btn-acao.btn-alocar,
+    .btn-acao.btn-transferir,
+    .btn-acao.btn-adicionar-mais,
+    .btn-acao.btn-desalocar {
+        min-width: 60px !important;
+        max-width: 85px !important;
+        padding: 0 6px !important;
+        font-size: 0.6rem !important;
+        gap: 2px;
+    }
+
+    /* Esconder ícones nos botões para ganhar espaço */
+    .btn-acao svg {
+        display: none !important;
+    }
+
+    /* Adicionar texto visível aos botões */
+    .btn-acao.btn-alocar::after {
+        content: 'ALOCAR';
+    }
+
+    .btn-acao.btn-transferir::after {
+        content: 'TRANSF';
+    }
+
+    .btn-acao.btn-adicionar-mais::after {
+        content: 'ADD+';
+    }
+
+    .btn-acao.btn-desalocar::after {
+        content: 'DESAL';
+    }
+
+    /* Container de ações do produto */
+    .produto-endereco-container {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    /* Botões flutuantes mobile - TAMBÉM COMPACTOS */
+    .action-btn-mobile {
+        flex: 1;
+        max-width: 110px !important;
+        min-height: 44px !important;
+        padding: 8px 10px !important;
+        font-size: 0.7rem !important;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+    }
+
+    /* Esconder ícones nos botões flutuantes mobile */
+    .action-btn-mobile svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    /* Dropdown de ação - compacto */
+    .dropdown-menu {
+        min-width: 140px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .dropdown-item {
+        padding: 8px 10px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .dropdown-item svg {
+        width: 12px !important;
+        height: 12px !important;
+    }
+
+    /* Corrigir overflow dos botões */
+    .btn-acao-container {
+        position: relative;
+        display: inline-flex;
+    }
+
+    /* Fix para quando há dropdown aberto */
+    .btn-acao-container .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+    }
 }
