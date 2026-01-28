@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -166,8 +167,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .btn-content {
@@ -176,7 +182,11 @@
             justify-content: center;
         }
     </style>
+
+    <!-- Supabase SDK - DEVE ser carregado antes dos módulos -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
     <div class="login-container">
         <div class="login-header">
@@ -188,26 +198,14 @@
         <form class="login-form" id="loginForm">
             <div class="form-group">
                 <label for="email" class="form-label">Email</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    class="form-input" 
-                    placeholder="seu@email.com"
-                    required
-                    autocomplete="email"
-                >
+                <input type="email" id="email" class="form-input" placeholder="seu@email.com" required
+                    autocomplete="email">
             </div>
 
             <div class="form-group">
                 <label for="password" class="form-label">Senha</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    class="form-input" 
-                    placeholder="••••••••"
-                    required
-                    autocomplete="current-password"
-                >
+                <input type="password" id="password" class="form-input" placeholder="••••••••" required
+                    autocomplete="current-password">
             </div>
 
             <button type="submit" class="login-btn" id="loginBtn">
@@ -223,8 +221,8 @@
 
         <a href="../index.html" class="back-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5"/>
-                <path d="M12 19l-7-7 7-7"/>
+                <path d="M19 12H5" />
+                <path d="M12 19l-7-7 7-7" />
             </svg>
             Voltar ao Hub
         </a>
@@ -247,7 +245,7 @@
             try {
                 await supabaseManager.initialize();
                 await authManager.initialize();
-                
+
                 // Verificar se já está logado
                 const isAuth = await authManager.isAuthenticated();
                 if (isAuth) {
@@ -258,7 +256,7 @@
                     }, 1000);
                     return;
                 }
-                
+
                 console.log('ℹ️ Nenhuma sessão ativa, aguardando login');
             } catch (error) {
                 console.error('❌ Erro na inicialização:', error);
@@ -299,24 +297,24 @@
                 showError('Por favor, preencha todos os campos');
                 return false;
             }
-            
+
             if (!email.includes('@')) {
                 showError('Por favor, insira um email válido');
                 return false;
             }
-            
+
             if (password.length < 6) {
                 showError('A senha deve ter pelo menos 6 caracteres');
                 return false;
             }
-            
+
             return true;
         }
 
         // Handler do formulário de login
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
@@ -329,19 +327,19 @@
 
             try {
                 console.log('🔐 Tentando fazer login...');
-                
+
                 // Usar o AuthManager para fazer login
                 const result = await authManager.login(email, password);
 
                 if (result.success) {
                     showSuccess('Login realizado com sucesso! Redirecionando...');
-                    
+
                     // Mostrar informações da sessão
                     const sessionInfo = authManager.getSessionInfo();
                     if (sessionInfo) {
                         console.log(`✅ Sessão criada. Expira em: ${sessionInfo.timeRemainingFormatted}`);
                     }
-                    
+
                     // Redirecionar após 1.5 segundos
                     setTimeout(() => {
                         window.location.href = './dashboard.html';
@@ -349,7 +347,7 @@
                 } else {
                     // Mostrar erro específico baseado no tipo
                     let errorMsg = result.error || 'Erro desconhecido';
-                    
+
                     if (errorMsg.includes('Invalid login credentials') || errorMsg.includes('Credenciais inválidas')) {
                         errorMsg = 'Email ou senha incorretos';
                     } else if (errorMsg.includes('Email not confirmed')) {
@@ -357,7 +355,7 @@
                     } else if (errorMsg.includes('Too many requests')) {
                         errorMsg = 'Muitas tentativas. Aguarde alguns minutos.';
                     }
-                    
+
                     showError(errorMsg);
                     console.error('❌ Falha no login:', result.error);
                 }
@@ -388,4 +386,5 @@
         }
     </script>
 </body>
+
 </html>
