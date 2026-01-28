@@ -1080,7 +1080,7 @@ function updateMobileAddressDisplay(enderecoElement, status) {
 
   if (status.alocado) {
     if (status.multiplos) {
-      // Multiple addresses - show count and list
+      // Multiple addresses - show count and list with validade info
       enderecoElement.classList.add('multiplos');
 
       const headerHtml = `
@@ -1095,15 +1095,29 @@ function updateMobileAddressDisplay(enderecoElement, status) {
         </div>
       `;
 
-      const addressListHtml = status.enderecos.map(endereco =>
-        `<div class="endereco-item-mobile" aria-label="Endereço: ${endereco}">${endereco}</div>`
-      ).join('');
+      const addressListHtml = status.enderecos.map(endereco => {
+        // Tentar obter informações de validade do produto neste endereço
+        const validadeInfo = obterValidadeProdutoNoEndereco(produtoAtual?.CODDV, endereco);
+        const validadeHtml = validadeInfo ? 
+          `<div class="endereco-validade-mobile">📆 ${formatarValidadeMobile(validadeInfo)}</div>` : '';
+        
+        return `
+          <div class="endereco-item-mobile" aria-label="Endereço: ${endereco}">
+            ${endereco}
+            ${validadeHtml}
+          </div>
+        `;
+      }).join('');
 
       enderecoElement.innerHTML = headerHtml + `<div class="endereco-list-mobile">${addressListHtml}</div>`;
       enderecoElement.setAttribute('aria-label', `Produto alocado em ${status.enderecos.length} endereços: ${status.enderecos.join(', ')}`);
 
     } else {
-      // Single address
+      // Single address with validade info
+      const validadeInfo = obterValidadeProdutoNoEndereco(produtoAtual?.CODDV, status.endereco);
+      const validadeHtml = validadeInfo ? 
+        `<div class="endereco-validade-mobile">📆 ${formatarValidadeMobile(validadeInfo)}</div>` : '';
+
       enderecoElement.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1113,6 +1127,7 @@ function updateMobileAddressDisplay(enderecoElement, status) {
           </svg>
           <strong>${status.endereco}</strong>
         </div>
+        ${validadeHtml}
       `;
       enderecoElement.setAttribute('aria-label', `Produto alocado no endereço: ${status.endereco}`);
     }
@@ -1134,6 +1149,40 @@ function updateMobileAddressDisplay(enderecoElement, status) {
     `;
     enderecoElement.setAttribute('aria-label', 'Produto sem endereço associado, disponível para alocação');
   }
+}
+
+// Obter validade de um produto em um endereço específico
+function obterValidadeProdutoNoEndereco(coddv, endereco) {
+  if (!coddv || !endereco || !window.sistemaEnderecamento) return null;
+  
+  try {
+    const produtos = window.sistemaEnderecamento.obterProdutosNoEndereco(endereco);
+    const produto = produtos.find(p => p.coddv === coddv);
+    return produto ? produto.validade : null;
+  } catch (error) {
+    console.warn('Erro ao obter validade do produto:', error);
+    return null;
+  }
+}
+
+// Formatar validade para exibição mobile
+function formatarValidadeMobile(validade) {
+  if (!validade || validade === '' || validade === null) {
+    return 'Não informada';
+  }
+  
+  // Se já está no formato MM/AAAA, retornar como está
+  if (validade.includes('/')) {
+    return validade;
+  }
+  
+  // Se está no formato MMAA, converter para MM/20AA
+  if (validade.length === 4 && /^\d{4}$/.test(validade)) {
+    return `${validade.substring(0, 2)}/20${validade.substring(2)}`;
+  }
+  
+  // Retornar como está se não conseguir formatar
+  return validade;
 }
 
 // Mobile-specific product search enhancement

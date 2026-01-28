@@ -231,4 +231,100 @@
     textarea {
         font-size: 16px !important;
     }
-}
+}    
+/* ===== Estilos Mobile para Validade dos Produtos ===== */
+    
+    /* Validade em produtos alocados - Mobile */
+    .endereco-produto .produto-validade {
+        font-size: 0.7rem !important;
+        padding: 0.2rem 0.4rem !important;
+        margin-top: 0.3rem !important;
+        border-radius: 3px !important;
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+    }
+
+    /* Status da validade - Mobile */
+    .endereco-produto .produto-validade.valida {
+        background: #dcfce7 !important;
+        color: #166534 !important;
+        border: 1px solid #bbf7d0 !important;
+    }
+
+    .endereco-produto .produto-validade.vencida {
+        background: #fef2f2 !important;
+        color: #dc2626 !important;
+        border: 1px solid #fecaca !important;
+    }
+
+    .endereco-produto .produto-validade.proxima-vencimento {
+        background: #fefce8 !important;
+        color: #ca8a04 !important;
+        border: 1px solid #fde047 !important;
+    }
+
+    .endereco-produto .produto-validade.nao-informada {
+        background: #f9fafb !important;
+        color: #6b7280 !important;
+        border: 1px solid #d1d5db !important;
+        font-style: italic;
+    }
+
+    /* Produtos em endereços - Mobile */
+    .endereco-produto {
+        padding: 0.6rem !important;
+        margin-bottom: 0.4rem !important;
+        border-radius: 6px !important;
+    }
+
+    .endereco-produto .produto-coddv {
+        font-size: 0.8rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+
+    .endereco-produto .produto-desc {
+        font-size: 0.75rem !important;
+        line-height: 1.2 !important;
+        margin-bottom: 0.2rem !important;
+    }
+
+    .endereco-produto .produto-data {
+        font-size: 0.65rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+
+    /* Ícones menores para mobile */
+    .produto-validade::before {
+        font-size: 0.8rem !important;
+    }
+
+    /* Hover/Touch feedback para mobile */
+    .endereco-produto:active .produto-validade {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+
+    /* Layout compacto para múltiplos produtos */
+    .endereco-item .endereco-produtos {
+        gap: 0.3rem !important;
+    }
+
+    /* Ajustes para telas muito pequenas */
+    @media (max-width: 480px) {
+        .endereco-produto .produto-validade {
+            font-size: 0.65rem !important;
+            padding: 0.15rem 0.3rem !important;
+        }
+
+        .endereco-produto {
+            padding: 0.5rem !important;
+        }
+    }
+
+    /* Modo paisagem mobile */
+    @media (max-width: 768px) and (orientation: landscape) {
+        .endereco-produto .produto-validade {
+            font-size: 0.75rem !important;
+        }
+    }
