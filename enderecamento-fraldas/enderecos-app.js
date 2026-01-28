@@ -429,24 +429,6 @@ class EnderecoApp {
         window.location.href = 'index.html';
     }
 
-    // Solicitar validade ao usuário
-    async solicitarValidade() {
-        let validade = '';
-        let valido = false;
-        while (!valido) {
-            validade = prompt('Informe a validade do produto (MMAA, ex: 0526):');
-            if (validade === null) return null; // Usuário cancelou
-
-            // Validar formato MMAA (Mês 01-12, Ano 00-99)
-            if (/^(0[1-9]|1[0-2])([0-9]{2})$/.test(validade)) {
-                valido = true;
-            } else {
-                alert('Formato inválido! Use MMAA (ex: 0526 para Maio/2026).');
-            }
-        }
-        return validade;
-    }
-
     // Alocar produto no endereço selecionado
     async alocarProdutoNoEndereco(endereco) {
         if (!this.produtoSelecionado) {
@@ -454,21 +436,14 @@ class EnderecoApp {
             return;
         }
 
-        // Solicitar validade (regra obrigatória)
-        const validade = await this.solicitarValidade();
-        if (!validade) return; // Cancelado pelo usuário
-
         try {
             // Alocar produto no sistema usando a mesma função que adicionar mais endereços
             // Isso permite múltiplas alocações desde o início
-            await this.sistema.adicionarProdutoEmMaisEnderecos(endereco, this.produtoSelecionado.coddv, this.produtoSelecionado.desc, validade);
+            await this.sistema.adicionarProdutoEmMaisEnderecos(endereco, this.produtoSelecionado.coddv, this.produtoSelecionado.desc);
 
             // Mostrar confirmação igual ao adicionar mais endereços
             const info = this.formatarInfoEndereco(endereco);
-            // Formatar visualização da validade
-            const validadeFmt = `${validade.substring(0, 2)}/20${validade.substring(2)}`;
-
-            await customAlert(`Produto alocado com sucesso!\n\nProduto: ${this.produtoSelecionado.desc}\nCODDV: ${this.produtoSelecionado.coddv}\nValidade: ${validadeFmt}\n\nEndereço: ${endereco}\n(${info.formatado})`, 'Sucesso');
+            await customAlert(`Produto alocado com sucesso!\n\nProduto: ${this.produtoSelecionado.desc}\nCODDV: ${this.produtoSelecionado.coddv}\n\nEndereço: ${endereco}\n(${info.formatado})`, 'Sucesso');
 
             // Atualizar estatísticas
             this.atualizarEstatisticas();
@@ -539,18 +514,12 @@ class EnderecoApp {
             return;
         }
 
-        // Solicitar validade (regra obrigatória)
-        const validade = await this.solicitarValidade();
-        if (!validade) return; // Cancelado
-
         try {
             // Adicionar produto no novo endereço usando a função específica para múltiplos
-            await this.sistema.adicionarProdutoEmMaisEnderecos(endereco, this.produtoSelecionado.coddv, this.produtoSelecionado.desc, validade);
+            await this.sistema.adicionarProdutoEmMaisEnderecos(endereco, this.produtoSelecionado.coddv, this.produtoSelecionado.desc);
 
             const info = this.formatarInfoEndereco(endereco);
-            const validadeFmt = `${validade.substring(0, 2)}/20${validade.substring(2)}`;
-
-            await customAlert(`Produto adicionado com sucesso!\n\nProduto: ${this.produtoSelecionado.desc}\nCODDV: ${this.produtoSelecionado.coddv}\nValidade: ${validadeFmt}\n\nNovo endereço: ${endereco}\n(${info.formatado})\n\nO produto continua também no endereço original: ${this.produtoSelecionado.enderecoAtual}`, 'Sucesso');
+            await customAlert(`Produto adicionado com sucesso!\n\nProduto: ${this.produtoSelecionado.desc}\nCODDV: ${this.produtoSelecionado.coddv}\n\nNovo endereço: ${endereco}\n(${info.formatado})\n\nO produto continua também no endereço original: ${this.produtoSelecionado.enderecoAtual}`, 'Sucesso');
 
             // Atualizar estatísticas
             this.atualizarEstatisticas();
