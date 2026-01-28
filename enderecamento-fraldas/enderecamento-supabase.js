@@ -97,7 +97,7 @@ class SistemaEnderecamentoSupabase {
     async carregarCache() {
         try {
             console.log('📦 [carregarCache] Iniciando carregamento do cache...');
-            
+
             // Carregar endereços com paginação para garantir que todos sejam carregados
             let todosEnderecos = [];
             let pagina = 0;
@@ -106,7 +106,7 @@ class SistemaEnderecamentoSupabase {
 
             while (temMaisRegistros) {
                 console.log(`📄 [carregarCache] Carregando página ${pagina + 1} (${pagina * tamanhoPagina} - ${(pagina + 1) * tamanhoPagina})...`);
-                
+
                 const { data: enderecosPagina, error: errEnd } = await this.client
                     .from('enderecos_fraldas')
                     .select('*')
@@ -129,7 +129,7 @@ class SistemaEnderecamentoSupabase {
                 if (enderecosPagina && enderecosPagina.length > 0) {
                     todosEnderecos = todosEnderecos.concat(enderecosPagina);
                     console.log(`✅ [carregarCache] Página ${pagina + 1}: ${enderecosPagina.length} endereços carregados`);
-                    
+
                     // Se retornou menos que o tamanho da página, não há mais registros
                     if (enderecosPagina.length < tamanhoPagina) {
                         temMaisRegistros = false;
@@ -155,7 +155,7 @@ class SistemaEnderecamentoSupabase {
 
             while (temMaisRegistros) {
                 console.log(`📄 [carregarCache] Carregando alocações página ${pagina + 1}...`);
-                
+
                 const { data: alocacoesPagina, error: errAloc } = await this.client
                     .from('alocacoes_fraldas')
                     .select('*')
@@ -168,7 +168,7 @@ class SistemaEnderecamentoSupabase {
                 if (alocacoesPagina && alocacoesPagina.length > 0) {
                     todasAlocacoes = todasAlocacoes.concat(alocacoesPagina);
                     console.log(`✅ [carregarCache] Alocações página ${pagina + 1}: ${alocacoesPagina.length} registros carregados`);
-                    
+
                     if (alocacoesPagina.length < tamanhoPagina) {
                         temMaisRegistros = false;
                     } else {
@@ -309,7 +309,7 @@ class SistemaEnderecamentoSupabase {
     /**
      * Alocar produto em endereço
      */
-    async alocarProduto(endereco, coddv, descricaoProduto, permitirMultiplos = false) {
+    async alocarProduto(endereco, coddv, descricaoProduto, validade, permitirMultiplos = false) {
         const enderecoUpper = endereco.toUpperCase();
         const sessao = this.obterDadosSessao();
 
@@ -355,6 +355,7 @@ class SistemaEnderecamentoSupabase {
                         p_endereco: enderecoUpper,
                         p_coddv: coddv,
                         p_descricao_produto: descricaoProduto,
+                        p_validade: validade,
                         p_usuario: sessao.usuario,
                         p_matricula: sessao.matricula,
                         p_cd: this.cd
@@ -391,6 +392,7 @@ class SistemaEnderecamentoSupabase {
                 coddv: coddv,
                 descricao_produto: descricaoProduto,
                 descricaoProduto: descricaoProduto, // compatibilidade
+                validade: validade,
                 data_alocacao: dataHoraBR,
                 dataAlocacao: dataHoraBR, // compatibilidade
                 usuario: sessao.usuario
@@ -402,6 +404,7 @@ class SistemaEnderecamentoSupabase {
                 endereco: enderecoUpper,
                 coddv,
                 descricaoProduto,
+                validade,
                 timestamp: new Date().toISOString()
             });
 
@@ -413,8 +416,8 @@ class SistemaEnderecamentoSupabase {
     /**
      * Adicionar produto em mais um endereço (mesmo que já alocado)
      */
-    async adicionarProdutoEmMaisEnderecos(endereco, coddv, descricaoProduto) {
-        return this.alocarProduto(endereco, coddv, descricaoProduto, true);
+    async adicionarProdutoEmMaisEnderecos(endereco, coddv, descricaoProduto, validade) {
+        return this.alocarProduto(endereco, coddv, descricaoProduto, validade, true);
     }
 
     /**
@@ -674,19 +677,19 @@ class SistemaEnderecamentoSupabase {
         console.log(`🔍 [buscarEnderecos] Iniciando busca com filtro: "${filtro}"`);
         console.log(`📦 [buscarEnderecos] Cache carregado: ${this.cacheCarregado}`);
         console.log(`📊 [buscarEnderecos] Total endereços no cache: ${Object.keys(this.cacheEnderecos).length}`);
-        
+
         // Se cache não carregado, tentar carregar
         if (!this.cacheCarregado || Object.keys(this.cacheEnderecos).length === 0) {
             console.log(`⚠️ [buscarEnderecos] Cache vazio ou não carregado, tentando carregar...`);
             await this.carregarCache();
-            
+
             // Se ainda estiver vazio após tentar carregar
             if (Object.keys(this.cacheEnderecos).length === 0) {
                 console.log(`❌ [buscarEnderecos] Cache ainda vazio após tentativa de carregamento`);
                 return [];
             }
         }
-        
+
         const filtroOriginal = filtro.trim();
         const filtroUpper = filtroOriginal.toUpperCase();
         const filtroLower = filtroOriginal.toLowerCase();
@@ -696,11 +699,11 @@ class SistemaEnderecamentoSupabase {
         // Log dos primeiros endereços do cache para debug
         const enderecosCache = Object.keys(this.cacheEnderecos);
         console.log(`🏠 [buscarEnderecos] Primeiros 10 endereços no cache:`, enderecosCache.slice(0, 10));
-        
+
         // Verificar se há endereços que começam com o filtro
         const enderecosComecamCom = enderecosCache.filter(e => e.startsWith(filtroUpper));
         console.log(`🎯 [buscarEnderecos] Endereços que começam com "${filtroUpper}":`, enderecosComecamCom.length);
-        
+
         // Log específico para PF11 se for o caso
         if (filtroUpper.includes('PF11') || filtroUpper.includes('11')) {
             const enderecosComPF11 = enderecosCache.filter(e => e.includes('PF11'));
@@ -714,9 +717,9 @@ class SistemaEnderecamentoSupabase {
             const enderecoSemPontos = endereco.replace(/\./g, '').toUpperCase();
 
             // Busca no código do endereço (múltiplas formas) - MELHORADA
-            const matchEndereco = 
+            const matchEndereco =
                 // Busca exata
-                enderecoUpper.includes(filtroUpper) || 
+                enderecoUpper.includes(filtroUpper) ||
                 // Busca começando com
                 enderecoUpper.startsWith(filtroUpper) ||
                 // Busca case insensitive
@@ -1221,9 +1224,9 @@ class SistemaEnderecamentoSupabase {
         this.cacheCarregado = false;
         this.cacheEnderecos = {};
         this.cacheAlocacoes = {};
-        
+
         await this.carregarCache();
-        
+
         console.log(`✅ [forcarRecarregamentoCompleto] Recarregamento concluído: ${Object.keys(this.cacheEnderecos).length} endereços`);
         return Object.keys(this.cacheEnderecos).length;
     }
@@ -1233,38 +1236,38 @@ class SistemaEnderecamentoSupabase {
      */
     async diagnosticarCache() {
         console.log('🔍 [diagnosticarCache] Iniciando diagnóstico...');
-        
+
         // Verificar quantos endereços existem no banco
         const { data: contagem, error } = await this.client
             .from('enderecos_fraldas')
             .select('endereco', { count: 'exact' })
             .eq('cd', this.cd)
             .eq('ativo', true);
-            
+
         if (error) {
             console.error('❌ Erro ao contar endereços no banco:', error);
             return null;
         }
-        
+
         const totalNoBanco = contagem.length;
         const totalNoCache = Object.keys(this.cacheEnderecos).length;
-        
+
         console.log(`📊 [diagnosticarCache] Endereços no banco: ${totalNoBanco}`);
         console.log(`📊 [diagnosticarCache] Endereços no cache: ${totalNoCache}`);
-        
+
         if (totalNoBanco !== totalNoCache) {
             console.warn(`⚠️ [diagnosticarCache] INCONSISTÊNCIA: Faltam ${totalNoBanco - totalNoCache} endereços no cache!`);
-            
+
             // Tentar recarregar
             console.log('🔄 [diagnosticarCache] Tentando recarregamento automático...');
             await this.forcarRecarregamentoCompleto();
-            
+
             const novoTotalNoCache = Object.keys(this.cacheEnderecos).length;
             console.log(`📊 [diagnosticarCache] Após recarregamento: ${novoTotalNoCache} endereços no cache`);
         } else {
             console.log('✅ [diagnosticarCache] Cache está consistente com o banco de dados');
         }
-        
+
         return {
             totalNoBanco,
             totalNoCache: Object.keys(this.cacheEnderecos).length,
@@ -1273,42 +1276,42 @@ class SistemaEnderecamentoSupabase {
     }
     async testarBusca(filtro) {
         console.log(`🧪 [TESTE] Iniciando teste de busca para: "${filtro}"`);
-        
+
         // Verificar estado do cache
         console.log(`📦 [TESTE] Cache carregado: ${this.cacheCarregado}`);
         console.log(`📊 [TESTE] Total endereços no cache: ${Object.keys(this.cacheEnderecos).length}`);
-        
+
         // Mostrar alguns endereços do cache
         const enderecosCache = Object.keys(this.cacheEnderecos);
         console.log(`🏠 [TESTE] Primeiros 20 endereços no cache:`, enderecosCache.slice(0, 20));
-        
+
         // Buscar endereços específicos relacionados ao filtro
         const filtroUpper = filtro.toUpperCase();
-        const enderecosRelacionados = enderecosCache.filter(e => 
-            e.includes(filtroUpper) || 
+        const enderecosRelacionados = enderecosCache.filter(e =>
+            e.includes(filtroUpper) ||
             e.startsWith(filtroUpper) ||
             e.replace(/\./g, '').includes(filtroUpper.replace(/\./g, ''))
         );
         console.log(`🎯 [TESTE] Endereços relacionados a "${filtro}" no cache:`, enderecosRelacionados.slice(0, 10));
-        
+
         // Executar busca
         const resultados = await this.buscarEnderecos(filtro);
-        
+
         // Mostrar resultados
         console.log(`✅ [TESTE] Resultados da busca:`, resultados.length);
         console.log(`📋 [TESTE] Endereços encontrados:`, resultados.map(r => r.endereco));
-        
+
         // Verificar se endereços esperados foram encontrados
         const enderecosEncontrados = resultados.map(r => r.endereco);
         const enderecosEsperados = enderecosRelacionados;
         const enderecosNaoEncontrados = enderecosEsperados.filter(e => !enderecosEncontrados.includes(e));
-        
+
         if (enderecosNaoEncontrados.length > 0) {
             console.warn(`⚠️ [TESTE] Endereços esperados mas não encontrados:`, enderecosNaoEncontrados);
         } else {
             console.log(`✅ [TESTE] Todos os endereços esperados foram encontrados!`);
         }
-        
+
         return {
             filtro,
             cacheCarregado: this.cacheCarregado,
@@ -1328,10 +1331,10 @@ class SistemaEnderecamentoSupabase {
         const prefixoUpper = prefixo.toUpperCase();
         const enderecosCache = Object.keys(this.cacheEnderecos);
         const enderecosComPrefixo = enderecosCache.filter(e => e.startsWith(prefixoUpper));
-        
+
         console.log(`📋 [DEBUG] Endereços que começam com "${prefixo}":`, enderecosComPrefixo.length);
         console.log(`🏠 [DEBUG] Lista:`, enderecosComPrefixo.slice(0, 20));
-        
+
         return enderecosComPrefixo;
     }
 }
