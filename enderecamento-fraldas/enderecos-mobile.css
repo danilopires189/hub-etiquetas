@@ -143,6 +143,76 @@
         font-size: 0.75rem;
     }
 
+    /* Mobile Address List Items */
+    .mobile-address-item {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-address-item:hover,
+    .mobile-address-item:active {
+        border-color: var(--brand-blue);
+        background: #f8fafc;
+        transform: translateY(-1px);
+    }
+
+    .mobile-address-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .mobile-address-code {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: var(--brand-blue);
+        font-size: 0.9rem;
+    }
+
+    .mobile-address-status {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .mobile-address-status.available {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .mobile-address-info {
+        color: var(--muted);
+        font-size: 0.875rem;
+    }
+
+    .mobile-address-description {
+        font-weight: 500;
+    }
+
+    /* Transfer specific styles */
+    .mobile-transfer-info {
+        background: #fef3c7;
+        border: 1px solid #fbbf24;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .mobile-transfer-info p {
+        margin: 0;
+        color: #92400e;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
     /* Animação para aparecer a seção de validade */
     @keyframes slideInUp {
         from {

@@ -1193,7 +1193,7 @@ async function executarAlocacaoMobile() {
     if (status.multiplos) {
       // Multiple addresses - show transfer popup
       console.log('📱 Produto com múltiplos endereços - abrindo popup de transferência');
-      abrirPopupTransferencia();
+      abrirPopupTransferencia(status.enderecos);
     } else {
       // Single address - direct transfer
       console.log('📱 Produto com endereço único - confirmando transferência');
@@ -1468,6 +1468,82 @@ function showMobileValidityFeedback(message, type) {
   feedback.textContent = message;
   feedback.className = `mobile-validity-feedback ${type}`;
   feedback.style.display = 'block';
+}
+
+// Mobile transfer modal functions
+function openMobileTransferModal(enderecos) {
+  console.log('📱 Abrindo modal mobile de transferência com endereços:', enderecos);
+
+  if (!produtoAtual) {
+    showMobileToast('Nenhum produto selecionado.', 'error');
+    return;
+  }
+
+  // Update product info
+  const productDesc = $('#mobileTransferProductDesc');
+  const productCoddv = $('#mobileTransferProductCoddv');
+  
+  if (productDesc) productDesc.textContent = produtoAtual.DESC;
+  if (productCoddv) productCoddv.textContent = produtoAtual.CODDV;
+
+  // Populate address list
+  populateMobileTransferAddressList(enderecos);
+
+  // Show modal
+  const modal = $('#mobileTransferModal');
+  if (modal) {
+    modal.classList.remove('hide');
+    mobileModalManager.openModal('mobileTransferModal');
+  }
+}
+
+function closeMobileTransferModal() {
+  console.log('📱 Fechando modal mobile de transferência');
+  
+  const modal = $('#mobileTransferModal');
+  if (modal) {
+    modal.classList.add('hide');
+    mobileModalManager.closeModal('mobileTransferModal');
+  }
+}
+
+function populateMobileTransferAddressList(enderecos) {
+  const addressList = $('#mobileTransferAddressList');
+  if (!addressList) return;
+
+  addressList.innerHTML = '';
+
+  enderecos.forEach(endereco => {
+    const info = formatarInfoEndereco(endereco);
+    
+    const addressItem = document.createElement('div');
+    addressItem.className = 'mobile-address-item';
+    addressItem.onclick = () => selectTransferSourceAddress(endereco);
+    
+    addressItem.innerHTML = `
+      <div class="mobile-address-header">
+        <div class="mobile-address-code">${endereco}</div>
+        <div class="mobile-address-status available">Origem</div>
+      </div>
+      <div class="mobile-address-info">
+        <div class="mobile-address-description">${info.formatado}</div>
+      </div>
+    `;
+    
+    addressList.appendChild(addressItem);
+  });
+}
+
+function selectTransferSourceAddress(sourceAddress) {
+  console.log('📱 Endereço de origem selecionado:', sourceAddress);
+  
+  // Close transfer modal
+  closeMobileTransferModal();
+  
+  // Open address modal for destination selection
+  setTimeout(() => {
+    openMobileAddressModal('transfer', sourceAddress);
+  }, 300);
 }
 
 // Hide mobile validity feedback
@@ -3499,6 +3575,13 @@ function transferirProduto() {
 function abrirPopupTransferencia(enderecos) {
   if (!produtoAtual) return;
 
+  if (isMobileDevice()) {
+    // Use mobile modal for transfer selection
+    openMobileTransferModal(enderecos);
+    return;
+  }
+
+  // Desktop version
   // Atualizar informações do produto no popup
   $('#popupTransferenciaProdutoDesc').textContent = produtoAtual.DESC;
   $('#popupTransferenciaProdutoCoddv').textContent = produtoAtual.CODDV;

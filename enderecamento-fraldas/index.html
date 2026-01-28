@@ -524,6 +524,34 @@
             </div>
         </div>
 
+        <!-- Mobile Address Selection Modal for Transfer -->
+        <div id="mobileTransferModal" class="mobile-modal-overlay hide">
+            <div class="mobile-modal">
+                <div class="mobile-modal-header">
+                    <h3 id="mobileTransferTitle">Selecionar Endereço de Origem</h3>
+                    <button class="mobile-modal-close" onclick="closeMobileTransferModal()">×</button>
+                </div>
+                <div class="mobile-modal-content">
+                    <div class="mobile-product-info" id="mobileTransferProductInfo">
+                        <strong>Produto:</strong> <span id="mobileTransferProductDesc"></span><br>
+                        <strong>CODDV:</strong> <span id="mobileTransferProductCoddv"></span>
+                    </div>
+
+                    <div class="mobile-transfer-info">
+                        <p>Este produto está alocado em múltiplos endereços. Selecione de qual endereço deseja
+                            transferir:</p>
+                    </div>
+
+                    <div class="mobile-address-list" id="mobileTransferAddressList">
+                        <!-- Address list will be populated dynamically -->
+                    </div>
+                </div>
+                <div class="mobile-modal-footer">
+                    <button class="btn btn-ghost" onclick="closeMobileTransferModal()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Mobile Confirmation Modal -->
         <div id="mobileConfirmationModal" class="mobile-modal-overlay hide">
             <div class="mobile-modal">
