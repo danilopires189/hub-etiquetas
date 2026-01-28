@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Hub de Etiquetas</title>
+    <link rel="icon" href="../assets/pm.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../shared/design-system.css">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-header {
+            margin-bottom: 30px;
+        }
+
+        .login-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 8px 0;
+        }
+
+        .login-subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .login-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 20px;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #374151;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="../assets/pm.png" alt="Pague Menos" class="login-logo" onerror="this.style.display='none'">
+            <h1 class="login-title">Painel Administrativo</h1>
+            <p class="login-subtitle">Hub de Etiquetas</p>
+        </div>
+
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    class="form-input" 
+                    placeholder="seu@email.com"
+                    required
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Senha</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    class="form-input" 
+                    placeholder="••••••••"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <div class="btn-content">
+                    <div class="loading-spinner" id="loadingSpinner"></div>
+                    <span id="btnText">Entrar</span>
+                </div>
+            </button>
+        </form>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <a href="../index.html" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5"/>
+                <path d="M12 19l-7-7 7-7"/>
+            </svg>
+            Voltar ao Hub
+        </a>
+    </div>
+
+    <script type="module">
+        import supabaseManager from '../supabase/client.js';
+        import authManager from '../supabase/auth.js';
+        import { ADMIN_CONFIG } from '../supabase/config.js';
+
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const btnText = document.getElementById('btnText');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        // Inicializar sistema de autenticação
+        async function initializeAuth() {
+            try {
+                await supabaseManager.initialize();
+                await authManager.initialize();
+                
+                // Verificar se já está logado
+                const isAuth = await authManager.isAuthenticated();
+                if (isAuth) {
+                    console.log('✅ Sessão ativa encontrada, redirecionando...');
+                    showSuccess('Sessão ativa encontrada. Redirecionando...');
+                    setTimeout(() => {
+                        window.location.href = './dashboard.html';
+                    }, 1000);
+                    return;
+                }
+                
+                console.log('ℹ️ Nenhuma sessão ativa, aguardando login');
+            } catch (error) {
+                console.error('❌ Erro na inicialização:', error);
+                showError('Erro na inicialização do sistema. Tente recarregar a página.');
+            }
+        }
+
+        // Mostrar mensagem de erro
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        // Mostrar mensagem de sucesso
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        // Limpar mensagens
+        function clearMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+
+        // Configurar estado de loading
+        function setLoading(loading) {
+            loginBtn.disabled = loading;
+            loadingSpinner.style.display = loading ? 'block' : 'none';
+            btnText.textContent = loading ? 'Entrando...' : 'Entrar';
+        }
+
+        // Validar campos do formulário
+        function validateForm(email, password) {
+            if (!email || !password) {
+                showError('Por favor, preencha todos os campos');
+                return false;
+            }
+            
+            if (!email.includes('@')) {
+                showError('Por favor, insira um email válido');
+                return false;
+            }
+            
+            if (password.length < 6) {
+                showError('A senha deve ter pelo menos 6 caracteres');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Handler do formulário de login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!validateForm(email, password)) {
+                return;
+            }
+
+            setLoading(true);
+            clearMessages();
+
+            try {
+                console.log('🔐 Tentando fazer login...');
+                
+                // Usar o AuthManager para fazer login
+                const result = await authManager.login(email, password);
+
+                if (result.success) {
+                    showSuccess('Login realizado com sucesso! Redirecionando...');
+                    
+                    // Mostrar informações da sessão
+                    const sessionInfo = authManager.getSessionInfo();
+                    if (sessionInfo) {
+                        console.log(`✅ Sessão criada. Expira em: ${sessionInfo.timeRemainingFormatted}`);
+                    }
+                    
+                    // Redirecionar após 1.5 segundos
+                    setTimeout(() => {
+                        window.location.href = './dashboard.html';
+                    }, 1500);
+                } else {
+                    // Mostrar erro específico baseado no tipo
+                    let errorMsg = result.error || 'Erro desconhecido';
+                    
+                    if (errorMsg.includes('Invalid login credentials') || errorMsg.includes('Credenciais inválidas')) {
+                        errorMsg = 'Email ou senha incorretos';
+                    } else if (errorMsg.includes('Email not confirmed')) {
+                        errorMsg = 'Email não confirmado. Verifique sua caixa de entrada.';
+                    } else if (errorMsg.includes('Too many requests')) {
+                        errorMsg = 'Muitas tentativas. Aguarde alguns minutos.';
+                    }
+                    
+                    showError(errorMsg);
+                    console.error('❌ Falha no login:', result.error);
+                }
+            } catch (error) {
+                console.error('❌ Erro inesperado no login:', error);
+                showError('Erro na conexão. Verifique sua internet e tente novamente.');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        // Pré-preencher email se for o admin configurado
+        document.getElementById('email').value = ADMIN_CONFIG.email;
+
+        // Focar no campo de senha se email já estiver preenchido
+        if (document.getElementById('email').value) {
+            document.getElementById('password').focus();
+        }
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', initializeAuth);
+
+        // Também inicializar imediatamente se DOM já estiver pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeAuth);
+        } else {
+            initializeAuth();
+        }
+    </script>
+</body>
+</html>

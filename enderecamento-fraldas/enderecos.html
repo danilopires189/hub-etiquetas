@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pague Menos • Gestão de Endereços</title>
+    <link rel="icon" href="../assets/pm.png" />
+    <link rel="stylesheet" href="../shared/design-system.css">
+    <link rel="stylesheet" href="../shared/components.css">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./enderecos.css">
+    <link rel="stylesheet" href="./scanner.css">
+    <!-- Otimizações Mobile - Carrega por último para sobrescrever estilos pesados -->
+    <link rel="stylesheet" href="./enderecos-mobile.css">
+</head>
+
+<body class="fade-in">
+
+    <div class="screen-container">
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logos">
+                    <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary"
+                        onerror="this.style.display='none'">
+                    <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary"
+                        onerror="this.style.display='none'">
+                </div>
+                <div class="brand-text">
+                    <h1>Pague Menos</h1>
+                    <span class="app-subtitle">Gestão de Endereços</span>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="btnVoltar" class="btn btn-ghost" onclick="window.location.href='index.html'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5" />
+                        <path d="M12 19l-7-7 7-7" />
+                    </svg>
+                    Voltar
+                </button>
+                <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9,22 9,12 15,12 15,22" />
+                    </svg>
+                    Hub
+                </button>
+            </div>
+        </header>
+
+        <!-- Painel de Estatísticas -->
+        <section class="stats-panel animate-slide-in-up">
+            <div class="stats-header">
+                <h3>Estatísticas</h3>
+                <button id="btnRefreshStats" class="btn btn-ghost btn-sm"
+                    onclick="enderecoApp.forcarAtualizacaoCompleta()" title="Atualizar dados do banco">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23,4 23,10 17,10" />
+                        <polyline points="1,20 1,14 7,14" />
+                        <path d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15" />
+                    </svg>
+                    Atualizar
+                </button>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalCadastrados">0</div>
+                        <div class="stat-label">Endereços Cadastrados</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔴</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalOcupados">0</div>
+                        <div class="stat-label">Endereços Ocupados</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🟢</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalDisponiveis">0</div>
+                        <div class="stat-label">Endereços Disponíveis</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="percentualOcupacao">0%</div>
+                        <div class="stat-label">Taxa de Ocupação</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Abas de Navegação -->
+        <section class="tabs-container">
+            <div class="tabs-nav">
+
+                <button class="tab-btn active" data-tab="listar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 6h13" />
+                        <path d="M8 12h13" />
+                        <path d="M8 18h13" />
+                        <path d="M3 6h.01" />
+                        <path d="M3 12h.01" />
+                        <path d="M3 18h.01" />
+                    </svg>
+                    Listar Endereços
+                </button>
+                <button class="tab-btn" data-tab="buscar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg>
+                    Buscar Endereços
+                </button>
+                <button class="tab-btn" data-tab="historico">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12,6 12,12 16,14" />
+                    </svg>
+                    Histórico
+                </button>
+            </div>
+
+            <!-- Aba Cadastrar -->
+
+
+            <!-- Aba Listar -->
+            <div class="tab-content active" id="tab-listar">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Lista de Endereços</h2>
+                        <div class="filter-controls">
+                            <select id="filtroStatus" class="filter-select">
+                                <option value="todos">Todos os Status</option>
+                                <option value="disponivel">Disponíveis</option>
+                                <option value="ocupado">Ocupados</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="enderecos-lista" id="enderecosLista">
+                        <!-- Lista será preenchida dinamicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Buscar -->
+            <div class="tab-content" id="tab-buscar">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Buscar Endereços</h2>
+                    </div>
+
+                    <div class="search-controls">
+                        <div style="position: relative; flex: 1;">
+                            <input type="text" id="campoBusca" placeholder="Digite parte do endereço ou descrição..."
+                                class="search-input" style="padding-left: 45px; width: 100%;">
+                            <div class="scanner-icon"
+                                style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; z-index: 10;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2-2h3">
+                                    </path>
+                                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        <button type="button" id="btnBuscar" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="m21 21-4.35-4.35" />
+                            </svg>
+                            Buscar
+                        </button>
+                    </div>
+
+                    <div class="resultados-busca enderecos-lista" id="resultadosBusca">
+                        <!-- Resultados serão preenchidos dinamicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aba Histórico -->
+            <div class="tab-content" id="tab-historico">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Histórico de Operações</h2>
+                    </div>
+
+                    <div class="historico-enderecos" id="historicoEnderecos">
+                        <!-- Histórico será preenchido dinamicamente -->
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.33.1/dist/umd/supabase.js"></script>
+
+    <!-- Inicialização do Supabase -->
+    <script type="module" src="../supabase/init.js"></script>
+
+    <!-- Base de dados local (produtos) -->
+    <script src="../data_base/BASE_BARRAS.js"></script>
+
+    <!-- Contador global -->
+    <script src="../js/contador-global-centralizado.js"></script>
+
+    <!-- Sistema de Endereçamento com Supabase (Substitui o enderecamento.js) -->
+    <script type="module" src="./enderecamento-supabase.js"></script>
+
+    <!-- Aplicações de endereços -->
+    <script src="./enderecos-app.js"></script>
+
+
+    <!-- Modal de Confirmação Customizado -->
+    <div id="modalConfirmacao" class="modal-overlay">
+        <div class="modal animate-pop-in">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalConfirmTitle">Confirmação</h3>
+                <button class="modal-close" id="btnModalConfirmClose">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalConfirmMessage">Deseja realmente realizar esta operação?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="btnModalConfirmCancel">Cancelar</button>
+                <button class="btn btn-primary" id="btnModalConfirmOk">Confirmar</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Scanner Mobile -->
+    <script src="./scanner.js"></script>
+
+
+</body>
+
+</html>

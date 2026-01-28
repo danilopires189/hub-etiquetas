@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Restauração de Histórico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .status-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .status-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .module-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        
+        .module-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+        
+        .module-card .entries {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+        
+        .backup-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .backup-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .backup-item:last-child {
+            border-bottom: none;
+        }
+        
+        .backup-info {
+            flex: 1;
+        }
+        
+        .backup-info h4 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .backup-info p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Sistema de Restauração de Histórico</h1>
+            <p>Restaure o histórico de etiquetas do Supabase para o navegador</p>
+        </div>
+        
+        <div class="content">
+            <!-- Status do Sistema -->
+            <div class="section">
+                <h2>📊 Status do Sistema</h2>
+                <div class="status-grid">
+                    <div class="status-card">
+                        <h3>Sistema</h3>
+                        <div class="value" id="system-status">Carregando...</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Supabase</h3>
+                        <div class="value" id="supabase-status">Carregando...</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Backups</h3>
+                        <div class="value" id="backups-count">Carregando...</div>
+                    </div>
+                </div>
+                <button class="btn" onclick="updateSystemStatus()">🔄 Atualizar Status</button>
+            </div>
+            
+            <!-- Módulos -->
+            <div class="section">
+                <h2>📋 Histórico dos Módulos</h2>
+                <div class="modules-grid" id="modules-grid">
+                    <!-- Será preenchido dinamicamente -->
+                </div>
+                <button class="btn" onclick="updateModulesStatus()">🔄 Atualizar Módulos</button>
+            </div>
+            
+            <!-- Restauração Individual -->
+            <div class="section">
+                <h2>🔄 Restauração Individual</h2>
+                <div class="form-group">
+                    <label for="module-select">Selecionar Módulo:</label>
+                    <select id="module-select">
+                        <option value="">Selecione um módulo...</option>
+                        <option value="caixa">Caixa</option>
+                        <option value="termo">Termo</option>
+                        <option value="placas">Placas</option>
+                        <option value="avulso">Avulso</option>
+                        <option value="enderec">Endereçamento</option>
+                        <option value="transferencia">Transferência</option>
+                        <option value="etiqueta-mercadoria">Etiqueta Mercadoria</option>
+                        <option value="inventario">Inventário</option>
+                        <option value="pedido-direto">Pedido Direto</option>
+                    </select>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="overwrite-local">
+                    <label for="overwrite-local">Substituir histórico local completamente</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="create-backup" checked>
+                    <label for="create-backup">Criar backup do histórico local atual</label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="max-entries">Máximo de entradas (deixe vazio para todas):</label>
+                    <input type="number" id="max-entries" min="1" max="1000" placeholder="Ex: 100">
+                </div>
+                
+                <button class="btn" onclick="restoreIndividualModule()" id="restore-individual-btn">
+                    🔄 Restaurar Módulo Selecionado
+                </button>
+            </div>
+            
+            <!-- Restauração Completa -->
+            <div class="section">
+                <h2>🔄 Restauração Completa</h2>
+                <p style="margin-bottom: 20px;">
+                    Restaura o histórico de todos os módulos de uma vez. 
+                    <strong>Use com cuidado!</strong>
+                </p>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="overwrite-all">
+                    <label for="overwrite-all">Substituir todo o histórico local</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="backup-all" checked>
+                    <label for="backup-all">Criar backup de todos os históricos locais</label>
+                </div>
+                
+                <button class="btn btn-warning" onclick="restoreAllModules()" id="restore-all-btn">
+                    ⚠️ Restaurar Todos os Módulos
+                </button>
+            </div>
+            
+            <!-- Gerenciamento de Backups -->
+            <div class="section">
+                <h2>💾 Gerenciamento de Backups</h2>
+                <div class="backup-list" id="backup-list">
+                    <!-- Será preenchido dinamicamente -->
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="btn" onclick="updateBackupsList()">🔄 Atualizar Lista</button>
+                    <button class="btn btn-danger" onclick="cleanOldBackups()">🧹 Limpar Backups Antigos</button>
+                </div>
+            </div>
+            
+            <!-- Log de Atividades -->
+            <div class="section">
+                <h2>📝 Log de Atividades</h2>
+                <div class="log" id="activity-log">Sistema carregado. Aguardando ações...</div>
+                <button class="btn" onclick="clearLog()">🧹 Limpar Log</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./history-restoration-system.js"></script>
+    <script>
+        // Estado da aplicação
+        let systemInitialized = false;
+        
+        // Função para log
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('activity-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = `[${timestamp}]`;
+            
+            let color = '#00ff00';
+            if (type === 'error') color = '#ff6b6b';
+            if (type === 'warning') color = '#ffd43b';
+            if (type === 'success') color = '#51cf66';
+            
+            logElement.innerHTML += `\n<span style="color: ${color}">${prefix} ${message}</span>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        // Função para limpar log
+        function clearLog() {
+            document.getElementById('activity-log').innerHTML = 'Log limpo.';
+        }
+        
+        // Função para mostrar loading
+        function showLoading(buttonId) {
+            const button = document.getElementById(buttonId);
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="loading"></span> Processando...';
+            button.disabled = true;
+            return originalText;
+        }
+        
+        // Função para esconder loading
+        function hideLoading(buttonId, originalText) {
+            const button = document.getElementById(buttonId);
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+        
+        // Atualizar status do sistema
+        async function updateSystemStatus() {
+            log('Atualizando status do sistema...');
+            
+            try {
+                // Verificar se o sistema está inicializado
+                if (window.historyRestorationSystem) {
+                    if (!window.historyRestorationSystem.initialized) {
+                        await window.historyRestorationSystem.initialize();
+                    }
+                    systemInitialized = window.historyRestorationSystem.initialized;
+                }
+                
+                // Atualizar elementos da UI
+                document.getElementById('system-status').textContent = systemInitialized ? '✅ Ativo' : '❌ Inativo';
+                document.getElementById('supabase-status').textContent = 
+                    (window.supabaseManager && window.supabaseManager.isConnected()) ? '✅ Conectado' : '❌ Desconectado';
+                
+                // Contar backups
+                const backups = window.listHistoryBackups ? window.listHistoryBackups() : [];
+                document.getElementById('backups-count').textContent = backups.length;
+                
+                log('Status do sistema atualizado', 'success');
+                
+            } catch (error) {
+                log(`Erro ao atualizar status: ${error.message}`, 'error');
+            }
+        }
+        
+        // Atualizar status dos módulos
+        async function updateModulesStatus() {
+            log('Atualizando status dos módulos...');
+            
+            try {
+                const stats = window.getRestorationStats ? window.getRestorationStats() : null;
+                const modulesGrid = document.getElementById('modules-grid');
+                
+                if (!stats) {
+                    modulesGrid.innerHTML = '<p>Sistema de restauração não disponível</p>';
+                    return;
+                }
+                
+                modulesGrid.innerHTML = '';
+                
+                Object.entries(stats.modules).forEach(([moduleName, moduleStats]) => {
+                    const moduleCard = document.createElement('div');
+                    moduleCard.className = 'module-card';
+                    moduleCard.innerHTML = `
+                        <h4>${moduleName}</h4>
+                        <div class="entries">${moduleStats.localEntries}</div>
+                        <p>entradas locais</p>
+                        <button class="btn" onclick="restoreSpecificModule('${moduleName}')">
+                            🔄 Restaurar
+                        </button>
+                    `;
+                    modulesGrid.appendChild(moduleCard);
+                });
+                
+                log('Status dos módulos atualizado', 'success');
+                
+            } catch (error) {
+                log(`Erro ao atualizar módulos: ${error.message}`, 'error');
+            }
+        }
+        
+        // Restaurar módulo específico
+        async function restoreSpecificModule(moduleName) {
+            log(`Iniciando restauração do módulo ${moduleName}...`);
+            
+            try {
+                if (!window.restoreModuleHistory) {
+                    throw new Error('Sistema de restauração não disponível');
+                }
+                
+                const result = await window.restoreModuleHistory(moduleName, {
+                    backup: true,
+                    overwrite: false
+                });
+                
+                if (result.success) {
+                    log(`✅ Módulo ${moduleName} restaurado: ${result.restored} entradas`, 'success');
+                    updateModulesStatus();
+                } else {
+                    log(`❌ Falha na restauração do módulo ${moduleName}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`Erro na restauração do módulo ${moduleName}: ${error.message}`, 'error');
+            }
+        }
+        
+        // Restaurar módulo individual
+        async function restoreIndividualModule() {
+            const moduleName = document.getElementById('module-select').value;
+            if (!moduleName) {
+                alert('Por favor, selecione um módulo');
+                return;
+            }
+            
+            const originalText = showLoading('restore-individual-btn');
+            
+            try {
+                log(`Iniciando restauração individual do módulo ${moduleName}...`);
+                
+                const options = {
+                    overwrite: document.getElementById('overwrite-local').checked,
+                    backup: document.getElementById('create-backup').checked,
+                    maxEntries: document.getElementById('max-entries').value ? 
+                        parseInt(document.getElementById('max-entries').value) : null
+                };
+                
+                log(`Opções: ${JSON.stringify(options)}`);
+                
+                const result = await window.restoreModuleHistory(moduleName, options);
+                
+                if (result.success) {
+                    log(`✅ Restauração concluída: ${result.restored} entradas restauradas`, 'success');
+                    if (result.backup) {
+                        log(`💾 Backup criado: ${result.backup.entries} entradas`, 'info');
+                    }
+                    updateModulesStatus();
+                    updateBackupsList();
+                } else {
+                    log(`❌ Falha na restauração: ${result.message || 'Erro desconhecido'}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`Erro na restauração: ${error.message}`, 'error');
+            } finally {
+                hideLoading('restore-individual-btn', originalText);
+            }
+        }
+        
+        // Restaurar todos os módulos
+        async function restoreAllModules() {
+            if (!confirm('Tem certeza que deseja restaurar TODOS os módulos? Esta ação pode substituir dados locais.')) {
+                return;
+            }
+            
+            const originalText = showLoading('restore-all-btn');
+            
+            try {
+                log('Iniciando restauração completa de todos os módulos...');
+                
+                const options = {
+                    overwrite: document.getElementById('overwrite-all').checked,
+                    backup: document.getElementById('backup-all').checked
+                };
+                
+                log(`Opções: ${JSON.stringify(options)}`);
+                
+                const result = await window.restoreAllHistory(options);
+                
+                if (result.success) {
+                    log(`✅ Restauração completa concluída: ${result.summary.totalRestored} entradas`, 'success');
+                    log(`📊 Módulos processados: ${result.summary.successful}/${result.summary.total}`, 'info');
+                    
+                    // Mostrar detalhes por módulo
+                    Object.entries(result.modules).forEach(([moduleName, moduleResult]) => {
+                        if (moduleResult.success) {
+                            log(`  ✅ ${moduleName}: ${moduleResult.restored} entradas`, 'success');
+                        } else {
+                            log(`  ❌ ${moduleName}: ${moduleResult.error}`, 'error');
+                        }
+                    });
+                    
+                    updateModulesStatus();
+                    updateBackupsList();
+                } else {
+                    log('❌ Falha na restauração completa', 'error');
+                }
+                
+            } catch (error) {
+                log(`Erro na restauração completa: ${error.message}`, 'error');
+            } finally {
+                hideLoading('restore-all-btn', originalText);
+            }
+        }
+        
+        // Atualizar lista de backups
+        function updateBackupsList() {
+            log('Atualizando lista de backups...');
+            
+            try {
+                const backups = window.listHistoryBackups ? window.listHistoryBackups() : [];
+                const backupList = document.getElementById('backup-list');
+                
+                if (backups.length === 0) {
+                    backupList.innerHTML = '<div class="backup-item"><p>Nenhum backup encontrado</p></div>';
+                    return;
+                }
+                
+                backupList.innerHTML = '';
+                
+                backups.forEach(backup => {
+                    const backupItem = document.createElement('div');
+                    backupItem.className = 'backup-item';
+                    backupItem.innerHTML = `
+                        <div class="backup-info">
+                            <h4>${backup.moduleName}</h4>
+                            <p>${backup.date} - ${backup.entries} entradas</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-success" onclick="restoreFromBackup('${backup.key}')">
+                                🔄 Restaurar
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteBackup('${backup.key}')">
+                                🗑️ Excluir
+                            </button>
+                        </div>
+                    `;
+                    backupList.appendChild(backupItem);
+                });
+                
+                log(`Lista de backups atualizada: ${backups.length} backups`, 'success');
+                
+            } catch (error) {
+                log(`Erro ao atualizar lista de backups: ${error.message}`, 'error');
+            }
+        }
+        
+        // Restaurar de backup
+        async function restoreFromBackup(backupKey) {
+            if (!confirm('Tem certeza que deseja restaurar este backup? Isso substituirá o histórico atual.')) {
+                return;
+            }
+            
+            try {
+                log(`Restaurando backup: ${backupKey}...`);
+                
+                const result = window.restoreFromBackup(backupKey);
+                
+                log(`✅ Backup restaurado: ${result.entries} entradas`, 'success');
+                updateModulesStatus();
+                
+            } catch (error) {
+                log(`Erro ao restaurar backup: ${error.message}`, 'error');
+            }
+        }
+        
+        // Excluir backup
+        function deleteBackup(backupKey) {
+            if (!confirm('Tem certeza que deseja excluir este backup? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+            
+            try {
+                localStorage.removeItem(backupKey);
+                log(`🗑️ Backup excluído: ${backupKey}`, 'warning');
+                updateBackupsList();
+                
+            } catch (error) {
+                log(`Erro ao excluir backup: ${error.message}`, 'error');
+            }
+        }
+        
+        // Limpar backups antigos
+        function cleanOldBackups() {
+            if (!confirm('Tem certeza que deseja limpar backups com mais de 7 dias?')) {
+                return;
+            }
+            
+            try {
+                // Implementar limpeza de backups antigos
+                const backups = window.listHistoryBackups();
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - 7);
+                
+                let cleaned = 0;
+                backups.forEach(backup => {
+                    const backupDate = new Date(backup.timestamp);
+                    if (backupDate < cutoffDate) {
+                        localStorage.removeItem(backup.key);
+                        cleaned++;
+                    }
+                });
+                
+                log(`🧹 Backups antigos removidos: ${cleaned}`, 'warning');
+                updateBackupsList();
+                
+            } catch (error) {
+                log(`Erro ao limpar backups: ${error.message}`, 'error');
+            }
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', async () => {
+            log('Interface de restauração carregada');
+            
+            // Aguardar sistemas estarem prontos
+            setTimeout(async () => {
+                await updateSystemStatus();
+                await updateModulesStatus();
+                updateBackupsList();
+                
+                log('Interface inicializada com sucesso', 'success');
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

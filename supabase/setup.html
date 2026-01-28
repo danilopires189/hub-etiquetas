@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Supabase - Hub de Etiquetas</title>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+            color: #1f2937;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        h1 {
+            color: #059669;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #059669;
+        }
+        
+        .step h3 {
+            margin-top: 0;
+            color: #059669;
+        }
+        
+        .code-block {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .button {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        
+        .button:hover {
+            background: #047857;
+        }
+        
+        .button.secondary {
+            background: #6b7280;
+        }
+        
+        .button.secondary:hover {
+            background: #4b5563;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        
+        .credentials {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        
+        .credentials strong {
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Setup Supabase - Hub de Etiquetas</h1>
+        <p class="subtitle">Configure o banco de dados Supabase para integração completa</p>
+        
+        <div class="step">
+            <h3>📋 Passo 1: Executar Schema SQL</h3>
+            <p>Copie e execute o SQL abaixo no <strong>SQL Editor</strong> do seu projeto Supabase:</p>
+            <button class="button" onclick="copySQL()">📋 Copiar SQL</button>
+            <button class="button secondary" onclick="openSupabase()">🔗 Abrir Supabase</button>
+            
+            <div class="code-block" id="sqlCode">
+-- Carregando schema SQL...
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>🔐 Passo 2: Configurar Usuário Admin</h3>
+            <p>Crie o usuário administrativo no Supabase Auth:</p>
+            
+            <div class="credentials">
+                <strong>Email:</strong> danilo_pires189@hotmail.com<br>
+                <strong>Senha:</strong> Danilo189
+            </div>
+            
+            <button class="button" onclick="createAdminUser()">👤 Criar Usuário Admin</button>
+            <div id="adminStatus"></div>
+        </div>
+        
+        <div class="step">
+            <h3>✅ Passo 3: Testar Conexão</h3>
+            <p>Teste a conexão e inicialize os dados:</p>
+            
+            <button class="button" onclick="testConnection()">🔌 Testar Conexão</button>
+            <button class="button" onclick="initializeData()">🗄️ Inicializar Dados</button>
+            <div id="connectionStatus"></div>
+        </div>
+        
+        <div class="step">
+            <h3>📊 Passo 4: Migrar Dados Existentes</h3>
+            <p>Migre os dados históricos do localStorage para Supabase:</p>
+            
+            <button class="button" onclick="migrateData()">📦 Migrar Dados</button>
+            <div id="migrationStatus"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import supabaseManager from './client.js';
+        import { ADMIN_CONFIG } from './config.js';
+        
+        // Carregar schema SQL
+        async function loadSQL() {
+            try {
+                const response = await fetch('./schema.sql');
+                const sql = await response.text();
+                document.getElementById('sqlCode').textContent = sql;
+            } catch (error) {
+                document.getElementById('sqlCode').textContent = 'Erro ao carregar schema.sql';
+                console.error('Erro ao carregar SQL:', error);
+            }
+        }
+        
+        // Copiar SQL para clipboard
+        window.copySQL = async function() {
+            const sqlCode = document.getElementById('sqlCode').textContent;
+            try {
+                await navigator.clipboard.writeText(sqlCode);
+                showStatus('connectionStatus', 'SQL copiado para clipboard!', 'success');
+            } catch (error) {
+                console.error('Erro ao copiar:', error);
+                showStatus('connectionStatus', 'Erro ao copiar SQL', 'error');
+            }
+        };
+        
+        // Abrir Supabase
+        window.openSupabase = function() {
+            window.open('https://jomwkkhhhekbyanftpoc.supabase.co', '_blank');
+        };
+        
+        // Criar usuário admin
+        window.createAdminUser = async function() {
+            showStatus('adminStatus', 'Criando usuário admin...', 'info');
+            
+            try {
+                await supabaseManager.initialize();
+                
+                const result = await supabaseManager.client.auth.signUp({
+                    email: ADMIN_CONFIG.email,
+                    password: ADMIN_CONFIG.password
+                });
+                
+                if (result.error) {
+                    if (result.error.message.includes('already registered')) {
+                        showStatus('adminStatus', 'Usuário admin já existe!', 'success');
+                    } else {
+                        throw result.error;
+                    }
+                } else {
+                    showStatus('adminStatus', 'Usuário admin criado com sucesso!', 'success');
+                }
+            } catch (error) {
+                console.error('Erro ao criar usuário:', error);
+                showStatus('adminStatus', `Erro: ${error.message}`, 'error');
+            }
+        };
+        
+        // Testar conexão
+        window.testConnection = async function() {
+            showStatus('connectionStatus', 'Testando conexão...', 'info');
+            
+            try {
+                const connected = await supabaseManager.initialize();
+                
+                if (connected) {
+                    const stats = await supabaseManager.getCounterStats();
+                    showStatus('connectionStatus', 
+                        `✅ Conexão OK! Contador atual: ${stats.total_count}`, 'success');
+                } else {
+                    showStatus('connectionStatus', 'Falha na conexão', 'error');
+                }
+            } catch (error) {
+                console.error('Erro na conexão:', error);
+                showStatus('connectionStatus', `Erro: ${error.message}`, 'error');
+            }
+        };
+        
+        // Inicializar dados
+        window.initializeData = async function() {
+            showStatus('connectionStatus', 'Inicializando dados...', 'info');
+            
+            try {
+                await supabaseManager.initialize();
+                
+                // Verificar se contador existe, se não, criar
+                const stats = await supabaseManager.getCounterStats();
+                
+                if (stats.total_count === 0) {
+                    // Inicializar com valor do localStorage se existir
+                    const localData = localStorage.getItem('contador_global_centralizado_v1');
+                    let initialValue = 20430; // Valor padrão
+                    
+                    if (localData) {
+                        const parsed = JSON.parse(localData);
+                        initialValue = parsed.totalEtiquetas || initialValue;
+                    }
+                    
+                    await supabaseManager.updateGlobalCounter(initialValue, 'geral');
+                    showStatus('connectionStatus', 
+                        `✅ Dados inicializados! Contador: ${initialValue}`, 'success');
+                } else {
+                    showStatus('connectionStatus', 
+                        `✅ Dados já existem! Contador: ${stats.total_count}`, 'success');
+                }
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+                showStatus('connectionStatus', `Erro: ${error.message}`, 'error');
+            }
+        };
+        
+        // Migrar dados
+        window.migrateData = async function() {
+            showStatus('migrationStatus', 'Iniciando migração...', 'info');
+            
+            try {
+                await supabaseManager.initialize();
+                
+                let migratedCount = 0;
+                
+                // Migrar histórico de caixa
+                const caixaHistory = localStorage.getItem('etiquetas-history');
+                if (caixaHistory) {
+                    const history = JSON.parse(caixaHistory);
+                    
+                    for (const item of history) {
+                        try {
+                            await supabaseManager.saveLabelGeneration({
+                                applicationType: 'caixa',
+                                coddv: item.base,
+                                quantity: item.qtd || 1,
+                                copies: item.copias || 1,
+                                labelType: item.labelType,
+                                orientation: item.orient || 'h',
+                                metadata: {
+                                    migrated: true,
+                                    originalTimestamp: item.timestamp,
+                                    ultimoNumero: item.ultimoNumero,
+                                    proximoNumero: item.proximoNumero,
+                                    totalLabels: item.totalLabels
+                                }
+                            });
+                            migratedCount++;
+                        } catch (error) {
+                            console.warn('Erro ao migrar item:', error);
+                        }
+                    }
+                }
+                
+                showStatus('migrationStatus', 
+                    `✅ Migração concluída! ${migratedCount} registros migrados`, 'success');
+                    
+                // Marcar migração como concluída
+                localStorage.setItem('supabase_migration_completed', new Date().toISOString());
+                
+            } catch (error) {
+                console.error('Erro na migração:', error);
+                showStatus('migrationStatus', `Erro: ${error.message}`, 'error');
+            }
+        };
+        
+        // Função auxiliar para mostrar status
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        // Carregar SQL na inicialização
+        loadSQL();
+    </script>
+</body>
+</html>

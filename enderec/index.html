@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pague Menos • Endereçamento</title>
+  <link rel="icon" href="../assets/pm.png" />
+  <link rel="stylesheet" href="../shared/design-system.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/mobile-dark-mode.css">
+  <link rel="stylesheet" href="styles.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+</head>
+
+<body class="fade-in">
+
+  <div class="screen-container">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logos">
+          <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary" onerror="this.style.display='none'">
+          <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary" onerror="this.style.display='none'">
+        </div>
+        <div class="brand-text">
+          <h1>Pague Menos</h1>
+          <span class="app-subtitle">Etiquetas • Endereçamento</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9,22 9,12 15,12 15,22" />
+          </svg>
+          Hub
+        </button>
+        <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()"
+          aria-label="Imprimir">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 6,2 18,2 18,9" />
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+            <rect x="6" y="14" width="12" height="8" />
+          </svg>
+          Imprimir
+        </button>
+      </div>
+    </header>
+
+    <section class="panel controls animate-slide-in-up">
+      <!-- 0) TIPO -->
+      <div class="field full">
+        <label>Tipo de etiqueta</label>
+        <div class="type-chooser">
+          <label class="type-card">
+            <input type="radio" name="tipo" value="pulmao">
+            <span class="icon" aria-hidden="true">🧊</span>
+            <span class="title">Pulmão</span>
+          </label>
+          <label class="type-card">
+            <input type="radio" name="tipo" value="estacao">
+            <span class="icon" aria-hidden="true">🗂️</span>
+            <span class="title">Estação</span>
+          </label>
+          <label class="type-card">
+            <input type="radio" name="tipo" value="outro">
+            <span class="icon" aria-hidden="true">📝</span>
+            <span class="title">Outro</span>
+          </label>
+        </div>
+        <small class="hint"></small>
+      </div>
+
+      <!-- 1) CAMPOS PULMÃO -->
+      <div id="pulmaoFields" class="pulmao-fields hide">
+        <div class="field" style="max-width: 110px;">
+          <label for="prefixIni">Primeira rua</label>
+          <input id="prefixIni" placeholder="ex.: PG01" maxlength="12" />
+        </div>
+        <div class="field" style="max-width: 110px;">
+          <label for="prefixFim">Última rua</label>
+          <input id="prefixFim" placeholder="ex.:PG03" maxlength="12" />
+        </div>
+
+        <div class="field" style="max-width: 80px;">
+          <label>Bloco fixo</label>
+          <input value="001" disabled title="Bloco fixo">
+        </div>
+
+        <div class="field" style="max-width: 100px;">
+          <label for="colIni">Nº da 1ª coluna</label>
+          <input id="colIni" type="number" min="1" max="999" value="1" />
+        </div>
+
+        <div class="field" style="max-width: 120px;">
+          <label for="colFim">Nº da última coluna</label>
+          <input id="colFim" type="number" min="1" max="999" value="31" />
+        </div>
+
+        <div class="field">
+          <label>Escolha os níveis</label>
+          <div id="nivels"
+            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 16px; border: 2px solid transparent; border-radius: 14px; background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%); box-shadow: 0 2px 8px rgba(6, 46, 111, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);">
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="T" class="nivel"> <span>T</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="1" class="nivel" checked> <span>1</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="2" class="nivel" checked> <span>2</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="3" class="nivel"> <span>3</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="4" class="nivel"> <span>4</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="5" class="nivel"> <span>5</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="6" class="nivel"> <span>6</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="7" class="nivel"> <span>7</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="8" class="nivel"> <span>8</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="9" class="nivel"> <span>9</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" value="10" class="nivel"> <span>10</span></label>
+            <label class="switch"
+              style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><input
+                type="checkbox" id="nivAll"> <span>Todos</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1b) CAMPOS ESTAÇÃO (prefixos e complemento) -->
+      <div id="estacaoFields" class="estacao-fields hide">
+        <div class="field" style="max-width: 100px;">
+          <label for="prefixIniE">Primeira estação</label>
+          <input id="prefixIniE" placeholder="ex.: M101" maxlength="12" />
+        </div>
+        <div class="field" style="max-width: 100px;">
+          <label for="prefixFimE">Última estação</label>
+          <input id="prefixFimE" placeholder="ex.: M106" maxlength="12" />
+        </div>
+        <div class="field">
+          <label for="livreE">Complemento da etiqueta</label>
+          <input id="livreE" placeholder="ex.: ESTACAO" maxlength="24" />
+        </div>
+      </div>
+
+      <!-- 1c) CAMPOS OUTRO -->
+      <div id="outroFields" class="outro-fields hide">
+        <!-- Linha 1: Estação -->
+        <div class="field" style="max-width: 200px;">
+          <label>Estação</label>
+          <div class="row">
+            <input id="prefixIniO" placeholder="Início" maxlength="12" style="max-width: 90px;" />
+            <input id="prefixFimO" placeholder="Fim" maxlength="12" style="max-width: 90px;" />
+          </div>
+        </div>
+
+        <!-- Linha 2: Blocos 1, 2 e 3 em grid/flex -->
+        <div class="row wrap" style="align-items: flex-start;">
+
+          <!-- Bloco 1 -->
+          <div class="field" style="flex: 1; min-width: 200px;">
+            <label>Bloco 1</label>
+            <div class="row">
+              <input id="b1Ini" placeholder="Início" maxlength="12" style="max-width: 90px;" />
+              <input id="b1Fim" placeholder="Fim" maxlength="12" style="max-width: 90px;" />
+            </div>
+          </div>
+
+          <!-- Bloco 2 -->
+          <div class="field" style="flex: 1; min-width: 200px;">
+            <label>Bloco 2</label>
+            <div class="row">
+              <input id="b2Ini" placeholder="Início" maxlength="12" style="max-width: 90px;" />
+              <input id="b2Fim" placeholder="Fim" maxlength="12" style="max-width: 90px;" />
+            </div>
+          </div>
+
+          <!-- Bloco 3 -->
+          <div class="field" style="flex: 1; min-width: 200px;">
+            <label>Bloco 3</label>
+            <div class="row">
+              <input id="b3Ini" placeholder="Início" maxlength="12" style="max-width: 90px;" />
+              <input id="b3Fim" placeholder="Fim" maxlength="12" style="max-width: 90px;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Linha 3: Separador -->
+        <div class="field" style="max-width: 90px;">
+          <label for="separador">Separador</label>
+          <input id="separador" placeholder="Padrão: ." value="." maxlength="5" />
+        </div>
+      </div>
+
+      <!-- 2) TIPO DE CÓDIGO (Barras ou QR Code) -->
+      <div class="field full">
+        <label>Tipo de código</label>
+        <div class="code-type-chooser">
+          <label class="code-type-card" title="Código de Barras">
+            <input type="radio" name="tipocodigo" value="barras" checked>
+            <div class="code-icon barras-icon">
+              <svg width="40" height="28" viewBox="0 0 40 28" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="0" width="3" height="28" />
+                <rect x="5" y="0" width="1" height="28" />
+                <rect x="8" y="0" width="4" height="28" />
+                <rect x="14" y="0" width="2" height="28" />
+                <rect x="18" y="0" width="1" height="28" />
+                <rect x="21" y="0" width="3" height="28" />
+                <rect x="26" y="0" width="1" height="28" />
+                <rect x="29" y="0" width="4" height="28" />
+                <rect x="35" y="0" width="2" height="28" />
+                <rect x="39" y="0" width="1" height="28" />
+              </svg>
+            </div>
+            <span class="code-title">Barras</span>
+          </label>
+          <label class="code-type-card" title="QR Code">
+            <input type="radio" name="tipocodigo" value="qrcode">
+            <div class="code-icon qr-icon">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <!-- QR Code pattern -->
+                <rect x="0" y="0" width="8" height="8" />
+                <rect x="2" y="2" width="4" height="4" fill="white" />
+                <rect x="3" y="3" width="2" height="2" />
+
+                <rect x="20" y="0" width="8" height="8" />
+                <rect x="22" y="2" width="4" height="4" fill="white" />
+                <rect x="23" y="3" width="2" height="2" />
+
+                <rect x="0" y="20" width="8" height="8" />
+                <rect x="2" y="22" width="4" height="4" fill="white" />
+                <rect x="3" y="23" width="2" height="2" />
+
+                <!-- Data pattern -->
+                <rect x="10" y="0" width="2" height="2" />
+                <rect x="14" y="0" width="2" height="2" />
+                <rect x="10" y="4" width="2" height="2" />
+                <rect x="14" y="4" width="2" height="2" />
+
+                <rect x="0" y="10" width="2" height="2" />
+                <rect x="4" y="10" width="2" height="2" />
+                <rect x="10" y="10" width="4" height="4" />
+                <rect x="16" y="10" width="2" height="2" />
+                <rect x="20" y="10" width="2" height="2" />
+                <rect x="26" y="10" width="2" height="2" />
+
+                <rect x="10" y="16" width="2" height="2" />
+                <rect x="14" y="16" width="2" height="2" />
+                <rect x="10" y="20" width="2" height="2" />
+                <rect x="14" y="20" width="2" height="2" />
+
+                <rect x="20" y="20" width="2" height="2" />
+                <rect x="24" y="20" width="2" height="2" />
+                <rect x="22" y="22" width="2" height="2" />
+                <rect x="20" y="24" width="2" height="2" />
+                <rect x="26" y="26" width="2" height="2" />
+              </svg>
+            </div>
+            <span class="code-title">QR Code</span>
+          </label>
+        </div>
+        <small class="hint"></small>
+      </div>
+
+      <!-- 3) AJUSTES (comum aos dois tipos) -->
+      <div class="field" style="max-width: 80px; margin-left: 20px;">
+        <label>Nº de cópias</label>
+        <input id="copias" type="number" min="1" value="1" />
+      </div>
+
+      <div class="field">
+        <label>Largura × Altura (mm)</label>
+        <div class="row">
+          <input id="wmm" type="number" min="50" value="106" />
+          <input id="hmm" type="number" min="30" value="62" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tamanho do texto (pt)</label>
+        <div class="row">
+          <input id="tpt" type="number" min="8" value="24" />
+        </div>
+      </div>
+
+      <div class="field" style="display: none;">
+        <label for="orient">Orientação</label>
+        <select id="orient">
+          <option value="h" selected>Horizontal</option>
+          <option value="vcw">Vertical 90° (horário)</option>
+          <option value="vccw">Vertical -90° (anti-horário)</option>
+        </select>
+      </div>
+
+      <div class="field" style="display: none;">
+        <label for="logo">Logo na etiqueta</label>
+        <div class="row wrap">
+          <label class="switch"><input type="checkbox" id="logo" checked><span>Exibir (Pague Menos)</span></label>
+          <span class="hint">Opacidade (%)</span>
+          <input id="logoop" class="num" type="number" min="0" max="100" step="1" value="100"
+            title="Opacidade da logo em %">
+          <label class="switch"><input type="checkbox" id="logoPrintOff"><span>Ocultar logo na impressão</span></label>
+        </div>
+      </div>
+
+      <div class="field" style="display: none;">
+        <label for="logomm">Tamanho da logo (mm)</label>
+        <input id="logomm" type="number" min="6" value="10">
+      </div>
+
+      <div class="field full" style="margin-top: 20px;">
+        <button id="gerar" class="btn btn-primary" disabled>Gerar etiquetas</button>
+      </div>
+    </section>
+
+    <main id="preview" class="preview"></main>
+
+    <footer class="app-footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-info">
+            <p class="footer-title">Sistema de Etiquetas Pague Menos</p>
+            <p class="footer-subtitle">Desenvolvido por Danilo Pires</p>
+          </div>
+          <div class="footer-links">
+            <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="footer-link">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+              </svg>
+              Suporte
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="app.js"></script>
+
+    <!-- Contador Global Centralizado -->
+    <script src="../js/contador-global-centralizado.js"></script>
+
+    <!-- Supabase Integration -->
+    <script type="module" src="../supabase/init.js"></script>
+
+    <script>
+      // Configurar contador para tipo 'enderec'
+      window.addEventListener('DOMContentLoaded', async () => {
+        console.log('🏷️ Aplicação de Endereçamento carregada');
+
+        // Aguardar contador estar pronto
+        setTimeout(async () => {
+          if (window.contadorGlobal) {
+            console.log('✅ Contador Global disponível');
+
+            // Interceptar geração de etiquetas para contar
+            const btnGerar = document.getElementById('gerar');
+            if (btnGerar) {
+              console.log('🔗 Botão gerar encontrado, configurando interceptação...');
+
+              btnGerar.addEventListener('click', async function (e) {
+                try {
+                  console.log('🖱️ Botão gerar clicado');
+
+                  // Calcular quantidade de etiquetas que serão geradas
+                  const copias = parseInt(document.getElementById('copias').value) || 1;
+                  const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
+
+                  let totalEtiquetas = 0;
+
+                  if (tipo === 'pulmao') {
+                    // Calcular etiquetas de pulmão
+                    const colIni = parseInt(document.getElementById('colIni').value) || 1;
+                    const colFim = parseInt(document.getElementById('colFim').value) || 1;
+                    const niveisChecked = document.querySelectorAll('.nivel:checked').length;
+
+                    const colunas = Math.max(0, colFim - colIni + 1);
+                    totalEtiquetas = colunas * niveisChecked * copias;
+
+                  } else if (tipo === 'estacao') {
+                    // Calcular etiquetas de estação baseado no range
+                    const countRange = (idIni, idFim) => {
+                      const ini = document.getElementById(idIni).value;
+                      const fim = document.getElementById(idFim).value;
+                      if (!ini) return 0; // Se vazio, não gera nada
+
+                      // Helper local para simular o parseAlphaNum do app.js
+                      const sanitize = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                      const parse = (s) => {
+                        const m = sanitize(s).match(/^([A-Z]*)(\d+)?$/);
+                        return m ? { alpha: m[1], num: m[2] ? parseInt(m[2], 10) : null } : null;
+                      };
+
+                      const a = parse(ini);
+                      if (!a) return 0; // Inválido
+
+                      if (!fim) return 1; // Só inicio = 1 item
+
+                      const b = parse(fim);
+                      if (!b) return 1; // Fim inválido, considera só inicio
+
+                      if (a.alpha !== b.alpha) return 1; // Prefixos diferentes, fallback para 1
+                      if (a.num === null || b.num === null) return 1; // Sem número
+
+                      return Math.max(0, b.num - a.num + 1);
+                    };
+
+                    const qtdEstacoes = countRange('prefixIniE', 'prefixFimE');
+                    totalEtiquetas = qtdEstacoes * copias;
+                  } else if (tipo === 'outro') {
+                    // Calcular etiquetas de Outro (Produto Cartesiano)
+                    const countRange = (idIni, idFim) => {
+                      const ini = document.getElementById(idIni).value;
+                      const fim = document.getElementById(idFim).value;
+                      if (!ini) return 0; // Se vazio, não gera nada? Ou gera 1 se for opcional? 
+                      // Na lógica do app.js, se o range é inválido ou vazio, ele pode ser ignorado ou tratado.
+                      // Vamos assumir que se tem inicio, conta. Se tem fim, calcula a diferença.
+                      // Mas precisamos usar a mesma lógica do makePrefixList para saber a quantidade exata.
+                      // Simplificação: se tem inicio e fim, tenta parsear.
+
+                      // Helper local para simular o parseAlphaNum do app.js
+                      const sanitize = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                      const parse = (s) => {
+                        const m = sanitize(s).match(/^([A-Z]*)(\d+)?$/);
+                        return m ? { alpha: m[1], num: m[2] ? parseInt(m[2], 10) : null } : null;
+                      };
+
+                      const a = parse(ini);
+                      if (!a) return 0; // Inválido
+
+                      if (!fim) return 1; // Só inicio = 1 item
+
+                      const b = parse(fim);
+                      if (!b) return 1; // Fim inválido, considera só inicio
+
+                      if (a.alpha !== b.alpha) return 1; // Prefixos diferentes, fallback para 1 (ou erro na geração)
+                      if (a.num === null || b.num === null) return 1; // Sem número
+
+                      return Math.max(0, b.num - a.num + 1);
+                    };
+
+                    const qtdEstacao = countRange('prefixIniO', 'prefixFimO');
+                    // Blocos são opcionais. Se não preenchidos, não multiplicam (são "1" na combinação, ou "0" se não existirem?)
+                    // Na lógica do app.js: "Se não tem início, ignora este bloco". 
+                    // Se ignora, ele não participa do produto cartesiano.
+                    // O produto cartesiano é: (R1 items) x (R2 items) x ...
+                    // Se R2 não existe, é (R1 items) x ...
+                    // Então count deve ser 1 se vazio, para elemento neutro da multiplicação?
+                    // Não, se ranges = [R1], length é len(R1).
+                    // Se ranges = [R1, R2], length é len(R1) * len(R2).
+                    // Então precisamos contar apenas os ranges que existem.
+
+                    const counts = [
+                      countRange('prefixIniO', 'prefixFimO'),
+                      countRange('b1Ini', 'b1Fim'),
+                      countRange('b2Ini', 'b2Fim'),
+                      countRange('b3Ini', 'b3Fim')
+                    ].filter(c => c > 0); // Filtra os que tem itens
+
+                    if (counts.length > 0) {
+                      totalEtiquetas = counts.reduce((a, b) => a * b, 1) * copias;
+                    } else {
+                      totalEtiquetas = 0;
+                    }
+                  }
+
+                  console.log(`📊 Calculado: ${totalEtiquetas} etiquetas de endereçamento`);
+
+                  if (totalEtiquetas > 0) {
+                    // Incrementar contador global
+                    const novoValor = await window.contadorGlobal.incrementarContador(totalEtiquetas, 'enderec');
+                    console.log(`✅ Contador incrementado: +${totalEtiquetas} enderec = ${novoValor}`);
+
+                    // Mostrar popup de sucesso
+                    mostrarPopupSucesso('Etiquetas geradas com sucesso!', `+${totalEtiquetas} etiquetas | Total: ${novoValor.toLocaleString('pt-BR')}`);
+
+                    // Feedback visual discreto
+                    const valorFormatado = novoValor.toLocaleString('pt-BR');
+                    console.log(`📊 Total atual: ${valorFormatado} etiquetas`);
+                  }
+
+                } catch (error) {
+                  console.error('❌ Erro ao incrementar contador:', error);
+                  // Continuar com geração mesmo se contador falhar
+                }
+              });
+            } else {
+              console.warn('⚠️ Botão gerar não encontrado');
+            }
+          } else {
+            console.warn('⚠️ Contador Global não disponível');
+          }
+        }, 2000);
+      });
+
+      // Função para mostrar popup de sucesso
+      function mostrarPopupSucesso(titulo, subtitulo) {
+        // Criar popup
+        const popup = document.createElement('div');
+        popup.id = 'popup-sucesso';
+        popup.innerHTML = `
+        <div class="popup-content">
+          <div class="popup-icon">✅</div>
+          <div class="popup-text">
+            <div class="popup-titulo">${titulo}</div>
+            <div class="popup-subtitulo">${subtitulo}</div>
+          </div>
+        </div>
+      `;
+
+        // Adicionar ao body
+        document.body.appendChild(popup);
+
+        // Mostrar com animação
+        setTimeout(() => {
+          popup.classList.add('show');
+        }, 100);
+
+        // Remover após 2 segundos
+        setTimeout(() => {
+          popup.classList.remove('show');
+          setTimeout(() => {
+            if (popup.parentNode) {
+              popup.parentNode.removeChild(popup);
+            }
+          }, 300);
+        }, 2000);
+      }
+    </script>
+
+    <style>
+      /* Popup de Sucesso */
+      #popup-sucesso {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e2e8f0;
+        padding: 0;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 320px;
+        overflow: hidden;
+      }
+
+      #popup-sucesso.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .popup-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+      }
+
+      .popup-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+      }
+
+      .popup-text {
+        flex: 1;
+      }
+
+      .popup-titulo {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 14px;
+        margin-bottom: 2px;
+      }
+
+      .popup-subtitulo {
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      /* Barra de progresso */
+      #popup-sucesso::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #10b981, #059669);
+        width: 100%;
+        animation: progress 2s linear forwards;
+      }
+
+      @keyframes progress {
+        from {
+          width: 100%;
+        }
+
+        to {
+          width: 0%;
+        }
+      }
+
+      /* Responsivo */
+      @media (max-width: 640px) {
+        #popup-sucesso {
+          top: 10px;
+          right: 10px;
+          left: 10px;
+          max-width: none;
+        }
+      }
+    </style>
+  </div>
+</body>
+
+</html>
