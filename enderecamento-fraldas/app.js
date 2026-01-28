@@ -1500,6 +1500,11 @@ async function confirmMobileAllocation() {
   const sourceAddress = mobileModalState.sourceAddress;
 
   console.log('📱 Confirmando alocação mobile:', { mode, address, sourceAddress, validity });
+  console.log('📱 Estado da validade:', { 
+    validatedValidity: mobileModalState.validatedValidity,
+    validityType: typeof mobileModalState.validatedValidity,
+    validityLength: mobileModalState.validatedValidity?.length 
+  });
 
   try {
     if (mode === 'transfer') {
@@ -1525,11 +1530,12 @@ async function confirmMobileAllocation() {
 // Execute mobile allocation
 async function executeMobileAllocation(address, validity) {
   console.log('📱 Executando alocação mobile para endereço:', address, 'com validade:', validity);
+  console.log('📱 Tipo da validade:', typeof validity, 'Comprimento:', validity?.length);
 
   try {
     // Use optimized addressing system
     if (window.sistemaEnderecamento) {
-      await window.sistemaEnderecamento.alocarProduto(address, produtoAtual.CODDV, produtoAtual.DESC, validity);
+      await window.sistemaEnderecamento.alocarProduto(address, produtoAtual.CODDV, produtoAtual.DESC, false, validity);
     }
 
     // Update legacy system
@@ -2776,7 +2782,7 @@ async function alocarNoEnderecoDestino(produto, endereco) {
     if (!validade) return;
 
     if (window.sistemaEnderecamento) {
-      await window.sistemaEnderecamento.alocarProduto(endereco, produto.CODDV, produto.DESC, validade);
+      await window.sistemaEnderecamento.alocarProduto(endereco, produto.CODDV, produto.DESC, false, validade);
     }
 
     // Atualizar legado
@@ -4409,7 +4415,7 @@ function alocarProdutoNoEndereco(endereco) {
             }
 
             // Depois alocar no novo endereço
-            await window.sistemaEnderecamento.alocarProduto(endereco, produtoAtual.CODDV, produtoAtual.DESC, validadeExistente);
+            await window.sistemaEnderecamento.alocarProduto(endereco, produtoAtual.CODDV, produtoAtual.DESC, false, validadeExistente);
           } else {
             // Transferência simples
             await window.sistemaEnderecamento.transferirProduto(enderecoOrigem, endereco);
@@ -4425,7 +4431,7 @@ function alocarProdutoNoEndereco(endereco) {
         console.log('➕ Realizando nova alocação...');
         const validade = await solicitarValidade();
         if (!validade) return;
-        await window.sistemaEnderecamento.alocarProduto(endereco, produtoAtual.CODDV, produtoAtual.DESC, validade);
+        await window.sistemaEnderecamento.alocarProduto(endereco, produtoAtual.CODDV, produtoAtual.DESC, false, validade);
 
         const info = formatarInfoEndereco(endereco);
         showToast(`Alocação realizada com sucesso!\n\nProduto: ${produtoAtual.DESC}\nEndereço: ${endereco}\n(${info.formatado})`, 'success');
