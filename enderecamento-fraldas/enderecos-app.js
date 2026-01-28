@@ -429,6 +429,79 @@ class EnderecoApp {
         window.location.href = 'index.html';
     }
 
+    // Solicitar validade com modal
+    async solicitarValidade() {
+        return await this.mostrarModalValidade();
+    }
+
+    mostrarModalValidade() {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('modalValidade');
+            const input = document.getElementById('inputValidade');
+            const btnOk = document.getElementById('btnModalValidadeOk');
+            const btnCancel = document.getElementById('btnModalValidadeCancel');
+            const btnClose = document.getElementById('btnModalValidadeClose');
+            const feedback = document.getElementById('feedbackValidade');
+
+            if (!modal) {
+                console.error('Modal de validade não encontrado!');
+                resolve(null);
+                return;
+            }
+
+            // Limpar estado
+            input.value = '';
+            feedback.style.display = 'none';
+            input.classList.remove('error');
+
+            const fecharModal = (valor) => {
+                modal.classList.remove('active');
+                // Remover listeners para evitar duplicidade
+                btnOk.onclick = null;
+                btnCancel.onclick = null;
+                btnClose.onclick = null;
+                input.onkeypress = null;
+                input.oninput = null;
+                resolve(valor);
+            };
+
+            const validar = () => {
+                const valor = input.value.trim();
+                // Validar MMAA (Mês 01-12, Ano 24-99)
+                // Permitir qualquer ano a partir de 24 (2024)
+                const regex = /^(0[1-9]|1[0-2])([2-9][0-9])$/;
+                if (regex.test(valor)) {
+                    fecharModal(valor);
+                } else {
+                    feedback.style.display = 'block';
+                    input.classList.add('error');
+                    input.focus();
+                }
+            };
+
+            // Mostrar modal
+            modal.classList.add('active');
+            setTimeout(() => input.focus(), 100);
+
+            // Eventos
+            btnOk.onclick = validar;
+            btnCancel.onclick = () => fecharModal(null);
+            btnClose.onclick = () => fecharModal(null);
+
+            // Máscara e Enter
+            input.oninput = (e) => {
+                // Remove não-números
+                e.target.value = e.target.value.replace(/\D/g, '');
+                feedback.style.display = 'none';
+                input.classList.remove('error');
+            };
+
+            input.onkeypress = (e) => {
+                if (e.key === 'Enter') validar();
+            };
+        });
+    }
+
     // Alocar produto no endereço selecionado
     async alocarProdutoNoEndereco(endereco) {
         if (!this.produtoSelecionado) {
@@ -436,14 +509,21 @@ class EnderecoApp {
             return;
         }
 
+        // Solicitar validade (regra obrigatória)
+        const validade = await this.solicitarValidade();
+        if (!validade) return; // Cancelado pelo usuário
+
         try {
             // Alocar produto no sistema usando a mesma função que adicionar mais endereços
             // Isso permite múltiplas alocações desde o início
-            await this.sistema.adicionarProdutoEmMaisEnderecos(endereco, this.produtoSelecionado.coddv, this.produtoSelecionado.desc);
+            await this.sistema.adicionarProdutoEmMaisEnderecos(endereco, this.produtoSelecionado.coddv, this.produtoSelecionado.desc, validade);
 
             // Mostrar confirmação igual ao adicionar mais endereços
             const info = this.formatarInfoEndereco(endereco);
-            await customAlert(`Produto alocado com sucesso!\n\nProduto: ${this.produtoSelecionado.desc}\nCODDV: ${this.produtoSelecionado.coddv}\n\nEndereço: ${endereco}\n(${info.formatado})`, 'Sucesso');
+            // Formatar visualização da validade
+            const validadeFmt = `${validade.substring(0, 2)}/20${validade.substring(2)}`;
+
+            await customAlert(`Produto alocado com sucesso!\n\nProduto: ${this.produtoSelecionado.desc}\nCODDV: ${this.produtoSelecionado.coddv}\nValidade: ${validadeFmt}\n\nEndereço: ${endereco}\n(${info.formatado})`, 'Sucesso');
 
             // Atualizar estatísticas
             this.atualizarEstatisticas();
@@ -514,12 +594,19 @@ class EnderecoApp {
             return;
         }
 
+        // Solicitar validade (regra obrigatória)
+        const validade = await this.solicitarValidade();
+        if (!validade) return; // Cancelado pelo usuário
+
         try {
             // Adicionar produto no novo endereço usando a função específica para múltiplos
-            await this.sistema.adicionarProdutoEmMaisEnderecos(endereco, this.produtoSelecionado.coddv, this.produtoSelecionado.desc);
+            await this.sistema.adicionarProdutoEmMaisEnderecos(endereco, this.produtoSelecionado.coddv, this.produtoSelecionado.desc, validade);
 
             const info = this.formatarInfoEndereco(endereco);
-            await customAlert(`Produto adicionado com sucesso!\n\nProduto: ${this.produtoSelecionado.desc}\nCODDV: ${this.produtoSelecionado.coddv}\n\nNovo endereço: ${endereco}\n(${info.formatado})\n\nO produto continua também no endereço original: ${this.produtoSelecionado.enderecoAtual}`, 'Sucesso');
+            // Formatar visualização da validade
+            const validadeFmt = `${validade.substring(0, 2)}/20${validade.substring(2)}`;
+
+            await customAlert(`Produto adicionado com sucesso!\n\nProduto: ${this.produtoSelecionado.desc}\nCODDV: ${this.produtoSelecionado.coddv}\nValidade: ${validadeFmt}\n\nNovo endereço: ${endereco}\n(${info.formatado})\n\nO produto continua também no endereço original: ${this.produtoSelecionado.enderecoAtual}`, 'Sucesso');
 
             // Atualizar estatísticas
             this.atualizarEstatisticas();

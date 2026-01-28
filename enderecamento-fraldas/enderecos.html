@@ -236,6 +236,29 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de Validade -->
+    <div id="modalValidade" class="modal-overlay">
+        <div class="modal animate-pop-in">
+            <div class="modal-header">
+                <h3 class="modal-title">Informe a Validade</h3>
+                <button class="modal-close" id="btnModalValidadeClose">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Por favor, informe a validade do produto no formato MMAA (ex: 0526).</p>
+                <div class="field">
+                    <label for="inputValidade">Validade</label>
+                    <input type="text" id="inputValidade" placeholder="MMAA" maxlength="4" inputmode="numeric">
+                    <div id="feedbackValidade" class="hint" style="color: #ef4444; display: none;">Formato inválido
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="btnModalValidadeCancel">Cancelar</button>
+                <button class="btn btn-primary" id="btnModalValidadeOk">Confirmar</button>
+            </div>
+        </div>
+    </div>
     </div>
 
     <!-- Scanner Mobile -->
