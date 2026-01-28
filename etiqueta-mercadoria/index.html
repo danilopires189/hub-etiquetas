@@ -451,15 +451,11 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <script src="../shared/barcode.js"></script>
 
-    <!-- Correções críticas (DEVE ser carregado primeiro) -->
-    <script src="../js/fix-client-errors.js"></script>
-    <script src="../js/fix-counter-conflict.js"></script>
-
     <!-- Supabase Integration -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Contador Global -->
-    <script src="../js/contador-global-centralizado.js"></script>
+    <!-- Contador Global Otimizado -->
+    <script src="../js/contador-global-otimizado.js"></script>
 
     <!-- Supabase Init (Carrega após contador global) -->
     <script type="module" src="../supabase/init.js"></script>
@@ -468,15 +464,6 @@
     <script src="../data_base/BASE_END.js"></script>
     <script src="../data_base/BASE_USUARIO.js"></script>
     <script src="app.js"></script>
-
-    <!-- Correção do fluxo de impressão (DEVE ser carregado após app.js) -->
-    <script src="fix-print-flow.js"></script>
-
-    <!-- Diagnóstico de performance -->
-    <script src="diagnostico-performance.js"></script>
-
-    <!-- Script de teste das correções (apenas para desenvolvimento) -->
-    <script src="test-corrections.js"></script>
 </body>
 
 </html>

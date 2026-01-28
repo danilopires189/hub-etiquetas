@@ -95,34 +95,44 @@ const LABEL_CONFIG = {
 // Cache para resultados de formatação
 const descriptionFormatCache = new Map();
 
-function measureTextDimensions(text, fontSize, fontWeight, fontFamily, maxWidth) {
-    try {
-        const measureElement = document.createElement('div');
+// Elemento reutilizável para medição de texto (performance)
+let measureElement = null;
+
+function getMeasureElement() {
+    if (!measureElement) {
+        measureElement = document.createElement('div');
         measureElement.style.cssText = `
             position: absolute;
             visibility: hidden;
+            pointer-events: none;
             white-space: normal;
-            word-wrap: break-word; /* Legacy */
-            overflow-wrap: break-word; /* Standard */
-            word-break: break-all; /* Force break */
-            font-size: ${fontSize}pt;
-            font-weight: ${fontWeight};
-            font-family: ${fontFamily};
-            width: ${maxWidth}px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-all;
             line-height: 1.2;
             padding: 0;
             margin: 0;
             border: none;
+            top: -9999px;
+            left: -9999px;
         `;
-        measureElement.textContent = text;
-
         document.body.appendChild(measureElement);
+    }
+    return measureElement;
+}
 
-        const rect = measureElement.getBoundingClientRect();
-        const lineHeight = parseFloat(getComputedStyle(measureElement).lineHeight);
-        const lines = Math.ceil((rect.height - 0.1) / lineHeight);
+function measureTextDimensions(text, fontSize, fontWeight, fontFamily, maxWidth) {
+    try {
+        const el = getMeasureElement();
+        el.style.fontSize = fontSize + 'pt';
+        el.style.fontWeight = fontWeight;
+        el.style.fontFamily = fontFamily;
+        el.style.width = maxWidth + 'px';
+        el.textContent = text;
 
-        document.body.removeChild(measureElement);
+        const rect = el.getBoundingClientRect();
+        const lineHeight = fontSize * 1.2; // Aproximação rápida
+        const lines = Math.max(1, Math.ceil(rect.height / (lineHeight * 1.333)));
 
         return {
             width: rect.width,
@@ -130,9 +140,8 @@ function measureTextDimensions(text, fontSize, fontWeight, fontFamily, maxWidth)
             lines: lines
         };
     } catch (error) {
-        console.warn('Erro na medição de texto:', error);
-        // Fallback: estimativa baseada em caracteres
-        const avgCharWidth = fontSize * 0.6; // Aproximação
+        // Fallback rápido: estimativa baseada em caracteres
+        const avgCharWidth = fontSize * 0.6;
         const charsPerLine = Math.floor(maxWidth / avgCharWidth);
         const estimatedLines = Math.ceil(text.length / charsPerLine);
 
