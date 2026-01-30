@@ -39,6 +39,89 @@ class SistemaEnderecamentoSupabase {
     }
 
     /**
+     * Salvar no localStorage com tratamento de erro de quota
+     * Retorna true se salvou com sucesso, false caso contrário
+     */
+    salvarLocalStorageSeguro(chave, valor) {
+        try {
+            localStorage.setItem(chave, valor);
+            return true;
+        } catch (e) {
+            if (e.name === 'QuotaExceededError' || 
+                e.message.includes('exceeded the quota') ||
+                e.message.includes('exceeded the storage')) {
+                console.warn(`⚠️ Quota do localStorage excedida ao salvar '${chave}'. Tentando limpar cache antigo...`);
+                
+                // Tentar limpar dados antigos do histórico para liberar espaço
+                this.limparCacheAntigo();
+                
+                // Tentar salvar novamente
+                try {
+                    localStorage.setItem(chave, valor);
+                    console.log(`✅ '${chave}' salvo com sucesso após limpar cache.`);
+                    return true;
+                } catch (e2) {
+                    console.error(`❌ Falha ao salvar '${chave}' mesmo após limpar cache:`, e2);
+                    
+                    // Se for dados de endereços cadastrados, não bloquear a operação
+                    // pois esses dados podem ser recarregados do servidor
+                    if (chave === 'enderecos_cadastrados') {
+                        console.warn('⚠️ Dados de endereços cadastrados não foram salvos localmente, mas a operação continua.');
+                        return false; // Retorna false mas não lança erro
+                    }
+                    
+                    throw e2;
+                }
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Limpar cache antigo para liberar espaço no localStorage
+     */
+    limparCacheAntigo() {
+        try {
+            console.log('🧹 Limpando cache antigo para liberar espaço...');
+            
+            // Remover itens de histórico mais antigos (manter apenas os 10 mais recentes)
+            const historico = JSON.parse(localStorage.getItem('historico_enderecos') || '[]');
+            if (historico.length > 10) {
+                const historicoRecente = historico.slice(-10);
+                localStorage.setItem('historico_enderecos', JSON.stringify(historicoRecente));
+                console.log(`🧹 Histórico reduzido de ${historico.length} para ${historicoRecente.length} itens.`);
+            }
+
+            // Limpar dados de endereços cadastrados se forem muito grandes
+            // (esses podem ser recarregados do servidor)
+            const chavesParaRemover = [
+                'enderecos_cadastrados_backup',
+                'cache_enderecos_antigo',
+                'dados_enderecamento_old',
+                'historico_operacoes'
+            ];
+            
+            chavesParaRemover.forEach(chave => {
+                if (localStorage.getItem(chave)) {
+                    localStorage.removeItem(chave);
+                    console.log(`🧹 Removida chave antiga: ${chave}`);
+                }
+            });
+
+            // Se ainda não liberou espaço suficiente, remover endereços cadastrados
+            // (eles serão recarregados do Supabase)
+            const enderecosCadastrados = localStorage.getItem('enderecos_cadastrados');
+            if (enderecosCadastrados && enderecosCadastrados.length > 50000) {
+                console.log('🧹 Dados de endereços cadastrados muito grandes, removendo cache local.');
+                localStorage.removeItem('enderecos_cadastrados');
+            }
+
+        } catch (error) {
+            console.error('Erro ao limpar cache antigo:', error);
+        }
+    }
+
+    /**
      * Formatar validade para exibição
      */
     formatarValidade(validade) {
@@ -307,10 +390,26 @@ class SistemaEnderecamentoSupabase {
                 ativo: dados.ativo
             };
         }
-        localStorage.setItem('enderecos_cadastrados', JSON.stringify(enderecosCadastrados));
-
-        // Salvar alocações
-        localStorage.setItem('enderecos_ocupados', JSON.stringify(this.cacheAlocacoes));
+        
+        // Salvar com tratamento de erro de quota
+        const enderecosJson = JSON.stringify(enderecosCadastrados);
+        const alocacoesJson = JSON.stringify(this.cacheAlocacoes);
+        
+        // Verificar tamanho antes de salvar
+        const tamanhoEnderecos = enderecosJson.length * 2; // UTF-16 = 2 bytes por char
+        const tamanhoAlocacoes = alocacoesJson.length * 2;
+        
+        if (tamanhoEnderecos > 2000000) { // > 2MB
+            console.warn(`⚠️ Dados de endereços muito grandes (${(tamanhoEnderecos/1024/1024).toFixed(2)}MB). Pulando cache local.`);
+        } else {
+            this.salvarLocalStorageSeguro('enderecos_cadastrados', enderecosJson);
+        }
+        
+        if (tamanhoAlocacoes > 1000000) { // > 1MB
+            console.warn(`⚠️ Dados de alocações muito grandes (${(tamanhoAlocacoes/1024/1024).toFixed(2)}MB). Pulando cache local.`);
+        } else {
+            this.salvarLocalStorageSeguro('enderecos_ocupados', alocacoesJson);
+        }
     }
 
     /**
@@ -531,7 +630,12 @@ class SistemaEnderecamentoSupabase {
                 // Recarregar cache do banco para garantir consistência
                 await this.carregarCache();
 
-                this.salvarDadosLocais();
+                // Salvar localmente (com tratamento de erro de quota)
+                try {
+                    this.salvarDadosLocais();
+                } catch (saveError) {
+                    console.warn('⚠️ Dados não salvos localmente (quota excedida), mas desalocação foi realizada:', saveError.message);
+                }
                 return produto;
 
             } catch (error) {
@@ -552,7 +656,12 @@ class SistemaEnderecamentoSupabase {
                 timestamp: new Date().toISOString()
             });
 
-            this.salvarDadosLocais();
+            // Salvar localmente (com tratamento de erro de quota)
+            try {
+                this.salvarDadosLocais();
+            } catch (saveError) {
+                console.warn('⚠️ Dados não salvos localmente (quota excedida), mas desalocação foi realizada:', saveError.message);
+            }
             return produto;
         }
     }

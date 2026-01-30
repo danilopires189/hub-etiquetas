@@ -266,14 +266,16 @@ body {
   .action-btn-mobile {
     flex: 1;
     min-height: 44px;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 0.5rem;
     border-radius: 12px;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.8rem;
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
+    flex-direction: column;
+    gap: 4px;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
@@ -508,26 +510,7 @@ body {
     overflow: hidden;
   }
 
-  .produto-endereco::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    animation: shimmer 2s infinite;
-  }
-
-  @keyframes shimmer {
-    0% {
-      left: -100%;
-    }
-
-    100% {
-      left: 100%;
-    }
-  }
+  /* Animação shimmer removida para melhor usabilidade mobile */
 
   /* Multiple addresses display */
   .produto-endereco.multiplos {
@@ -536,9 +519,7 @@ body {
     color: #92400e;
   }
 
-  .produto-endereco.multiplos::before {
-    background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.3), transparent);
-  }
+  /* Efeito de sombra amarela removido dos endereços múltiplos */
 
   /* Address count indicator for multiple addresses */
   .endereco-count {
@@ -569,7 +550,7 @@ body {
 
   .endereco-item-mobile {
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 700;
     color: #047857;
     background: rgba(255, 255, 255, 0.7);
     padding: 0.5rem 0.75rem;
@@ -587,9 +568,7 @@ body {
     color: #991b1b;
   }
 
-  .produto-endereco.sem-endereco::before {
-    background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.3), transparent);
-  }
+  /* Efeito de sombra removido dos endereços sem alocação */
 
   /* Mobile responsive typography */
   @media (max-width: 480px) {
@@ -2105,10 +2084,15 @@ select:focus {
   }
 
   /* Mobile button typography */
-  .btn,
-  .action-btn-mobile {
+  .btn {
     font-size: 16px !important;
     /* Prevent zoom on iOS */
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .action-btn-mobile {
+    font-size: 0.8rem !important;
     line-height: 1.2;
     text-align: center;
   }
@@ -5044,11 +5028,11 @@ MOBILE LOADING AND EMPTY STATES ===== */
   font-size: 0.8rem;
 }
 
-/* Lista de endereços mobile */
+/* Lista de endereços mobile - exibe todos os endereços sem scroll interno */
 .endereco-list-mobile {
-  max-height: 200px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 /* Responsividade específica para validade mobile */

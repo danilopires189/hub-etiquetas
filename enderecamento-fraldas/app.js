@@ -1,5 +1,101 @@
 /* ===== Sistema com autenticação ===== */
 
+/* ===== Utilitários de localStorage Seguro ===== */
+/**
+ * Salvar no localStorage com tratamento de erro de quota
+ * Retorna true se salvou com sucesso, false caso contrário
+ */
+/**
+ * Verificar espaço usado no localStorage
+ */
+function verificarEspacoLocalStorage() {
+  let total = 0;
+  for (let chave in localStorage) {
+    if (localStorage.hasOwnProperty(chave)) {
+      total += localStorage[chave].length * 2; // UTF-16 = 2 bytes por char
+    }
+  }
+  return {
+    bytes: total,
+    kb: (total / 1024).toFixed(2),
+    mb: (total / 1024 / 1024).toFixed(2)
+  };
+}
+
+/**
+ * Limpar dados antigos do localStorage para liberar espaço
+ */
+function limparDadosAntigosLocalStorage() {
+  console.log('🧹 Limpando dados antigos do localStorage...');
+  const espacoAntes = verificarEspacoLocalStorage();
+  console.log(`📊 Espaço antes: ${espacoAntes.mb} MB`);
+  
+  // Lista de chaves que podem ser removidas (não essenciais)
+  const chavesParaLimpar = [
+    'historico_enderecos',
+    'historico_operacoes',
+    'enderecos_cadastrados_backup',
+    'cache_enderecos_antigo',
+    'dados_enderecamento_old'
+  ];
+  
+  chavesParaLimpar.forEach(chave => {
+    if (localStorage.getItem(chave)) {
+      localStorage.removeItem(chave);
+      console.log(`🗑️ Removido: ${chave}`);
+    }
+  });
+  
+  // Limpar históricos mantendo apenas os 10 mais recentes
+  ['historico_enderecos', 'historico_operacoes'].forEach(chave => {
+    try {
+      const dados = JSON.parse(localStorage.getItem(chave) || '[]');
+      if (Array.isArray(dados) && dados.length > 10) {
+        const dadosRecentes = dados.slice(-10);
+        localStorage.setItem(chave, JSON.stringify(dadosRecentes));
+        console.log(`📉 ${chave} reduzido de ${dados.length} para ${dadosRecentes.length} itens`);
+      }
+    } catch (e) {
+      // Ignora erro
+    }
+  });
+  
+  const espacoDepois = verificarEspacoLocalStorage();
+  console.log(`📊 Espaço depois: ${espacoDepois.mb} MB`);
+  console.log(`✅ Liberado: ${(espacoAntes.mb - espacoDepois.mb).toFixed(2)} MB`);
+}
+
+function salvarLocalStorageSeguro(chave, valor) {
+  try {
+    localStorage.setItem(chave, valor);
+    return true;
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || 
+        e.message.includes('exceeded the quota') ||
+        e.message.includes('exceeded the storage')) {
+      console.warn(`⚠️ Quota excedida ao salvar '${chave}'.`);
+      
+      // Tentar limpar dados antigos
+      limparDadosAntigosLocalStorage();
+      
+      // Tentar novamente
+      try {
+        localStorage.setItem(chave, valor);
+        console.log(`✅ '${chave}' salvo após limpar espaço.`);
+        return true;
+      } catch (e2) {
+        console.error(`❌ Falha ao salvar '${chave}':`, e2);
+        // Mostrar aviso ao usuário mas não bloquear a operação
+        if (typeof showToast === 'function') {
+          showToast('Aviso: Dados locais não foram salvos devido a limitação de espaço, mas a operação foi realizada.', 'warning');
+        }
+        return false;
+      }
+    }
+    throw e;
+  }
+}
+
 /* ===== Mobile Scanner Prevention ===== */
 // Prevent scanner functionality on mobile devices
 (function () {
@@ -139,7 +235,7 @@ function verificarAutenticacao() {
     if (isNaN(expiresAt.getTime())) {
       console.warn('⚠️ Data de expiração inválida. Renovando sessão...');
       session.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-      localStorage.setItem('enderecamento_fraldas_session', JSON.stringify(session));
+      salvarLocalStorageSeguro('enderecamento_fraldas_session', JSON.stringify(session));
     } else if (now >= expiresAt) {
       console.warn('🔒 Sessão expirada:', { now, expiresAt });
       localStorage.removeItem('enderecamento_fraldas_session');
@@ -1101,10 +1197,16 @@ function updateMobileAddressDisplay(enderecoElement, status) {
         const validadeHtml = validadeInfo ? 
           `<div class="endereco-validade-mobile">📆 ${formatarValidadeMobile(validadeInfo)}</div>` : '';
         
+        // Tentar obter data/hora da alocação
+        const dataAlocacaoInfo = obterDataAlocacaoProdutoNoEndereco(produtoAtual?.CODDV, endereco);
+        const dataAlocacaoHtml = dataAlocacaoInfo ? 
+          `<div class="endereco-data-alocacao-mobile">🕐 ${formatarDataAlocacaoMobile(dataAlocacaoInfo)}</div>` : '';
+        
         return `
           <div class="endereco-item-mobile" aria-label="Endereço: ${endereco}">
             ${endereco}
             ${validadeHtml}
+            ${dataAlocacaoHtml}
           </div>
         `;
       }).join('');
@@ -1117,6 +1219,11 @@ function updateMobileAddressDisplay(enderecoElement, status) {
       const validadeInfo = obterValidadeProdutoNoEndereco(produtoAtual?.CODDV, status.endereco);
       const validadeHtml = validadeInfo ? 
         `<div class="endereco-validade-mobile">📆 ${formatarValidadeMobile(validadeInfo)}</div>` : '';
+      
+      // Data/hora da alocação
+      const dataAlocacaoInfo = obterDataAlocacaoProdutoNoEndereco(produtoAtual?.CODDV, status.endereco);
+      const dataAlocacaoHtml = dataAlocacaoInfo ? 
+        `<div class="endereco-data-alocacao-mobile">🕐 ${formatarDataAlocacaoMobile(dataAlocacaoInfo)}</div>` : '';
 
       enderecoElement.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
@@ -1128,6 +1235,7 @@ function updateMobileAddressDisplay(enderecoElement, status) {
           <strong>${status.endereco}</strong>
         </div>
         ${validadeHtml}
+        ${dataAlocacaoHtml}
       `;
       enderecoElement.setAttribute('aria-label', `Produto alocado no endereço: ${status.endereco}`);
     }
@@ -1165,6 +1273,22 @@ function obterValidadeProdutoNoEndereco(coddv, endereco) {
   }
 }
 
+// Obter data/hora da alocação de um produto em um endereço específico
+function obterDataAlocacaoProdutoNoEndereco(coddv, endereco) {
+  if (!coddv || !endereco || !window.sistemaEnderecamento) return null;
+  
+  try {
+    const produtos = window.sistemaEnderecamento.obterProdutosNoEndereco(endereco);
+    const produto = produtos.find(p => p.coddv === coddv);
+    if (!produto) return null;
+    // Retorna data_alocacao, dataAlocacao ou created_at
+    return produto.data_alocacao || produto.dataAlocacao || produto.created_at || null;
+  } catch (error) {
+    console.warn('Erro ao obter data de alocação do produto:', error);
+    return null;
+  }
+}
+
 // Formatar validade para exibição mobile
 function formatarValidadeMobile(validade) {
   if (!validade || validade === '' || validade === null) {
@@ -1183,6 +1307,56 @@ function formatarValidadeMobile(validade) {
   
   // Retornar como está se não conseguir formatar
   return validade;
+}
+
+// Formatar data/hora da alocação para exibição mobile
+function formatarDataAlocacaoMobile(dataAlocacao) {
+  if (!dataAlocacao || dataAlocacao === '' || dataAlocacao === null) {
+    return '';
+  }
+  
+  try {
+    // Se já está no formato string brasileiro (DD/MM/YYYY HH:MM:SS)
+    if (typeof dataAlocacao === 'string' && dataAlocacao.includes('/')) {
+      // Retorna apenas a parte da hora se for data completa
+      const parts = dataAlocacao.split(' ');
+      if (parts.length === 2) {
+        return dataAlocacao; // Retorna data e hora completas
+      }
+      return dataAlocacao;
+    }
+    
+    // Se é uma data ISO (YYYY-MM-DDTHH:MM:SS)
+    if (typeof dataAlocacao === 'string' && dataAlocacao.includes('T')) {
+      const date = new Date(dataAlocacao);
+      if (!isNaN(date.getTime())) {
+        const dia = String(date.getDate()).padStart(2, '0');
+        const mes = String(date.getMonth() + 1).padStart(2, '0');
+        const ano = date.getFullYear();
+        const hora = String(date.getHours()).padStart(2, '0');
+        const minuto = String(date.getMinutes()).padStart(2, '0');
+        const segundo = String(date.getSeconds()).padStart(2, '0');
+        return `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
+      }
+    }
+    
+    // Se é timestamp numérico ou string de data
+    const date = new Date(dataAlocacao);
+    if (!isNaN(date.getTime())) {
+      const dia = String(date.getDate()).padStart(2, '0');
+      const mes = String(date.getMonth() + 1).padStart(2, '0');
+      const ano = date.getFullYear();
+      const hora = String(date.getHours()).padStart(2, '0');
+      const minuto = String(date.getMinutes()).padStart(2, '0');
+      const segundo = String(date.getSeconds()).padStart(2, '0');
+      return `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
+    }
+  } catch (error) {
+    console.warn('Erro ao formatar data de alocação:', error);
+  }
+  
+  // Retornar como está se não conseguir formatar
+  return String(dataAlocacao);
 }
 
 // Mobile-specific product search enhancement
@@ -1665,7 +1839,7 @@ async function executeMobileAllocation(address, validity) {
 
     // Update legacy system
     enderecosProdutos[produtoAtual.CODDV] = address;
-    localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+    salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
     // Add to history
     await adicionarHistorico('ALOCAÇÃO', produtoAtual, null, address);
@@ -1720,7 +1894,7 @@ async function executeMobileTransfer(sourceAddress, destinationAddress) {
 
     // Update legacy system
     enderecosProdutos[produtoAtual.CODDV] = destinationAddress;
-    localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+    salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
     // Add to history
     await adicionarHistorico('TRANSFERÊNCIA', produtoAtual, sourceAddress, destinationAddress);
@@ -2241,7 +2415,7 @@ async function executeMobileDeallocation(address, showSuccessMessage = true) {
 
     // Update legacy system
     delete enderecosProdutos[produtoAtual.CODDV];
-    localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+    salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
     // Add to history
     await adicionarHistorico('DESALOCAÇÃO', produtoAtual, address, null);
@@ -2912,7 +3086,7 @@ async function alocarNoEnderecoDestino(produto, endereco) {
 
     // Atualizar legado
     enderecosProdutos[produto.CODDV] = endereco;
-    localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+    salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
     const info = formatarInfoEndereco(endereco);
     showToast(`Alocação realizada com sucesso!\n${endereco}`, 'success');
@@ -2941,7 +3115,7 @@ async function adicionarEmMaisEnderecoDestino(produto, endereco) {
 
     // Atualizar legado (manter compatibilidade)
     enderecosProdutos[produto.CODDV] = endereco;
-    localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+    salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
     const info = formatarInfoEndereco(endereco);
     showToast(`Produto adicionado com sucesso!\n\nNovo endereço: ${endereco}\n(${info.formatado})\n\nO produto continua nos endereços anteriores.`, 'success');
@@ -2980,7 +3154,7 @@ async function transferirParaEnderecoDestino(produto, origem, destino) {
 
     // Atualizar legado
     enderecosProdutos[produto.CODDV] = destino;
-    localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+    salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
     showToast(`Transferência realizada com sucesso!`, 'success');
 
@@ -3253,7 +3427,7 @@ async function executarOperacao() {
   }
 
   // Salvar no localStorage
-  localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+  salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
   // Atualizar exibição do produto
   exibirProduto(produtoAtual);
@@ -3321,7 +3495,7 @@ async function adicionarHistorico(tipo, produto, enderecoAnterior, enderecoNovo)
     historicoOperacoes = historicoOperacoes.slice(0, 50);
   }
 
-  localStorage.setItem('historico_operacoes', JSON.stringify(historicoOperacoes));
+  salvarLocalStorageSeguro('historico_operacoes', JSON.stringify(historicoOperacoes));
 
   // Atualizar exibição
   exibirHistorico();
@@ -3977,7 +4151,7 @@ async function executarDesalocacao(endereco, atualizarInterface = true) {
     }
 
     // Salvar no localStorage
-    localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+    salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
     // Incrementar contador global
     if (window.contadorGlobal) {
@@ -4309,7 +4483,7 @@ async function selecionarEnderecoParaAdicionar(endereco) {
 
       // Atualizar sistema legado
       enderecosProdutos[produtoAtual.CODDV] = endereco;
-      localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+      salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
       const info = formatarInfoEndereco(endereco);
       showToast(`Produto adicionado com sucesso!\n\nNovo endereço: ${endereco}\n(${info.formatado})`, 'success');
@@ -4573,7 +4747,7 @@ function alocarProdutoNoEndereco(endereco) {
 
       // Atualizar sistema legado (manter compatibilidade)
       enderecosProdutos[produtoAtual.CODDV] = endereco;
-      localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+      salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
       // Fechar popup
       fecharPopupEnderecos();
@@ -4783,7 +4957,7 @@ async function executeMobileAddition(address, validity) {
 
     // Update legacy system
     enderecosProdutos[produtoAtual.CODDV] = address;
-    localStorage.setItem('enderecos_produtos', JSON.stringify(enderecosProdutos));
+    salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
     // Add to history
     await adicionarHistorico('ALOCAÇÃO ADICIONAL', produtoAtual, null, address);

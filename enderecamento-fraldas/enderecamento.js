@@ -435,11 +435,37 @@ class SistemaEnderecamento {
         this.salvarDados();
     }
 
-    // Salvar dados no localStorage
+    // Salvar dados no localStorage com tratamento de erro de quota
     salvarDados() {
-        localStorage.setItem('enderecos_cadastrados', JSON.stringify(this.enderecosCadastrados));
-        localStorage.setItem('enderecos_ocupados', JSON.stringify(this.enderecosOcupados));
-        localStorage.setItem('historico_enderecos', JSON.stringify(this.historicoEnderecos));
+        try {
+            localStorage.setItem('enderecos_cadastrados', JSON.stringify(this.enderecosCadastrados));
+            localStorage.setItem('enderecos_ocupados', JSON.stringify(this.enderecosOcupados));
+            localStorage.setItem('historico_enderecos', JSON.stringify(this.historicoEnderecos));
+        } catch (e) {
+            if (e.name === 'QuotaExceededError' || 
+                e.message.includes('exceeded the quota') ||
+                e.message.includes('exceeded the storage')) {
+                console.warn('⚠️ Quota do localStorage excedida. Tentando limpar cache...');
+                
+                // Limpar histórico antigo
+                if (this.historicoEnderecos.length > 20) {
+                    this.historicoEnderecos = this.historicoEnderecos.slice(-20);
+                    console.log(`🧹 Histórico reduzido para ${this.historicoEnderecos.length} itens.`);
+                }
+                
+                // Tentar salvar novamente
+                try {
+                    localStorage.setItem('enderecos_ocupados', JSON.stringify(this.enderecosOcupados));
+                    localStorage.setItem('historico_enderecos', JSON.stringify(this.historicoEnderecos));
+                    console.log('✅ Dados salvos com sucesso após limpar cache.');
+                } catch (e2) {
+                    console.error('❌ Falha ao salvar mesmo após limpar cache:', e2);
+                    // Não bloquear a operação, apenas logar o erro
+                }
+            } else {
+                throw e;
+            }
+        }
     }
 
     // Exportar dados para backup
