@@ -1,5 +1,21 @@
 /* ===== Otimizações de Performance Mobile ===== */
 
+/* Ícone de scanner/código de barras nos inputs (mobile) */
+.scanner-icon {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.scanner-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #64748b;
+  display: block !important;
+  visibility: visible !important;
+}
+
 /* Reduzir motion para melhor performance */
 @media (max-width: 768px) {
   * {

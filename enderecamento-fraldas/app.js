@@ -147,7 +147,8 @@ function salvarLocalStorageSeguro(chave, valor) {
       });
 
       // Remove any scanner-related elements that might have been added
-      const scannerElements = document.querySelectorAll('[class*="scanner"], [id*="scanner"], .scanner-btn, .input-with-scanner .scanner-btn');
+      // NOTA: Não remover .scanner-icon pois é apenas um ícone visual de código de barras
+      const scannerElements = document.querySelectorAll('[class*="scanner"]:not(.scanner-icon), [id*="scanner"], .scanner-btn, .input-with-scanner .scanner-btn');
       scannerElements.forEach(element => {
         element.remove();
         console.log('🚫 Removed scanner element from mobile');

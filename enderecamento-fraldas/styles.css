@@ -1852,6 +1852,20 @@ select:focus {
     pointer-events: none !important;
   }
 
+  /* Garantir que o ícone de código de barras nos inputs seja visível */
+  .scanner-icon {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none;
+  }
+
+  .scanner-icon svg {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
   /* History Toggle Button */
   .history-toggle-btn {
     background: rgba(255, 255, 255, 0.9);
