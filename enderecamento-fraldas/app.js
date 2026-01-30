@@ -1068,8 +1068,8 @@ function updateMobileProductDisplay(produto, status) {
     return;
   }
 
-  // Update product code with mobile-optimized display
-  produtoCoddv.innerHTML = `<span class="codigo-principal">${produto.CODDV}</span>`;
+  // Update product code with mobile-optimized display (código + etiqueta)
+  produtoCoddv.innerHTML = `<span class="codigo-principal">${produto.CODDV}</span><span class="etiqueta-separador">📋</span>`;
   produtoCoddv.setAttribute('aria-label', `Código do produto: ${produto.CODDV}`);
 
   // Update product description with mobile-friendly formatting
