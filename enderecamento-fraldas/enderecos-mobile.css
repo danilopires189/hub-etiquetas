@@ -197,6 +197,13 @@
         font-weight: 500;
     }
 
+    .mobile-address-validade {
+        font-weight: 600;
+        color: #2563eb;
+        font-size: 0.9rem;
+        padding: 4px 0;
+    }
+
     /* Transfer specific styles */
     .mobile-transfer-info {
         background: #fef3c7;

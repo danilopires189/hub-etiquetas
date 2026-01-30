@@ -1803,7 +1803,11 @@ function populateMobileTransferAddressList(enderecos) {
   addressList.innerHTML = '';
 
   enderecos.forEach(endereco => {
-    const info = formatarInfoEndereco(endereco);
+    // Obter validade do produto neste endereço
+    const validade = obterValidadeProdutoNoEndereco(produtoAtual?.CODDV, endereco);
+    const validadeHtml = validade ? 
+      `<div class="mobile-address-validade">📆 Validade: ${formatarValidadeMobile(validade)}</div>` : 
+      '<div class="mobile-address-validade" style="color: #999;">📆 Validade: Não informada</div>';
     
     const addressItem = document.createElement('div');
     addressItem.className = 'mobile-address-item';
@@ -1815,7 +1819,7 @@ function populateMobileTransferAddressList(enderecos) {
         <div class="mobile-address-status available">Origem</div>
       </div>
       <div class="mobile-address-info">
-        <div class="mobile-address-description">${info.formatado}</div>
+        ${validadeHtml}
       </div>
     `;
     
@@ -2288,9 +2292,15 @@ function openMobileDeallocationModal(addresses) {
       const occupiedBy = isOccupied ? (Array.isArray(isOccupied) ? isOccupied : [isOccupied]) : [];
       const otherProducts = occupiedBy.filter(p => p.coddv !== produtoAtual.CODDV);
 
+      // Obter validade do produto neste endereço
+      const validade = obterValidadeProdutoNoEndereco(produtoAtual?.CODDV, address);
+      const validadeHtml = validade ? 
+        `<div class="mobile-address-validade">📆 Validade: ${formatarValidadeMobile(validade)}</div>` : 
+        '<div class="mobile-address-validade" style="color: #999;">📆 Validade: Não informada</div>';
+
       addressItem.innerHTML = `
         <div class="mobile-address-code">${address}</div>
-        <div class="mobile-address-info">${info.formatado}</div>
+        <div class="mobile-address-info">${validadeHtml}</div>
         ${otherProducts.length > 0 ? `<div class="mobile-address-shared">Compartilhado com: ${otherProducts.map(p => p.coddv).join(', ')}</div>` : ''}
         <div class="mobile-address-select-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
