@@ -147,11 +147,3 @@
     padding: 0.1rem 0.25rem;
   }
 }
-
-/* Telas muito pequenas */
-@media (max-width: 480px) {
-  .endereco-validade-mobile {
-    font-size: 0.6rem;
-    padding: 0.1rem 0.25rem;
-  }
-}
