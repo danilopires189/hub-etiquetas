@@ -1048,6 +1048,25 @@ function updateMobileActionButtons(produto) {
   updateMobileProductDisplay(produto, status);
 }
 
+// Buscar endereço no BASE_END e extrair os 3 últimos dígitos
+function obterUltimosDigitosEndereco(coddv) {
+  if (!coddv || !window.DB_END || !window.DB_END.BASE_END) return null;
+  
+  try {
+    // Buscar pelo CODDV na base de dados
+    const registro = window.DB_END.BASE_END.find(item => item.CODDV === String(coddv));
+    if (registro && registro.ENDERECO) {
+      // Extrair os 3 últimos dígitos do endereço (ex: "D01 .001.011.085" -> "085")
+      const endereco = registro.ENDERECO;
+      const match = endereco.match(/(\d{3})$/);
+      return match ? match[1] : null;
+    }
+  } catch (error) {
+    console.warn('Erro ao buscar endereço no BASE_END:', error);
+  }
+  return null;
+}
+
 // Update mobile product display with optimized layout and typography
 function updateMobileProductDisplay(produto, status) {
   if (!isMobileDevice()) {
@@ -1068,9 +1087,16 @@ function updateMobileProductDisplay(produto, status) {
     return;
   }
 
-  // Update product code with mobile-optimized display
-  produtoCoddv.textContent = produto.CODDV;
-  produtoCoddv.setAttribute('aria-label', `Código do produto: ${produto.CODDV}`);
+  // Buscar os 3 últimos dígitos do endereço no BASE_END
+  const ultimosDigitos = obterUltimosDigitosEndereco(produto.CODDV);
+  
+  // Update product code with mobile-optimized display (etiqueta + código + endereço)
+  let codigoHtml = `<span class="codigo-label">📋 ${produto.CODDV}</span>`;
+  if (ultimosDigitos) {
+    codigoHtml += `<span class="endereco-digitos">${ultimosDigitos}</span>`;
+  }
+  produtoCoddv.innerHTML = codigoHtml;
+  produtoCoddv.setAttribute('aria-label', `Código do produto: ${produto.CODDV}${ultimosDigitos ? ', Endereço: ' + ultimosDigitos : ''}`);
 
   // Update product description with mobile-friendly formatting
   const descricaoFormatada = formatarDescricaoMobile(produto.DESC);
