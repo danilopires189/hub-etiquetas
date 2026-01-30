@@ -3421,6 +3421,11 @@ function obterDataAlocacao(coddv, endereco) {
 }
 
 function atualizarBotoesMobileBusca(produtoCarregado) {
+  // Aplicar apenas no mobile
+  if (!isMobileDevice()) {
+    return;
+  }
+  
   const btnBuscar = $('#btnBuscar');
   const btnLimpar = $('#btnLimpar');
   
@@ -3429,7 +3434,7 @@ function atualizarBotoesMobileBusca(produtoCarregado) {
     return;
   }
   
-  console.log('Atualizando botões - produto carregado:', produtoCarregado);
+  console.log('📱 Atualizando botões mobile - produto carregado:', produtoCarregado);
   
   if (produtoCarregado) {
     // Produto buscado - mostrar apenas "Limpar"
@@ -3456,6 +3461,9 @@ function exibirProduto(produto) {
 
   produtoAtual = produto;
   const status = obterStatusProduto(produto.CODDV);
+
+  // Atualizar botões mobile - esconder "Buscar", mostrar apenas "Limpar"
+  atualizarBotoesMobileBusca(true);
 
   // Atualizar informações do produto
   $('#produtoInfo .produto-coddv').textContent = `CODDV: ${produto.CODDV}`;
