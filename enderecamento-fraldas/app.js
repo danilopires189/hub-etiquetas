@@ -1385,11 +1385,11 @@ function formatarDataAlocacaoMobile(dataAlocacao) {
   return String(dataAlocacao);
 }
 
-// Mobile-specific product search enhancement
+// Mobile-specific product search enhancement with scanner detection
 function enhanceMobileProductSearch() {
   if (!isMobileDevice()) return;
 
-  console.log('📱 Aprimorando busca de produto para mobile');
+  console.log('📱 Aprimorando busca de produto para mobile com detecção de scanner');
 
   const codigoInput = $('#codigoProduto');
   if (!codigoInput) return;
@@ -1401,20 +1401,86 @@ function enhanceMobileProductSearch() {
   codigoInput.setAttribute('spellcheck', 'false');
 
   // Add mobile-friendly placeholder
-  codigoInput.placeholder = 'Digite o código do produto';
+  codigoInput.placeholder = 'Bipe ou digite o código';
 
-  // Add input formatting for better mobile experience
+  // Scanner detection variables
+  let barcodeTimer = null;
+  let lastInputTime = 0;
+  let isManualEntry = false;
+  let inputStartTime = 0;
+
+  // Add input formatting with scanner detection
   codigoInput.addEventListener('input', function (e) {
     const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (value !== e.target.value) {
       e.target.value = value;
     }
+
+    const currentTime = Date.now();
+    const timeSinceLastInput = currentTime - lastInputTime;
+
+    // Clear any existing timer
+    if (barcodeTimer) {
+      clearTimeout(barcodeTimer);
+      barcodeTimer = null;
+    }
+
+    // Only process if we have some content
+    if (value.length > 0) {
+      // If this is the first character, record start time
+      if (value.length === 1) {
+        inputStartTime = currentTime;
+        isManualEntry = false;
+        lastInputTime = currentTime;
+        codigoInput.placeholder = "Aguardando leitor...";
+        console.log('📱 Iniciando entrada - detectando método...');
+        return;
+      }
+
+      // Detect input method based on timing between characters
+      // If time between characters > 50ms, it's likely manual entry
+      if (timeSinceLastInput > 50) {
+        isManualEntry = true;
+        codigoInput.placeholder = "Digite e pressione Enter";
+        console.log('🖊️ Entrada manual detectada - aguardando Enter');
+        // NO TIMER for manual entry - user must press Enter
+      } else {
+        // Fast input - likely scanner
+        codigoInput.placeholder = "Aguardando leitor...";
+        console.log('📱 Entrada rápida detectada - timer ativo');
+
+        // Set timer ONLY for fast input (scanner)
+        barcodeTimer = setTimeout(() => {
+          console.log('⏰ Timer expirado - processando código automaticamente');
+          const btnBuscar = $('#btnBuscar');
+          if (btnBuscar && !btnBuscar.disabled) {
+            btnBuscar.click();
+          }
+          barcodeTimer = null;
+        }, 150);
+      }
+    } else {
+      // Reset state when field is empty
+      isManualEntry = false;
+      inputStartTime = 0;
+      codigoInput.placeholder = 'Bipe ou digite o código';
+    }
+
+    lastInputTime = currentTime;
   });
 
-  // Add mobile-specific keyboard handling
+  // Add Enter key handler for manual input
   codigoInput.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') {
       e.preventDefault();
+      console.log('⏎ Enter pressionado - processando código imediatamente');
+
+      // Clear any pending timer
+      if (barcodeTimer) {
+        clearTimeout(barcodeTimer);
+        barcodeTimer = null;
+      }
+
       const btnBuscar = $('#btnBuscar');
       if (btnBuscar && !btnBuscar.disabled) {
         btnBuscar.click();
@@ -1422,7 +1488,7 @@ function enhanceMobileProductSearch() {
     }
   });
 
-  console.log('📱 Busca de produto aprimorada para mobile');
+  console.log('📱 Busca de produto aprimorada para mobile (com detecção de scanner)');
 }
 
 // Execute allocation action on mobile
@@ -2571,15 +2637,25 @@ function executeMobileConfirmation() {
 document.addEventListener('DOMContentLoaded', function () {
   const addressInput = $('#mobileAddressInput');
   if (addressInput) {
+    // Scanner detection variables for address
+    let addressTimer = null;
+    let lastAddressInputTime = 0;
+    let addressInputStartTime = 0;
+
     // Auto-validate on Enter key
     addressInput.addEventListener('keypress', function (e) {
       if (e.key === 'Enter') {
         e.preventDefault();
+        // Clear any pending timer
+        if (addressTimer) {
+          clearTimeout(addressTimer);
+          addressTimer = null;
+        }
         validateMobileAddress();
       }
     });
 
-    // Clear validation state on input change
+    // Enhanced input handling with scanner detection
     addressInput.addEventListener('input', function () {
       this.classList.remove('valid', 'invalid');
       clearMobileAddressFeedback();
@@ -2592,6 +2668,46 @@ document.addEventListener('DOMContentLoaded', function () {
       if (validitySection) {
         validitySection.classList.add('hide');
       }
+
+      const currentTime = Date.now();
+      const timeSinceLastInput = currentTime - lastAddressInputTime;
+      const value = this.value.trim();
+
+      // Clear any existing timer
+      if (addressTimer) {
+        clearTimeout(addressTimer);
+        addressTimer = null;
+      }
+
+      // Only process if we have content (format PF01.001.001.A01 = 15 chars)
+      if (value.length >= 5) {
+        // If this is early input, record start time
+        if (value.length <= 5) {
+          addressInputStartTime = currentTime;
+          lastAddressInputTime = currentTime;
+          return;
+        }
+
+        // Detect input method based on timing
+        // If time between characters > 50ms, it's likely manual entry
+        if (timeSinceLastInput <= 50 || value.length >= 15) {
+          // Fast input or complete address - likely scanner
+          console.log('📱 Entrada rápida de endereço detectada - timer ativo');
+
+          // Set timer for scanner auto-validation
+          addressTimer = setTimeout(() => {
+            console.log('⏰ Timer de endereço expirado - validando automaticamente');
+            if (value.length >= 15) {
+              validateMobileAddress();
+            }
+            addressTimer = null;
+          }, 150);
+        } else {
+          console.log('🖊️ Entrada manual de endereço detectada - aguardando Enter ou ícone');
+        }
+      }
+
+      lastAddressInputTime = currentTime;
     });
   }
 
