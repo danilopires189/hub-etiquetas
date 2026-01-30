@@ -1010,7 +1010,6 @@ label {
 
 .field>label {
   background: linear-gradient(135deg, #062e6f, #0ea5e9);
-  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
