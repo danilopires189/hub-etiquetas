@@ -266,14 +266,16 @@ body {
   .action-btn-mobile {
     flex: 1;
     min-height: 44px;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 0.5rem;
     border-radius: 12px;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.8rem;
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
+    flex-direction: column;
+    gap: 4px;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
@@ -2082,10 +2084,15 @@ select:focus {
   }
 
   /* Mobile button typography */
-  .btn,
-  .action-btn-mobile {
+  .btn {
     font-size: 16px !important;
     /* Prevent zoom on iOS */
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .action-btn-mobile {
+    font-size: 0.8rem !important;
     line-height: 1.2;
     text-align: center;
   }
