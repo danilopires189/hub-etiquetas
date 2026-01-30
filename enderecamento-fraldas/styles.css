@@ -1742,7 +1742,6 @@ select:focus {
   .scanner-status,
   .scanner-close,
   .scanner-title,
-  .scanner-icon,
   .scanner-video,
   .scanner-canvas,
   .scanner-overlay-frame,
@@ -1761,7 +1760,6 @@ select:focus {
   .scanner-status,
   .scanner-close,
   .scanner-title,
-  .scanner-icon,
   .scanner-video,
   .scanner-canvas,
   .scanner-overlay-frame,
@@ -1814,8 +1812,7 @@ select:focus {
     pointer-events: none !important;
   }
 
-  /* Remove any SVG icons related to scanning */
-  svg.scanner-icon,
+  /* Remove scanner-related SVGs but keep input icons */
   svg.camera-icon {
     display: none !important;
     visibility: hidden !important;
