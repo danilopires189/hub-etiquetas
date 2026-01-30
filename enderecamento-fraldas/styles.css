@@ -1840,12 +1840,17 @@ select:focus {
     padding-right: 12px !important;
   }
 
-  #btnBuscar,
-  #btnLimpar {
+  #btnBuscar:not(.hide),
+  #btnLimpar:not(.hide) {
     display: inline-flex !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+  }
+  
+  #btnBuscar.hide,
+  #btnLimpar.hide {
+    display: none !important;
   }
 
   /* Ensure form functionality remains intact */

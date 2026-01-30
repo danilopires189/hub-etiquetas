@@ -3437,23 +3437,28 @@ function obterDataAlocacao(coddv, endereco) {
 }
 
 function atualizarBotoesMobileBusca(produtoCarregado) {
-  if (!isMobileDevice()) return;
-  
   const btnBuscar = $('#btnBuscar');
   const btnLimpar = $('#btnLimpar');
   
-  if (!btnBuscar || !btnLimpar) return;
+  if (!btnBuscar || !btnLimpar) {
+    console.warn('Botões não encontrados');
+    return;
+  }
+  
+  console.log('Atualizando botões - produto carregado:', produtoCarregado);
   
   if (produtoCarregado) {
     // Produto buscado - mostrar apenas "Limpar"
     btnBuscar.classList.add('hide');
     btnLimpar.classList.remove('hide');
     btnLimpar.style.width = '100%';
+    btnLimpar.style.flex = '1';
   } else {
     // Nenhum produto - mostrar ambos
     btnBuscar.classList.remove('hide');
     btnLimpar.classList.remove('hide');
     btnLimpar.style.width = '';
+    btnLimpar.style.flex = '';
   }
 }
 
