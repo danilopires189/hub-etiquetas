@@ -1101,10 +1101,16 @@ function updateMobileAddressDisplay(enderecoElement, status) {
         const validadeHtml = validadeInfo ? 
           `<div class="endereco-validade-mobile">📆 ${formatarValidadeMobile(validadeInfo)}</div>` : '';
         
+        // Tentar obter data/hora da alocação
+        const dataAlocacaoInfo = obterDataAlocacaoProdutoNoEndereco(produtoAtual?.CODDV, endereco);
+        const dataAlocacaoHtml = dataAlocacaoInfo ? 
+          `<div class="endereco-data-alocacao-mobile">🕐 ${formatarDataAlocacaoMobile(dataAlocacaoInfo)}</div>` : '';
+        
         return `
           <div class="endereco-item-mobile" aria-label="Endereço: ${endereco}">
             ${endereco}
             ${validadeHtml}
+            ${dataAlocacaoHtml}
           </div>
         `;
       }).join('');
@@ -1117,6 +1123,11 @@ function updateMobileAddressDisplay(enderecoElement, status) {
       const validadeInfo = obterValidadeProdutoNoEndereco(produtoAtual?.CODDV, status.endereco);
       const validadeHtml = validadeInfo ? 
         `<div class="endereco-validade-mobile">📆 ${formatarValidadeMobile(validadeInfo)}</div>` : '';
+      
+      // Data/hora da alocação
+      const dataAlocacaoInfo = obterDataAlocacaoProdutoNoEndereco(produtoAtual?.CODDV, status.endereco);
+      const dataAlocacaoHtml = dataAlocacaoInfo ? 
+        `<div class="endereco-data-alocacao-mobile">🕐 ${formatarDataAlocacaoMobile(dataAlocacaoInfo)}</div>` : '';
 
       enderecoElement.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
@@ -1128,6 +1139,7 @@ function updateMobileAddressDisplay(enderecoElement, status) {
           <strong>${status.endereco}</strong>
         </div>
         ${validadeHtml}
+        ${dataAlocacaoHtml}
       `;
       enderecoElement.setAttribute('aria-label', `Produto alocado no endereço: ${status.endereco}`);
     }
@@ -1165,6 +1177,22 @@ function obterValidadeProdutoNoEndereco(coddv, endereco) {
   }
 }
 
+// Obter data/hora da alocação de um produto em um endereço específico
+function obterDataAlocacaoProdutoNoEndereco(coddv, endereco) {
+  if (!coddv || !endereco || !window.sistemaEnderecamento) return null;
+  
+  try {
+    const produtos = window.sistemaEnderecamento.obterProdutosNoEndereco(endereco);
+    const produto = produtos.find(p => p.coddv === coddv);
+    if (!produto) return null;
+    // Retorna data_alocacao, dataAlocacao ou created_at
+    return produto.data_alocacao || produto.dataAlocacao || produto.created_at || null;
+  } catch (error) {
+    console.warn('Erro ao obter data de alocação do produto:', error);
+    return null;
+  }
+}
+
 // Formatar validade para exibição mobile
 function formatarValidadeMobile(validade) {
   if (!validade || validade === '' || validade === null) {
@@ -1183,6 +1211,56 @@ function formatarValidadeMobile(validade) {
   
   // Retornar como está se não conseguir formatar
   return validade;
+}
+
+// Formatar data/hora da alocação para exibição mobile
+function formatarDataAlocacaoMobile(dataAlocacao) {
+  if (!dataAlocacao || dataAlocacao === '' || dataAlocacao === null) {
+    return '';
+  }
+  
+  try {
+    // Se já está no formato string brasileiro (DD/MM/YYYY HH:MM:SS)
+    if (typeof dataAlocacao === 'string' && dataAlocacao.includes('/')) {
+      // Retorna apenas a parte da hora se for data completa
+      const parts = dataAlocacao.split(' ');
+      if (parts.length === 2) {
+        return dataAlocacao; // Retorna data e hora completas
+      }
+      return dataAlocacao;
+    }
+    
+    // Se é uma data ISO (YYYY-MM-DDTHH:MM:SS)
+    if (typeof dataAlocacao === 'string' && dataAlocacao.includes('T')) {
+      const date = new Date(dataAlocacao);
+      if (!isNaN(date.getTime())) {
+        const dia = String(date.getDate()).padStart(2, '0');
+        const mes = String(date.getMonth() + 1).padStart(2, '0');
+        const ano = date.getFullYear();
+        const hora = String(date.getHours()).padStart(2, '0');
+        const minuto = String(date.getMinutes()).padStart(2, '0');
+        const segundo = String(date.getSeconds()).padStart(2, '0');
+        return `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
+      }
+    }
+    
+    // Se é timestamp numérico ou string de data
+    const date = new Date(dataAlocacao);
+    if (!isNaN(date.getTime())) {
+      const dia = String(date.getDate()).padStart(2, '0');
+      const mes = String(date.getMonth() + 1).padStart(2, '0');
+      const ano = date.getFullYear();
+      const hora = String(date.getHours()).padStart(2, '0');
+      const minuto = String(date.getMinutes()).padStart(2, '0');
+      const segundo = String(date.getSeconds()).padStart(2, '0');
+      return `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
+    }
+  } catch (error) {
+    console.warn('Erro ao formatar data de alocação:', error);
+  }
+  
+  // Retornar como está se não conseguir formatar
+  return String(dataAlocacao);
 }
 
 // Mobile-specific product search enhancement

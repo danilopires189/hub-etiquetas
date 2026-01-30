@@ -103,9 +103,27 @@
   gap: 0.5rem;
 }
 
+/* Data/Hora da alocação em endereços mobile */
+.endereco-data-alocacao-mobile {
+  font-size: 0.7rem;
+  color: #0369a1;
+  font-weight: 600;
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.4rem;
+  background: #e0f2fe;
+  border: 1px solid #7dd3fc;
+  border-radius: 3px;
+  display: inline-block;
+}
+
 /* Responsividade específica para validade mobile */
 @media (max-width: 768px) {
   .endereco-validade-mobile {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.3rem;
+  }
+  
+  .endereco-data-alocacao-mobile {
     font-size: 0.65rem;
     padding: 0.15rem 0.3rem;
   }
@@ -114,6 +132,19 @@
     font-size: 0.75rem;
     font-weight: 700;
     padding: 0.4rem;
+  }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 480px) {
+  .endereco-validade-mobile {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.25rem;
+  }
+  
+  .endereco-data-alocacao-mobile {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.25rem;
   }
 }
 
