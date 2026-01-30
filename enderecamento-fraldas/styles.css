@@ -5044,11 +5044,11 @@ MOBILE LOADING AND EMPTY STATES ===== */
   font-size: 0.8rem;
 }
 
-/* Lista de endereços mobile */
+/* Lista de endereços mobile - exibe todos os endereços sem scroll interno */
 .endereco-list-mobile {
-  max-height: 200px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 /* Responsividade específica para validade mobile */
