@@ -21,28 +21,11 @@ function loadScriptAsync(src, id) {
 }
 
 /**
- * Otimiza carregamento da BASE_END - carrega apenas se necessário
+ * Detecta se é dispositivo mobile
  */
-function optimizeBaseEndLoading() {
-  // Só carrega BASE_END completa quando realmente necessário
-  // Por padrão, usa versão reduzida ou carrega sob demanda
-  
-  const isMobile = window.innerWidth <= 768 || 
+function detectMobileDevice() {
+  return window.innerWidth <= 768 || 
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
-  if (isMobile) {
-    console.log('📱 Modo mobile detectado - otimizando carregamento');
-    
-    // Adiar carregamento de scripts não críticos
-    setTimeout(() => {
-      // Carregar BASE_END de forma assíncrona após a interface estar pronta
-      if (window.DB_END) {
-        console.log('✅ BASE_END já carregada');
-      } else {
-        console.log('⏳ Agendando carregamento da BASE_END...');
-      }
-    }, 2000); // Aguarda 2s para interface renderizar primeiro
-  }
 }
 
 /**
@@ -116,7 +99,12 @@ function setupMemoryCleanup() {
 
 // Inicializar otimizações quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
-  optimizeBaseEndLoading();
+  const isMobile = detectMobileDevice();
+  
+  if (isMobile) {
+    console.log('📱 Modo mobile detectado - otimizações ativadas');
+  }
+  
   setupLazyLoading();
   setupMemoryCleanup();
   
@@ -131,5 +119,6 @@ window.PerformanceOptimization = {
   loadScriptAsync,
   debounce,
   throttle,
-  setupLazyLoading
+  setupLazyLoading,
+  detectMobileDevice
 };
