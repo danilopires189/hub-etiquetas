@@ -3436,10 +3436,32 @@ function obterDataAlocacao(coddv, endereco) {
   return 'Data não disponível';
 }
 
+function atualizarBotoesMobileBusca(produtoCarregado) {
+  if (!isMobileDevice()) return;
+  
+  const btnBuscar = $('#btnBuscar');
+  const btnLimpar = $('#btnLimpar');
+  
+  if (!btnBuscar || !btnLimpar) return;
+  
+  if (produtoCarregado) {
+    // Produto buscado - mostrar apenas "Limpar"
+    btnBuscar.classList.add('hide');
+    btnLimpar.classList.remove('hide');
+    btnLimpar.style.width = '100%';
+  } else {
+    // Nenhum produto - mostrar ambos
+    btnBuscar.classList.remove('hide');
+    btnLimpar.classList.remove('hide');
+    btnLimpar.style.width = '';
+  }
+}
+
 function exibirProduto(produto) {
   if (!produto) {
     $('#produtoInfo').classList.add('hide');
     updateMobileActionButtons(null); // Hide mobile buttons
+    atualizarBotoesMobileBusca(false); // Mostrar botões de busca novamente
     return;
   }
 
@@ -3508,6 +3530,9 @@ function exibirProduto(produto) {
 
   // Update mobile action buttons
   updateMobileActionButtons(produto);
+  
+  // Atualizar botões de busca no mobile (esconder "Buscar", mostrar apenas "Limpar")
+  atualizarBotoesMobileBusca(true);
 }
 
 function atualizarInterfaceOperacao() {
