@@ -816,19 +816,49 @@ body {
   .header-top-row .brand {
     flex: 1;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 0.25rem;
+  }
+
+  .header-top-row .brand-logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 0.5rem;
   }
 
-  /* Hide brand text on mobile to keep it compact */
+  .header-top-row .brand-logo {
+    height: 24px;
+    width: auto;
+    max-width: 80px;
+    object-fit: contain;
+  }
+
+  .header-top-row .brand-logo.primary,
+  .header-top-row .brand-logo.secondary {
+    height: 24px;
+  }
+
+  /* Nome do módulo no mobile */
   .header-top-row .brand-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .header-top-row .brand-text h1 {
     display: none;
   }
 
-  .header-top-row .brand-logo {
-    height: 28px;
-    width: auto;
+  .header-top-row .brand-text .app-subtitle {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--brand-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   /* Nav Container */
