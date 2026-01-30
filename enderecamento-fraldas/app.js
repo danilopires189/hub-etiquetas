@@ -1161,9 +1161,9 @@ function updateMobileProductStatus(statusElement, status) {
         <circle cx="12" cy="12" r="10"/>
         <path d="M12 6v6l4 2"/>
       </svg>
-      Disponível
+      Não Alocado
     `;
-    statusElement.setAttribute('aria-label', 'Produto disponível para alocação');
+    statusElement.setAttribute('aria-label', 'Produto não alocado');
   }
 }
 
@@ -3512,7 +3512,7 @@ function exibirProduto(produto) {
     $('#btnAlocar').classList.add('hide');
 
   } else {
-    statusElement.textContent = 'DISPONÍVEL';
+    statusElement.textContent = 'NÃO ALOCADO';
     statusElement.className = 'produto-status status-disponivel';
     enderecoElement.style.display = 'none';
 
