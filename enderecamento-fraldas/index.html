@@ -23,6 +23,8 @@
             console.log('🚫 Scanner CSS loading skipped for mobile device');
         }
     </script>
+    <!-- Otimizações de Performance Mobile -->
+    <link rel="stylesheet" href="./mobile-performance.css">
 </head>
 
 <body class="fade-in">
@@ -310,9 +312,6 @@
         <!-- Base de dados local (produtos) -->
         <script src="../data_base/BASE_BARRAS.js"></script>
         
-        <!-- Base de dados de endereços -->
-        <script src="../data_base/BASE_END.js"></script>
-        
         <!-- Base de dados de usuários -->
         <script src="../data_base/BASE_USUARIO.js"></script>
         
@@ -333,6 +332,9 @@
 
         <!-- Aplicação principal -->
         <script src="./app.js"></script>
+        
+        <!-- Otimizações de Performance -->
+        <script src="./performance-optimization.js"></script>
 
         <!-- Popup de Seleção de Endereços -->
         <div id="popupEnderecos" class="popup-overlay hide">
