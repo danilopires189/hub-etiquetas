@@ -1090,10 +1090,10 @@ function updateMobileProductDisplay(produto, status) {
   // Buscar os 3 últimos dígitos do endereço no BASE_END
   const ultimosDigitos = obterUltimosDigitosEndereco(produto.CODDV);
   
-  // Update product code with mobile-optimized display (etiqueta + código + endereço)
-  let codigoHtml = `<span class="codigo-label">📋 ${produto.CODDV}</span>`;
+  // Update product code with mobile-optimized display (código + etiqueta + endereço)
+  let codigoHtml = `<span class="codigo-principal">${produto.CODDV}</span>`;
   if (ultimosDigitos) {
-    codigoHtml += `<span class="endereco-digitos">${ultimosDigitos}</span>`;
+    codigoHtml += `<span class="etiqueta-separador">📋</span><span class="endereco-digitos">${ultimosDigitos}</span>`;
   }
   produtoCoddv.innerHTML = codigoHtml;
   produtoCoddv.setAttribute('aria-label', `Código do produto: ${produto.CODDV}${ultimosDigitos ? ', Endereço: ' + ultimosDigitos : ''}`);
