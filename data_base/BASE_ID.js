@@ -1,5 +1,5 @@
 // BASE_ID.js - Auto-convertido de BASE_ID.xlsx
-// 02/02/2026, 12:07:41
+// 02/02/2026, 15:18:11
 
 window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
@@ -11746,6 +11746,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
             "CD": 2,
             "CODDV": "22381",
             "ID": "061"
+        },
+        {
+            "CD": 2,
+            "CODDV": "223883",
+            "ID": "599"
         },
         {
             "CD": 2,
@@ -102480,7 +102485,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "550760",
-            "ID": "417"
+            "ID": "600"
         },
         {
             "CD": 2,
@@ -105535,7 +105540,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "558273",
-            "ID": "460"
+            "ID": "849"
         },
         {
             "CD": 2,
@@ -117905,7 +117910,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "588563",
-            "ID": "357"
+            "ID": "870"
         },
         {
             "CD": 2,
@@ -135979,6 +135984,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "635200",
+            "ID": "998"
+        },
+        {
+            "CD": 2,
             "CODDV": "635260",
             "ID": "415"
         },
@@ -138091,6 +138101,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
             "CD": 2,
             "CODDV": "71781",
             "ID": "111"
+        },
+        {
+            "CD": 2,
+            "CODDV": "718637",
+            "ID": "964"
         },
         {
             "CD": 2,
@@ -164159,6 +164174,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "799653",
+            "ID": "244"
+        },
+        {
+            "CD": 2,
             "CODDV": "799661",
             "ID": "613"
         },
@@ -170109,6 +170129,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "817473",
+            "ID": "262"
+        },
+        {
+            "CD": 2,
             "CODDV": "817503",
             "ID": "552"
         },
@@ -170216,6 +170241,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
             "CD": 2,
             "CODDV": "81787",
             "ID": "882"
+        },
+        {
+            "CD": 2,
+            "CODDV": "817880",
+            "ID": "074"
         },
         {
             "CD": 2,
