@@ -1,5 +1,5 @@
 // BASE_ID.js - Auto-convertido de BASE_ID.xlsx
-// 02/02/2026, 10:20:10
+// 02/02/2026, 12:07:41
 
 window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
@@ -136701,6 +136701,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
             "CD": 2,
             "CODDV": "661929",
             "ID": "095"
+        },
+        {
+            "CD": 2,
+            "CODDV": "662569",
+            "ID": "595"
         },
         {
             "CD": 2,
