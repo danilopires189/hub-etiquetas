@@ -1,5 +1,5 @@
 // BASE_ID.js - Auto-convertido de BASE_ID.xlsx
-// 03/02/2026, 16:07:56
+// 03/02/2026, 20:08:01
 
 window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
@@ -169549,6 +169549,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "814989",
+            "ID": "998"
+        },
+        {
+            "CD": 2,
             "CODDV": "814997",
             "ID": "424"
         },
@@ -169791,6 +169796,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
             "CD": 2,
             "CODDV": "816043",
             "ID": "198"
+        },
+        {
+            "CD": 2,
+            "CODDV": "816051",
+            "ID": "358"
         },
         {
             "CD": 2,
@@ -170074,8 +170084,18 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "817090",
+            "ID": "108"
+        },
+        {
+            "CD": 2,
             "CODDV": "817120",
             "ID": "448"
+        },
+        {
+            "CD": 2,
+            "CODDV": "817163",
+            "ID": "354"
         },
         {
             "CD": 2,
