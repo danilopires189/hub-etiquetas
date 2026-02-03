@@ -1,5 +1,5 @@
 // BASE_ID.js - Auto-convertido de BASE_ID.xlsx
-// 03/02/2026, 12:38:20
+// 03/02/2026, 15:22:52
 
 window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
@@ -5715,7 +5715,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "171549",
-            "ID": "781"
+            "ID": "935"
         },
         {
             "CD": 2,
@@ -136969,6 +136969,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "682233",
+            "ID": "674"
+        },
+        {
+            "CD": 2,
             "CODDV": "682241",
             "ID": "158"
         },
@@ -140241,6 +140246,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
             "CD": 2,
             "CODDV": "742180",
             "ID": "735"
+        },
+        {
+            "CD": 2,
+            "CODDV": "742198",
+            "ID": "003"
         },
         {
             "CD": 2,
@@ -169544,6 +169554,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "815020",
+            "ID": "232"
+        },
+        {
+            "CD": 2,
             "CODDV": "815047",
             "ID": "306"
         },
@@ -169571,6 +169586,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
             "CD": 2,
             "CODDV": "815144",
             "ID": "913"
+        },
+        {
+            "CD": 2,
+            "CODDV": "815160",
+            "ID": "197"
         },
         {
             "CD": 2,
@@ -169839,6 +169859,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "816329",
+            "ID": "309"
+        },
+        {
+            "CD": 2,
             "CODDV": "816353",
             "ID": "391"
         },
@@ -170026,6 +170051,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
             "CD": 2,
             "CODDV": "816884",
             "ID": "625"
+        },
+        {
+            "CD": 2,
+            "CODDV": "816892",
+            "ID": "063"
         },
         {
             "CD": 2,
