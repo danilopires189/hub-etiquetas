@@ -418,8 +418,9 @@
                 <div id="historico-list" class="historico-list"></div>
             </div>
 
-            <div class="modal-footer">
-                <small>Histórico local (últimos 60 dias)</small>
+            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                <small>Histórico salvo por 2 anos • IndexedDB + localStorage</small>
+                <button onclick="exportHistoryToCSV()" style="font-size: 0.75rem; padding: 4px 10px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">📥 Exportar CSV</button>
             </div>
         </div>
     </div>
@@ -463,6 +464,10 @@
     <script src="../data_base/BASE_BARRAS.js"></script>
     <script src="../data_base/BASE_END.js"></script>
     <script src="../data_base/BASE_USUARIO.js"></script>
+    
+    <!-- IndexedDB Storage -->
+    <script src="indexeddb-storage.js"></script>
+    
     <script src="app.js"></script>
 </body>
 

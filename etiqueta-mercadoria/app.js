@@ -2200,9 +2200,64 @@ function mostrarPopupSucesso(titulo, subtitulo) {
     }, 2000);
 }
 
+/**
+ * Normaliza o código de barras removendo caracteres não numéricos
+ */
+function normalizeBarcode(barcode) {
+    if (!barcode) return '';
+    return String(barcode).replace(/\D/g, '');
+}
+
+/**
+ * Busca produto pelo código de barras com múltiplas estratégias
+ */
+function findProductByBarcode(barcode) {
+    const normalizedBarcode = normalizeBarcode(barcode);
+    
+    // Tentativa 1: Busca exata
+    let product = Data.products.get(barcode);
+    if (product) return product;
+    
+    // Tentativa 2: Busca com código normalizado
+    product = Data.products.get(normalizedBarcode);
+    if (product) return product;
+    
+    // Tentativa 3: Busca removendo zeros à esquerda
+    const trimmedBarcode = normalizedBarcode.replace(/^0+/, '');
+    if (trimmedBarcode && trimmedBarcode !== normalizedBarcode) {
+        product = Data.products.get(trimmedBarcode);
+        if (product) return product;
+    }
+    
+    // Tentativa 4: Busca com zeros à esquerda (13 dígitos)
+    if (normalizedBarcode.length < 13) {
+        const paddedBarcode = normalizedBarcode.padStart(13, '0');
+        product = Data.products.get(paddedBarcode);
+        if (product) return product;
+    }
+    
+    // Tentativa 5: Busca com zeros à esquerda (14 dígitos)
+    if (normalizedBarcode.length < 14) {
+        const paddedBarcode = normalizedBarcode.padStart(14, '0');
+        product = Data.products.get(paddedBarcode);
+        if (product) return product;
+    }
+    
+    // Tentativa 6: Busca iterando por todos os produtos
+    for (const [key, value] of Data.products) {
+        const normalizedKey = normalizeBarcode(key);
+        if (normalizedKey === normalizedBarcode) {
+            return value;
+        }
+    }
+    
+    return null;
+}
+
 async function handleSearch(e) {
     e.preventDefault();
-    const barcode = ui.barcodeInput.value.trim();
+    const rawBarcode = ui.barcodeInput.value.trim();
+    const barcode = normalizeBarcode(rawBarcode);
     const matricula = ui.matriculaInput.value.trim();
 
     // 1. Validate Deposito
@@ -2246,12 +2301,15 @@ async function handleSearch(e) {
     }
 
     // 3. Lookup Product
-    const product = Data.products.get(barcode);
+    console.log('🔍 Buscando:', rawBarcode);
+    const product = findProductByBarcode(rawBarcode);
     if (!product) {
-        showStatus('Produto não encontrado (BARRAS: ' + barcode + ')', 'error');
+        console.warn('❌ Produto não encontrado:', rawBarcode);
+        showStatus('Produto não encontrado (BARRAS: ' + rawBarcode + ')', 'error');
         ui.barcodeInput.select();
         return;
     }
+    console.log('✅ Encontrado:', product.DESC);
 
     // 4. Lookup Address
     const addressList = Data.addresses.get(product.CODDV);
@@ -2854,7 +2912,7 @@ ui.btnConfirmValidity.addEventListener('click', () => {
     const validation = validateValidityInput(val);
 
     if (!validation.valid) {
-        alert(validation.msg);
+        showStatus('❌ ' + validation.msg, 'error');
         ui.modalInputValidity.select();
         return;
     }
@@ -2878,7 +2936,7 @@ ui.modalInputValidity.addEventListener('keydown', (e) => {
         const validation = validateValidityInput(val);
 
         if (!validation.valid) {
-            alert(validation.msg);
+            showStatus('❌ ' + validation.msg, 'error');
             ui.modalInputValidity.select();
             return;
         }
@@ -2950,14 +3008,75 @@ function saveHistory(item) {
     // Filter keep only newer than limitDate
     historyData = historyData.filter(h => new Date(h.timestamp) > limitDate);
 
-    localStorage.setItem('mercadoria-history', JSON.stringify(historyData));
+    // Salvar no localStorage (limitado aos últimos 100 para evitar QuotaExceeded)
+    try {
+        localStorage.setItem('mercadoria-history', JSON.stringify(historyData.slice(0, 100)));
+    } catch (e) {
+        console.warn('⚠️ localStorage cheio, mantendo apenas em memória');
+    }
+    
+    // ✅ INDEXEDDB: Salvar assíncronamente (não bloqueia)
+    if (window.storageManager?.isReady) {
+        window.storageManager.addLabelToHistory({
+            productName: item.desc || 'Desconhecido',
+            barcode: item.barcode || '',
+            coddv: item.coddv || '',
+            matricula: item.matricula || '',
+            userName: item.userName || '',
+            deposito: item.deposito || '',
+            copies: item.copies || 1,
+            destino: item.type || '',
+            address: item.address || '',
+            validity: item.validity || null,
+            machine: item.machine || '',
+            tipoEtiqueta: 'mercadoria',
+            timestamp: item.timestamp,
+            date: new Date(item.timestamp).toLocaleDateString('pt-BR')
+        }).then(() => {
+            console.log('💾 Etiqueta salva no IndexedDB');
+        }).catch(err => {
+            console.error('❌ Erro ao salvar no IndexedDB:', err);
+        });
+    }
 }
 
-function showHistory() {
+async function showHistory() {
     $('#historico-modal').style.display = 'flex';
-    renderHistory(historyData);
     $('#search-section').style.display = 'none';
     $('#search-input').value = '';
+    
+    // ✅ Tentar carregar do IndexedDB primeiro
+    if (window.storageManager?.isReady) {
+        try {
+            const dbHistory = await window.storageManager.getLabelHistory({ limit: 200 });
+            if (dbHistory.length > 0) {
+                // Converter formato do IndexedDB para formato do app
+                const convertedHistory = dbHistory.map(item => ({
+                    id: item.id || Date.now(),
+                    desc: item.productName,
+                    coddv: item.coddv,
+                    barcode: item.barcode,
+                    matricula: item.matricula,
+                    userName: item.userName,
+                    deposito: item.deposito,
+                    address: item.address,
+                    type: item.destino,
+                    copies: item.copies,
+                    validity: item.validity,
+                    machine: item.machine,
+                    timestamp: item.timestamp
+                }));
+                
+                // Atualizar historyData global
+                historyData = convertedHistory;
+                console.log(`📊 ${convertedHistory.length} registros carregados do IndexedDB`);
+            }
+        } catch (error) {
+            console.warn('⚠️ Erro ao carregar do IndexedDB, usando localStorage:', error);
+        }
+    }
+    
+    renderHistory(historyData);
 }
 
 function hideHistory() {
@@ -3758,5 +3877,84 @@ function setupAutoRefresh() {
 // Boot
 init();
 setupAutoRefresh();
+
+// ============================================
+// FUNÇÕES DE EXPORTAÇÃO E ESTATÍSTICAS
+// ============================================
+
+async function exportHistoryToCSV() {
+    if (!window.storageManager?.isReady) {
+        showStatus('❌ IndexedDB não disponível', 'error');
+        return;
+    }
+
+    try {
+        const historico = await window.storageManager.getLabelHistory({ limit: 10000 });
+        
+        if (historico.length === 0) {
+            showStatus('ℹ️ Nenhum dado para exportar', 'warning');
+            return;
+        }
+
+        const headers = ['Data/Hora', 'Produto', 'CODDV', 'EAN', 'Matrícula', 'Operador', 'Depósito', 'Cópias', 'Destino', 'Endereço', 'Máquina'];
+        
+        const rows = historico.map(item => [
+            new Date(item.timestamp).toLocaleString('pt-BR'),
+            item.productName || '',
+            item.coddv || '',
+            item.barcode || '',
+            item.matricula || '',
+            item.userName || '',
+            item.deposito || '',
+            item.copies || 1,
+            item.destino || '',
+            item.address || '',
+            item.machine || ''
+        ]);
+
+        const csvContent = '\ufeff' + [
+            headers.join(';'),
+            ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';'))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `historico-etiquetas-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showStatus(`✅ ${historico.length} registros exportados`, 'success');
+        console.log(`✅ ${historico.length} registros exportados`);
+    } catch (error) {
+        console.error('❌ Erro ao exportar:', error);
+        showStatus('❌ Erro ao exportar', 'error');
+    }
+}
+
+async function showStorageStats() {
+    if (!window.storageManager?.isReady) {
+        showStatus('❌ IndexedDB não disponível', 'error');
+        return;
+    }
+
+    try {
+        const stats = await window.storageManager.getDetailedStats();
+        
+        // Apenas log no console, sem alertas
+        console.log('📊 Estatísticas de Armazenamento:');
+        console.log(`  • ${stats.totalRecords.toLocaleString()} etiquetas no IndexedDB`);
+        console.log(`  • Espaço usado: ~${stats.estimatedSizeMB} MB de ${stats.limitMB} MB`);
+        console.log(`  • Uso: ${stats.usagePercent}%`);
+        console.log(`  • ${historyData.length} etiquetas no localStorage (backup)`);
+        console.log(`  ⏱️ Retenção: 2 anos (automático)`);
+        
+        showStatus(`📊 ${stats.totalRecords.toLocaleString()} etiquetas salvas`, 'success');
+    } catch (error) {
+        console.error('❌ Erro:', error);
+        showStatus('❌ Erro ao obter estatísticas', 'error');
+    }
+}
 
 
