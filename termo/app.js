@@ -85,12 +85,21 @@ function cleanDuplicateTermoHistory() {
     }
   }
 
-  // Se houve mudanças, atualizar
-  if (uniqueHistory.length !== termoGenerationHistory.length) {
+  // SEMPRE limitar a 500 registros, mesmo sem duplicatas
+  const needsUpdate = uniqueHistory.length !== termoGenerationHistory.length || uniqueHistory.length > 500;
+  
+  if (needsUpdate) {
+    const duplicatasRemovidas = sortedHistory.length - uniqueHistory.length;
+    const totalAntes = termoGenerationHistory.length;
     termoGenerationHistory = uniqueHistory.slice(0, 500); // Manter apenas os 500 mais recentes
+    
     try {
       localStorage.setItem('termo-etiquetas-history', JSON.stringify(termoGenerationHistory));
-      console.log(`Histórico termo limpo: ${sortedHistory.length - uniqueHistory.length} duplicatas removidas`);
+      if (duplicatasRemovidas > 0) {
+        console.log(`Histórico termo limpo: ${duplicatasRemovidas} duplicatas removidas, mantidos ${termoGenerationHistory.length} registros`);
+      } else {
+        console.log(`Histórico termo ajustado: mantidos ${termoGenerationHistory.length} de ${totalAntes} registros (limite: 500)`);
+      }
     } catch (e) {
       console.warn('Erro ao salvar histórico termo limpo:', e.message);
     }
@@ -1309,19 +1318,12 @@ function saveToTermoHistory(config) {
   } catch (e) {
     console.warn('⚠️ Erro ao salvar histórico termo:', e.message);
 
-    // Tentar limpeza emergencial
+    // Tratamento simples para erro de espaço
     if (e.name === 'QuotaExceededError') {
-      try {
-        // Manter apenas os 50 registros mais recentes
-        termoGenerationHistory = termoGenerationHistory.slice(0, 50);
-        localStorage.setItem('termo-etiquetas-history', JSON.stringify(termoGenerationHistory));
-        console.log('🧹 Limpeza emergencial do histórico termo executada');
-      } catch (emergencyError) {
-        console.error('❌ Falha na limpeza emergencial termo:', emergencyError.message);
-        // Limpar completamente se necessário
-        localStorage.removeItem('termo-etiquetas-history');
-        termoGenerationHistory = [];
-      }
+      console.warn('⚠️ Espaço insuficiente no navegador');
+      alert('Espaço de armazenamento cheio. O histórico será limpo.');
+      localStorage.removeItem('termo-etiquetas-history');
+      termoGenerationHistory = [];
     }
   }
 }
