@@ -2372,28 +2372,8 @@ function closeValidityModal() {
 }
 
 async function executePrint(copies, validityDate = null) {
-    // Proteção contra chamadas sem dados
-    if (!pendingData) {
-        console.error('❌ executePrint chamado sem pendingData');
-        showStatus('Erro: Dados da etiqueta não encontrados. Escaneie o produto novamente.', 'error');
-        return false;
-    }
-    
-    // Validar dados necessários
-    const required = ['product', 'targetAddress', 'barcode', 'matricula', 'destinoType'];
-    const missing = required.filter(field => !pendingData[field]);
-    if (missing.length > 0) {
-        console.error('❌ pendingData incompleto:', missing);
-        showStatus('Erro: Dados incompletos. Tente novamente.', 'error');
-        pendingData = null; // Limpar estado corrompido
-        return false;
-    }
-    
+    if (!pendingData) return;
     let { product, targetAddress, barcode, matricula, destinoType } = pendingData;
-    
-    // Marcar processamento
-    window._lastProcessStart = Date.now();
-    window._isProcessing = true;
 
     // NOVAS REGRAS PARA MODO AUTOMÁTICO
     if (destinoType === 'automatico') {
@@ -2559,9 +2539,7 @@ async function executePrint(copies, validityDate = null) {
         }
     }, 500); // Executar após a impressão
 
-    // Garantir que flag de processamento seja resetado
-    window._isProcessing = false;
-    return true;
+
 }
 
 // Post-print cleanup function
@@ -3780,30 +3758,5 @@ function setupAutoRefresh() {
 // Boot
 init();
 setupAutoRefresh();
-
-// ===== PROTEÇÕES GLOBAIS DE ERRO =====
-// Limpa estado corrompido em caso de erro crítico
-
-window.addEventListener('error', (event) => {
-    console.error('🚨 Erro global capturado:', event.error);
-    // Limpar estado de processamento em caso de erro grave
-    if (window._isProcessing) {
-        console.warn('🧹 Limpando estado após erro...');
-        window._isProcessing = false;
-        window.pendingData = null;
-    }
-});
-
-window.addEventListener('unhandledrejection', (event) => {
-    console.error('🚨 Promessa rejeitada não tratada:', event.reason);
-    // Limpar estado de processamento
-    if (window._isProcessing) {
-        console.warn('🧹 Limpando estado após rejeição...');
-        window._isProcessing = false;
-        window.pendingData = null;
-    }
-});
-
-console.log('🛡️ Proteções globais de erro ativadas');
 
 
