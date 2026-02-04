@@ -958,34 +958,51 @@ class EnderecoApp {
         inputElement.setAttribute('autocapitalize', 'off');
         inputElement.setAttribute('spellcheck', 'false');
 
-        // Detectar se é coletor Zebra ou Honeywell
+        // Detectar tipo de dispositivo/navegador
         const userAgent = navigator.userAgent.toLowerCase();
         const isZebra = /zebra|tc2x|tc5x|tc7x|ec30/i.test(userAgent);
         const isHoneywell = /honeywell|dolphin|eda5x|eda7x/i.test(userAgent);
         const isColetor = isZebra || isHoneywell;
+        const isChromeMobile = /chrome.*mobile/i.test(userAgent) || /android.*chrome/i.test(userAgent);
+        const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
         
-        console.log('🔍 Device detectado - Zebra:', isZebra, '| Honeywell:', isHoneywell);
+        console.log('🔍 Device - Zebra:', isZebra, '| Honeywell:', isHoneywell, '| ChromeMobile:', isChromeMobile);
 
         // Ajustar threshold baseado no dispositivo
-        // Coletores industriais são mais rápidos (< 30ms)
-        const SCANNER_THRESHOLD = isColetor ? 30 : 50;
-        const SCANNER_TIMER = isColetor ? 100 : 150;
+        let SCANNER_THRESHOLD, SCANNER_TIMER;
+        if (isColetor) {
+            SCANNER_THRESHOLD = 30;
+            SCANNER_TIMER = 100;
+        } else if (isChromeMobile || isMobile) {
+            SCANNER_THRESHOLD = 80; // Mais tolerante para mobile
+            SCANNER_TIMER = 200;
+        } else {
+            SCANNER_THRESHOLD = 50;
+            SCANNER_TIMER = 150;
+        }
+        
+        console.log('⚙️ Config - Threshold:', SCANNER_THRESHOLD, 'ms | Timer:', SCANNER_TIMER, 'ms');
 
         // Variáveis para detecção de scanner
         let barcodeTimer = null;
         let lastInputTime = 0;
         let isManualEntry = false;
-        let inputStartTime = 0;
-        let charCount = 0;
         let firstCharTime = 0;
+        let charCount = 0;
+        let inputBuffer = [];
 
-        // Detectar se é dispositivo mobile
-        const isMobileDevice = () => {
-            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // Função para processar busca
+        const processarBusca = () => {
+            console.log('⏰ EXECUTANDO BUSCA AUTOMÁTICA!');
+            this.buscarEnderecos();
+            barcodeTimer = null;
         };
 
         // Evento de input para detectar scanner vs digitação manual
         inputElement.addEventListener('input', (e) => {
+            // Ignorar eventos de composition (teclado virtual Android)
+            if (e.isComposing) return;
+
             const value = e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g, '');
             if (value !== e.target.value) {
                 e.target.value = value;
@@ -993,6 +1010,13 @@ class EnderecoApp {
 
             const currentTime = Date.now();
             const timeSinceLastInput = currentTime - lastInputTime;
+            
+            // Guardar no buffer para análise
+            inputBuffer.push({ char: value.slice(-1), time: currentTime });
+            if (inputBuffer.length > 20) inputBuffer.shift();
+
+            // SEMPRE atualizar lastInputTime
+            lastInputTime = currentTime;
 
             // Limpar timer existente
             if (barcodeTimer) {
@@ -1000,57 +1024,61 @@ class EnderecoApp {
                 barcodeTimer = null;
             }
 
-            // SEMPRE atualizar lastInputTime
-            lastInputTime = currentTime;
-
             // Só processar se houver conteúdo
             if (value.length > 0) {
-                // Se for o primeiro caractere, apenas registra
+                // Se for o primeiro caractere
                 if (value.length === 1) {
-                    inputStartTime = currentTime;
                     firstCharTime = currentTime;
                     charCount = 1;
                     isManualEntry = false;
+                    inputBuffer = [{ char: value, time: currentTime }];
                     inputElement.placeholder = "Aguardando leitor...";
-                    console.log('📱 Iniciando entrada... (threshold:', SCANNER_THRESHOLD, 'ms)');
-                    return; // Não processa mais nada no primeiro caractere
+                    console.log('📱 Iniciando... (threshold:', SCANNER_THRESHOLD, 'ms)');
+                    return;
                 }
 
-                // Incrementar contador de caracteres
+                // Incrementar contador
                 charCount++;
 
-                // Detectar método de entrada baseado no timing
-                // Coletores: < 30ms | Celulares: < 50ms = scanner
-                if (timeSinceLastInput > SCANNER_THRESHOLD) {
-                    // Entrada manual - NÃO executa timer
+                // Calcular velocidade média dos últimos caracteres
+                let velocidadeMedia = 0;
+                if (inputBuffer.length >= 3) {
+                    const tempos = [];
+                    for (let i = 1; i < inputBuffer.length; i++) {
+                        tempos.push(inputBuffer[i].time - inputBuffer[i-1].time);
+                    }
+                    velocidadeMedia = tempos.reduce((a, b) => a + b, 0) / tempos.length;
+                }
+
+                // Detectar método de entrada
+                const isFastInput = timeSinceLastInput <= SCANNER_THRESHOLD || 
+                                    (velocidadeMedia > 0 && velocidadeMedia <= SCANNER_THRESHOLD + 20);
+
+                if (!isFastInput) {
+                    // Entrada manual
                     isManualEntry = true;
                     inputElement.placeholder = "Digite e pressione Enter";
-                    console.log('🖊️ MANUAL (delay:', timeSinceLastInput, 'ms >', SCANNER_THRESHOLD, 'ms)');
+                    console.log('🖊️ MANUAL (delay:', timeSinceLastInput, 'ms, média:', velocidadeMedia.toFixed(1), 'ms)');
                 } else {
-                    // Entrada rápida - scanner detectado
+                    // Entrada rápida - scanner
                     inputElement.placeholder = "Aguardando leitor...";
-                    console.log('📱 SCANNER (delay:', timeSinceLastInput, 'ms <=', SCANNER_THRESHOLD, 'ms)');
+                    console.log('📱 SCANNER (delay:', timeSinceLastInput, 'ms, média:', velocidadeMedia.toFixed(1), 'ms)');
 
-                    // Calcular velocidade média para confirmar scanner em coletores
                     if (isColetor && charCount >= 3) {
                         const tempoTotal = currentTime - firstCharTime;
-                        const velocidadeMedia = tempoTotal / charCount;
-                        console.log('📊 Velocidade média:', velocidadeMedia.toFixed(2), 'ms/caractere');
+                        const vmedia = tempoTotal / charCount;
+                        console.log('📊 Velocidade:', vmedia.toFixed(2), 'ms/caractere');
                     }
 
-                    // SEMPRE executar busca automaticamente para entrada rápida
-                    barcodeTimer = setTimeout(() => {
-                        console.log('⏰ EXECUTANDO BUSCA AUTOMÁTICA!');
-                        this.buscarEnderecos();
-                        barcodeTimer = null;
-                    }, SCANNER_TIMER);
+                    // SEMPRE executar busca automaticamente
+                    barcodeTimer = setTimeout(processarBusca, SCANNER_TIMER);
                 }
             } else {
-                // Campo vazio - resetar estado
+                // Campo vazio - resetar
                 isManualEntry = false;
-                inputStartTime = 0;
                 firstCharTime = 0;
                 charCount = 0;
+                inputBuffer = [];
                 inputElement.placeholder = 'Digite parte do endereço ou descrição...';
             }
         });

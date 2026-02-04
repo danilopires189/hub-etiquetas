@@ -1377,19 +1377,34 @@ function enhanceMobileProductSearch() {
   codigoInput.setAttribute('autocapitalize', 'off');
   codigoInput.setAttribute('spellcheck', 'false');
 
-  // Detectar se é coletor Zebra ou Honeywell
+  // Detectar tipo de dispositivo/navegador
   const userAgent = navigator.userAgent.toLowerCase();
   const isZebra = /zebra|tc2x|tc5x|tc7x|ec30/i.test(userAgent);
   const isHoneywell = /honeywell|dolphin|eda5x|eda7x/i.test(userAgent);
   const isColetor = isZebra || isHoneywell;
+  const isChromeMobile = /chrome.*mobile/i.test(userAgent) || /android.*chrome/i.test(userAgent);
+  const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
   
-  console.log('🔍 Device detectado - Zebra:', isZebra, '| Honeywell:', isHoneywell);
+  console.log('🔍 Device - Zebra:', isZebra, '| Honeywell:', isHoneywell, '| ChromeMobile:', isChromeMobile, '| Mobile:', isMobile);
 
   // Ajustar threshold baseado no dispositivo
-  // Coletores industriais são mais rápidos (< 30ms)
-  // Celulares comuns variam (50-200ms)
-  const SCANNER_THRESHOLD = isColetor ? 30 : 50;
-  const SCANNER_TIMER = isColetor ? 100 : 150;
+  // Coletores industriais: < 30ms
+  // Chrome Mobile: pode precisar de threshold maior (~80ms) pois é mais lento
+  // Desktop: 50ms
+  let SCANNER_THRESHOLD, SCANNER_TIMER;
+  if (isColetor) {
+    SCANNER_THRESHOLD = 30;
+    SCANNER_TIMER = 100;
+  } else if (isChromeMobile || isMobile) {
+    // Mobile precisa de threshold mais tolerante
+    SCANNER_THRESHOLD = 80; // Aumentado para mobile
+    SCANNER_TIMER = 200;    // Timer um pouco maior
+  } else {
+    SCANNER_THRESHOLD = 50;
+    SCANNER_TIMER = 150;
+  }
+  
+  console.log('⚙️ Config - Threshold:', SCANNER_THRESHOLD, 'ms | Timer:', SCANNER_TIMER, 'ms');
 
   // Add mobile-friendly placeholder
   codigoInput.placeholder = isColetor ? 'Bipe o código' : 'Bipe ou digite o código';
@@ -1398,14 +1413,28 @@ function enhanceMobileProductSearch() {
   let barcodeTimer = null;
   let lastInputTime = 0;
   let isManualEntry = false;
-  let inputStartTime = 0;
-  
-  // Contador de caracteres para detectar scanner de coletor
-  let charCount = 0;
   let firstCharTime = 0;
+  let charCount = 0;
+  let inputBuffer = [];
+
+  // Função para processar scanner
+  function processarScanner() {
+    console.log('⏰ EXECUTANDO BUSCA AUTOMÁTICA!');
+    const btnBuscar = $('#btnBuscar');
+    if (btnBuscar && !btnBuscar.disabled) {
+      btnBuscar.click();
+    }
+    barcodeTimer = null;
+  }
 
   // Add input formatting with scanner detection
   codigoInput.addEventListener('input', function (e) {
+    // Ignorar eventos de composition (teclado virtual Android)
+    if (e.isComposing) {
+      console.log('📝 Ignorando evento de composition');
+      return;
+    }
+
     const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (value !== e.target.value) {
       e.target.value = value;
@@ -1413,6 +1442,10 @@ function enhanceMobileProductSearch() {
 
     const currentTime = Date.now();
     const timeSinceLastInput = currentTime - lastInputTime;
+    
+    // Guardar no buffer para análise
+    inputBuffer.push({ char: value.slice(-1), time: currentTime });
+    if (inputBuffer.length > 20) inputBuffer.shift();
 
     // SEMPRE atualizar lastInputTime
     lastInputTime = currentTime;
@@ -1425,67 +1458,71 @@ function enhanceMobileProductSearch() {
 
     // Only process if we have some content
     if (value.length > 0) {
-      // If this is the first character, apenas registra
+      // If this is the first character
       if (value.length === 1) {
-        inputStartTime = currentTime;
         firstCharTime = currentTime;
         charCount = 1;
         isManualEntry = false;
+        inputBuffer = [{ char: value, time: currentTime }];
         codigoInput.placeholder = "Aguardando leitor...";
-        console.log('📱 Iniciando entrada... (threshold:', SCANNER_THRESHOLD, 'ms)');
-        return; // Não processa mais nada no primeiro caractere
+        console.log('📱 Iniciando... (threshold:', SCANNER_THRESHOLD, 'ms)');
+        return;
       }
 
-      // Incrementar contador de caracteres
+      // Incrementar contador
       charCount++;
 
-      // Detect input method based on timing between characters
-      // Coletores: < 30ms | Celulares: < 50ms = scanner
-      if (timeSinceLastInput > SCANNER_THRESHOLD) {
-        // Entrada manual detectada - NÃO executa timer
+      // Calcular velocidade média dos últimos caracteres
+      let velocidadeMedia = 0;
+      if (inputBuffer.length >= 3) {
+        const tempos = [];
+        for (let i = 1; i < inputBuffer.length; i++) {
+          tempos.push(inputBuffer[i].time - inputBuffer[i-1].time);
+        }
+        velocidadeMedia = tempos.reduce((a, b) => a + b, 0) / tempos.length;
+      }
+
+      // Detectar método de entrada
+      // Usar tanto o último delay quanto a média móvel
+      const isFastInput = timeSinceLastInput <= SCANNER_THRESHOLD || 
+                          (velocidadeMedia > 0 && velocidadeMedia <= SCANNER_THRESHOLD + 20);
+
+      if (!isFastInput) {
+        // Entrada manual
         isManualEntry = true;
         codigoInput.placeholder = "Digite e pressione Enter";
-        console.log('🖊️ MANUAL (delay:', timeSinceLastInput, 'ms >', SCANNER_THRESHOLD, 'ms)');
+        console.log('🖊️ MANUAL (delay:', timeSinceLastInput, 'ms, média:', velocidadeMedia.toFixed(1), 'ms)');
       } else {
-        // Entrada rápida - scanner detectado
+        // Entrada rápida - scanner
         codigoInput.placeholder = "Aguardando leitor...";
-        console.log('📱 SCANNER (delay:', timeSinceLastInput, 'ms <=', SCANNER_THRESHOLD, 'ms)');
+        console.log('📱 SCANNER (delay:', timeSinceLastInput, 'ms, média:', velocidadeMedia.toFixed(1), 'ms)');
 
-        // Calcular velocidade média para confirmar scanner em coletores
+        // Mostrar velocidade média em coletores
         if (isColetor && charCount >= 3) {
           const tempoTotal = currentTime - firstCharTime;
-          const velocidadeMedia = tempoTotal / charCount;
-          console.log('📊 Velocidade média:', velocidadeMedia.toFixed(2), 'ms/caractere');
+          const vmedia = tempoTotal / charCount;
+          console.log('📊 Velocidade:', vmedia.toFixed(2), 'ms/caractere');
         }
 
-        // SEMPRE executar busca automaticamente para entrada rápida (scanner)
-        // independente de ser coletor ou não
-        barcodeTimer = setTimeout(() => {
-          console.log('⏰ EXECUTANDO BUSCA AUTOMÁTICA!');
-          const btnBuscar = $('#btnBuscar');
-          if (btnBuscar && !btnBuscar.disabled) {
-            btnBuscar.click();
-          }
-          barcodeTimer = null;
-        }, SCANNER_TIMER);
+        // SEMPRE executar busca automaticamente para entrada rápida
+        barcodeTimer = setTimeout(processarScanner, SCANNER_TIMER);
       }
     } else {
-      // Reset state when field is empty
+      // Reset
       isManualEntry = false;
-      inputStartTime = 0;
       firstCharTime = 0;
       charCount = 0;
+      inputBuffer = [];
       codigoInput.placeholder = isColetor ? 'Bipe o código' : 'Bipe ou digite o código';
     }
   });
 
-  // Add Enter key handler for manual input
+  // Add Enter key handler
   codigoInput.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') {
       e.preventDefault();
-      console.log('⏎ Enter pressionado - processando código imediatamente');
+      console.log('⏎ Enter pressionado');
 
-      // Clear any pending timer
       if (barcodeTimer) {
         clearTimeout(barcodeTimer);
         barcodeTimer = null;
@@ -1498,7 +1535,13 @@ function enhanceMobileProductSearch() {
     }
   });
 
-  console.log('📱 Busca de produto aprimorada para mobile (com detecção de scanner)');
+  // Fallback: detectar quando o input recebe foco (alguns scanners disparam assim)
+  codigoInput.addEventListener('focus', function() {
+    console.log('🎯 Input recebeu foco');
+    lastInputTime = Date.now();
+  });
+
+  console.log('📱 Scanner configurado! Threshold:', SCANNER_THRESHOLD, 'ms');
 }
 
 // Execute allocation action on mobile
