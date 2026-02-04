@@ -1402,6 +1402,30 @@ select:focus {
   color: var(--brand-blue);
 }
 
+/* Estilo para o separador de etiqueta com ID */
+.etiqueta-separador {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  font-size: 1rem;
+  cursor: help;
+}
+
+/* Estilo para o ID da etiqueta */
+.etiqueta-id {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #e60012 0%, #c40010 100%);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 4px;
+  border: 1px solid #a3000d;
+  box-shadow: 0 2px 4px rgba(230, 0, 18, 0.3);
+  letter-spacing: 1px;
+}
+
 .produto-status {
   padding: 4px 12px;
   border-radius: 20px;
@@ -5092,5 +5116,88 @@ MOBILE LOADING AND EMPTY STATES ===== */
     padding: 0.65rem;
     font-weight: 700;
     background: #1e3a5f;
+  }
+}
+/* ===== FIX CONTRASTE MOBILE - PRODUTO INFO ===== */
+
+/* Forçar cores escuras no display de produto mobile para garantir contraste */
+@media (max-width: 768px) {
+  /* Container principal do produto - fundo claro garantido */
+  .produto-info {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  
+  /* Card do produto - fundo claro com texto escuro */
+  .produto-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    border: 2px solid #e2e8f0 !important;
+    color: #0f172a !important;
+  }
+  
+  /* Código do produto - texto azul escuro garantido */
+  .produto-coddv {
+    color: #062e6f !important;
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%) !important;
+    border: 2px solid #bae6fd !important;
+  }
+  
+  .produto-coddv .codigo-principal {
+    color: #062e6f !important;
+    font-weight: 700 !important;
+  }
+  
+  /* Descrição do produto - texto escuro garantido */
+  .produto-desc {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Código de barras - texto cinza escuro */
+  .produto-barras {
+    color: #475569 !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  
+  /* Status do produto */
+  .produto-status {
+    font-weight: 700 !important;
+  }
+  
+  .status-alocado {
+    background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%) !important;
+    color: #166534 !important;
+    border: 2px solid #bbf7d0 !important;
+  }
+  
+  .status-disponivel {
+    background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%) !important;
+    color: #92400e !important;
+    border: 2px solid #fde68a !important;
+  }
+  
+  /* Garantir que o separador de ID tenha cor adequada */
+  .etiqueta-separador {
+    color: #475569 !important;
+  }
+  
+  .etiqueta-id {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    color: #ffffff !important;
+  }
+}
+
+/* Telas muito pequenas - reforçar contraste */
+@media (max-width: 480px) {
+  .produto-coddv {
+    font-size: 1.2rem !important;
+    color: #062e6f !important;
+  }
+  
+  .produto-desc {
+    font-size: 1rem !important;
+    color: #0f172a !important;
+    line-height: 1.4 !important;
   }
 }

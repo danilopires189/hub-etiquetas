@@ -1051,6 +1051,31 @@ function updateMobileActionButtons(produto) {
   updateMobileProductDisplay(produto, status);
 }
 
+// Função para buscar ID do produto na BASE_ID pelo CODDV
+function buscarIdPorCoddv(coddv) {
+  if (!window.DB_BASE_ID || !window.DB_BASE_ID.BASE_BASE_ID) {
+    console.warn('⚠️ BASE_ID não carregada');
+    return null;
+  }
+  
+  // Obter CD da sessão atual
+  const sessionData = JSON.parse(localStorage.getItem('enderecamento_fraldas_session') || '{}');
+  const cdAtual = parseInt(sessionData.cd) || 2;
+  
+  // Buscar na base o ID correspondente ao CODDV e CD
+  const registro = window.DB_BASE_ID.BASE_BASE_ID.find(
+    item => item.CODDV === coddv && parseInt(item.CD) === cdAtual
+  );
+  
+  if (registro) {
+    console.log('✅ ID encontrado para CODDV', coddv, ':', registro.ID);
+    return registro.ID;
+  }
+  
+  console.log('⚠️ ID não encontrado para CODDV:', coddv);
+  return null;
+}
+
 // Update mobile product display with optimized layout and typography
 function updateMobileProductDisplay(produto, status) {
   if (!isMobileDevice()) {
@@ -1071,8 +1096,12 @@ function updateMobileProductDisplay(produto, status) {
     return;
   }
 
-  // Update product code with mobile-optimized display (código + etiqueta)
-  produtoCoddv.innerHTML = `<span class="codigo-principal">${produto.CODDV}</span><span class="etiqueta-separador">📋</span>`;
+  // Buscar ID correspondente ao CODDV
+  const idEtiqueta = buscarIdPorCoddv(produto.CODDV);
+  
+  // Update product code with mobile-optimized display (código + etiqueta + ID)
+  const idHtml = idEtiqueta ? `<span class="etiqueta-id">${idEtiqueta}</span>` : '';
+  produtoCoddv.innerHTML = `<span class="codigo-principal">${produto.CODDV}</span><span class="etiqueta-separador" title="ID da etiqueta">📋${idHtml}</span>`;
   produtoCoddv.setAttribute('aria-label', `Código do produto: ${produto.CODDV}`);
 
   // Update product description with mobile-friendly formatting
