@@ -1212,12 +1212,8 @@ function updateMobileAddressDisplay(enderecoElement, status) {
       enderecoElement.classList.add('multiplos');
 
       const headerHtml = `
-        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; gap: 8px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <polyline points="3.27,6.96 12,12.01 20.73,6.96"/>
-            <line x1="12" y1="22.08" x2="12" y2="12"/>
-          </svg>
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; gap: 8px; color: #334155;">
+          📦
           <strong>Múltiplos Endereços</strong>
           <span class="endereco-count">${status.enderecos.length}</span>
         </div>
@@ -1227,22 +1223,18 @@ function updateMobileAddressDisplay(enderecoElement, status) {
         // Tentar obter informações de validade do produto neste endereço
         const validadeInfo = obterValidadeProdutoNoEndereco(produtoAtual?.CODDV, endereco);
         const validadeHtml = validadeInfo ? 
-          `<div class="endereco-validade-mobile">📆 ${formatarValidadeMobile(validadeInfo)}</div>` : '';
+          `<div class="endereco-validade-mobile">${formatarValidadeMobile(validadeInfo)}</div>` : '';
         
         // Tentar obter data/hora da alocação
         const dataAlocacaoInfo = obterDataAlocacaoProdutoNoEndereco(produtoAtual?.CODDV, endereco);
         const dataAlocacaoHtml = dataAlocacaoInfo ? 
-          `<div class="endereco-data-alocacao-mobile">🕐 ${formatarDataAlocacaoMobile(dataAlocacaoInfo)}</div>` : '';
+          `<div class="endereco-data-alocacao-mobile">${formatarDataAlocacaoMobile(dataAlocacaoInfo)}</div>` : '';
         
-        // Mesmo visual do produto único alocado
+        // Visual igual à imagem - fundo branco, badge verde
         return `
           <div class="endereco-item-mobile" aria-label="Endereço: ${endereco}">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                <polyline points="3.27,6.96 12,12.01 20.73,6.96"/>
-                <line x1="12" y1="22.08" x2="12" y2="12"/>
-              </svg>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.25rem;">
+              📦
               <strong>${endereco}</strong>
             </div>
             ${validadeHtml}
@@ -1258,20 +1250,16 @@ function updateMobileAddressDisplay(enderecoElement, status) {
       // Single address with validade info
       const validadeInfo = obterValidadeProdutoNoEndereco(produtoAtual?.CODDV, status.endereco);
       const validadeHtml = validadeInfo ? 
-        `<div class="endereco-validade-mobile">📆 ${formatarValidadeMobile(validadeInfo)}</div>` : '';
+        `<div class="endereco-validade-mobile">${formatarValidadeMobile(validadeInfo)}</div>` : '';
       
       // Data/hora da alocação
       const dataAlocacaoInfo = obterDataAlocacaoProdutoNoEndereco(produtoAtual?.CODDV, status.endereco);
       const dataAlocacaoHtml = dataAlocacaoInfo ? 
-        `<div class="endereco-data-alocacao-mobile">🕐 ${formatarDataAlocacaoMobile(dataAlocacaoInfo)}</div>` : '';
+        `<div class="endereco-data-alocacao-mobile">${formatarDataAlocacaoMobile(dataAlocacaoInfo)}</div>` : '';
 
       enderecoElement.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <polyline points="3.27,6.96 12,12.01 20.73,6.96"/>
-            <line x1="12" y1="22.08" x2="12" y2="12"/>
-          </svg>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.25rem;">
+          📦
           <strong>${status.endereco}</strong>
         </div>
         ${validadeHtml}

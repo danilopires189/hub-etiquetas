@@ -534,14 +534,14 @@ body {
 
   /* Animação shimmer removida para melhor usabilidade mobile */
 
-  /* Multiple addresses display - mesmo visual do único */
+  /* Multiple addresses display - fundo branco igual à imagem */
   .produto-endereco.multiplos {
-    background: #ecfdf5;
-    border-color: #a7f3d0;
-    color: #059669;
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #334155;
     border-radius: 8px;
     padding: 12px;
-    border: 1px solid #a7f3d0;
+    border: 1px solid #e2e8f0;
   }
 
   /* Efeito de sombra amarela removido dos endereços múltiplos */
@@ -5042,34 +5042,58 @@ MOBILE LOADING AND EMPTY STATES ===== */
   content: '❓';
 }
 
-/* ===== Estilos Mobile para Validade em Endereços ===== */
+/* ===== Estilos Mobile para Endereços - Igual à imagem ===== */
 
-/* Validade em endereços mobile - Mesmo visual do produto único alocado */
-.endereco-validade-mobile {
-  font-size: 0.9rem;
-  color: #065f46;
+/* Item de endereço mobile - fundo branco/cinza claro, texto escuro */
+.endereco-item-mobile {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 1rem;
   font-weight: 500;
+  color: #1e293b;
+  text-align: center;
+}
+
+/* Ícone e código do endereço */
+.endereco-item-mobile strong {
+  color: #062e6f;
+  font-weight: 600;
+}
+
+/* Badge de validade - verde como na imagem */
+.endereco-validade-mobile {
+  font-size: 0.85rem;
+  color: #166534;
+  font-weight: 600;
   margin-top: 0.5rem;
-  padding: 0.35rem 0.6rem;
+  padding: 0.3rem 0.6rem;
   background: #dcfce7;
-  border: 1px solid #a7f3d0;
+  border: 1px solid #86efac;
   border-radius: 6px;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
 }
 
-/* Itens de endereço mobile - EXATAMENTE igual ao produto único alocado */
-.endereco-item-mobile {
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  background: #ecfdf5;
-  border-radius: 8px;
-  border: 1px solid #a7f3d0;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #059669;
-  text-align: center;
+/* Data de alocação - cinza como na imagem */
+.endereco-data-alocacao-mobile {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+/* Ícone do relógio na data */
+.endereco-data-alocacao-mobile::before {
+  content: "🕐";
+  font-size: 0.75rem;
 }
 
 /* Último item sem margem inferior */
@@ -5092,22 +5116,28 @@ MOBILE LOADING AND EMPTY STATES ===== */
   font-weight: 500;
 }
 
-/* Responsividade específica para validade mobile */
+/* Responsividade específica para endereços mobile */
 @media (max-width: 768px) {
-  .endereco-validade-mobile {
-    font-size: 0.85rem;
-    padding: 0.25rem 0.5rem;
-    font-weight: 500;
-  }
-  
   .endereco-item-mobile {
     font-size: 0.95rem;
     padding: 0.75rem;
     font-weight: 500;
-    background: #ecfdf5;
-    color: #059669;
-    border: 1px solid #a7f3d0;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
+  }
+  
+  .endereco-item-mobile strong {
+    color: #062e6f;
+  }
+  
+  .endereco-validade-mobile {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    font-weight: 600;
+    background: #dcfce7;
+    border: 1px solid #86efac;
   }
   
   .endereco-data-alocacao-mobile {
@@ -5119,19 +5149,16 @@ MOBILE LOADING AND EMPTY STATES ===== */
 
 /* Telas muito pequenas */
 @media (max-width: 480px) {
-  .endereco-validade-mobile {
-    font-size: 0.8rem;
-    padding: 0.2rem 0.4rem;
-    font-weight: 500;
-  }
-  
   .endereco-item-mobile {
     font-size: 0.9rem;
     padding: 0.65rem;
-    font-weight: 500;
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .endereco-validade-mobile {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
   }
 }
 /* ===== FIX CONTRASTE MOBILE - PRODUTO INFO ===== */
