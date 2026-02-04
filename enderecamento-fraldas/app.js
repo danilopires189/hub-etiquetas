@@ -3894,14 +3894,15 @@ async function exibirHistorico() {
         cd: item.cd
       }));
 
-      // Ordenar por data decrescente (mais recentes primeiro)
-      historicoOperacoes.sort((a, b) => {
-        const dataA = new Date(a.dataHoraRaw || a.timestamp);
-        const dataB = new Date(b.dataHoraRaw || b.timestamp);
-        return dataB - dataA; // Decrescente
-      });
-
+      // O Supabase já retorna ordenado por data_hora DESC
+      // Não precisamos reordenar, apenas usar na ordem que veio
       console.log('✅ Histórico carregado do Supabase:', historicoOperacoes.length, 'registros');
+      
+      // Debug: mostrar as datas para verificar ordenação
+      if (historicoOperacoes.length > 0) {
+        console.log('📅 Primeiro registro:', historicoOperacoes[0].dataHoraRaw);
+        console.log('📅 Último registro:', historicoOperacoes[historicoOperacoes.length - 1].dataHoraRaw);
+      }
 
     } catch (error) {
       console.error('❌ Erro ao carregar histórico do Supabase:', error);
@@ -3996,13 +3997,8 @@ async function exibirHistoricoCompleto() {
         cd: item.cd
       }));
 
-      // Ordenar por data decrescente (mais recentes primeiro)
-      historicoOperacoes.sort((a, b) => {
-        const dataA = new Date(a.dataHoraRaw || a.timestamp);
-        const dataB = new Date(b.dataHoraRaw || b.timestamp);
-        return dataB - dataA; // Decrescente
-      });
-
+      // O Supabase já retorna ordenado por data_hora DESC
+      // Não precisamos reordenar, apenas usar na ordem que veio
       console.log('✅ Histórico completo carregado do Supabase:', historicoOperacoes.length, 'registros');
 
     } catch (error) {

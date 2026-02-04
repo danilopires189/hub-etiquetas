@@ -67,13 +67,7 @@ async function exibirHistoricoCorrigido() {
         };
       });
 
-      // Ordenar por data decrescente (mais recentes primeiro)
-      historicoOperacoes.sort((a, b) => {
-        const dataA = new Date(a.dataHoraRaw || a.timestamp);
-        const dataB = new Date(b.dataHoraRaw || b.timestamp);
-        return dataB - dataA; // Decrescente
-      });
-      
+      // O Supabase já retorna ordenado por data_hora DESC
       console.log('✅ Histórico carregado do Supabase:', historicoOperacoes.length, 'registros');
       
     } catch (error) {
@@ -178,13 +172,7 @@ async function exibirHistoricoCompletoCorrigido() {
         };
       });
 
-      // Ordenar por data decrescente (mais recentes primeiro)
-      historicoOperacoes.sort((a, b) => {
-        const dataA = new Date(a.dataHoraRaw || a.timestamp);
-        const dataB = new Date(b.dataHoraRaw || b.timestamp);
-        return dataB - dataA; // Decrescente
-      });
-      
+      // O Supabase já retorna ordenado por data_hora DESC
       console.log('✅ Histórico completo carregado do Supabase:', historicoOperacoes.length, 'registros');
       
     } catch (error) {

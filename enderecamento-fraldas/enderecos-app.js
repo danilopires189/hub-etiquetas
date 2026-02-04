@@ -1624,13 +1624,7 @@ class EnderecoApp {
                     };
                 });
 
-                // Ordenar por data decrescente (mais recentes primeiro)
-                historico.sort((a, b) => {
-                    const dataA = new Date(a.dataHoraRaw || a.timestamp);
-                    const dataB = new Date(b.dataHoraRaw || b.timestamp);
-                    return dataB - dataA; // Decrescente
-                });
-
+                // O Supabase já retorna ordenado por data_hora DESC
                 console.log('✅ Histórico de endereços carregado do Supabase:', historico.length, 'registros');
 
             } catch (error) {
@@ -1731,13 +1725,7 @@ class EnderecoApp {
                     };
                 });
 
-                // Ordenar por data decrescente (mais recentes primeiro)
-                historico.sort((a, b) => {
-                    const dataA = new Date(a.dataHoraRaw || a.timestamp);
-                    const dataB = new Date(b.dataHoraRaw || b.timestamp);
-                    return dataB - dataA; // Decrescente
-                });
-
+                // O Supabase já retorna ordenado por data_hora DESC
                 console.log('✅ Histórico completo de endereços carregado do Supabase:', historico.length, 'registros');
 
             } catch (error) {
