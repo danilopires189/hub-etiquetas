@@ -1414,6 +1414,9 @@ function enhanceMobileProductSearch() {
     const currentTime = Date.now();
     const timeSinceLastInput = currentTime - lastInputTime;
 
+    // SEMPRE atualizar lastInputTime
+    lastInputTime = currentTime;
+
     // Clear any existing timer
     if (barcodeTimer) {
       clearTimeout(barcodeTimer);
@@ -1422,16 +1425,15 @@ function enhanceMobileProductSearch() {
 
     // Only process if we have some content
     if (value.length > 0) {
-      // If this is the first character, record start time
+      // If this is the first character, apenas registra
       if (value.length === 1) {
         inputStartTime = currentTime;
         firstCharTime = currentTime;
         charCount = 1;
         isManualEntry = false;
-        lastInputTime = currentTime;
         codigoInput.placeholder = "Aguardando leitor...";
-        console.log('📱 Iniciando entrada - detectando método... (threshold:', SCANNER_THRESHOLD, 'ms)');
-        return;
+        console.log('📱 Iniciando entrada... (threshold:', SCANNER_THRESHOLD, 'ms)');
+        return; // Não processa mais nada no primeiro caractere
       }
 
       // Incrementar contador de caracteres
@@ -1440,14 +1442,14 @@ function enhanceMobileProductSearch() {
       // Detect input method based on timing between characters
       // Coletores: < 30ms | Celulares: < 50ms = scanner
       if (timeSinceLastInput > SCANNER_THRESHOLD) {
+        // Entrada manual detectada - NÃO executa timer
         isManualEntry = true;
         codigoInput.placeholder = "Digite e pressione Enter";
-        console.log('🖊️ Entrada manual detectada (delay:', timeSinceLastInput, 'ms >', SCANNER_THRESHOLD, 'ms)');
-        // NO TIMER for manual entry - user must press Enter
+        console.log('🖊️ MANUAL (delay:', timeSinceLastInput, 'ms >', SCANNER_THRESHOLD, 'ms)');
       } else {
-        // Fast input - likely scanner
+        // Entrada rápida - scanner detectado
         codigoInput.placeholder = "Aguardando leitor...";
-        console.log('📱 Entrada rápida detectada (delay:', timeSinceLastInput, 'ms <=', SCANNER_THRESHOLD, 'ms)');
+        console.log('📱 SCANNER (delay:', timeSinceLastInput, 'ms <=', SCANNER_THRESHOLD, 'ms)');
 
         // Calcular velocidade média para confirmar scanner em coletores
         if (isColetor && charCount >= 3) {
@@ -1456,9 +1458,10 @@ function enhanceMobileProductSearch() {
           console.log('📊 Velocidade média:', velocidadeMedia.toFixed(2), 'ms/caractere');
         }
 
-        // Set timer para scanner (mais rápido em coletores)
+        // SEMPRE executar busca automaticamente para entrada rápida (scanner)
+        // independente de ser coletor ou não
         barcodeTimer = setTimeout(() => {
-          console.log('⏰ Timer expirado - processando código automaticamente');
+          console.log('⏰ EXECUTANDO BUSCA AUTOMÁTICA!');
           const btnBuscar = $('#btnBuscar');
           if (btnBuscar && !btnBuscar.disabled) {
             btnBuscar.click();
@@ -1474,8 +1477,6 @@ function enhanceMobileProductSearch() {
       charCount = 0;
       codigoInput.placeholder = isColetor ? 'Bipe o código' : 'Bipe ou digite o código';
     }
-
-    lastInputTime = currentTime;
   });
 
   // Add Enter key handler for manual input
@@ -1708,6 +1709,9 @@ function configurarScannerMobileAddressInput() {
     const currentTime = Date.now();
     const timeSinceLastInput = currentTime - lastInputTime;
 
+    // SEMPRE atualizar lastInputTime
+    lastInputTime = currentTime;
+
     // Limpar timer existente
     if (barcodeTimer) {
       clearTimeout(barcodeTimer);
@@ -1716,14 +1720,13 @@ function configurarScannerMobileAddressInput() {
 
     // Só processar se houver conteúdo
     if (value.length > 0) {
-      // Se for o primeiro caractere, registrar início
+      // Se for o primeiro caractere, apenas registra
       if (value.length === 1) {
         isManualEntry = false;
         firstCharTime = currentTime;
         charCount = 1;
-        lastInputTime = currentTime;
         addressInput.placeholder = "Aguardando leitor...";
-        console.log('📱 Modal Endereço: Iniciando entrada... (threshold:', SCANNER_THRESHOLD, 'ms)');
+        console.log('📱 Modal: Iniciando... (threshold:', SCANNER_THRESHOLD, 'ms)');
         return;
       }
 
@@ -1733,25 +1736,25 @@ function configurarScannerMobileAddressInput() {
       // Detectar método de entrada baseado no timing
       // Coletores: < 30ms | Celulares: < 50ms = scanner
       if (timeSinceLastInput > SCANNER_THRESHOLD) {
+        // Entrada manual - NÃO executa timer
         isManualEntry = true;
         addressInput.placeholder = "Ex: PF01.001.001.A01";
-        console.log('🖊️ Modal Endereço: Entrada manual detectada (delay:', timeSinceLastInput, 'ms)');
-        // NÃO executar validação automática para entrada manual
+        console.log('🖊️ Modal: MANUAL (delay:', timeSinceLastInput, 'ms)');
       } else {
-        // Entrada rápida - provavelmente scanner
+        // Entrada rápida - scanner detectado
         addressInput.placeholder = "Aguardando leitor...";
-        console.log('📱 Modal Endereço: Entrada rápida detectada (delay:', timeSinceLastInput, 'ms <=', SCANNER_THRESHOLD, 'ms)');
+        console.log('📱 Modal: SCANNER (delay:', timeSinceLastInput, 'ms)');
 
         // Calcular velocidade média para confirmar scanner em coletores
         if (isColetor && charCount >= 3) {
           const tempoTotal = currentTime - firstCharTime;
           const velocidadeMedia = tempoTotal / charCount;
-          console.log('📊 Modal Endereço - Velocidade média:', velocidadeMedia.toFixed(2), 'ms/caractere');
+          console.log('📊 Velocidade média:', velocidadeMedia.toFixed(2), 'ms/caractere');
         }
 
         // Executar validação automaticamente após scanner
         barcodeTimer = setTimeout(() => {
-          console.log('⏰ Modal Endereço: Timer expirado - validando endereço automaticamente');
+          console.log('⏰ Modal: VALIDANDO AUTOMATICAMENTE!');
           // Só validar se tiver formato completo de endereço
           if (value.length >= 14) { // PF01.001.001.A01 = 14 caracteres
             validateMobileAddress();
@@ -1766,8 +1769,6 @@ function configurarScannerMobileAddressInput() {
       charCount = 0;
       addressInput.placeholder = 'Ex: PF01.001.001.A01';
     }
-
-    lastInputTime = currentTime;
   };
 
   // Handler para evento keydown (Enter)

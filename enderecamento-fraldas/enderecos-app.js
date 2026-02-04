@@ -1000,18 +1000,20 @@ class EnderecoApp {
                 barcodeTimer = null;
             }
 
+            // SEMPRE atualizar lastInputTime
+            lastInputTime = currentTime;
+
             // Só processar se houver conteúdo
             if (value.length > 0) {
-                // Se for o primeiro caractere, registrar início
+                // Se for o primeiro caractere, apenas registra
                 if (value.length === 1) {
                     inputStartTime = currentTime;
                     firstCharTime = currentTime;
                     charCount = 1;
                     isManualEntry = false;
-                    lastInputTime = currentTime;
                     inputElement.placeholder = "Aguardando leitor...";
-                    console.log('📱 Iniciando entrada - detectando método... (threshold:', SCANNER_THRESHOLD, 'ms)');
-                    return;
+                    console.log('📱 Iniciando entrada... (threshold:', SCANNER_THRESHOLD, 'ms)');
+                    return; // Não processa mais nada no primeiro caractere
                 }
 
                 // Incrementar contador de caracteres
@@ -1020,14 +1022,14 @@ class EnderecoApp {
                 // Detectar método de entrada baseado no timing
                 // Coletores: < 30ms | Celulares: < 50ms = scanner
                 if (timeSinceLastInput > SCANNER_THRESHOLD) {
+                    // Entrada manual - NÃO executa timer
                     isManualEntry = true;
                     inputElement.placeholder = "Digite e pressione Enter";
-                    console.log('🖊️ Entrada manual detectada (delay:', timeSinceLastInput, 'ms >', SCANNER_THRESHOLD, 'ms)');
-                    // NÃO executar busca automática para entrada manual
+                    console.log('🖊️ MANUAL (delay:', timeSinceLastInput, 'ms >', SCANNER_THRESHOLD, 'ms)');
                 } else {
-                    // Entrada rápida - provavelmente scanner
+                    // Entrada rápida - scanner detectado
                     inputElement.placeholder = "Aguardando leitor...";
-                    console.log('📱 Entrada rápida detectada (delay:', timeSinceLastInput, 'ms <=', SCANNER_THRESHOLD, 'ms)');
+                    console.log('📱 SCANNER (delay:', timeSinceLastInput, 'ms <=', SCANNER_THRESHOLD, 'ms)');
 
                     // Calcular velocidade média para confirmar scanner em coletores
                     if (isColetor && charCount >= 3) {
@@ -1036,9 +1038,9 @@ class EnderecoApp {
                         console.log('📊 Velocidade média:', velocidadeMedia.toFixed(2), 'ms/caractere');
                     }
 
-                    // SEMPRE executar busca automaticamente após scanner (todos os dispositivos)
+                    // SEMPRE executar busca automaticamente para entrada rápida
                     barcodeTimer = setTimeout(() => {
-                        console.log('⏰ Timer expirado - processando código do scanner automaticamente');
+                        console.log('⏰ EXECUTANDO BUSCA AUTOMÁTICA!');
                         this.buscarEnderecos();
                         barcodeTimer = null;
                     }, SCANNER_TIMER);
@@ -1051,8 +1053,6 @@ class EnderecoApp {
                 charCount = 0;
                 inputElement.placeholder = 'Digite parte do endereço ou descrição...';
             }
-
-            lastInputTime = currentTime;
         });
 
         // Evento de tecla Enter para entrada manual
