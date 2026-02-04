@@ -1208,12 +1208,12 @@ function updateMobileAddressDisplay(enderecoElement, status) {
 
   if (status.alocado) {
     if (status.multiplos) {
-      // Multiple addresses - show count and list with validade info
+      // Multiple addresses - show each with the same visual as single address
       enderecoElement.classList.add('multiplos');
 
       const headerHtml = `
-        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             <polyline points="3.27,6.96 12,12.01 20.73,6.96"/>
             <line x1="12" y1="22.08" x2="12" y2="12"/>
@@ -1234,9 +1234,17 @@ function updateMobileAddressDisplay(enderecoElement, status) {
         const dataAlocacaoHtml = dataAlocacaoInfo ? 
           `<div class="endereco-data-alocacao-mobile">🕐 ${formatarDataAlocacaoMobile(dataAlocacaoInfo)}</div>` : '';
         
+        // Mesmo visual do produto único alocado
         return `
           <div class="endereco-item-mobile" aria-label="Endereço: ${endereco}">
-            ${endereco}
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27,6.96 12,12.01 20.73,6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+              <strong>${endereco}</strong>
+            </div>
             ${validadeHtml}
             ${dataAlocacaoHtml}
           </div>
@@ -1244,7 +1252,7 @@ function updateMobileAddressDisplay(enderecoElement, status) {
       }).join('');
 
       enderecoElement.innerHTML = headerHtml + `<div class="endereco-list-mobile">${addressListHtml}</div>`;
-      enderecoElement.setAttribute('aria-label', `Produto alocado em ${status.enderecos.length} endereços: ${status.enderecos.join(', ')}`);
+      enderecoElement.setAttribute('aria-label', `Produto alocado em ${status.enderecos.length} endereços: ${status.enderecos.join(', ')}`)
 
     } else {
       // Single address with validade info
