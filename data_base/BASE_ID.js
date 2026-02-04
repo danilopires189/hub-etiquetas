@@ -1,5 +1,5 @@
 // BASE_ID.js - Auto-convertido de BASE_ID.xlsx
-// 04/02/2026, 13:50:41
+// 04/02/2026, 16:07:41
 
 window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
@@ -3905,7 +3905,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "156213",
-            "ID": "684"
+            "ID": "445"
         },
         {
             "CD": 2,
@@ -6150,7 +6150,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "173673",
-            "ID": "517"
+            "ID": "719"
         },
         {
             "CD": 2,
@@ -12405,7 +12405,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "229881",
-            "ID": "823"
+            "ID": "451"
         },
         {
             "CD": 2,
@@ -13745,7 +13745,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "240451",
-            "ID": "186"
+            "ID": "448"
         },
         {
             "CD": 2,
@@ -16465,7 +16465,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "264059",
-            "ID": "996"
+            "ID": "443"
         },
         {
             "CD": 2,
@@ -21525,7 +21525,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "298662",
-            "ID": "522"
+            "ID": "622"
         },
         {
             "CD": 2,
@@ -25370,7 +25370,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "323136",
-            "ID": "700"
+            "ID": "446"
         },
         {
             "CD": 2,
@@ -27545,7 +27545,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "333441",
-            "ID": "752"
+            "ID": "452"
         },
         {
             "CD": 2,
@@ -41135,7 +41135,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "393231",
-            "ID": "985"
+            "ID": "781"
         },
         {
             "CD": 2,
@@ -67345,7 +67345,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "465550",
-            "ID": "785"
+            "ID": "450"
         },
         {
             "CD": 2,
@@ -78915,7 +78915,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "493643",
-            "ID": "767"
+            "ID": "444"
         },
         {
             "CD": 2,
@@ -81735,7 +81735,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "500240",
-            "ID": "615"
+            "ID": "449"
         },
         {
             "CD": 2,
@@ -82450,7 +82450,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "501859",
-            "ID": "939"
+            "ID": "358"
         },
         {
             "CD": 2,
@@ -94630,7 +94630,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "533319",
-            "ID": "472"
+            "ID": "447"
         },
         {
             "CD": 2,
@@ -125724,6 +125724,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "608009",
+            "ID": "517"
+        },
+        {
+            "CD": 2,
             "CODDV": "608017",
             "ID": "556"
         },
@@ -149510,7 +149515,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "763900",
-            "ID": "732"
+            "ID": "615"
         },
         {
             "CD": 2,
@@ -165039,6 +165044,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "801810",
+            "ID": "631"
+        },
+        {
+            "CD": 2,
             "CODDV": "801836",
             "ID": "445"
         },
@@ -169904,6 +169914,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "816370",
+            "ID": "472"
+        },
+        {
+            "CD": 2,
             "CODDV": "816388",
             "ID": "939"
         },
@@ -170419,6 +170434,16 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         },
         {
             "CD": 2,
+            "CODDV": "818356",
+            "ID": "522"
+        },
+        {
+            "CD": 2,
+            "CODDV": "818364",
+            "ID": "186"
+        },
+        {
+            "CD": 2,
             "CODDV": "818372",
             "ID": "412"
         },
@@ -170486,6 +170511,11 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
             "CD": 2,
             "CODDV": "818747",
             "ID": "042"
+        },
+        {
+            "CD": 2,
+            "CODDV": "818763",
+            "ID": "399"
         },
         {
             "CD": 2,
@@ -171485,7 +171515,7 @@ window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
             "CD": 2,
             "CODDV": "96059",
-            "ID": "927"
+            "ID": "442"
         },
         {
             "CD": 2,
