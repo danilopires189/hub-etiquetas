@@ -1298,14 +1298,22 @@ function formatarValidadeMobile(validade) {
     return 'Não informada';
   }
   
-  // Se já está no formato MM/AAAA, retornar como está
+  // Se já está no formato MM/AAAA, converter para MM/AA
   if (validade.includes('/')) {
+    const partes = validade.split('/');
+    if (partes.length === 2) {
+      const mes = partes[0];
+      const ano = partes[1];
+      // Pegar apenas os 2 últimos dígitos do ano
+      const anoCurto = ano.length === 4 ? ano.substring(2) : ano;
+      return `${mes}/${anoCurto}`;
+    }
     return validade;
   }
   
-  // Se está no formato MMAA, converter para MM/20AA
+  // Se está no formato MMAA, converter para MM/AA
   if (validade.length === 4 && /^\d{4}$/.test(validade)) {
-    return `${validade.substring(0, 2)}/20${validade.substring(2)}`;
+    return `${validade.substring(0, 2)}/${validade.substring(2)}`;
   }
   
   // Retornar como está se não conseguir formatar
