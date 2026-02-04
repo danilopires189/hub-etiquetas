@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Scanner Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .test-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .test-input.scanner {
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+        .test-input.manual {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .log {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.scanner {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status.manual {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .status.waiting {
+            background: #fef3c7;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Detecção de Scanner</h1>
+    
+    <div id="status" class="status waiting">Aguardando entrada...</div>
+    
+    <h3>Campo de Teste:</h3>
+    <input type="text" id="testInput" class="test-input" placeholder="Digite ou escaneie um código">
+    
+    <div>
+        <button class="btn btn-success" onclick="simularScanner()">📱 Simular Scanner (Rápido)</button>
+        <button class="btn btn-primary" onclick="simularManual()">⌨️ Simular Manual (Lento)</button>
+        <button class="btn" onclick="limparLog()">🗑️ Limpar Log</button>
+    </div>
+    
+    <h3>Log de Eventos:</h3>
+    <div id="log" class="log"></div>
+
+    <script>
+        const input = document.getElementById('testInput');
+        const status = document.getElementById('status');
+        const log = document.getElementById('log');
+        
+        let barcodeTimer = null;
+        let lastInputTime = 0;
+        let isManualEntry = false;
+        
+        function addLog(message) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            log.insertBefore(entry, log.firstChild);
+        }
+        
+        function limparLog() {
+            log.innerHTML = '';
+            input.value = '';
+            status.textContent = 'Aguardando entrada...';
+            status.className = 'status waiting';
+            input.className = 'test-input';
+        }
+        
+        // Configurar detecção de scanner
+        input.addEventListener('input', function(e) {
+            const value = e.target.value;
+            const currentTime = Date.now();
+            const timeSinceLastInput = currentTime - lastInputTime;
+            
+            addLog('Input: "' + value + '" | Delay: ' + timeSinceLastInput + 'ms');
+            
+            // Limpar timer existente
+            if (barcodeTimer) {
+                clearTimeout(barcodeTimer);
+                barcodeTimer = null;
+            }
+            
+            if (value.length > 0) {
+                // Primeiro caractere
+                if (value.length === 1) {
+                    isManualEntry = false;
+                    lastInputTime = currentTime;
+                    status.textContent = 'Iniciando entrada...';
+                    status.className = 'status waiting';
+                    input.className = 'test-input';
+                    return;
+                }
+                
+                // Detectar método de entrada
+                if (timeSinceLastInput > 50) {
+                    // Entrada manual
+                    isManualEntry = true;
+                    status.textContent = '🖊️ Entrada MANUAL detectada (delay: ' + timeSinceLastInput + 'ms)';
+                    status.className = 'status manual';
+                    input.className = 'test-input manual';
+                    addLog('→ MANUAL detectado (>' + timeSinceLastInput + 'ms)');
+                } else {
+                    // Entrada rápida - scanner
+                    status.textContent = '📱 Entrada RÁPIDA detectada (delay: ' + timeSinceLastInput + 'ms)';
+                    status.className = 'status scanner';
+                    input.className = 'test-input scanner';
+                    addLog('→ SCANNER detectado (<' + timeSinceLastInput + 'ms)');
+                    
+                    // Timer para busca automática
+                    barcodeTimer = setTimeout(() => {
+                        addLog('✅ BUSCA AUTOMÁTICA ACIONADA!');
+                        status.textContent = '✅ Busca automática executada!';
+                        alert('Busca automática executada para: ' + input.value);
+                    }, 150);
+                }
+            } else {
+                isManualEntry = false;
+                status.textContent = 'Aguardando entrada...';
+                status.className = 'status waiting';
+                input.className = 'test-input';
+            }
+            
+            lastInputTime = currentTime;
+        });
+        
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (barcodeTimer) {
+                    clearTimeout(barcodeTimer);
+                    barcodeTimer = null;
+                }
+                addLog('⏎ ENTER pressionado - buscando...');
+                alert('Busca manual executada para: ' + input.value);
+            }
+        });
+        
+        // Simular scanner
+        function simularScanner() {
+            limparLog();
+            addLog('🧪 Simulando SCANNER (30ms entre caracteres)...');
+            input.value = '';
+            input.focus();
+            
+            const codigo = '12345678';
+            let i = 0;
+            
+            const intervalo = setInterval(() => {
+                if (i < codigo.length) {
+                    input.value += codigo[i];
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    i++;
+                } else {
+                    clearInterval(intervalo);
+                    addLog('✅ Simulação de scanner concluída');
+                }
+            }, 30); // 30ms entre caracteres
+        }
+        
+        // Simular entrada manual
+        function simularManual() {
+            limparLog();
+            addLog('🧪 Simulando DIGITAÇÃO MANUAL (200ms entre caracteres)...');
+            input.value = '';
+            input.focus();
+            
+            const codigo = '87654321';
+            let i = 0;
+            
+            const intervalo = setInterval(() => {
+                if (i < codigo.length) {
+                    input.value += codigo[i];
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    i++;
+                } else {
+                    clearInterval(intervalo);
+                    addLog('✅ Simulação manual concluída');
+                    addLog('📝 Aguardando ENTER para buscar...');
+                }
+            }, 200); // 200ms entre caracteres
+        }
+        
+        addLog('🚀 Página de teste carregada');
+        addLog('📱 User Agent: ' + navigator.userAgent.substring(0, 50) + '...');
+        addLog('📱 Largura da tela: ' + window.innerWidth + 'px');
+    </script>
+</body>
+</html>
