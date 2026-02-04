@@ -1,33 +1,40 @@
 /* ===== Sistema de Scanner para Dispositivos Móveis ===== */
 
 // Prevent scanner functionality on mobile devices for this specific implementation
-if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-  // Mobile device detected - disable all scanner functionality
-  console.log('Scanner functionality disabled on mobile devices');
-  
-  // Override scanner functions to prevent execution
-  window.mobileScanner = {
-    isMobileDevice: () => true,
-    isSupported: () => false,
-    openScanner: () => console.log('Scanner disabled on mobile'),
-    closeScanner: () => {},
-    destroy: () => {}
-  };
-  
-  // Prevent adding scanner buttons
-  function addScannerButtons() {
-    console.log('Scanner buttons disabled on mobile');
+(function() {
+  if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    // Mobile device detected - disable all scanner functionality
+    console.log('Scanner functionality disabled on mobile devices');
+    
+    // Override scanner functions to prevent execution
+    window.mobileScanner = {
+      isMobileDevice: () => true,
+      isSupported: () => false,
+      openScanner: () => console.log('Scanner disabled on mobile'),
+      closeScanner: () => {},
+      destroy: () => {}
+    };
+    
+    // Prevent adding scanner buttons
+    window.addScannerButtons = function() {
+      console.log('Scanner buttons disabled on mobile');
+      return;
+    };
+    
+    window.addScannerButton = function() {
+      console.log('Scanner button disabled on mobile');
+      return;
+    };
+    
+    // Exit early - don't load the rest of the scanner code
     return;
   }
   
-  function addScannerButton() {
-    console.log('Scanner button disabled on mobile');
-    return;
-  }
-  
-  // Exit early to prevent loading the rest of the scanner code
-  return;
-}
+  // Continue with scanner initialization for desktop...
+  initializeScanner();
+})();
+
+function initializeScanner() {
 
 class MobileScanner {
     constructor() {
@@ -647,3 +654,5 @@ window.addEventListener('beforeunload', () => {
         window.mobileScanner.destroy();
     }
 });
+
+} // Fechamento da função initializeScanner()

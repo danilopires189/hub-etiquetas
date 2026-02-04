@@ -473,6 +473,8 @@ function toggleUserInfo() {
 function initializeMobileInterface() {
   if (!isMobileDevice()) {
     console.log('📱 Não é dispositivo móvel - pulando inicialização mobile');
+    // MAS ainda assim configurar o scanner para desktop
+    enhanceMobileProductSearch();
     return;
   }
 
@@ -515,7 +517,7 @@ function initializeMobileInterface() {
   const deviceInfo = getMobileDeviceInfo();
   console.log('📱 Device info:', deviceInfo);
 
-  // Enhance mobile product search
+  // Enhance mobile product search (também funciona em desktop)
   enhanceMobileProductSearch();
 
   console.log('📱 Interface mobile inicializada com sucesso');
