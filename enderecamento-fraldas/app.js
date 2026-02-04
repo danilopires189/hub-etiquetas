@@ -1223,7 +1223,7 @@ function updateMobileAddressDisplay(enderecoElement, status) {
         // Tentar obter informações de validade do produto neste endereço
         const validadeInfo = obterValidadeProdutoNoEndereco(produtoAtual?.CODDV, endereco);
         const validadeHtml = validadeInfo ? 
-          `<div class="endereco-validade-mobile">${formatarValidadeMobile(validadeInfo)}</div>` : '';
+          `<div class="endereco-validade-mobile">📆 ${formatarValidadeMobile(validadeInfo)}</div>` : '';
         
         // Tentar obter data/hora da alocação
         const dataAlocacaoInfo = obterDataAlocacaoProdutoNoEndereco(produtoAtual?.CODDV, endereco);
@@ -1233,7 +1233,7 @@ function updateMobileAddressDisplay(enderecoElement, status) {
         // Visual igual à imagem - fundo branco, badge verde
         return `
           <div class="endereco-item-mobile" aria-label="Endereço: ${endereco}">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.25rem;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0.35rem;">
               📦
               <strong>${endereco}</strong>
             </div>
@@ -1250,7 +1250,7 @@ function updateMobileAddressDisplay(enderecoElement, status) {
       // Single address with validade info
       const validadeInfo = obterValidadeProdutoNoEndereco(produtoAtual?.CODDV, status.endereco);
       const validadeHtml = validadeInfo ? 
-        `<div class="endereco-validade-mobile">${formatarValidadeMobile(validadeInfo)}</div>` : '';
+        `<div class="endereco-validade-mobile">📆 ${formatarValidadeMobile(validadeInfo)}</div>` : '';
       
       // Data/hora da alocação
       const dataAlocacaoInfo = obterDataAlocacaoProdutoNoEndereco(produtoAtual?.CODDV, status.endereco);
@@ -1258,7 +1258,7 @@ function updateMobileAddressDisplay(enderecoElement, status) {
         `<div class="endereco-data-alocacao-mobile">${formatarDataAlocacaoMobile(dataAlocacaoInfo)}</div>` : '';
 
       enderecoElement.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.25rem;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0.35rem;">
           📦
           <strong>${status.endereco}</strong>
         </div>

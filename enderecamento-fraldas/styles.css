@@ -5046,21 +5046,23 @@ MOBILE LOADING AND EMPTY STATES ===== */
 
 /* Item de endereço mobile - fundo branco/cinza claro, texto escuro */
 .endereco-item-mobile {
-  padding: 0.75rem 1rem;
+  padding: 1rem;
   margin-bottom: 0.5rem;
   background: #ffffff;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 600;
   color: #1e293b;
   text-align: center;
 }
 
-/* Ícone e código do endereço */
+/* Ícone e código do endereço - DESTAQUE MAIOR */
 .endereco-item-mobile strong {
   color: #062e6f;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
 }
 
 /* Badge de validade - verde como na imagem */
@@ -5119,9 +5121,9 @@ MOBILE LOADING AND EMPTY STATES ===== */
 /* Responsividade específica para endereços mobile */
 @media (max-width: 768px) {
   .endereco-item-mobile {
-    font-size: 0.95rem;
-    padding: 0.75rem;
-    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.85rem;
+    font-weight: 600;
     background: #ffffff;
     color: #1e293b;
     border: 1px solid #e2e8f0;
@@ -5130,6 +5132,9 @@ MOBILE LOADING AND EMPTY STATES ===== */
   
   .endereco-item-mobile strong {
     color: #062e6f;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
   }
   
   .endereco-validade-mobile {
@@ -5150,10 +5155,14 @@ MOBILE LOADING AND EMPTY STATES ===== */
 /* Telas muito pequenas */
 @media (max-width: 480px) {
   .endereco-item-mobile {
-    font-size: 0.9rem;
-    padding: 0.65rem;
+    font-size: 0.95rem;
+    padding: 0.75rem;
     background: #ffffff;
     border: 1px solid #e2e8f0;
+  }
+  
+  .endereco-item-mobile strong {
+    font-size: 1.05rem;
   }
   
   .endereco-validade-mobile {
