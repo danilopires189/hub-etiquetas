@@ -1572,6 +1572,9 @@ function openMobileAddressModal(mode, sourceAddress = null) {
     autoFocus: true,
     closePrevious: true
   });
+
+  // Configurar detecção de scanner para o input de endereço
+  configurarScannerMobileAddressInput();
 }
 
 // Close mobile address modal
@@ -1617,6 +1620,111 @@ function closeMobileAddressModal() {
   hideMobileAddressFeedback();
   hideMobileValidityFeedback();
   hideMobileAddressSuggestions();
+}
+
+// Configurar detecção de scanner vs digitação manual no input de endereço mobile
+function configurarScannerMobileAddressInput() {
+  const addressInput = $('#mobileAddressInput');
+  if (!addressInput) return;
+
+  // Remover event listeners anteriores se existirem (para evitar duplicação)
+  if (addressInput._scannerInputHandler) {
+    addressInput.removeEventListener('input', addressInput._scannerInputHandler);
+  }
+  if (addressInput._scannerKeydownHandler) {
+    addressInput.removeEventListener('keydown', addressInput._scannerKeydownHandler);
+  }
+
+  // Adicionar atributos para melhor experiência mobile
+  addressInput.setAttribute('autocomplete', 'off');
+  addressInput.setAttribute('autocorrect', 'off');
+  addressInput.setAttribute('autocapitalize', 'off');
+  addressInput.setAttribute('spellcheck', 'false');
+
+  // Variáveis para detecção de scanner
+  let barcodeTimer = null;
+  let lastInputTime = 0;
+  let isManualEntry = false;
+
+  // Handler para evento input
+  addressInput._scannerInputHandler = function(e) {
+    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g, '');
+    if (value !== e.target.value) {
+      e.target.value = value;
+    }
+
+    const currentTime = Date.now();
+    const timeSinceLastInput = currentTime - lastInputTime;
+
+    // Limpar timer existente
+    if (barcodeTimer) {
+      clearTimeout(barcodeTimer);
+      barcodeTimer = null;
+    }
+
+    // Só processar se houver conteúdo
+    if (value.length > 0) {
+      // Se for o primeiro caractere, registrar início
+      if (value.length === 1) {
+        isManualEntry = false;
+        lastInputTime = currentTime;
+        addressInput.placeholder = "Aguardando leitor...";
+        console.log('📱 Modal Endereço: Iniciando entrada - detectando método...');
+        return;
+      }
+
+      // Detectar método de entrada baseado no timing
+      // Se tempo entre caracteres > 50ms, provavelmente é digitação manual
+      if (timeSinceLastInput > 50) {
+        isManualEntry = true;
+        addressInput.placeholder = "Ex: PF01.001.001.A01";
+        console.log('🖊️ Modal Endereço: Entrada manual detectada - aguardando Enter ou botão Validar');
+        // NÃO executar validação automática para entrada manual
+      } else {
+        // Entrada rápida - provavelmente scanner
+        addressInput.placeholder = "Aguardando leitor...";
+        console.log('📱 Modal Endereço: Entrada rápida detectada - scanner ativo');
+
+        // Executar validação automaticamente após scanner
+        barcodeTimer = setTimeout(() => {
+          console.log('⏰ Modal Endereço: Timer expirado - validando endereço automaticamente');
+          // Só validar se tiver formato completo de endereço
+          if (value.length >= 14) { // PF01.001.001.A01 = 14 caracteres
+            validateMobileAddress();
+          }
+          barcodeTimer = null;
+        }, 150);
+      }
+    } else {
+      // Campo vazio - resetar estado
+      isManualEntry = false;
+      addressInput.placeholder = 'Ex: PF01.001.001.A01';
+    }
+
+    lastInputTime = currentTime;
+  };
+
+  // Handler para evento keydown (Enter)
+  addressInput._scannerKeydownHandler = function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      console.log('⏎ Modal Endereço: Enter pressionado - validando endereço');
+
+      // Limpar timer pendente
+      if (barcodeTimer) {
+        clearTimeout(barcodeTimer);
+        barcodeTimer = null;
+      }
+
+      validateMobileAddress();
+    }
+  };
+
+  // Adicionar event listeners
+  addressInput.addEventListener('input', addressInput._scannerInputHandler);
+  addressInput.addEventListener('keydown', addressInput._scannerKeydownHandler);
+
+  console.log('📱 Detecção de scanner configurada para input de endereço mobile');
 }
 
 // Validate mobile address input
@@ -3709,6 +3817,7 @@ async function exibirHistorico() {
       // Converter formato do Supabase para formato local
       historicoOperacoes = historicoSupabase.map(item => ({
         timestamp: formatarDataHistorico(item.data_hora),
+        dataHoraRaw: item.data_hora, // Guardar data original para ordenação
         tipo: item.tipo,
         coddv: item.coddv,
         desc: item.descricao_produto || 'Produto não identificado',
@@ -3718,6 +3827,13 @@ async function exibirHistorico() {
         matricula: item.matricula,
         cd: item.cd
       }));
+
+      // Ordenar por data decrescente (mais recentes primeiro)
+      historicoOperacoes.sort((a, b) => {
+        const dataA = new Date(a.dataHoraRaw || a.timestamp);
+        const dataB = new Date(b.dataHoraRaw || b.timestamp);
+        return dataB - dataA; // Decrescente
+      });
 
       console.log('✅ Histórico carregado do Supabase:', historicoOperacoes.length, 'registros');
 
@@ -3803,6 +3919,7 @@ async function exibirHistoricoCompleto() {
       // Converter formato do Supabase para formato local
       historicoOperacoes = historicoSupabase.map(item => ({
         timestamp: formatarDataHistorico(item.data_hora),
+        dataHoraRaw: item.data_hora, // Guardar data original para ordenação
         tipo: item.tipo,
         coddv: item.coddv,
         desc: item.descricao_produto || 'Produto não identificado',
@@ -3812,6 +3929,13 @@ async function exibirHistoricoCompleto() {
         matricula: item.matricula,
         cd: item.cd
       }));
+
+      // Ordenar por data decrescente (mais recentes primeiro)
+      historicoOperacoes.sort((a, b) => {
+        const dataA = new Date(a.dataHoraRaw || a.timestamp);
+        const dataB = new Date(b.dataHoraRaw || b.timestamp);
+        return dataB - dataA; // Decrescente
+      });
 
       console.log('✅ Histórico completo carregado do Supabase:', historicoOperacoes.length, 'registros');
 

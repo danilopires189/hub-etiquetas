@@ -55,6 +55,7 @@ async function exibirHistoricoCorrigido() {
         
         return {
           timestamp: formatarDataSegura(item.data_hora),
+          dataHoraRaw: item.data_hora, // Guardar data original para ordenação
           tipo: item.tipo,
           coddv: item.coddv,
           desc: item.descricao_produto || 'Produto não identificado',
@@ -64,6 +65,13 @@ async function exibirHistoricoCorrigido() {
           matricula: item.matricula,
           cd: item.cd
         };
+      });
+
+      // Ordenar por data decrescente (mais recentes primeiro)
+      historicoOperacoes.sort((a, b) => {
+        const dataA = new Date(a.dataHoraRaw || a.timestamp);
+        const dataB = new Date(b.dataHoraRaw || b.timestamp);
+        return dataB - dataA; // Decrescente
       });
       
       console.log('✅ Histórico carregado do Supabase:', historicoOperacoes.length, 'registros');
@@ -158,6 +166,7 @@ async function exibirHistoricoCompletoCorrigido() {
         
         return {
           timestamp: formatarDataSegura(item.data_hora),
+          dataHoraRaw: item.data_hora, // Guardar data original para ordenação
           tipo: item.tipo,
           coddv: item.coddv,
           desc: item.descricao_produto || 'Produto não identificado',
@@ -167,6 +176,13 @@ async function exibirHistoricoCompletoCorrigido() {
           matricula: item.matricula,
           cd: item.cd
         };
+      });
+
+      // Ordenar por data decrescente (mais recentes primeiro)
+      historicoOperacoes.sort((a, b) => {
+        const dataA = new Date(a.dataHoraRaw || a.timestamp);
+        const dataB = new Date(b.dataHoraRaw || b.timestamp);
+        return dataB - dataA; // Decrescente
       });
       
       console.log('✅ Histórico completo carregado do Supabase:', historicoOperacoes.length, 'registros');

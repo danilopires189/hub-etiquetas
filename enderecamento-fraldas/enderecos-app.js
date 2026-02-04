@@ -822,12 +822,8 @@ class EnderecoApp {
 
         const busca = document.getElementById('campoBusca');
         if (busca) {
-            busca.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') this.buscarEnderecos();
-            });
-            busca.addEventListener('input', debounce((e) => {
-                if (e.target.value.length >= 3 || e.target.value.length === 0) this.buscarEnderecos();
-            }, 300));
+            // Configurar detecção de scanner vs digitação manual para mobile
+            this.configurarDeteccaoScannerBusca(busca);
         }
 
         console.log('✅ Delegação de eventos simplificada ativa.');
@@ -945,6 +941,105 @@ class EnderecoApp {
         }, { passive: false });
 
         console.log('📱 Delegação de eventos mobile configurada');
+    }
+
+    // Configurar detecção de scanner vs digitação manual no campo de busca
+    configurarDeteccaoScannerBusca(inputElement) {
+        if (!inputElement) return;
+
+        // Adicionar atributos para melhor experiência mobile
+        inputElement.setAttribute('autocomplete', 'off');
+        inputElement.setAttribute('autocorrect', 'off');
+        inputElement.setAttribute('autocapitalize', 'off');
+        inputElement.setAttribute('spellcheck', 'false');
+
+        // Variáveis para detecção de scanner
+        let barcodeTimer = null;
+        let lastInputTime = 0;
+        let isManualEntry = false;
+        let inputStartTime = 0;
+
+        // Detectar se é dispositivo mobile
+        const isMobileDevice = () => {
+            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        };
+
+        // Evento de input para detectar scanner vs digitação manual
+        inputElement.addEventListener('input', (e) => {
+            const value = e.target.value.toUpperCase().replace(/[^A-Z0-9.]/g, '');
+            if (value !== e.target.value) {
+                e.target.value = value;
+            }
+
+            const currentTime = Date.now();
+            const timeSinceLastInput = currentTime - lastInputTime;
+
+            // Limpar timer existente
+            if (barcodeTimer) {
+                clearTimeout(barcodeTimer);
+                barcodeTimer = null;
+            }
+
+            // Só processar se houver conteúdo
+            if (value.length > 0) {
+                // Se for o primeiro caractere, registrar início
+                if (value.length === 1) {
+                    inputStartTime = currentTime;
+                    isManualEntry = false;
+                    lastInputTime = currentTime;
+                    inputElement.placeholder = "Aguardando leitor...";
+                    console.log('📱 Iniciando entrada - detectando método...');
+                    return;
+                }
+
+                // Detectar método de entrada baseado no timing
+                // Se tempo entre caracteres > 50ms, provavelmente é digitação manual
+                if (timeSinceLastInput > 50) {
+                    isManualEntry = true;
+                    inputElement.placeholder = "Digite e pressione Enter";
+                    console.log('🖊️ Entrada manual detectada - aguardando Enter ou botão Buscar');
+                    // NÃO executar busca automática para entrada manual
+                } else {
+                    // Entrada rápida - provavelmente scanner
+                    inputElement.placeholder = "Aguardando leitor...";
+                    console.log('📱 Entrada rápida detectada - scanner ativo');
+
+                    // Apenas em mobile, executar busca automaticamente após scanner
+                    if (isMobileDevice()) {
+                        barcodeTimer = setTimeout(() => {
+                            console.log('⏰ Timer expirado - processando código do scanner automaticamente');
+                            this.buscarEnderecos();
+                            barcodeTimer = null;
+                        }, 150);
+                    }
+                }
+            } else {
+                // Campo vazio - resetar estado
+                isManualEntry = false;
+                inputStartTime = 0;
+                inputElement.placeholder = 'Digite parte do endereço ou descrição...';
+            }
+
+            lastInputTime = currentTime;
+        });
+
+        // Evento de tecla Enter para entrada manual
+        inputElement.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                console.log('⏎ Enter pressionado - processando busca');
+
+                // Limpar timer pendente
+                if (barcodeTimer) {
+                    clearTimeout(barcodeTimer);
+                    barcodeTimer = null;
+                }
+
+                this.buscarEnderecos();
+            }
+        });
+
+        console.log('📱 Detecção de scanner configurada para campo de busca');
     }
 
     // Trocar aba
@@ -1486,6 +1581,7 @@ class EnderecoApp {
                         id: item.id,
                         timestamp: item.data_hora,
                         timestampFormatado: timestampFormatado,
+                        dataHoraRaw: item.data_hora, // Guardar data original para ordenação
                         tipo: item.tipo,
                         endereco: item.endereco_destino || item.endereco,
                         coddv: item.coddv,
@@ -1494,6 +1590,13 @@ class EnderecoApp {
                         usuario: item.usuario,
                         cd: item.cd
                     };
+                });
+
+                // Ordenar por data decrescente (mais recentes primeiro)
+                historico.sort((a, b) => {
+                    const dataA = new Date(a.dataHoraRaw || a.timestamp);
+                    const dataB = new Date(b.dataHoraRaw || b.timestamp);
+                    return dataB - dataA; // Decrescente
                 });
 
                 console.log('✅ Histórico de endereços carregado do Supabase:', historico.length, 'registros');
@@ -1577,7 +1680,6 @@ class EnderecoApp {
                 const historicoSupabase = await this.sistema.obterHistorico(200); // Buscar mais registros
 
                 // Converter formato do Supabase para formato local
-                // Converter formato do Supabase para formato local
                 historico = historicoSupabase.map(item => {
                     // Formatar data usando função utilitária
                     const timestampFormatado = this.formatarDataHistorico(item.data_hora);
@@ -1586,6 +1688,7 @@ class EnderecoApp {
                         id: item.id,
                         timestamp: item.data_hora,
                         timestampFormatado: timestampFormatado,
+                        dataHoraRaw: item.data_hora, // Guardar data original para ordenação
                         tipo: item.tipo,
                         endereco: item.endereco_destino || item.endereco,
                         coddv: item.coddv,
@@ -1594,6 +1697,13 @@ class EnderecoApp {
                         usuario: item.usuario,
                         cd: item.cd
                     };
+                });
+
+                // Ordenar por data decrescente (mais recentes primeiro)
+                historico.sort((a, b) => {
+                    const dataA = new Date(a.dataHoraRaw || a.timestamp);
+                    const dataB = new Date(b.dataHoraRaw || b.timestamp);
+                    return dataB - dataA; // Decrescente
                 });
 
                 console.log('✅ Histórico completo de endereços carregado do Supabase:', historico.length, 'registros');
