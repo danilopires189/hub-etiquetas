@@ -534,13 +534,14 @@ body {
 
   /* Animação shimmer removida para melhor usabilidade mobile */
 
-  /* Multiple addresses display */
+  /* Multiple addresses display - mesmo visual do único */
   .produto-endereco.multiplos {
-    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+    background: #ecfdf5;
     border-color: #a7f3d0;
     color: #059669;
-    border-radius: 12px;
-    padding: 1rem;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #a7f3d0;
   }
 
   /* Efeito de sombra amarela removido dos endereços múltiplos */
@@ -550,31 +551,26 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    background: #059669;
     color: white;
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 0.3rem 0.7rem;
-    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
     margin-left: 0.5rem;
     vertical-align: middle;
-    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.3);
   }
 
   .produto-endereco.multiplos .endereco-count {
-    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.3);
+    background: #059669;
   }
 
   /* Mobile address list for multiple addresses */
   .endereco-list-mobile {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgba(167, 243, 208, 0.5);
+    gap: 0.5rem;
+    margin-top: 0.5rem;
   }
 
   .endereco-item-mobile {
@@ -5050,31 +5046,29 @@ MOBILE LOADING AND EMPTY STATES ===== */
 
 /* Validade em endereços mobile - Mesmo visual do produto único alocado */
 .endereco-validade-mobile {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #065f46;
-  font-weight: 600;
+  font-weight: 500;
   margin-top: 0.5rem;
-  padding: 0.4rem 0.75rem;
-  background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%);
-  border: 2px solid #bbf7d0;
-  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  background: #dcfce7;
+  border: 1px solid #a7f3d0;
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
+  gap: 0.25rem;
 }
 
-/* Itens de endereço mobile - Mesmo visual do produto único alocado (fundo claro) */
+/* Itens de endereço mobile - EXATAMENTE igual ao produto único alocado */
 .endereco-item-mobile {
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-  border-radius: 12px;
-  border: 2px solid #a7f3d0;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background: #ecfdf5;
+  border-radius: 8px;
+  border: 1px solid #a7f3d0;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #059669;
-  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.15);
   text-align: center;
 }
 
@@ -5101,41 +5095,43 @@ MOBILE LOADING AND EMPTY STATES ===== */
 /* Responsividade específica para validade mobile */
 @media (max-width: 768px) {
   .endereco-validade-mobile {
-    font-size: 0.9rem;
-    padding: 0.35rem 0.6rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    font-weight: 500;
   }
   
   .endereco-item-mobile {
     font-size: 0.95rem;
-    padding: 0.85rem;
-    font-weight: 600;
-    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    padding: 0.75rem;
+    font-weight: 500;
+    background: #ecfdf5;
     color: #059669;
-    border: 2px solid #a7f3d0;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
   }
   
   .endereco-data-alocacao-mobile {
     font-size: 0.8rem;
     color: #64748b;
-    margin-top: 0.4rem;
+    margin-top: 0.35rem;
   }
 }
 
 /* Telas muito pequenas */
 @media (max-width: 480px) {
   .endereco-validade-mobile {
-    font-size: 0.85rem;
-    padding: 0.3rem 0.5rem;
-    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
+    font-weight: 500;
   }
   
   .endereco-item-mobile {
     font-size: 0.9rem;
-    padding: 0.75rem;
-    font-weight: 600;
-    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-    border: 2px solid #a7f3d0;
+    padding: 0.65rem;
+    font-weight: 500;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
   }
 }
 /* ===== FIX CONTRASTE MOBILE - PRODUTO INFO ===== */
