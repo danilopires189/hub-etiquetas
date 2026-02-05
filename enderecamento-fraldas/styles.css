@@ -1981,12 +1981,20 @@ select:focus {
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: none;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
   }
 
   .scanner-icon svg {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    width: 100%;
+    height: 100%;
+    min-width: 20px;
+    min-height: 20px;
   }
 
   /* History Toggle Button */
@@ -2536,6 +2544,29 @@ select:focus {
   display: flex;
   gap: 0.5rem;
   align-items: stretch;
+  position: relative;
+}
+
+/* Ícone de scanner no modal mobile */
+.mobile-input-group .scanner-icon {
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 22px !important;
+  height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--muted) !important;
+  pointer-events: none !important;
+  z-index: 10 !important;
+}
+
+.mobile-input-group .scanner-icon svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
 }
 
 .mobile-input-group input {
