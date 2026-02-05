@@ -130,8 +130,8 @@ async function exibirHistoricoCorrigido() {
         ${!op.enderecoNovo && op.enderecoAnterior ? `Removido${enderecoAnteriorInfo ? ` (${enderecoAnteriorInfo.formatado})` : ''}` : ''}
       </div>
       <div class="historico-usuario">
-        <span class="usuario-info">👤 ${op.usuario ? op.usuario.split(' ')[0] : 'Sistema'}</span>
-        ${op.matricula ? `<span class="matricula-info">Mat: ${op.matricula}</span>` : ''}
+        <span class="usuario-info">👤 ${op.usuario ? op.usuario : 'Sistema'}</span>
+        ${op.matricula ? `<span class="matricula-info">🆔 ${op.matricula}</span>` : ''}
         ${op.cd ? `<span class="cd-info">📍 ${op.cd}</span>` : ''}
       </div>
     </div>
@@ -229,8 +229,8 @@ async function exibirHistoricoCompletoCorrigido() {
         ${!op.enderecoNovo && op.enderecoAnterior ? `Removido${enderecoAnteriorInfo ? ` (${enderecoAnteriorInfo.formatado})` : ''}` : ''}
       </div>
       <div class="historico-usuario">
-        <span class="usuario-info">👤 ${op.usuario ? op.usuario.split(' ')[0] : 'Sistema'}</span>
-        ${op.matricula ? `<span class="matricula-info">Mat: ${op.matricula}</span>` : ''}
+        <span class="usuario-info">👤 ${op.usuario ? op.usuario : 'Sistema'}</span>
+        ${op.matricula ? `<span class="matricula-info">🆔 ${op.matricula}</span>` : ''}
         ${op.cd ? `<span class="cd-info">📍 ${op.cd}</span>` : ''}
       </div>
     </div>
