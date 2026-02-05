@@ -14,29 +14,62 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
   
-  // Aguardar Supabase estar pronto
-  if (window.supabaseClient) {
+  console.log('🔄 Página carregada, verificando Supabase...');
+  
+  // Verificar se já está pronto
+  if (getSupabase()) {
     console.log('✅ Supabase já está pronto');
     configurarEventos();
-  } else {
-    console.log('⏳ Aguardando Supabase...');
-    window.addEventListener('supabasePronto', () => {
-      console.log('✅ Supabase pronto via evento');
-      configurarEventos();
-    });
-    
-    // Fallback: tentar após 2 segundos
-    setTimeout(() => {
-      if (!window.supabaseClient) {
-        console.warn('⚠️ Supabase não carregou, usando modo offline');
-      }
-      configurarEventos();
-    }, 2000);
+    return;
   }
+  
+  // Aguardar evento de sistema pronto
+  window.addEventListener('sistemaEnderecamentoPronto', (e) => {
+    console.log('✅ Evento sistemaEnderecamentoPronto recebido:', e.detail);
+    if (getSupabase()) {
+      configurarEventos();
+    }
+  });
+  
+  // Fallback: tentar a cada 500ms por até 5 segundos
+  let tentativas = 0;
+  const maxTentativas = 10;
+  
+  const verificarSupabase = setInterval(() => {
+    tentativas++;
+    
+    if (getSupabase()) {
+      console.log('✅ Supabase pronto após', tentativas, 'tentativas');
+      clearInterval(verificarSupabase);
+      configurarEventos();
+      return;
+    }
+    
+    if (tentativas >= maxTentativas) {
+      clearInterval(verificarSupabase);
+      console.warn('⚠️ Supabase não carregou após', maxTentativas, 'tentativas');
+      showToast('Aviso: Banco de dados não conectado', 'warning');
+      configurarEventos(); // Configurar mesmo assim
+    }
+  }, 500);
 });
 
 function getSupabase() {
-  return window.supabaseClient || null;
+  // Tentar várias formas de acessar o Supabase
+  if (window.supabaseManager?.client) {
+    console.log('✅ Usando supabaseManager.client');
+    return window.supabaseManager.client;
+  }
+  if (window.sistemaEnderecamento?.client) {
+    console.log('✅ Usando sistemaEnderecamento.client');
+    return window.sistemaEnderecamento.client;
+  }
+  if (window.sistemaEnderecamentoSupabase?.client) {
+    console.log('✅ Usando sistemaEnderecamentoSupabase.client');
+    return window.sistemaEnderecamentoSupabase.client;
+  }
+  console.warn('❌ Supabase não disponível');
+  return null;
 }
 
 function configurarEventos() {
@@ -61,6 +94,8 @@ function configurarEventos() {
 
 async function buscarProduto() {
   const codigo = $('#codigoProduto').value.trim();
+  console.log('🔍 Iniciando busca por:', codigo);
+  
   if (!codigo) {
     showToast('Informe um código para buscar', 'warning');
     return;
@@ -73,10 +108,13 @@ async function buscarProduto() {
   try {
     // Buscar na base de dados local
     const produto = buscarNaBase(codigo);
+    console.log('📦 Produto na base:', produto);
     
     if (!produto) {
+      console.log('🔍 Produto não encontrado na base, tentando como endereço...');
       // Tentar buscar como endereço no banco
       const produtosNoEndereco = await buscarPorEndereco(codigo);
+      console.log('📍 Produtos no endereço:', produtosNoEndereco);
       if (produtosNoEndereco.length > 0) {
         mostrarListaEnderecos(produtosNoEndereco, codigo);
         return;
@@ -102,15 +140,32 @@ async function buscarProduto() {
 }
 
 function buscarNaBase(codigo) {
-  if (!window.DB_CADASTRO?.BASE_CADASTRO) return null;
+  if (!window.DB_CADASTRO?.BASE_CADASTRO) {
+    console.warn('⚠️ DB_CADASTRO não disponível');
+    return null;
+  }
   
   const codigoLimpo = codigo.trim();
-  return window.DB_CADASTRO.BASE_CADASTRO.find(item => 
+  console.log('🔍 Buscando na base:', codigoLimpo);
+  const resultado = window.DB_CADASTRO.BASE_CADASTRO.find(item => 
     item.CODDV === codigoLimpo || item.BARRAS === codigoLimpo
   );
+  console.log('✅ Resultado:', resultado ? 'Encontrado' : 'Não encontrado');
+  return resultado;
 }
 
 async function buscarPorEndereco(endereco) {
+  // Tentar usar sistemaEnderecamento primeiro
+  if (window.sistemaEnderecamento?.obterProdutosNoEndereco) {
+    try {
+      const produtos = await window.sistemaEnderecamento.obterProdutosNoEndereco(endereco.toUpperCase());
+      return produtos || [];
+    } catch (e) {
+      console.warn('Erro no sistemaEnderecamento:', e);
+    }
+  }
+  
+  // Fallback: usar Supabase direto
   const client = getSupabase();
   if (!client) {
     console.warn('Supabase não disponível');
@@ -118,13 +173,18 @@ async function buscarPorEndereco(endereco) {
   }
   
   try {
+    console.log('🔍 Buscando endereço:', endereco.toUpperCase());
     const { data, error } = await client
       .from('alocacoes_fraldas')
       .select('*')
       .eq('endereco', endereco.toUpperCase())
       .eq('ativo', true);
     
-    if (error) throw error;
+    if (error) {
+      console.error('Erro Supabase:', error);
+      throw error;
+    }
+    console.log('✅ Produtos encontrados:', data?.length || 0);
     return data || [];
   } catch (e) {
     console.error('Erro ao buscar endereço:', e);
@@ -133,22 +193,32 @@ async function buscarPorEndereco(endereco) {
 }
 
 async function buscarValidade(coddv) {
+  console.log('🔍 Buscando validade para CODDV:', coddv);
+  
   const client = getSupabase();
   if (!client) {
-    console.warn('Supabase não disponível');
+    console.error('❌ Supabase não disponível');
+    showToast('Erro: Banco de dados não conectado', 'error');
     return null;
   }
   
   try {
+    console.log('📡 Consultando alocacoes_fraldas...');
     const { data, error } = await client
       .from('alocacoes_fraldas')
-      .select('validade, endereco, id')
+      .select('validade, endereco, id, coddv, ativo')
       .eq('coddv', coddv)
       .eq('ativo', true);
     
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Erro na consulta:', error);
+      throw error;
+    }
+    
+    console.log('✅ Dados retornados:', data);
     
     if (data && data.length > 0) {
+      console.log(`✅ Produto ${coddv} encontrado em ${data.length} endereço(s)`);
       return {
         validade: data[0].validade,
         endereco: data[0].endereco,
@@ -156,9 +226,12 @@ async function buscarValidade(coddv) {
         multiplos: data.length > 1,
         todos: data
       };
+    } else {
+      console.log('ℹ️ Produto não encontrado ou não está alocado');
     }
   } catch (e) {
-    console.error('Erro ao buscar validade:', e);
+    console.error('❌ Erro ao buscar validade:', e);
+    showToast('Erro ao buscar no banco: ' + e.message, 'error');
   }
   
   return null;
@@ -316,7 +389,8 @@ async function gerarCSV() {
   
   const client = getSupabase();
   if (!client) {
-    showToast('Banco de dados não disponível', 'error');
+    showToast('Banco de dados não conectado', 'error');
+    console.error('Supabase não disponível para gerar CSV');
     return;
   }
   
@@ -324,6 +398,8 @@ async function gerarCSV() {
   $('#btnGerarCSV').innerHTML = `<svg class="spin" width="16" height="16" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Gerando...`;
   
   try {
+    console.log(`📡 Buscando validades de ${inicio} até ${fim}...`);
+    
     // Buscar alocações no período
     const { data, error } = await client
       .from('alocacoes_fraldas')
@@ -333,7 +409,12 @@ async function gerarCSV() {
       .lte('validade', fim)
       .order('validade', { ascending: true });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Erro na consulta:', error);
+      throw error;
+    }
+    
+    console.log('✅ Dados encontrados:', data?.length || 0);
     
     if (!data || data.length === 0) {
       showToast('Nenhum produto encontrado no período', 'warning');
@@ -346,8 +427,8 @@ async function gerarCSV() {
     showToast(`${data.length} registros exportados`, 'success');
     
   } catch (e) {
-    console.error('Erro ao gerar CSV:', e);
-    showToast('Erro ao gerar relatório', 'error');
+    console.error('❌ Erro ao gerar CSV:', e);
+    showToast('Erro ao gerar relatório: ' + e.message, 'error');
   } finally {
     $('#btnGerarCSV').disabled = false;
     $('#btnGerarCSV').innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg> CSV`;
@@ -418,3 +499,33 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// Função de diagnóstico (pode ser chamada no console)
+window.diagnosticarConexao = function() {
+  console.log('=== DIAGNÓSTICO DE CONEXÃO ===');
+  console.log('supabaseManager:', window.supabaseManager ? '✅ Presente' : '❌ Ausente');
+  console.log('supabaseManager.client:', window.supabaseManager?.client ? '✅ Presente' : '❌ Ausente');
+  console.log('sistemaEnderecamento:', window.sistemaEnderecamento ? '✅ Presente' : '❌ Ausente');
+  console.log('sistemaEnderecamento.client:', window.sistemaEnderecamento?.client ? '✅ Presente' : '❌ Ausente');
+  console.log('getSupabase():', getSupabase() ? '✅ Funcionando' : '❌ Retornando null');
+  console.log('==============================');
+  
+  const status = {
+    supabaseManager: !!window.supabaseManager,
+    supabaseManagerClient: !!window.supabaseManager?.client,
+    sistemaEnderecamento: !!window.sistemaEnderecamento,
+    sistemaEnderecamentoClient: !!window.sistemaEnderecamento?.client,
+    getSupabase: !!getSupabase()
+  };
+  
+  alert(`Status da Conexão:
+- supabaseManager: ${status.supabaseManager ? '✅' : '❌'}
+- supabaseManager.client: ${status.supabaseManagerClient ? '✅' : '❌'}
+- sistemaEnderecamento: ${status.sistemaEnderecamento ? '✅' : '❌'}
+- sistemaEnderecamento.client: ${status.sistemaEnderecamentoClient ? '✅' : '❌'}
+- getSupabase(): ${status.getSupabase ? '✅' : '❌'}
+
+Verifique o console (F12) para mais detalhes.`);
+  
+  return status;
+};
