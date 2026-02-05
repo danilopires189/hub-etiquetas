@@ -1,0 +1,213 @@
+/* ===== Estilos específicos para página de validade ===== */
+
+.csv-section {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #bae6fd;
+}
+
+.periodo-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.periodo-row input {
+  width: 90px;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.produto-validade {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #dc2626;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  border: 2px solid #fca5a5;
+  display: inline-block;
+  margin: 0.75rem 0;
+}
+
+.enderecos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.endereco-item {
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.endereco-item:hover {
+  border-color: #0ea5e9;
+  background: #f0f9ff;
+}
+
+.endereco-item.selecionado {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+/* ===== Print Styles - Etiqueta A4 Horizontal ===== */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+  
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-template,
+  .print-template * {
+    visibility: visible;
+  }
+  
+  .print-template {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  .etiqueta-a4 {
+    width: 277mm;
+    height: 180mm;
+    padding: 15mm;
+    box-sizing: border-box;
+  }
+}
+
+.print-template {
+  background: white;
+}
+
+.etiqueta-a4 {
+  border: 3px solid #0b3a88;
+  border-radius: 15px;
+  padding: 25px;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.etiqueta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid #e2e8f0;
+  padding-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+.etiqueta-logo {
+  height: 60px;
+}
+
+.etiqueta-id-badge {
+  background: linear-gradient(135deg, #e60012, #c40010);
+  color: white;
+  padding: 12px 25px;
+  border-radius: 10px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  box-shadow: 0 4px 12px rgba(230, 0, 18, 0.3);
+}
+
+.etiqueta-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.etiqueta-row {
+  display: flex;
+  gap: 40px;
+}
+
+.etiqueta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.etiqueta-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.etiqueta-value {
+  font-size: 1.4rem;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.etiqueta-validade {
+  color: #dc2626;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.etiqueta-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 3px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.etiqueta-usuario {
+  display: flex;
+  gap: 15px;
+}
+
+.hide {
+  display: none !important;
+}
+
+/* ===== Ajustes Mobile ===== */
+@media (max-width: 768px) {
+  .periodo-row {
+    flex-wrap: wrap;
+  }
+  
+  .periodo-row input {
+    flex: 1;
+    min-width: 80px;
+  }
+  
+  .etiqueta-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .etiqueta-id-badge {
+    font-size: 1.3rem;
+    padding: 8px 15px;
+  }
+  
+  .etiqueta-validade {
+    font-size: 1.6rem;
+  }
+}
