@@ -809,6 +809,111 @@ class SistemaEnderecamentoSupabase {
     }
 
     /**
+     * Verificar status atual do produto diretamente no banco (sem cache)
+     * Usado para garantir dados reais em tempo real
+     */
+    async verificarStatusProdutoRealTime(coddv) {
+        try {
+            console.log(`🔍 [RealTime] Verificando status atual do produto ${coddv} no banco...`);
+            
+            const { data: alocacoes, error } = await this.client
+                .from('alocacoes_fraldas')
+                .select('*')
+                .eq('coddv', coddv)
+                .eq('cd', this.cd)
+                .eq('ativo', true);
+
+            if (error) {
+                console.error('❌ [RealTime] Erro ao buscar alocações:', error);
+                // Fallback para cache em caso de erro
+                return this.obterStatusProdutoDoCache(coddv);
+            }
+
+            if (alocacoes && alocacoes.length > 0) {
+                // Produto está alocado - retornar dados atualizados do banco
+                const enderecos = alocacoes.map(a => a.endereco).sort();
+                console.log(`✅ [RealTime] Produto ${coddv} encontrado em ${enderecos.length} endereço(s):`, enderecos);
+                
+                // Atualizar cache local para manter sincronizado
+                enderecos.forEach(endereco => {
+                    const alocacao = alocacoes.find(a => a.endereco === endereco);
+                    if (!this.cacheAlocacoes[endereco]) {
+                        this.cacheAlocacoes[endereco] = [];
+                    }
+                    // Verificar se já existe no cache
+                    const existe = this.cacheAlocacoes[endereco].find(p => p.coddv === coddv);
+                    if (!existe) {
+                        this.cacheAlocacoes[endereco].push(alocacao);
+                    }
+                });
+
+                return {
+                    alocado: true,
+                    endereco: enderecos[0],
+                    enderecos: enderecos,
+                    multiplos: enderecos.length > 1,
+                    origem: 'banco'
+                };
+            } else {
+                // Produto não está alocado
+                console.log(`ℹ️ [RealTime] Produto ${coddv} não está alocado`);
+                
+                // Limpar do cache local se existir
+                for (const [endereco, produtos] of Object.entries(this.cacheAlocacoes)) {
+                    if (Array.isArray(produtos)) {
+                        const idx = produtos.findIndex(p => p.coddv === coddv);
+                        if (idx !== -1) {
+                            this.cacheAlocacoes[endereco].splice(idx, 1);
+                            if (this.cacheAlocacoes[endereco].length === 0) {
+                                delete this.cacheAlocacoes[endereco];
+                            }
+                        }
+                    } else if (produtos.coddv === coddv) {
+                        delete this.cacheAlocacoes[endereco];
+                    }
+                }
+
+                return {
+                    alocado: false,
+                    endereco: null,
+                    enderecos: [],
+                    multiplos: false,
+                    origem: 'banco'
+                };
+            }
+        } catch (error) {
+            console.error('❌ [RealTime] Erro inesperado:', error);
+            // Fallback para cache
+            return this.obterStatusProdutoDoCache(coddv);
+        }
+    }
+
+    /**
+     * Obter status do produto do cache (fallback)
+     */
+    obterStatusProdutoDoCache(coddv) {
+        const enderecos = [];
+        for (const [endereco, produtos] of Object.entries(this.cacheAlocacoes)) {
+            if (Array.isArray(produtos)) {
+                if (produtos.find(p => p.coddv === coddv)) {
+                    enderecos.push(endereco);
+                }
+            } else if (produtos.coddv === coddv) {
+                enderecos.push(endereco);
+            }
+        }
+        
+        enderecos.sort();
+        return {
+            alocado: enderecos.length > 0,
+            endereco: enderecos[0] || null,
+            enderecos: enderecos,
+            multiplos: enderecos.length > 1,
+            origem: 'cache'
+        };
+    }
+
+    /**
      * Verificar se endereço tem espaço
      */
     enderecoTemEspaco(endereco) {

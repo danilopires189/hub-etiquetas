@@ -3715,6 +3715,18 @@ function exibirProduto(produto) {
 
   produtoAtual = produto;
   const status = obterStatusProduto(produto.CODDV);
+  exibirProdutoComStatus(produto, status);
+}
+
+function exibirProdutoComStatus(produto, status) {
+  if (!produto) {
+    $('#produtoInfo').classList.add('hide');
+    updateMobileActionButtons(null);
+    atualizarBotoesMobileBusca(false);
+    return;
+  }
+
+  produtoAtual = produto;
 
   // Atualizar botões mobile - esconder "Buscar", mostrar apenas "Limpar"
   atualizarBotoesMobileBusca(true);
@@ -4143,7 +4155,7 @@ async function exibirHistoricoCompleto() {
 }
 
 /* ===== Event Handlers ===== */
-function buscarProdutoHandler() {
+async function buscarProdutoHandler() {
   const codigoElement = $('#codigoProduto');
 
   if (!codigoElement) {
@@ -4166,7 +4178,24 @@ function buscarProdutoHandler() {
     return;
   }
 
-  exibirProduto(produto);
+  // Buscar status em tempo real do banco de dados (não usar cache)
+  if (window.sistemaEnderecamento && window.sistemaEnderecamento.verificarStatusProdutoRealTime) {
+    try {
+      console.log('🔄 [Busca] Verificando status em tempo real do banco...');
+      const statusReal = await window.sistemaEnderecamento.verificarStatusProdutoRealTime(produto.CODDV);
+      console.log('✅ [Busca] Status real obtido:', statusReal);
+      
+      // Exibir produto com status atualizado do banco
+      exibirProdutoComStatus(produto, statusReal);
+    } catch (error) {
+      console.error('❌ [Busca] Erro ao verificar status em tempo real:', error);
+      // Fallback para exibição normal (com cache)
+      exibirProduto(produto);
+    }
+  } else {
+    // Sistema de endereçamento não disponível, usar método tradicional
+    exibirProduto(produto);
+  }
 
   // Se houver endereço de destino selecionado, prosseguir com alocação
   if (enderecoDestino) {
