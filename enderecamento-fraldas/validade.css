@@ -1,24 +1,123 @@
 /* ===== Estilos específicos para página de validade ===== */
 
+/* Container principal */
+.screen-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  min-height: 100vh;
+}
+
+/* Seção CSV */
 .csv-section {
   background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-  padding: 1rem;
-  border-radius: 12px;
-  border: 1px solid #bae6fd;
+  padding: 1.25rem;
+  border-radius: 16px;
+  border: 2px solid #bae6fd;
+  margin-top: 1rem;
+}
+
+.csv-section label {
+  display: block;
+  font-weight: 600;
+  color: #0369a1;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
 }
 
 .periodo-row {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   align-items: flex-end;
   flex-wrap: wrap;
 }
 
 .periodo-row input {
-  width: 90px;
+  width: 100px;
   text-align: center;
   font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  padding: 0.6rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.periodo-row input:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+  outline: none;
+}
+
+/* Card do produto */
+.produto-card {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.produto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.produto-coddv {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0b3a88;
+}
+
+.produto-status {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.produto-status.status-alocado {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.produto-status.status-disponivel {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.produto-desc {
+  font-size: 1.15rem;
   font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.produto-barras {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
 }
 
 .produto-validade {
@@ -29,38 +128,82 @@
   padding: 0.75rem 1.25rem;
   border-radius: 10px;
   border: 2px solid #fca5a5;
-  display: inline-block;
   margin: 0.75rem 0;
 }
 
+.produto-endereco {
+  font-size: 1.05rem;
+  color: #059669;
+  background: #f0fdf4;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #a7f3d0;
+  margin-bottom: 1rem;
+}
+
+/* Lista de endereços */
 .enderecos-lista {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  max-height: 300px;
+  gap: 0.75rem;
+  max-height: 350px;
   overflow-y: auto;
+  margin-top: 0.5rem;
+}
+
+.endereco-titulo {
+  font-weight: 700;
+  color: #0b3a88;
+  font-size: 1.1rem;
+  padding: 0.5rem 0;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 0.5rem;
 }
 
 .endereco-item {
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   border: 2px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   background: white;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
 }
 
 .endereco-item:hover {
   border-color: #0ea5e9;
   background: #f0f9ff;
+  transform: translateX(4px);
 }
 
 .endereco-item.selecionado {
   border-color: #10b981;
   background: #f0fdf4;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.endereco-nome {
+  font-weight: 700;
+  color: #0b3a88;
+  font-size: 1.05rem;
+}
+
+.endereco-validade {
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.endereco-produto {
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+/* Botão imprimir */
+#btnImprimir {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.875rem;
+  font-size: 1rem;
 }
 
 /* ===== Print Styles - Etiqueta A4 Horizontal ===== */
@@ -80,10 +223,16 @@
   }
   
   .print-template {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
     width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .etiqueta-a4 {
@@ -91,19 +240,31 @@
     height: 180mm;
     padding: 15mm;
     box-sizing: border-box;
+    page-break-after: avoid;
   }
 }
 
 .print-template {
   background: white;
+  display: none;
+}
+
+.print-template.hide {
+  display: none;
+}
+
+.print-template:not(.hide) {
+  display: flex;
 }
 
 .etiqueta-a4 {
-  border: 3px solid #0b3a88;
-  border-radius: 15px;
-  padding: 25px;
+  border: 4px solid #0b3a88;
+  border-radius: 20px;
+  padding: 30px;
   background: white;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 800px;
 }
 
 .etiqueta-header {
@@ -116,43 +277,44 @@
 }
 
 .etiqueta-logo {
-  height: 60px;
+  height: 70px;
 }
 
 .etiqueta-id-badge {
-  background: linear-gradient(135deg, #e60012, #c40010);
+  background: linear-gradient(135deg, #e60012, #b91c1c);
   color: white;
-  padding: 12px 25px;
-  border-radius: 10px;
-  font-size: 1.8rem;
-  font-weight: 700;
+  padding: 15px 30px;
+  border-radius: 12px;
+  font-size: 2rem;
+  font-weight: 800;
   font-family: 'Courier New', monospace;
-  box-shadow: 0 4px 12px rgba(230, 0, 18, 0.3);
+  box-shadow: 0 6px 20px rgba(230, 0, 18, 0.35);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .etiqueta-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 .etiqueta-row {
   display: flex;
-  gap: 40px;
+  gap: 50px;
 }
 
 .etiqueta-field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .etiqueta-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #64748b;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
 .etiqueta-value {
@@ -163,25 +325,58 @@
 
 .etiqueta-validade {
   color: #dc2626;
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
 }
 
 .etiqueta-footer {
-  margin-top: 40px;
+  margin-top: 30px;
   padding-top: 20px;
   border-top: 3px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
-  font-size: 0.95rem;
-  color: #64748b;
+  align-items: center;
+  font-size: 1rem;
+  color: #475569;
 }
 
 .etiqueta-usuario {
   display: flex;
-  gap: 15px;
+  gap: 20px;
+  font-weight: 500;
 }
 
+/* Toast container */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  border-left: 4px solid #0ea5e9;
+  transform: translateX(120%);
+  transition: transform 0.3s ease;
+  max-width: 350px;
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast-success { border-left-color: #22c55e; }
+.toast-warning { border-left-color: #f59e0b; }
+.toast-error { border-left-color: #ef4444; }
+
+/* Hide utility */
 .hide {
   display: none !important;
 }
@@ -189,12 +384,18 @@
 /* ===== Ajustes Mobile ===== */
 @media (max-width: 768px) {
   .periodo-row {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
   }
   
   .periodo-row input {
-    flex: 1;
-    min-width: 80px;
+    width: 100%;
+  }
+  
+  .produto-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
   }
   
   .etiqueta-row {
@@ -203,11 +404,17 @@
   }
   
   .etiqueta-id-badge {
-    font-size: 1.3rem;
-    padding: 8px 15px;
+    font-size: 1.4rem;
+    padding: 10px 20px;
   }
   
   .etiqueta-validade {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
+  }
+  
+  .etiqueta-footer {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
   }
 }
