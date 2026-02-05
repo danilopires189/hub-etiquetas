@@ -4170,8 +4170,8 @@ async function exibirHistoricoCompleto() {
       </div>
       ${op.usuario ? `
         <div class="historico-usuario">
-          <span class="usuario-info">👤 ${op.usuario.split(' ')[0]}</span>
-          ${op.matricula ? `<span class="matricula-info">Mat: ${op.matricula}</span>` : ''}
+          <span class="usuario-info">👤 ${op.usuario}</span>
+          ${op.matricula ? `<span class="matricula-info">🆔 ${op.matricula}</span>` : ''}
           ${op.cd ? `<span class="cd-info">📍 ${op.cd}</span>` : ''}
         </div>
       ` : ''}
