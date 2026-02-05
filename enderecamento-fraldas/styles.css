@@ -1467,6 +1467,28 @@ select:focus {
   margin-bottom: 1rem;
 }
 
+/* Status container para indicador de sincronização */
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sync-indicator {
+  display: none;
+  color: var(--brand-blue);
+  animation: spin 1s linear infinite;
+}
+
+.sync-indicator.show {
+  display: inline-flex;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .produto-coddv {
   font-family: 'Courier New', monospace;
   font-weight: bold;

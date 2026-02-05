@@ -962,7 +962,7 @@ function scrollInputIntoView(inputElement) {
 }
 
 // Show/hide mobile action buttons based on product status
-function updateMobileActionButtons(produto) {
+function updateMobileActionButtons(produto, statusForcado = null) {
   if (!isMobileDevice()) {
     console.log('📱 Não é dispositivo móvel - pulando atualização dos botões mobile');
     return;
@@ -988,8 +988,9 @@ function updateMobileActionButtons(produto) {
   }
 
   console.log('📱 Atualizando botões mobile para produto:', produto.CODDV);
-  const status = obterStatusProduto(produto.CODDV);
-  console.log('📱 Status do produto:', status);
+  // Usar status forçado (do banco) ou calcular do cache
+  const status = statusForcado || obterStatusProduto(produto.CODDV);
+  console.log('📱 Status do produto:', status, statusForcado ? '(do banco)' : '(do cache)');
 
   // Update mobile state
   mobileState.updateState('currentProduct', produto);
@@ -1588,8 +1589,20 @@ async function executarAlocacaoMobile() {
     return;
   }
 
-  const status = obterStatusProduto(produtoAtual.CODDV);
-  console.log('📱 Status do produto:', status);
+  // Verificar status em tempo real antes de executar
+  let status;
+  if (window.sistemaEnderecamento && window.sistemaEnderecamento.verificarStatusProdutoRealTime) {
+    try {
+      console.log('📱 Verificando status em tempo real antes de alocar/transferir...');
+      status = await window.sistemaEnderecamento.verificarStatusProdutoRealTime(produtoAtual.CODDV);
+      console.log('📱 Status real do banco:', status);
+    } catch (error) {
+      console.warn('📱 Erro ao verificar status em tempo real, usando cache:', error);
+      status = obterStatusProduto(produtoAtual.CODDV);
+    }
+  } else {
+    status = obterStatusProduto(produtoAtual.CODDV);
+  }
 
   if (status.alocado) {
     // Product is allocated - show transfer options
@@ -3032,11 +3045,26 @@ async function executarDesalocacaoMobile() {
     return;
   }
 
-  const status = obterStatusProduto(produtoAtual.CODDV);
-  console.log('📱 Status do produto:', status);
+  // Verificar status em tempo real antes de executar
+  let status;
+  if (window.sistemaEnderecamento && window.sistemaEnderecamento.verificarStatusProdutoRealTime) {
+    try {
+      console.log('📱 Verificando status em tempo real antes de desalocar...');
+      status = await window.sistemaEnderecamento.verificarStatusProdutoRealTime(produtoAtual.CODDV);
+      console.log('📱 Status real do banco:', status);
+    } catch (error) {
+      console.warn('📱 Erro ao verificar status em tempo real, usando cache:', error);
+      status = obterStatusProduto(produtoAtual.CODDV);
+    }
+  } else {
+    status = obterStatusProduto(produtoAtual.CODDV);
+  }
 
   if (!status.alocado) {
-    showMobileToast('Este produto não está alocado em nenhum endereço.', 'warning');
+    showMobileToast('⚠️ Este produto já foi desalocado por outro usuário ou não está mais alocado.', 'warning');
+    // Atualizar a interface para refletir o status real
+    exibirProdutoComStatus(produtoAtual, status);
+    updateMobileActionButtons(produtoAtual, status);
     return;
   }
 
@@ -3791,8 +3819,8 @@ function exibirProdutoComStatus(produto, status) {
   $('#produtoInfo').classList.remove('hide');
   acoesElement.classList.remove('hide');
 
-  // Update mobile action buttons
-  updateMobileActionButtons(produto);
+  // Update mobile action buttons - passar o status para garantir consistência
+  updateMobileActionButtons(produto, status);
   
   // Atualizar botões de busca no mobile (esconder "Buscar", mostrar apenas "Limpar")
   atualizarBotoesMobileBusca(true);
@@ -4178,28 +4206,85 @@ async function buscarProdutoHandler() {
     return;
   }
 
-  // Buscar status em tempo real do banco de dados (não usar cache)
-  if (window.sistemaEnderecamento && window.sistemaEnderecamento.verificarStatusProdutoRealTime) {
-    try {
-      console.log('🔄 [Busca] Verificando status em tempo real do banco...');
-      const statusReal = await window.sistemaEnderecamento.verificarStatusProdutoRealTime(produto.CODDV);
-      console.log('✅ [Busca] Status real obtido:', statusReal);
-      
-      // Exibir produto com status atualizado do banco
-      exibirProdutoComStatus(produto, statusReal);
-    } catch (error) {
-      console.error('❌ [Busca] Erro ao verificar status em tempo real:', error);
-      // Fallback para exibição normal (com cache)
-      exibirProduto(produto);
-    }
-  } else {
-    // Sistema de endereçamento não disponível, usar método tradicional
-    exibirProduto(produto);
-  }
-
+  // ESTRATÉGIA OTIMIZADA PARA INTERNET LENTA:
+  // 1. Mostrar resultado do cache imediatamente (resposta rápida)
+  // 2. Em paralelo, verificar no banco e atualizar se necessário
+  
+  const statusCache = obterStatusProduto(produto.CODDV);
+  
+  // Exibir imediatamente com dados do cache (rápido)
+  exibirProdutoComStatus(produto, statusCache);
+  
   // Se houver endereço de destino selecionado, prosseguir com alocação
   if (enderecoDestino) {
     verificarAlocacaoEnderecoDestino(produto);
+  }
+  
+  // Em paralelo, verificar no banco (sem bloquear a interface)
+  if (window.sistemaEnderecamento && window.sistemaEnderecamento.verificarStatusProdutoRealTime) {
+    verificarStatusEmBackground(produto, statusCache);
+  }
+}
+
+/**
+ * Verifica o status do produto em background e atualiza a interface se necessário
+ * Não bloqueia a interface - ideal para internet lenta
+ */
+async function verificarStatusEmBackground(produto, statusCache) {
+  const syncIndicator = $('#syncIndicator');
+  
+  try {
+    console.log('🔄 [Background] Verificando status atualizado...');
+    
+    // Mostrar indicador de sincronização
+    if (syncIndicator) syncIndicator.classList.add('show');
+    
+    // Timeout de 5 segundos para não travar em conexões muito lentas
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout')), 5000)
+    );
+    
+    // Corrida entre a requisição e o timeout
+    const statusReal = await Promise.race([
+      window.sistemaEnderecamento.verificarStatusProdutoRealTime(produto.CODDV),
+      timeoutPromise
+    ]);
+    
+    console.log('✅ [Background] Status obtido:', statusReal);
+    
+    // Verificar se houve mudança no status
+    const houveMudanca = 
+      statusCache.alocado !== statusReal.alocado ||
+      statusCache.enderecos.length !== statusReal.enderecos.length ||
+      !statusCache.enderecos.every(e => statusReal.enderecos.includes(e));
+    
+    if (houveMudanca) {
+      console.log('🔄 [Background] Status diferente do cache! Atualizando interface...');
+      
+      // Atualizar a interface silenciosamente
+      exibirProdutoComStatus(produto, statusReal);
+      
+      // Atualizar botões mobile também
+      updateMobileActionButtons(produto, statusReal);
+      
+      // Mostrar toast sutil informando da atualização
+      if (statusReal.alocado && !statusCache.alocado) {
+        showToast('⚡ Produto atualizado: agora está alocado', 'info');
+      } else if (!statusReal.alocado && statusCache.alocado) {
+        showToast('⚡ Produto atualizado: não está mais alocado', 'info');
+      } else if (statusReal.enderecos.length !== statusCache.enderecos.length) {
+        showToast(`⚡ Endereços atualizados: ${statusReal.enderecos.length} encontrado(s)`, 'info');
+      }
+    } else {
+      console.log('✅ [Background] Status igual ao cache, sem atualização necessária');
+    }
+    
+  } catch (error) {
+    // Silenciar erro em background para não incomodar o usuário
+    console.log('⚠️ [Background] Não foi possível verificar status atualizado:', error.message);
+  } finally {
+    // Esconder indicador de sincronização
+    if (syncIndicator) syncIndicator.classList.remove('show');
   }
 }
 
@@ -5406,8 +5491,32 @@ async function executarAdicaoExtraMobile() {
     return;
   }
 
+  // Verificar status em tempo real antes de executar
+  let status;
+  if (window.sistemaEnderecamento && window.sistemaEnderecamento.verificarStatusProdutoRealTime) {
+    try {
+      console.log('📱 Verificando status em tempo real antes de adicionar endereço...');
+      status = await window.sistemaEnderecamento.verificarStatusProdutoRealTime(produtoAtual.CODDV);
+      console.log('📱 Status real do banco:', status);
+    } catch (error) {
+      console.warn('📱 Erro ao verificar status em tempo real, usando cache:', error);
+      status = obterStatusProduto(produtoAtual.CODDV);
+    }
+  } else {
+    status = obterStatusProduto(produtoAtual.CODDV);
+  }
+
+  // Se não estiver alocado, não permite adicionar em mais endereços
+  if (!status.alocado) {
+    showMobileToast('⚠️ Este produto não está mais alocado. Não é possível adicionar em mais endereços.', 'warning');
+    // Atualizar a interface para refletir o status real
+    exibirProdutoComStatus(produtoAtual, status);
+    updateMobileActionButtons(produtoAtual, status);
+    return;
+  }
+
   // Open modal in ADD mode (distinct from allocate)
-  console.log('📱 Produto já alocado - abrindo modal de endereço mobile para adição extra');
+  console.log('📱 Produto alocado - abrindo modal de endereço mobile para adição extra');
   openMobileAddressModal('add');
 }
 window.executarAdicaoExtraMobile = executarAdicaoExtraMobile;

@@ -811,20 +811,36 @@ class SistemaEnderecamentoSupabase {
     /**
      * Verificar status atual do produto diretamente no banco (sem cache)
      * Usado para garantir dados reais em tempo real
+     * Otimizado para internet lenta com timeout e retry
      */
-    async verificarStatusProdutoRealTime(coddv) {
+    async verificarStatusProdutoRealTime(coddv, options = {}) {
+        const { timeout = 8000, retry = 1 } = options;
+        
         try {
             console.log(`🔍 [RealTime] Verificando status atual do produto ${coddv} no banco...`);
             
-            const { data: alocacoes, error } = await this.client
+            // Usar Promise.race para implementar timeout
+            const fetchPromise = this.client
                 .from('alocacoes_fraldas')
-                .select('*')
+                .select('endereco, coddv, ativo')
                 .eq('coddv', coddv)
                 .eq('cd', this.cd)
                 .eq('ativo', true);
+            
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), timeout)
+            );
+            
+            const { data: alocacoes, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
             if (error) {
                 console.error('❌ [RealTime] Erro ao buscar alocações:', error);
+                // Tentar novamente se ainda tem retry
+                if (retry > 0) {
+                    console.log(`🔄 [RealTime] Tentando novamente... (${retry} tentativa(s) restante(s))`);
+                    await new Promise(r => setTimeout(r, 1000)); // Esperar 1s antes de retry
+                    return this.verificarStatusProdutoRealTime(coddv, { timeout, retry: retry - 1 });
+                }
                 // Fallback para cache em caso de erro
                 return this.obterStatusProdutoDoCache(coddv);
             }
@@ -882,6 +898,17 @@ class SistemaEnderecamentoSupabase {
                 };
             }
         } catch (error) {
+            // Verificar se foi timeout
+            if (error.message === 'Timeout') {
+                console.warn(`⏱️ [RealTime] Timeout ao buscar produto ${coddv}`);
+                // Tentar novamente se ainda tem retry
+                if (retry > 0) {
+                    console.log(`🔄 [RealTime] Tentando novamente após timeout... (${retry} tentativa(s) restante(s))`);
+                    await new Promise(r => setTimeout(r, 1000));
+                    return this.verificarStatusProdutoRealTime(coddv, { timeout, retry: retry - 1 });
+                }
+            }
+            
             console.error('❌ [RealTime] Erro inesperado:', error);
             // Fallback para cache
             return this.obterStatusProdutoDoCache(coddv);
