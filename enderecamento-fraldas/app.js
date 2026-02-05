@@ -5202,6 +5202,14 @@ function configurarEventos() {
   $('#btnBuscar').addEventListener('click', buscarProdutoHandler);
   $('#btnLimpar').addEventListener('click', limparCampos);
 
+  // Botão de limpar dentro do input
+  const btnClearInput = $('#btnClearInput');
+  if (btnClearInput) {
+    btnClearInput.addEventListener('click', () => {
+      limparCampos();
+    });
+  }
+
   // Botões de ação do produto
   $('#btnAlocar').addEventListener('click', alocarProduto);
   $('#btnTransferir').addEventListener('click', transferirProduto);
