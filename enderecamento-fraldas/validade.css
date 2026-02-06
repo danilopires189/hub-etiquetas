@@ -50,7 +50,7 @@ body {
     color: #0ea5e9;
 }
 
-/* ===== Search Section ===== */
+/* ===== Search Section (Redesigned) ===== */
 .search-section {
     background: #f8fafc;
     padding: 1.5rem;
@@ -71,33 +71,50 @@ body {
     color: #475569;
 }
 
+/* Baseado no screenshot:
+   - Input tem largura limitada (aprox 300-400px)
+   - Ícone de scanner à esquerda DENTRO do input
+   - Botão 'X' à direita DENTRO do input
+   - Botão 'Buscar' DENTRO DO CARD mas FLUTUANDO À DIREITA, abaixo ou ao lado
+*/
+
 .search-input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
+    max-width: 450px;
+    /* Limite conforme imagem */
 }
 
 .search-input-wrapper input {
     width: 100%;
-    padding: 1rem 1rem 1rem 3rem;
-    /* Space for icon */
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 1rem;
+    height: 52px;
+    padding: 0.5rem 2.5rem 0.5rem 3.5rem;
+    /* Espaço icones */
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1.1rem;
     transition: all 0.2s;
+    background: white;
+    color: #1e293b;
 }
 
 .search-input-wrapper input:focus {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     outline: none;
 }
 
 .search-input-wrapper .scanner-icon {
     position: absolute;
     left: 1rem;
-    color: #94a3b8;
+    color: #64748b;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
 }
 
 .search-input-wrapper .clear-btn {
@@ -108,12 +125,40 @@ body {
     color: #94a3b8;
     cursor: pointer;
     padding: 4px;
+    display: flex;
+    align-items: center;
 }
 
 .search-actions {
     display: flex;
     justify-content: flex-end;
+    margin-top: 1rem;
 }
+
+#btnBuscar {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+    transition: transform 0.1s, background 0.2s;
+}
+
+#btnBuscar:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+#btnBuscar:active {
+    transform: translateY(0);
+}
+
 
 /* ===== Produto Result Card (Modern) ===== */
 .produto-result-card {
@@ -380,6 +425,38 @@ body {
 
 .btn-block {
     width: 100%;
+}
+
+.text-danger {
+    color: #dc2626;
+}
+
+.text-warning {
+    color: #d97706;
+}
+
+.text-success {
+    color: #16a34a;
+}
+
+.text-muted {
+    color: #94a3b8;
+}
+
+/* ===== Spin Animation ===== */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    display: inline-block;
+    animation: spin 1s linear infinite;
 }
 
 /* ===== Animations ===== */
