@@ -1,5 +1,7 @@
 /* ===== Página de Relatório de Validades (Refatorada) ===== */
 
+import { ValidadePrintOptimizer } from './validade-print.js';
+
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -53,6 +55,7 @@ function setupUI() {
   });
 
   $('#btnGerarCSV').addEventListener('click', gerarCSV);
+  $('#btnGerarPDF').addEventListener('click', gerarRelatorioPDF);
 
   // Input Search
   const inputBusca = $('#codigoProduto');
@@ -88,10 +91,10 @@ function setupUI() {
   // Focar no inicio
   inputBusca.focus();
 
-  // Impressão
+  // Impressão Etiqueta Individual
   $('#btnImprimir').addEventListener('click', imprimirEtiqueta);
 
-  // Formatação de datas nos inputs CSV
+  // Formatação de datas nos inputs
   ['validadeInicio', 'validadeFim'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -102,301 +105,251 @@ function setupUI() {
   });
 }
 
-async function inicializarPagina() {
-  console.log('🔄 Sincronizando dados...');
-
-  // Garantir que temos dados atualizados
-  try {
-    if (!sistema.cacheCarregado) {
-      await sistema.carregarCache();
-    }
-    console.log('✅ Dados sincronizados');
-  } catch (e) {
-    console.warn('⚠️ Usando dados em cache/offline', e);
-    showToast('Modo Offline: Usando dados locais', 'warning');
-  }
+function inicializarPagina() {
+  // Configs iniciais se necessario
 }
 
 function limparCampos() {
   $('#codigoProduto').value = '';
   $('#btnClearInput').classList.add('hide');
-  limparResultadosUI();
+  $('#produtoInfo').classList.add('hide');
+  $('#listaEnderecosContainer').classList.add('hide');
+  $('#listaEnderecos').innerHTML = '';
+  produtoAtual = null;
+  enderecoSelecionado = null;
   $('#codigoProduto').focus();
 }
 
-/**
- * Realiza a busca
- */
 async function buscarProduto() {
   const termo = $('#codigoProduto').value.trim().toUpperCase();
   if (!termo) {
-    showToast('Digite um código, barras ou endereço', 'warning');
+    showToast('Digite um código ou endereço', 'warning');
     return;
   }
 
-  // Loading estado
   const btn = $('#btnBuscar');
   const originalText = btn.innerHTML;
+  btn.innerHTML = '...';
   btn.disabled = true;
-  btn.innerHTML = `<span class="spin">↻</span> Buscando...`;
-
-  limparResultadosUI();
 
   try {
-    // 1. Tentar achar na base de produtos (BASE_BARRAS.js)
+    // 1. Verificar se é Produto (CODDV ou BARRAS)
     let produto = buscarNaBaseLocal(termo);
 
+    // 2. Se não achou na base local, buscar produto direto no Supabase (pode ser novo)
+    if (!produto) {
+      // Tentar buscar nas alocações se existe esse CODDV
+      // ou se o termo é um BARRAS válido
+    }
+
     if (produto) {
-      // É um produto
-      console.log('📦 Produto encontrado na base:', produto.DESC);
       produtoAtual = produto;
       await processarProduto(produto);
+    } else if (validarFormatoEndereco(termo)) {
+      // 3. Verificar se é Endereço
+      await processarEndereco(termo);
     } else {
-      // 2. Não é produto, verificar se é endereço
-      if (validarFormatoEndereco(termo) || termo.includes('PF')) {
-        console.log('📍 Buscando por endereço:', termo);
-        await processarEndereco(termo);
+      // Busca direta no banco de alocacoes
+      const alocacoes = await buscarAlocaDireta(termo);
+      if (alocacoes && alocacoes.length > 0) {
+        // Encontrou CODDV que nao tava na base local mas tá no banco
+        // Criar objeto produto fake baseado no banco
+        const first = alocacoes[0];
+        produtoAtual = {
+          CODDV: first.coddv,
+          DESC: first.descricao_produto,
+          BARRAS: '' // desconhecido
+        };
+        exibirMultiplosLocais(produtoAtual, alocacoes);
       } else {
-        // Tenta buscar no banco pra ver se é um código que não tem na base local mas tem alocado (raro)
-        // Ou chamar alocacao direta
-        const alocacoes = await buscarAlocacaoDireta(termo);
-        if (alocacoes && alocacoes.length > 0) {
-          // Criar objeto produto fake baseado no que retornou do banco
-          const fakeProd = {
-            CODDV: alocacoes[0].coddv,
-            DESC: alocacoes[0].descricao_produto || 'Produto não cadastrado',
-            BARRAS: ''
-          };
-          produtoAtual = fakeProd;
-          exibirMultiplosLocais(fakeProd, alocacoes); // Reusa logica
-        } else {
-          showToast('Produto ou endereço não encontrado', 'warning');
-        }
+        showToast('Produto ou endereço não encontrado', 'error');
       }
     }
-  } catch (e) {
-    console.error(e);
-    showToast('Erro ao buscar: ' + e.message, 'error');
+
+  } catch (error) {
+    console.error(error);
+    showToast('Erro ao buscar: ' + error.message, 'error');
   } finally {
-    btn.disabled = false;
     btn.innerHTML = originalText;
+    btn.disabled = false;
   }
 }
 
-/**
- * Busca direta se não achou na base local (fallback para produtos novos)
- */
-async function buscarAlocacaoDireta(coddv) {
-  if (!sistema.cacheCarregado) return [];
+function buscarNaBaseLocal(termo) {
+  if (!window.BASE_CADASTRO) return null;
+  // Busca exata CODDV
+  let found = window.BASE_CADASTRO.find(p => p.CODDV == termo);
+  if (found) return found;
 
-  // Procura no cache primeiro
-  const encontrados = [];
-  for (const [endereco, listaProdutos] of Object.entries(sistema.cacheAlocacoes)) {
-    const match = listaProdutos.find(p => p.coddv == coddv);
-    if (match) {
-      encontrados.push({
-        ...match,
-        endereco: endereco
-      });
-    }
-  }
-  return encontrados;
+  // Busca por BARRAS (pode ser lista ou string)
+  found = window.BASE_CADASTRO.find(p => {
+    if (!p.BARRAS) return false;
+    if (Array.isArray(p.BARRAS)) return p.BARRAS.includes(termo);
+    return p.BARRAS == termo;
+  });
+
+  return found;
 }
 
-/**
- * Processa logicamente um produto encontrado
- */
+function validarFormatoEndereco(termo) {
+  // Simplificado: PF + numeros
+  return /^PF\d{2}/.test(termo) || /^\d{2}-\d{3}/.test(termo); // Aceitar formatos diversos
+}
+
+async function buscarAlocaDireta(termo) {
+  if (!sistema.client) return [];
+  // Tenta buscar por CODDV
+  const { data } = await sistema.client.from('alocacoes_fraldas')
+    .select('*')
+    .eq('coddv', termo)
+    .eq('ativo', true);
+  return data || [];
+}
+
 async function processarProduto(produto) {
-  // Buscar onde ele está alocado usando o sistema
-  // O sistema já tem cache de alocações: sistema.cacheAlocacoes
-  // cacheAlocacoes é { "ENDERECO": [ {coddv, ...}, ... ] }
+  // Buscar onde está alocado
+  // Usar sistema.cacheAlocacoes se disponivel, ou buscar direto
 
   const alocacoes = [];
 
-  // Varrer cache (síncrono e rápido)
-  for (const [endereco, listaProdutos] of Object.entries(sistema.cacheAlocacoes)) {
-    const match = listaProdutos.find(p => p.coddv == produto.CODDV);
+  // Varre cache
+  for (const [end, lista] of Object.entries(sistema.cacheAlocacoes)) {
+    const match = lista.find(p => p.coddv == produto.CODDV);
     if (match) {
-      alocacoes.push({
-        ...match,
-        endereco: endereco // garantir que endereço está no obj
-      });
+      alocacoes.push({ ...match, endereco: end });
     }
   }
 
   if (alocacoes.length === 0) {
-    // Não alocado
     exibirProdutoNaoAlocado(produto);
   } else if (alocacoes.length === 1) {
-    // Alocado em 1 lugar
     exibirProdutoAlocado(produto, alocacoes[0]);
   } else {
-    // Múltiplos locais
     exibirMultiplosLocais(produto, alocacoes);
   }
 }
 
-/**
- * Processa busca por endereço
- */
 async function processarEndereco(endereco) {
-  // Buscar produtos neste endereço
-  // sistema.obterProdutosNoEndereco(endereco) retorna array
+  // Normalizar endereço?
+  // Buscar no cache
+  const produtosNoEndereco = sistema.cacheAlocacoes[endereco.toUpperCase()] || [];
 
-  // Se cache não tiver carregado (improvavel aqui), carregar
-  if (!sistema.cacheCarregado) await sistema.carregarCache();
+  if (produtosNoEndereco.length === 0) {
+    // Tentar buscar direto no banco pra garantir
+    const { data } = await sistema.client.from('alocacoes_fraldas')
+      .select('*')
+      .eq('endereco', endereco.toUpperCase())
+      .eq('ativo', true);
 
-  const produtos = sistema.obterProdutosNoEndereco(endereco);
-
-  if (produtos && produtos.length > 0) {
-    mostrarListaEnderecos(produtos, endereco, true);
+    if (data && data.length > 0) {
+      mostrarListaEnderecos(data.map(p => ({ ...p, endereco: endereco.toUpperCase() })));
+      return;
+    }
+    showToast(`Endereço ${endereco} vazio ou inválido`, 'info');
   } else {
-    showToast(`Nenhum produto alocado no endereço ${endereco}`, 'info');
+    mostrarListaEnderecos(produtosNoEndereco.map(p => ({ ...p, endereco: endereco.toUpperCase() })));
   }
 }
 
-/**
- * Helpers de Busca
- */
-function buscarNaBaseLocal(termo) {
-  if (!window.DB_CADASTRO?.BASE_CADASTRO) return null;
-
-  // Remove zeros a esquerda para comparar numeros, mas mantem original para string
-  const termoNum = termo.replace(/^0+/, '');
-
-  return window.DB_CADASTRO.BASE_CADASTRO.find(item =>
-    item.CODDV == termo ||
-    item.CODDV == termoNum ||
-    item.BARRAS == termo
-  );
-}
-
-function validarFormatoEndereco(end) {
-  // Regex simples ou usar do sistema
-  return /PF\d+\./.test(end);
-}
-
-// =========================================================
-// RENDERING
-// =========================================================
-
-function limparResultadosUI() {
-  $('#produtoInfo').classList.add('hide');
-  $('#listaEnderecosContainer').classList.add('hide');
-  produtoAtual = null;
-  enderecoSelecionado = null;
-}
+// ================= UI RENDERING =================
 
 function exibirProdutoNaoAlocado(produto) {
   $('#produtoInfo').classList.remove('hide');
+  $('#listaEnderecosContainer').classList.add('hide');
 
   $('.produto-coddv').textContent = produto.CODDV;
-  $('.produto-status').textContent = 'NÃO ALOCADO';
-  $('.produto-status').className = 'produto-status badge badge-neutral'; // Cinza
-
+  $('.produto-status').textContent = 'Não Alocado';
+  $('.produto-status').className = 'produto-status badge badge-neutral';
   $('.produto-desc').textContent = produto.DESC;
-  $('.produto-barras').textContent = produto.BARRAS || '-';
+  $('.produto-barras').textContent = Array.isArray(produto.BARRAS) ? produto.BARRAS.join(', ') : produto.BARRAS;
+  $('.produto-endereco').textContent = '-';
+  $('.produto-validade-conta').textContent = 'Produto sem alocação ativa';
 
-  $('.produto-endereco').innerHTML = '<span class="text-muted">Não consta em nenhum endereço</span>';
-  $('.produto-validade-conta').textContent = '-';
-
-  // Desabilitar impressão pois não tem validade/endereço
   $('#btnImprimir').disabled = true;
+  produtoAtual = produto;
+  enderecoSelecionado = null;
 }
 
 function exibirProdutoAlocado(produto, alocacao) {
   $('#produtoInfo').classList.remove('hide');
+  $('#listaEnderecosContainer').classList.add('hide');
+
+  const statusVal = sistema.obterStatusValidade(alocacao.validade);
+  const validadeFmt = sistema.formatarValidade(alocacao.validade);
 
   $('.produto-coddv').textContent = produto.CODDV;
-  $('.produto-status').textContent = 'ALOCADO';
-  $('.produto-status').className = 'produto-status badge badge-success'; // Verde
+  $('.produto-status').textContent = 'Alocado';
+  $('.produto-status').className = 'produto-status badge badge-success';
+  $('.produto-desc').textContent = alocacao.descricao_produto || produto.DESC;
+  $('.produto-barras').textContent = Array.isArray(produto.BARRAS) ? produto.BARRAS.join(', ') : produto.BARRAS;
 
-  $('.produto-desc').textContent = produto.DESC;
-  $('.produto-barras').textContent = produto.BARRAS || '-';
-
-  const validadeFmt = sistema.formatarValidade(alocacao.validade);
-  const statusValidade = sistema.obterStatusValidade(alocacao.validade);
-
-  let corValidade = '';
-  if (statusValidade === 'vencida') corValidade = 'text-danger';
-  if (statusValidade === 'proxima-vencimento') corValidade = 'text-warning';
-
-  $('.produto-endereco').innerHTML = `<span class="badge badge-outline">${alocacao.endereco}</span>`;
-  $('.produto-validade-conta').innerHTML = `<span class="${corValidade}"><strong>${validadeFmt}</strong></span>`;
-
-  $('.produto-validade-conta').className = `value produto-validade-conta ${statusValidade}`; // Helper visual css
-
-  enderecoSelecionado = alocacao.endereco;
-  produtoAtual = produto; // Atualiza global
+  $('.produto-endereco').textContent = alocacao.endereco;
+  $('.produto-validade-conta').textContent = validadeFmt;
+  $('.produto-validade-conta').className = `value produto-validade-conta status-${statusVal}`; // Adicionar cor
 
   $('#btnImprimir').disabled = false;
+  produtoAtual = produto;
+  enderecoSelecionado = alocacao.endereco;
 }
 
 function exibirMultiplosLocais(produto, alocacoes) {
-  // Mostrar lista de endereços onde esse produto está
-  $('#listaEnderecosContainer').classList.remove('hide');
   $('#produtoInfo').classList.add('hide');
-
-  const container = $('#listaEnderecos');
-  container.innerHTML = `<div class="alert alert-info">📦 <strong>${produto.DESC}</strong> encontrado em ${alocacoes.length} locais:</div>`;
-
-  alocacoes.forEach(a => {
-    const div = document.createElement('div');
-    div.className = 'endereco-card-item';
-    div.innerHTML = `
-            <div class="end-info">
-                <span class="end-badge">${a.endereco}</span>
-                <span class="end-validade">Val: ${sistema.formatarValidade(a.validade)}</span>
-            </div>
-            <button class="btn btn-sm btn-ghost">Selecionar</button>
-        `;
-    div.onclick = () => exibirProdutoAlocado(produto, a);
-    container.appendChild(div);
-  });
-}
-
-function mostrarListaEnderecos(produtos, enderecoNome, buscarDetalhes = false) {
   $('#listaEnderecosContainer').classList.remove('hide');
+
+  mostrarListaEnderecos(alocacoes);
+}
+
+function mostrarListaEnderecos(lista) {
   const container = $('#listaEnderecos');
-  container.innerHTML = `<div class="section-subtitle">📍 Endereço: <strong>${enderecoNome}</strong></div>`;
+  container.innerHTML = '';
 
-  produtos.forEach(p => {
-    // Enriquecer com descricao da base local se possivel
-    let desc = p.descricao_produto || p.descricaoProduto;
-    const local = buscarNaBaseLocal(p.coddv);
-    if (local) desc = local.DESC;
+  lista.forEach(aloc => {
+    const item = document.createElement('div');
+    item.className = 'endereco-card animate-slide-in-up';
 
-    const div = document.createElement('div');
-    div.className = 'endereco-card-item product-row';
-    div.innerHTML = `
-            <div class="prod-row-main">
-                <span class="prod-cod">${p.coddv}</span>
-                <span class="prod-desc">${desc}</span>
+    const statusVal = sistema.obterStatusValidade(aloc.validade);
+    const validadeFmt = sistema.formatarValidade(aloc.validade);
+
+    item.innerHTML = `
+            <div class="card-left">
+                <div class="end-code">${aloc.endereco}</div>
+                <div class="prod-name">${aloc.descricao_produto} <small>(#${aloc.coddv})</small></div>
             </div>
-            <div class="prod-row-meta">
-                 <span>Val: <strong>${sistema.formatarValidade(p.validade)}</strong></span>
+            <div class="card-right">
+                <div class="validade-chip ${statusVal}">
+                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                   ${validadeFmt}
+                </div>
+                <button class="btn-icon-sm" title="Selecionar">
+                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
             </div>
         `;
 
-    // Clicar para focar nesse produto
-    div.onclick = () => {
-      $('#codigoProduto').value = p.coddv;
-      buscarProduto();
-    };
+    item.addEventListener('click', () => {
+      // Selecionar este
+      const prodFake = {
+        CODDV: aloc.coddv,
+        DESC: aloc.descricao_produto,
+        BARRAS: ''
+      };
+      exibirProdutoAlocado(prodFake, aloc);
+    });
 
-    container.appendChild(div);
+    container.appendChild(item);
   });
+
+  $('#listaEnderecosContainer').classList.remove('hide');
 }
 
-// =========================================================
-// CSV / EXPORT
-// =========================================================
+
+// ================= EXPORTAÇÃO =================
 
 async function gerarCSV() {
   const inicio = $('#validadeInicio').value;
   const fim = $('#validadeFim').value;
 
-  if (inicio.length !== 4 || fim.length !== 4) {
+  if (!inicio || !fim || inicio.length !== 4 || fim.length !== 4) {
     showToast('Informe datas no formato MMAA (ex: 0126)', 'warning');
     return;
   }
@@ -406,23 +359,8 @@ async function gerarCSV() {
   btn.innerHTML = 'Gerando...';
 
   try {
-    if (!sistema.client) throw new Error('Sem conexão com banco de dados');
-
-    // Consulta direta ao Supabase para pegar range
-    const { data, error } = await sistema.client
-      .from('alocacoes_fraldas')
-      .select('*')
-      .eq('ativo', true)
-      .gte('validade', inicio)
-      .lte('validade', fim)
-      .order('validade'); // ordenado por validade
-
-    if (error) throw error;
-
-    if (!data || data.length === 0) {
-      showToast('Nenhum registro encontrado neste período.', 'info');
-      return;
-    }
+    const data = await fetchReportData(inicio, fim);
+    if (!data.length) return;
 
     baixarCSV(data, `validades_${inicio}_${fim}.csv`);
     showToast('Relatório gerado com sucesso!', 'success');
@@ -432,8 +370,106 @@ async function gerarCSV() {
     showToast('Erro ao gerar CSV: ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = 'Exportar Planilha';
+    btn.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Baixar Planilha (CSV)
+    `;
   }
+}
+
+async function gerarRelatorioPDF() {
+  const inicio = $('#validadeInicio').value;
+  const fim = $('#validadeFim').value;
+
+  if (!inicio || !fim || inicio.length !== 4 || fim.length !== 4) {
+    showToast('Informe datas no formato MMAA (ex: 0126)', 'warning');
+    return;
+  }
+
+  const btn = $('#btnGerarPDF');
+  btn.disabled = true;
+  btn.innerHTML = 'Gerando PDF...';
+
+  try {
+    const data = await fetchReportData(inicio, fim);
+    if (!data.length) return;
+
+    // Enriquecer dados com base local (DESCRIÇÃO principalmente)
+    const enrichedData = data.map(row => {
+      const local = buscarNaBaseLocal(String(row.coddv));
+      return {
+        ...row,
+        DESC: local ? local.DESC : (row.descricao_produto || 'Produto sem descrição'),
+        BARRAS: local ? local.BARRAS : ''
+      };
+    });
+
+    const optimizer = new ValidadePrintOptimizer();
+    const html = optimizer.generatePrintDocument(enrichedData, { inicio, fim });
+
+    // Abrir janela de impressão
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      // Aguardar carregamento (imagens, styles)
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+      }, 500);
+      showToast('Impressão iniciada!', 'success');
+    } else {
+      showToast('Pop-up bloqueado. Permita pop-ups para imprimir.', 'error');
+    }
+
+  } catch (e) {
+    console.error(e);
+    showToast('Erro ao gerar PDF: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        Imprimir Relatório (PDF)
+    `;
+  }
+}
+
+
+async function fetchReportData(inicio, fim) {
+  if (!sistema.client) throw new Error('Sem conexão com banco de dados');
+
+  const { data, error } = await sistema.client
+    .from('alocacoes_fraldas')
+    .select('*')
+    .eq('ativo', true)
+    .gte('validade', inicio)
+    .lte('validade', fim);
+
+  if (error) throw error;
+
+  if (!data || data.length === 0) {
+    showToast('Nenhum registro encontrado neste período.', 'info');
+    return [];
+  }
+
+  // Ordenar logicamente (YYYYMM)
+  return data.sort((a, b) => {
+    const valA = a.validade || '0000';
+    const valB = b.validade || '0000';
+    // MMAA -> YYYYMM
+    const dateA = parseInt('20' + valA.substring(2, 4) + valA.substring(0, 2));
+    const dateB = parseInt('20' + valB.substring(2, 4) + valB.substring(0, 2));
+    return dateA - dateB;
+  });
 }
 
 function baixarCSV(dados, filename) {
@@ -502,6 +538,7 @@ function showToast(msg, type = 'info') {
   if (window.showToast) {
     window.showToast(msg, type);
   } else {
-    alert(msg);
+    // Fallback simples
+    console.log(`[TOAST ${type}] ${msg}`);
   }
 }
