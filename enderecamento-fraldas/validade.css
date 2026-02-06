@@ -71,26 +71,27 @@ body {
     color: #475569;
 }
 
-/* Baseado no screenshot:
-   - Input tem largura limitada (aprox 300-400px)
-   - Ícone de scanner à esquerda DENTRO do input
-   - Botão 'X' à direita DENTRO do input
-   - Botão 'Buscar' DENTRO DO CARD mas FLUTUANDO À DIREITA, abaixo ou ao lado
+/* Ajuste solicitado: 
+   - Aumentar o espaço para inserir (dobro / full width)
+   - Ícone limpar DENTRO do input
+   - Botão buscar APÓS o input
 */
 
 .search-input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
-    max-width: 450px;
-    /* Limite conforme imagem */
+    width: 100%;
+    /* Ocupar largura total */
+    max-width: none;
+    /* Remover limite anterior */
 }
 
 .search-input-wrapper input {
     width: 100%;
     height: 52px;
-    padding: 0.5rem 2.5rem 0.5rem 3.5rem;
-    /* Espaço icones */
+    /* Ajuste padding: 3.5rem na esq (scanner) e 3rem na dir (limpar) */
+    padding: 0.5rem 3rem 0.5rem 3.5rem;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 1.1rem;
@@ -115,18 +116,27 @@ body {
     justify-content: center;
     width: 24px;
     height: 24px;
+    z-index: 10;
 }
 
 .search-input-wrapper .clear-btn {
     position: absolute;
-    right: 1rem;
+    right: 10px;
+    /* Dentro do input */
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     color: #94a3b8;
     cursor: pointer;
-    padding: 4px;
+    padding: 6px;
     display: flex;
     align-items: center;
+    z-index: 10;
+}
+
+.search-input-wrapper .clear-btn:hover {
+    color: #ef4444;
 }
 
 .search-actions {
