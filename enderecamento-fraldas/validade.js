@@ -1,531 +1,507 @@
-/* ===== Página de Relatório de Validades ===== */
+/* ===== Página de Relatório de Validades (Refatorada) ===== */
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 let produtoAtual = null;
 let enderecoSelecionado = null;
+let sistema = null; // Instância do SistemaEnderecamentoSupabase
 
-// Verificar autenticação
-document.addEventListener('DOMContentLoaded', () => {
+// Inicialização
+document.addEventListener('DOMContentLoaded', async () => {
+  // Verificar sessão
   const session = localStorage.getItem('enderecamento_fraldas_session');
   if (!session) {
     window.location.href = './login.html';
     return;
   }
-  
-  console.log('🔄 Página carregada, verificando Supabase...');
-  
-  // Verificar se já está pronto
-  if (getSupabase()) {
-    console.log('✅ Supabase já está pronto');
-    configurarEventos();
-    return;
+
+  console.log('🚀 Página de Validades iniciando...');
+
+  // Aguardar sistema de endereçamento
+  if (window.sistemaEnderecamento) {
+    sistema = window.sistemaEnderecamento;
+    inicializarPagina();
+  } else {
+    window.addEventListener('sistemaEnderecamentoPronto', () => {
+      console.log('✅ Sistema de Endereçamento pronto');
+      sistema = window.sistemaEnderecamento;
+      inicializarPagina();
+    });
   }
-  
-  // Aguardar evento de sistema pronto
-  window.addEventListener('sistemaEnderecamentoPronto', (e) => {
-    console.log('✅ Evento sistemaEnderecamentoPronto recebido:', e.detail);
-    if (getSupabase()) {
-      configurarEventos();
-    }
-  });
-  
-  // Fallback: tentar a cada 500ms por até 5 segundos
-  let tentativas = 0;
-  const maxTentativas = 10;
-  
-  const verificarSupabase = setInterval(() => {
-    tentativas++;
-    
-    if (getSupabase()) {
-      console.log('✅ Supabase pronto após', tentativas, 'tentativas');
-      clearInterval(verificarSupabase);
-      configurarEventos();
-      return;
-    }
-    
-    if (tentativas >= maxTentativas) {
-      clearInterval(verificarSupabase);
-      console.warn('⚠️ Supabase não carregou após', maxTentativas, 'tentativas');
-      showToast('Aviso: Banco de dados não conectado', 'warning');
-      configurarEventos(); // Configurar mesmo assim
-    }
-  }, 500);
+
+  // Configuração de UI
+  setupUI();
 });
 
-function getSupabase() {
-  // Tentar várias formas de acessar o Supabase
-  if (window.supabaseManager?.client) {
-    console.log('✅ Usando supabaseManager.client');
-    return window.supabaseManager.client;
-  }
-  if (window.sistemaEnderecamento?.client) {
-    console.log('✅ Usando sistemaEnderecamento.client');
-    return window.sistemaEnderecamento.client;
-  }
-  if (window.sistemaEnderecamentoSupabase?.client) {
-    console.log('✅ Usando sistemaEnderecamentoSupabase.client');
-    return window.sistemaEnderecamentoSupabase.client;
-  }
-  console.warn('❌ Supabase não disponível');
-  return null;
-}
-
-function configurarEventos() {
+function setupUI() {
+  // Botões
   $('#btnBuscar').addEventListener('click', buscarProduto);
-  $('#btnLimpar').addEventListener('click', limparCampos);
   $('#btnClearInput').addEventListener('click', limparCampos);
-  $('#btnImprimir').addEventListener('click', imprimirEtiqueta);
+
+  // Toggle Exportação
+  $('#btnExportarToggle').addEventListener('click', () => {
+    const panel = $('#painelExportacao');
+    panel.classList.toggle('hide');
+    if (!panel.classList.contains('hide')) {
+      panel.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  $('#btnCloseExport').addEventListener('click', () => {
+    $('#painelExportacao').classList.add('hide');
+  });
+
   $('#btnGerarCSV').addEventListener('click', gerarCSV);
-  
-  $('#codigoProduto').addEventListener('keypress', (e) => {
+
+  // Input Search
+  const inputBusca = $('#codigoProduto');
+  inputBusca.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') buscarProduto();
   });
-  
-  // Máscara para datas MMAA
-  $('#validadeInicio').addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
-  });
-  $('#validadeFim').addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
-  });
-}
 
-async function buscarProduto() {
-  const codigo = $('#codigoProduto').value.trim();
-  console.log('🔍 Iniciando busca por:', codigo);
-  
-  if (!codigo) {
-    showToast('Informe um código para buscar', 'warning');
-    return;
-  }
-  
-  // Mostrar loading
-  $('#btnBuscar').disabled = true;
-  $('#btnBuscar').innerHTML = `<svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Buscando...`;
-  
-  try {
-    // Buscar na base de dados local
-    const produto = buscarNaBase(codigo);
-    console.log('📦 Produto na base:', produto);
-    
-    if (!produto) {
-      console.log('🔍 Produto não encontrado na base, tentando como endereço...');
-      // Tentar buscar como endereço no banco
-      const produtosNoEndereco = await buscarPorEndereco(codigo);
-      console.log('📍 Produtos no endereço:', produtosNoEndereco);
-      if (produtosNoEndereco.length > 0) {
-        mostrarListaEnderecos(produtosNoEndereco, codigo);
-        return;
-      }
-      showToast('Produto ou endereço não encontrado', 'warning');
-      return;
-    }
-    
-    produtoAtual = produto;
-    
-    // Buscar validade no Supabase
-    const validadeInfo = await buscarValidade(produto.CODDV);
-    
-    exibirProduto(produto, validadeInfo);
-    
-  } catch (error) {
-    console.error('Erro na busca:', error);
-    showToast('Erro ao buscar produto', 'error');
-  } finally {
-    $('#btnBuscar').disabled = false;
-    $('#btnBuscar').innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Buscar`;
-  }
-}
-
-function buscarNaBase(codigo) {
-  if (!window.DB_CADASTRO?.BASE_CADASTRO) {
-    console.warn('⚠️ DB_CADASTRO não disponível');
-    return null;
-  }
-  
-  const codigoLimpo = codigo.trim();
-  console.log('🔍 Buscando na base:', codigoLimpo);
-  const resultado = window.DB_CADASTRO.BASE_CADASTRO.find(item => 
-    item.CODDV === codigoLimpo || item.BARRAS === codigoLimpo
-  );
-  console.log('✅ Resultado:', resultado ? 'Encontrado' : 'Não encontrado');
-  return resultado;
-}
-
-async function buscarPorEndereco(endereco) {
-  // Tentar usar sistemaEnderecamento primeiro
-  if (window.sistemaEnderecamento?.obterProdutosNoEndereco) {
-    try {
-      const produtos = await window.sistemaEnderecamento.obterProdutosNoEndereco(endereco.toUpperCase());
-      return produtos || [];
-    } catch (e) {
-      console.warn('Erro no sistemaEnderecamento:', e);
-    }
-  }
-  
-  // Fallback: usar Supabase direto
-  const client = getSupabase();
-  if (!client) {
-    console.warn('Supabase não disponível');
-    return [];
-  }
-  
-  try {
-    console.log('🔍 Buscando endereço:', endereco.toUpperCase());
-    const { data, error } = await client
-      .from('alocacoes_fraldas')
-      .select('*')
-      .eq('endereco', endereco.toUpperCase())
-      .eq('ativo', true);
-    
-    if (error) {
-      console.error('Erro Supabase:', error);
-      throw error;
-    }
-    console.log('✅ Produtos encontrados:', data?.length || 0);
-    return data || [];
-  } catch (e) {
-    console.error('Erro ao buscar endereço:', e);
-    return [];
-  }
-}
-
-async function buscarValidade(coddv) {
-  console.log('🔍 Buscando validade para CODDV:', coddv);
-  
-  const client = getSupabase();
-  if (!client) {
-    console.error('❌ Supabase não disponível');
-    showToast('Erro: Banco de dados não conectado', 'error');
-    return null;
-  }
-  
-  try {
-    console.log('📡 Consultando alocacoes_fraldas...');
-    const { data, error } = await client
-      .from('alocacoes_fraldas')
-      .select('validade, endereco, id, coddv, ativo')
-      .eq('coddv', coddv)
-      .eq('ativo', true);
-    
-    if (error) {
-      console.error('❌ Erro na consulta:', error);
-      throw error;
-    }
-    
-    console.log('✅ Dados retornados:', data);
-    
-    if (data && data.length > 0) {
-      console.log(`✅ Produto ${coddv} encontrado em ${data.length} endereço(s)`);
-      return {
-        validade: data[0].validade,
-        endereco: data[0].endereco,
-        id: data[0].id,
-        multiplos: data.length > 1,
-        todos: data
-      };
+  inputBusca.addEventListener('input', (e) => {
+    const btnClear = $('#btnClearInput');
+    if (e.target.value.trim()) {
+      btnClear.classList.remove('hide');
     } else {
-      console.log('ℹ️ Produto não encontrado ou não está alocado');
+      btnClear.classList.add('hide');
     }
-  } catch (e) {
-    console.error('❌ Erro ao buscar validade:', e);
-    showToast('Erro ao buscar no banco: ' + e.message, 'error');
-  }
-  
-  return null;
-}
-
-function exibirProduto(produto, validadeInfo) {
-  $('#produtoInfo').classList.remove('hide');
-  $('#listaEnderecosContainer').classList.add('hide');
-  
-  $('.produto-coddv').textContent = `CODDV: ${produto.CODDV}`;
-  $('.produto-desc').textContent = produto.DESC;
-  $('.produto-barras').textContent = `Barras: ${produto.BARRAS}`;
-  
-  const statusEl = $('.produto-status');
-  const validadeEl = $('.produto-validade');
-  const enderecoEl = $('.produto-endereco');
-  
-  if (validadeInfo) {
-    statusEl.textContent = '✓ ALOCADO';
-    statusEl.className = 'produto-status status-alocado';
-    
-    const valFormatada = formatarValidade(validadeInfo.validade);
-    validadeEl.innerHTML = `<strong>Validade:</strong> ${valFormatada}`;
-    validadeEl.style.display = 'block';
-    
-    enderecoEl.innerHTML = `<strong>Endereço:</strong> ${validadeInfo.endereco}`;
-    enderecoSelecionado = validadeInfo.endereco;
-    
-    // Se múltiplos endereços, mostrar seleção
-    if (validadeInfo.multiplos) {
-      mostrarSelecaoEnderecos(validadeInfo.todos);
-    }
-  } else {
-    statusEl.textContent = '⚠ NÃO ALOCADO';
-    statusEl.className = 'produto-status status-disponivel';
-    validadeEl.innerHTML = '<strong>Validade:</strong> <span style="color: #94a3b8;">Produto não possui validade cadastrada (não está alocado)</span>';
-    validadeEl.style.display = 'block';
-    enderecoEl.innerHTML = '<strong>Endereço:</strong> <span style="color: #94a3b8;">Não alocado</span>';
-    enderecoSelecionado = null;
-  }
-}
-
-function mostrarSelecaoEnderecos(enderecos) {
-  $('#listaEnderecosContainer').classList.remove('hide');
-  const lista = $('#listaEnderecos');
-  
-  lista.innerHTML = enderecos.map((item, idx) => `
-    <div class="endereco-item ${idx === 0 ? 'selecionado' : ''}" 
-         data-endereco="${item.endereco}" data-validade="${item.validade}" data-id="${item.id}">
-      <div class="endereco-nome">${item.endereco}</div>
-      <div class="endereco-validade">Validade: ${formatarValidade(item.validade)}</div>
-    </div>
-  `).join('');
-  
-  // Eventos de seleção
-  lista.querySelectorAll('.endereco-item').forEach(el => {
-    el.addEventListener('click', () => {
-      lista.querySelectorAll('.endereco-item').forEach(e => e.classList.remove('selecionado'));
-      el.classList.add('selecionado');
-      enderecoSelecionado = el.dataset.endereco;
-      
-      // Atualizar exibição
-      $('.produto-validade').innerHTML = `<strong>Validade:</strong> ${formatarValidade(el.dataset.validade)}`;
-      $('.produto-endereco').innerHTML = `<strong>Endereço:</strong> ${el.dataset.endereco}`;
-    });
   });
-}
 
-async function mostrarListaEnderecos(produtos, endereco) {
-  $('#listaEnderecosContainer').classList.remove('hide');
-  $('#produtoInfo').classList.add('hide');
-  
-  const lista = $('#listaEnderecos');
-  
-  lista.innerHTML = `<div class="endereco-titulo">📍 Produtos em ${endereco.toUpperCase()}</div>` + 
-    produtos.map(item => {
-      const produtoInfo = buscarNaBase(item.coddv);
-      return `
-        <div class="endereco-item" data-coddv="${item.coddv}">
-          <div class="endereco-produto">
-            <strong>${item.coddv}</strong>
-            ${produtoInfo ? `- ${produtoInfo.DESC.substring(0, 35)}...` : ''}
-          </div>
-          <div class="endereco-validade">Validade: ${formatarValidade(item.validade)}</div>
-        </div>
-      `;
-    }).join('');
-  
-  lista.querySelectorAll('.endereco-item').forEach(el => {
-    el.addEventListener('click', async () => {
-      const coddv = el.dataset.coddv;
-      const produto = buscarNaBase(coddv);
-      if (produto) {
-        $('#codigoProduto').value = coddv;
-        await buscarProduto();
+  // Scanner Manual (botão)
+  const btnScan = $('#btnScan');
+  if (btnScan) {
+    btnScan.addEventListener('click', () => {
+      if (window.mobileScanner && typeof window.mobileScanner.openScanner === 'function') {
+        window.mobileScanner.openScanner('barcode', (code) => {
+          inputBusca.value = code;
+          buscarProduto();
+        });
+      } else {
+        // Fallback se scanner não estiver carregado ou desativado
+        showToast('Scanner não disponível. Use a digitação ou leitor físico.', 'info');
       }
     });
+  }
+
+  // Focar no inicio
+  inputBusca.focus();
+
+  // Impressão
+  $('#btnImprimir').addEventListener('click', imprimirEtiqueta);
+
+  // Formatação de datas nos inputs CSV
+  ['validadeInicio', 'validadeFim'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+      });
+    }
   });
 }
 
-function formatarValidade(validade) {
-  if (!validade || validade.length !== 4) return '--/--';
-  const mes = validade.substring(0, 2);
-  const ano = validade.substring(2);
-  return `${mes}/${ano}`;
+async function inicializarPagina() {
+  console.log('🔄 Sincronizando dados...');
+
+  // Garantir que temos dados atualizados
+  try {
+    if (!sistema.cacheCarregado) {
+      await sistema.carregarCache();
+    }
+    console.log('✅ Dados sincronizados');
+  } catch (e) {
+    console.warn('⚠️ Usando dados em cache/offline', e);
+    showToast('Modo Offline: Usando dados locais', 'warning');
+  }
 }
 
 function limparCampos() {
   $('#codigoProduto').value = '';
+  $('#btnClearInput').classList.add('hide');
+  limparResultadosUI();
+  $('#codigoProduto').focus();
+}
+
+/**
+ * Realiza a busca
+ */
+async function buscarProduto() {
+  const termo = $('#codigoProduto').value.trim().toUpperCase();
+  if (!termo) {
+    showToast('Digite um código, barras ou endereço', 'warning');
+    return;
+  }
+
+  // Loading estado
+  const btn = $('#btnBuscar');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">↻</span> Buscando...`;
+
+  limparResultadosUI();
+
+  try {
+    // 1. Tentar achar na base de produtos (BASE_BARRAS.js)
+    let produto = buscarNaBaseLocal(termo);
+
+    if (produto) {
+      // É um produto
+      console.log('📦 Produto encontrado na base:', produto.DESC);
+      produtoAtual = produto;
+      await processarProduto(produto);
+    } else {
+      // 2. Não é produto, verificar se é endereço
+      if (validarFormatoEndereco(termo) || termo.includes('PF')) {
+        console.log('📍 Buscando por endereço:', termo);
+        await processarEndereco(termo);
+      } else {
+        // Tenta buscar no banco pra ver se é um código que não tem na base local mas tem alocado (raro)
+        // Ou chamar alocacao direta
+        const alocacoes = await buscarAlocacaoDireta(termo);
+        if (alocacoes && alocacoes.length > 0) {
+          // Criar objeto produto fake baseado no que retornou do banco
+          const fakeProd = {
+            CODDV: alocacoes[0].coddv,
+            DESC: alocacoes[0].descricao_produto || 'Produto não cadastrado',
+            BARRAS: ''
+          };
+          produtoAtual = fakeProd;
+          exibirMultiplosLocais(fakeProd, alocacoes); // Reusa logica
+        } else {
+          showToast('Produto ou endereço não encontrado', 'warning');
+        }
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    showToast('Erro ao buscar: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
+/**
+ * Busca direta se não achou na base local (fallback para produtos novos)
+ */
+async function buscarAlocacaoDireta(coddv) {
+  if (!sistema.cacheCarregado) return [];
+
+  // Procura no cache primeiro
+  const encontrados = [];
+  for (const [endereco, listaProdutos] of Object.entries(sistema.cacheAlocacoes)) {
+    const match = listaProdutos.find(p => p.coddv == coddv);
+    if (match) {
+      encontrados.push({
+        ...match,
+        endereco: endereco
+      });
+    }
+  }
+  return encontrados;
+}
+
+/**
+ * Processa logicamente um produto encontrado
+ */
+async function processarProduto(produto) {
+  // Buscar onde ele está alocado usando o sistema
+  // O sistema já tem cache de alocações: sistema.cacheAlocacoes
+  // cacheAlocacoes é { "ENDERECO": [ {coddv, ...}, ... ] }
+
+  const alocacoes = [];
+
+  // Varrer cache (síncrono e rápido)
+  for (const [endereco, listaProdutos] of Object.entries(sistema.cacheAlocacoes)) {
+    const match = listaProdutos.find(p => p.coddv == produto.CODDV);
+    if (match) {
+      alocacoes.push({
+        ...match,
+        endereco: endereco // garantir que endereço está no obj
+      });
+    }
+  }
+
+  if (alocacoes.length === 0) {
+    // Não alocado
+    exibirProdutoNaoAlocado(produto);
+  } else if (alocacoes.length === 1) {
+    // Alocado em 1 lugar
+    exibirProdutoAlocado(produto, alocacoes[0]);
+  } else {
+    // Múltiplos locais
+    exibirMultiplosLocais(produto, alocacoes);
+  }
+}
+
+/**
+ * Processa busca por endereço
+ */
+async function processarEndereco(endereco) {
+  // Buscar produtos neste endereço
+  // sistema.obterProdutosNoEndereco(endereco) retorna array
+
+  // Se cache não tiver carregado (improvavel aqui), carregar
+  if (!sistema.cacheCarregado) await sistema.carregarCache();
+
+  const produtos = sistema.obterProdutosNoEndereco(endereco);
+
+  if (produtos && produtos.length > 0) {
+    mostrarListaEnderecos(produtos, endereco, true);
+  } else {
+    showToast(`Nenhum produto alocado no endereço ${endereco}`, 'info');
+  }
+}
+
+/**
+ * Helpers de Busca
+ */
+function buscarNaBaseLocal(termo) {
+  if (!window.DB_CADASTRO?.BASE_CADASTRO) return null;
+
+  // Remove zeros a esquerda para comparar numeros, mas mantem original para string
+  const termoNum = termo.replace(/^0+/, '');
+
+  return window.DB_CADASTRO.BASE_CADASTRO.find(item =>
+    item.CODDV == termo ||
+    item.CODDV == termoNum ||
+    item.BARRAS == termo
+  );
+}
+
+function validarFormatoEndereco(end) {
+  // Regex simples ou usar do sistema
+  return /PF\d+\./.test(end);
+}
+
+// =========================================================
+// RENDERING
+// =========================================================
+
+function limparResultadosUI() {
   $('#produtoInfo').classList.add('hide');
   $('#listaEnderecosContainer').classList.add('hide');
   produtoAtual = null;
   enderecoSelecionado = null;
 }
 
-async function imprimirEtiqueta() {
-  if (!produtoAtual) {
-    showToast('Nenhum produto selecionado', 'warning');
-    return;
-  }
-  
-  const session = JSON.parse(localStorage.getItem('enderecamento_fraldas_session') || '{}');
-  const validadeInfo = await buscarValidade(produtoAtual.CODDV);
-  
-  // Preencher template
-  $('#printDesc').textContent = produtoAtual.DESC;
-  $('#printCoddv').textContent = produtoAtual.CODDV;
-  $('#printBarras').textContent = produtoAtual.BARRAS;
-  $('#printValidade').textContent = validadeInfo ? formatarValidade(validadeInfo.validade) : '--/--';
-  $('#printEndereco').textContent = enderecoSelecionado || 'Não alocado';
-  $('#printUsuario').textContent = session.usuario || 'Sistema';
-  $('#printMatricula').textContent = session.matricula ? `🆔 ${session.matricula}` : '';
-  $('#printData').textContent = new Date().toLocaleString('pt-BR');
-  $('#printIdBadge').textContent = validadeInfo?.id ? `ID: ${validadeInfo.id}` : 'ID: --';
-  
-  // Mostrar template e imprimir
-  const template = $('#printTemplate');
-  template.classList.remove('hide');
-  
-  window.print();
-  
-  setTimeout(() => {
-    template.classList.add('hide');
-  }, 100);
+function exibirProdutoNaoAlocado(produto) {
+  $('#produtoInfo').classList.remove('hide');
+
+  $('.produto-coddv').textContent = produto.CODDV;
+  $('.produto-status').textContent = 'NÃO ALOCADO';
+  $('.produto-status').className = 'produto-status badge badge-neutral'; // Cinza
+
+  $('.produto-desc').textContent = produto.DESC;
+  $('.produto-barras').textContent = produto.BARRAS || '-';
+
+  $('.produto-endereco').innerHTML = '<span class="text-muted">Não consta em nenhum endereço</span>';
+  $('.produto-validade-conta').textContent = '-';
+
+  // Desabilitar impressão pois não tem validade/endereço
+  $('#btnImprimir').disabled = true;
 }
+
+function exibirProdutoAlocado(produto, alocacao) {
+  $('#produtoInfo').classList.remove('hide');
+
+  $('.produto-coddv').textContent = produto.CODDV;
+  $('.produto-status').textContent = 'ALOCADO';
+  $('.produto-status').className = 'produto-status badge badge-success'; // Verde
+
+  $('.produto-desc').textContent = produto.DESC;
+  $('.produto-barras').textContent = produto.BARRAS || '-';
+
+  const validadeFmt = sistema.formatarValidade(alocacao.validade);
+  const statusValidade = sistema.obterStatusValidade(alocacao.validade);
+
+  let corValidade = '';
+  if (statusValidade === 'vencida') corValidade = 'text-danger';
+  if (statusValidade === 'proxima-vencimento') corValidade = 'text-warning';
+
+  $('.produto-endereco').innerHTML = `<span class="badge badge-outline">${alocacao.endereco}</span>`;
+  $('.produto-validade-conta').innerHTML = `<span class="${corValidade}"><strong>${validadeFmt}</strong></span>`;
+
+  $('.produto-validade-conta').className = `value produto-validade-conta ${statusValidade}`; // Helper visual css
+
+  enderecoSelecionado = alocacao.endereco;
+  produtoAtual = produto; // Atualiza global
+
+  $('#btnImprimir').disabled = false;
+}
+
+function exibirMultiplosLocais(produto, alocacoes) {
+  // Mostrar lista de endereços onde esse produto está
+  $('#listaEnderecosContainer').classList.remove('hide');
+  $('#produtoInfo').classList.add('hide');
+
+  const container = $('#listaEnderecos');
+  container.innerHTML = `<div class="alert alert-info">📦 <strong>${produto.DESC}</strong> encontrado em ${alocacoes.length} locais:</div>`;
+
+  alocacoes.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'endereco-card-item';
+    div.innerHTML = `
+            <div class="end-info">
+                <span class="end-badge">${a.endereco}</span>
+                <span class="end-validade">Val: ${sistema.formatarValidade(a.validade)}</span>
+            </div>
+            <button class="btn btn-sm btn-ghost">Selecionar</button>
+        `;
+    div.onclick = () => exibirProdutoAlocado(produto, a);
+    container.appendChild(div);
+  });
+}
+
+function mostrarListaEnderecos(produtos, enderecoNome, buscarDetalhes = false) {
+  $('#listaEnderecosContainer').classList.remove('hide');
+  const container = $('#listaEnderecos');
+  container.innerHTML = `<div class="section-subtitle">📍 Endereço: <strong>${enderecoNome}</strong></div>`;
+
+  produtos.forEach(p => {
+    // Enriquecer com descricao da base local se possivel
+    let desc = p.descricao_produto || p.descricaoProduto;
+    const local = buscarNaBaseLocal(p.coddv);
+    if (local) desc = local.DESC;
+
+    const div = document.createElement('div');
+    div.className = 'endereco-card-item product-row';
+    div.innerHTML = `
+            <div class="prod-row-main">
+                <span class="prod-cod">${p.coddv}</span>
+                <span class="prod-desc">${desc}</span>
+            </div>
+            <div class="prod-row-meta">
+                 <span>Val: <strong>${sistema.formatarValidade(p.validade)}</strong></span>
+            </div>
+        `;
+
+    // Clicar para focar nesse produto
+    div.onclick = () => {
+      $('#codigoProduto').value = p.coddv;
+      buscarProduto();
+    };
+
+    container.appendChild(div);
+  });
+}
+
+// =========================================================
+// CSV / EXPORT
+// =========================================================
 
 async function gerarCSV() {
   const inicio = $('#validadeInicio').value;
   const fim = $('#validadeFim').value;
-  
+
   if (inicio.length !== 4 || fim.length !== 4) {
-    showToast('Informe período válido (MMAA)', 'warning');
+    showToast('Informe datas no formato MMAA (ex: 0126)', 'warning');
     return;
   }
-  
-  const client = getSupabase();
-  if (!client) {
-    showToast('Banco de dados não conectado', 'error');
-    console.error('Supabase não disponível para gerar CSV');
-    return;
-  }
-  
-  $('#btnGerarCSV').disabled = true;
-  $('#btnGerarCSV').innerHTML = `<svg class="spin" width="16" height="16" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Gerando...`;
-  
+
+  const btn = $('#btnGerarCSV');
+  btn.disabled = true;
+  btn.innerHTML = 'Gerando...';
+
   try {
-    console.log(`📡 Buscando validades de ${inicio} até ${fim}...`);
-    
-    // Buscar alocações no período
-    const { data, error } = await client
+    if (!sistema.client) throw new Error('Sem conexão com banco de dados');
+
+    // Consulta direta ao Supabase para pegar range
+    const { data, error } = await sistema.client
       .from('alocacoes_fraldas')
       .select('*')
       .eq('ativo', true)
       .gte('validade', inicio)
       .lte('validade', fim)
-      .order('validade', { ascending: true });
-    
-    if (error) {
-      console.error('Erro na consulta:', error);
-      throw error;
-    }
-    
-    console.log('✅ Dados encontrados:', data?.length || 0);
-    
+      .order('validade'); // ordenado por validade
+
+    if (error) throw error;
+
     if (!data || data.length === 0) {
-      showToast('Nenhum produto encontrado no período', 'warning');
+      showToast('Nenhum registro encontrado neste período.', 'info');
       return;
     }
-    
-    // Gerar CSV
-    const csv = gerarConteudoCSV(data);
-    baixarArquivo(csv, `validades_${inicio}_${fim}.csv`);
-    showToast(`${data.length} registros exportados`, 'success');
-    
+
+    baixarCSV(data, `validades_${inicio}_${fim}.csv`);
+    showToast('Relatório gerado com sucesso!', 'success');
+
   } catch (e) {
-    console.error('❌ Erro ao gerar CSV:', e);
-    showToast('Erro ao gerar relatório: ' + e.message, 'error');
+    console.error(e);
+    showToast('Erro ao gerar CSV: ' + e.message, 'error');
   } finally {
-    $('#btnGerarCSV').disabled = false;
-    $('#btnGerarCSV').innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg> CSV`;
+    btn.disabled = false;
+    btn.innerHTML = 'Exportar Planilha';
   }
 }
 
-function gerarConteudoCSV(dados) {
-  const headers = ['CODDV', 'Descricao', 'Codigo_Barras', 'Validade', 'Endereco', 'CD', 'Usuario', 'Matricula', 'Data_Alocacao'];
-  
-  const linhas = dados.map(item => {
-    const produto = buscarNaBase(item.coddv);
-    return [
-      item.coddv,
-      produto ? produto.DESC : 'N/A',
-      produto ? produto.BARRAS : 'N/A',
-      formatarValidade(item.validade),
-      item.endereco,
-      item.cd || 'N/A',
-      item.usuario || 'Sistema',
-      item.matricula || '',
-      item.data_alocacao || ''
-    ].map(campo => `"${campo}"`).join(',');
+function baixarCSV(dados, filename) {
+  // Cabeçalho
+  let csvContent = "CODDV,DESCRICAO,BARRAS,VALIDADE,ENDERECO,DATA_ALOCACAO,USUARIO\n";
+
+  dados.forEach(row => {
+    // Tentar pegar dados completos da base local
+    const local = buscarNaBaseLocal(String(row.coddv));
+    const desc = local ? local.DESC : (row.descricao_produto || '');
+    const barras = local ? local.BARRAS : '';
+    const validadeFmt = sistema.formatarValidade(row.validade);
+    const dataAloc = row.data_alocacao ? new Date(row.data_alocacao).toLocaleDateString('pt-BR') : '';
+
+    // Escapar aspas
+    const descSafe = desc.replace(/"/g, '""');
+
+    csvContent += `"${row.coddv}","${descSafe}","${barras}","${validadeFmt}","${row.endereco}","${dataAloc}","${row.usuario || ''}"\n`;
   });
-  
-  return [headers.join(','), ...linhas].join('\n');
-}
 
-function baixarArquivo(conteudo, nomeArquivo) {
-  const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = nomeArquivo;
+  // Download
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
 }
 
-function showToast(mensagem, tipo = 'info') {
-  let container = document.querySelector('.toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-  }
-  
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${tipo}`;
-  toast.textContent = mensagem;
-  container.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.classList.add('show');
-  }, 100);
-  
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
+// =========================================================
+// IMPRESSÃO / UTILS
+// =========================================================
+
+function imprimirEtiqueta() {
+  if (!produtoAtual || !enderecoSelecionado) return;
+
+  // Obter dados da alocacao específica
+  // Precisamos achar de novo qual alocacao é essa pra pegar o ID se precisar
+  // Simplificação: pegar do cache pelo endereço
+  const lista = sistema.cacheAlocacoes[enderecoSelecionado] || [];
+  const alocacao = lista.find(a => a.coddv == produtoAtual.CODDV);
+
+  const sessao = sistema.obterDadosSessao();
+
+  $('#printDesc').textContent = produtoAtual.DESC;
+  $('#printCoddv').textContent = produtoAtual.CODDV;
+  $('#printBarras').textContent = produtoAtual.BARRAS;
+  $('#printValidade').textContent = alocacao ? sistema.formatarValidade(alocacao.validade) : '--/--';
+  $('#printEndereco').textContent = enderecoSelecionado;
+
+  $('#printUsuario').textContent = alocacao?.usuario || sessao.usuario || 'Sistema';
+  $('#printMatricula').textContent = sessao.matricula || '';
+  $('#printData').textContent = new Date().toLocaleString('pt-BR');
+  $('#printIdBadge').textContent = alocacao?.id ? `ID: ${alocacao.id}` : '';
+
+  const template = $('#printTemplate');
+  template.classList.remove('hide');
+  window.print();
+  setTimeout(() => template.classList.add('hide'), 500);
 }
 
-// Animação de loading
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+function showToast(msg, type = 'info') {
+  if (window.showToast) {
+    window.showToast(msg, type);
+  } else {
+    alert(msg);
   }
-  .spin {
-    animation: spin 1s linear infinite;
-  }
-`;
-document.head.appendChild(style);
-
-// Função de diagnóstico (pode ser chamada no console)
-window.diagnosticarConexao = function() {
-  console.log('=== DIAGNÓSTICO DE CONEXÃO ===');
-  console.log('supabaseManager:', window.supabaseManager ? '✅ Presente' : '❌ Ausente');
-  console.log('supabaseManager.client:', window.supabaseManager?.client ? '✅ Presente' : '❌ Ausente');
-  console.log('sistemaEnderecamento:', window.sistemaEnderecamento ? '✅ Presente' : '❌ Ausente');
-  console.log('sistemaEnderecamento.client:', window.sistemaEnderecamento?.client ? '✅ Presente' : '❌ Ausente');
-  console.log('getSupabase():', getSupabase() ? '✅ Funcionando' : '❌ Retornando null');
-  console.log('==============================');
-  
-  const status = {
-    supabaseManager: !!window.supabaseManager,
-    supabaseManagerClient: !!window.supabaseManager?.client,
-    sistemaEnderecamento: !!window.sistemaEnderecamento,
-    sistemaEnderecamentoClient: !!window.sistemaEnderecamento?.client,
-    getSupabase: !!getSupabase()
-  };
-  
-  alert(`Status da Conexão:
-- supabaseManager: ${status.supabaseManager ? '✅' : '❌'}
-- supabaseManager.client: ${status.supabaseManagerClient ? '✅' : '❌'}
-- sistemaEnderecamento: ${status.sistemaEnderecamento ? '✅' : '❌'}
-- sistemaEnderecamento.client: ${status.sistemaEnderecamentoClient ? '✅' : '❌'}
-- getSupabase(): ${status.getSupabase ? '✅' : '❌'}
-
-Verifique o console (F12) para mais detalhes.`);
-  
-  return status;
-};
+}
