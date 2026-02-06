@@ -71,20 +71,20 @@ body {
     color: #475569;
 }
 
-/* Ajuste solicitado: 
-   - Aumentar o espaço para inserir (dobro / full width)
-   - Ícone limpar DENTRO do input
-   - Botão buscar APÓS o input
-*/
+/* Layout Horizontal para Busca */
+.search-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
 
 .search-input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
-    width: 100%;
-    /* Ocupar largura total */
-    max-width: none;
-    /* Remover limite anterior */
+    flex: 1;
+    /* Ocupar todo espaço restante */
 }
 
 .search-input-wrapper input {
@@ -122,7 +122,6 @@ body {
 .search-input-wrapper .clear-btn {
     position: absolute;
     right: 10px;
-    /* Dentro do input */
     top: 50%;
     transform: translateY(-50%);
     background: none;
@@ -141,15 +140,17 @@ body {
 
 .search-actions {
     display: flex;
-    justify-content: flex-end;
-    margin-top: 1rem;
+    margin-top: 0;
+    /* Remove margem topo pois está na linha */
 }
 
 #btnBuscar {
     background: #3b82f6;
     color: white;
     border: none;
-    padding: 0.75rem 2rem;
+    padding: 0 2rem;
+    height: 52px;
+    /* Mesma altura input */
     border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
@@ -158,6 +159,7 @@ body {
     gap: 8px;
     box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
     transition: transform 0.1s, background 0.2s;
+    white-space: nowrap;
 }
 
 #btnBuscar:hover {
@@ -511,6 +513,20 @@ body {
 
     .search-section {
         padding: 1rem;
+    }
+
+    .search-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .search-actions {
+        width: 100%;
+    }
+
+    #btnBuscar {
+        width: 100%;
+        justify-content: center;
     }
 }
 
