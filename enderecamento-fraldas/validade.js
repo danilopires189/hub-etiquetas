@@ -533,18 +533,36 @@ async function fetchReportData(inicio, fim) {
   console.log(`[DEBUG] Buscando dados para CD ${cdAtual}, período ${inicio} a ${fim}`);
 
   // Busca TUDO do CD ativo para filtrar no JS (correção de filtro MMAA string)
-  const { data, error } = await sistema.client
-    .from('alocacoes_fraldas')
-    .select('*')
-    .eq('ativo', true)
-    .eq('cd', cdAtual);
+  console.log('[DEBUG] Executando query no Supabase...');
 
-  if (error) throw error;
+  let data, error;
+  try {
+    const result = await sistema.client
+      .from('alocacoes_fraldas')
+      .select('*')
+      .eq('ativo', true)
+      .eq('cd', cdAtual);
+
+    data = result.data;
+    error = result.error;
+    console.log(`[DEBUG] Query retornou: ${data ? data.length : 0} registros, erro: ${error ? error.message : 'nenhum'}`);
+  } catch (e) {
+    console.error('[DEBUG] Erro na query:', e);
+    throw e;
+  }
+
+  if (error) {
+    console.error('[DEBUG] Erro do Supabase:', error);
+    throw error;
+  }
 
   if (!data || data.length === 0) {
+    console.log('[DEBUG] Nenhum dado encontrado no banco');
     // Retorna vazio sem toast aqui para deixar o chamador decidir
     return [];
   }
+
+  console.log(`[DEBUG] ${data.length} registros encontrados, aplicando filtro de data...`);
 
   // Converter filtros para inteiros YYYYMM
   const parseDate = (mmaa) => {
