@@ -135,10 +135,19 @@ function inicializarPagina() {
  * Busca a etiqueta (ID) correspondente ao CODDV para o CD atual
  */
 function buscarEtiquetaNaBaseID(coddv, cd) {
-  if (!window.BASE_ID) return null;
+  if (!window.BASE_ID) {
+    console.warn('[BASE_ID] Base de IDs não carregada!');
+    return null;
+  }
+
+  // Normalizar para comparação
+  const coddvStr = String(coddv).trim();
+  const cdNum = parseInt(cd);
+
   const registro = window.BASE_ID.find(r =>
-    String(r.CODDV) === String(coddv) && parseInt(r.CD) === parseInt(cd)
+    String(r.CODDV).trim() === coddvStr && parseInt(r.CD) === cdNum
   );
+
   return registro ? registro.ID : null;
 }
 
@@ -466,6 +475,14 @@ async function gerarRelatorioPDF() {
         descricao_produto: local ? local.DESC : (row.descricao_produto || 'Produto sem descrição')
       };
     });
+
+    // Debug: mostrar primeiros registros enriquecidos
+    console.log('[DEBUG] Primeiros 3 registros enriquecidos:', enrichedData.slice(0, 3).map(r => ({
+      coddv: r.coddv,
+      barras: r.barras,
+      etiqueta: r.etiqueta,
+      validade: r.validade
+    })));
 
     const sessao = sistema.obterDadosSessao();
     const filtrosInfo = {
