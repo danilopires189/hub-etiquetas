@@ -441,7 +441,7 @@ async function gerarRelatorioPDF() {
     const filtrosInfo = {
       inicio,
       fim,
-      deposito: sessao.deposito || 'Depósito'
+      deposito: sessao.nomeCD || `CD ${sessao.cd || 2}`
     };
 
     const optimizer = new ValidadePrintOptimizer();
@@ -477,16 +477,16 @@ async function fetchReportData(inicio, fim) {
   }
 
   const sessao = sistema.obterDadosSessao();
-  if (!sessao || !sessao.deposito) {
-    throw new Error('Sessão inválida ou sem depósito definido.');
-  }
+  const cdAtual = sessao.cd || 2; // Default CD 2
 
-  // Busca TUDO do depósito ativo para filtrar no JS (correção de filtro MMAA string)
+  console.log(`[DEBUG] Buscando dados para CD ${cdAtual}, período ${inicio} a ${fim}`);
+
+  // Busca TUDO do CD ativo para filtrar no JS (correção de filtro MMAA string)
   const { data, error } = await sistema.client
     .from('alocacoes_fraldas')
     .select('*')
     .eq('ativo', true)
-    .eq('deposito', sessao.deposito);
+    .eq('cd', cdAtual);
 
   if (error) throw error;
 
