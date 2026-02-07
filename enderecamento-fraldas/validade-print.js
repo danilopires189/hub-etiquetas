@@ -59,10 +59,10 @@ export class ValidadePrintOptimizer {
                         <thead>
                             <tr>
                                 <th style="width: 10%">CODDV</th>
-                                <th style="width: 30%">Descrição</th>
+                                <th style="width: 35%">Descrição</th>
                                 <th style="width: 12%">Validade</th>
                                 <th style="width: 13%">Endereço</th>
-                                <th style="width: 20%">Barras</th>
+                                <th style="width: 15%">Barras</th>
                                 <th style="width: 15%">Etiqueta</th>
                             </tr>
                         </thead>

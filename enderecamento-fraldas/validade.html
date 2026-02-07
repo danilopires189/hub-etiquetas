@@ -265,30 +265,8 @@
 
     <!-- Scripts - Ordem Correta de Carregamento -->
     <script src="https://unpkg.com/@supabase/supabase-js@2.33.1/dist/umd/supabase.js"></script>
-
-    <!-- Cleanup: Limpar fila offline se estiver muito grande (evita travamento) -->
-    <script>
-        (function () {
-            try {
-                const queue = localStorage.getItem('hub_etiquetas_offline_queue');
-                if (queue) {
-                    const parsed = JSON.parse(queue);
-                    if (Array.isArray(parsed) && parsed.length > 1000) {
-                        console.warn(`⚠️ Fila offline muito grande (${parsed.length} ops). Limpando...`);
-                        localStorage.removeItem('hub_etiquetas_offline_queue');
-                        console.log('✅ Fila offline limpa para evitar travamento');
-                    }
-                }
-            } catch (e) {
-                // Se falhar parse, limpar tudo
-                localStorage.removeItem('hub_etiquetas_offline_queue');
-            }
-        })();
-    </script>
-
     <script type="module" src="../supabase/init.js"></script>
     <script src="../data_base/BASE_BARRAS.js"></script>
-    <script src="../data_base/BASE_ID.js"></script>
     <!-- Sistema de Endereçamento Central -->
     <script type="module" src="./enderecamento-supabase.js"></script>
     <!-- Script da Página -->
