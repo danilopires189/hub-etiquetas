@@ -22,8 +22,9 @@ class SupabaseIntegration {
             const connected = await supabaseManager.initialize();
 
             if (connected) {
-                console.log('✅ Supabase conectado, integrando com contador global...');
-                await this.integrateWithGlobalCounter();
+                console.log('✅ Supabase conectado, iniciando serviços...');
+                // Integracao com contador global desativada temporariamente para evitar loop de erro 400
+                // await this.integrateWithGlobalCounter();
                 await this.migrateExistingData();
                 this.initialized = true;
                 this.fallbackMode = false;
