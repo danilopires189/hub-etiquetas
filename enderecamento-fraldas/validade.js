@@ -535,53 +535,45 @@ async function fetchReportData(inicio, fim) {
   let data = null;
   let error = null;
 
-  // TENTATIVA 1: Usar cache local se disponível (muito mais rápido e não trava)
-  if (sistema.cache && sistema.cache.alocacoes && sistema.cache.alocacoes.length > 0) {
-    console.log(`[DEBUG] Usando cache local: ${sistema.cache.alocacoes.length} registros`);
+  // TENTATIVA 1: Buscar no BANCO DE DADOS (prioridade para dados frescos)
+  console.log('[DEBUG] Executando query no Supabase...');
+  try {
+    // Adicionar timeout de 15 segundos (aumentado para garantir)
+    const queryPromise = sistema.client
+      .from('alocacoes_fraldas')
+      .select('*')
+      .eq('ativo', true)
+      .eq('cd', cdAtual);
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout: A query demorou muito para responder')), 15000)
+    );
+
+    const result = await Promise.race([queryPromise, timeoutPromise]);
+
+    data = result.data;
+    error = result.error;
+    console.log(`[DEBUG] Query retornou: ${data ? data.length : 0} registros, erro: ${error ? error.message : 'nenhum'}`);
+  } catch (e) {
+    console.warn('[DEBUG] Erro na query principal:', e);
+    // Não lança erro ainda, tenta o cache
+  }
+
+  // TENTATIVA 2: Usar cache local como FALLBACK se o banco falhar ou retornar zero (e tiver cache)
+  if ((!data || error) && sistema.cache && sistema.cache.alocacoes && sistema.cache.alocacoes.length > 0) {
+    console.log(`[DEBUG] Banco falhou ou vazio. Usando cache local como fallback: ${sistema.cache.alocacoes.length} registros`);
     const cachedData = sistema.cache.alocacoes.filter(item => item.cd === cdAtual && item.ativo);
 
     if (cachedData.length > 0) {
       console.log(`[DEBUG] Encontrados ${cachedData.length} registros no cache para o CD ${cdAtual}`);
       data = cachedData;
-    } else {
-      console.log('[DEBUG] Cache vazio para este CD, tentando buscar no banco...');
-      // data remains null, so it will proceed to database query
-    }
-  }
-
-  // TENTATIVA 2: Busca no banco se cache falhar
-  if (!data) {
-    console.log('[DEBUG] Executando query no Supabase...');
-
-    try {
-      // Adicionar timeout de 10 segundos
-      const queryPromise = sistema.client
-        .from('alocacoes_fraldas')
-        .select('*')
-        .eq('ativo', true)
-        .eq('cd', cdAtual);
-
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout: A query demorou muito para responder')), 10000)
-      );
-
-      const result = await Promise.race([queryPromise, timeoutPromise]);
-
-      data = result.data;
-      error = result.error;
-      console.log(`[DEBUG] Query retornou: ${data ? data.length : 0} registros, erro: ${error ? error.message : 'nenhum'}`);
-    } catch (e) {
-      console.error('[DEBUG] Erro na query:', e);
-      // Verificar se é timeout
-      if (e.message.includes('Timeout')) {
-        showToast('O servidor demorou para responder. Tente novamente mais tarde.', 'error');
-      }
-      throw e;
+      error = null; // Limpa erro pois recuperamos do cache
+      showToast('Atenção: Exibindo dados em cache (conexão instável)', 'warning');
     }
   }
 
   if (error) {
-    console.error('[DEBUG] Erro do Supabase:', error);
+    console.error('[DEBUG] Erro do Supabase e sem cache:', error);
     throw error;
   }
 
