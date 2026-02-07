@@ -106,7 +106,10 @@ function setupUI() {
 }
 
 function inicializarPagina() {
-  // Configs iniciais se necessario
+  if (window.DB_CADASTRO && window.DB_CADASTRO.BASE_CADASTRO) {
+    window.BASE_CADASTRO = window.DB_CADASTRO.BASE_CADASTRO;
+    console.log(`📦 Base local carregada com ${window.BASE_CADASTRO.length} produtos.`);
+  }
 }
 
 function limparCampos() {
@@ -455,7 +458,10 @@ async function gerarRelatorioPDF() {
 
 
 async function fetchReportData(inicio, fim) {
-  if (!sistema.client) throw new Error('Sem conexão com banco de dados');
+  if (!sistema || !sistema.client) {
+    showToast('Erro critico: Sistema não inicializado. Recarregue a página.', 'error');
+    throw new Error('Sem conexão com sistema');
+  }
 
   const sessao = sistema.obterDadosSessao();
   if (!sessao || !sessao.deposito) {
@@ -562,7 +568,10 @@ function showToast(msg, type = 'info') {
   if (window.showToast) {
     window.showToast(msg, type);
   } else {
-    // Fallback simples
+    // Fallback para alert se não houver toast sistema
     console.log(`[TOAST ${type}] ${msg}`);
+    if (type === 'error' || type === 'warning') {
+      alert(msg);
+    }
   }
 }
