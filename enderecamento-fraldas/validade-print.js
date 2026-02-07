@@ -77,8 +77,20 @@ export class ValidadePrintOptimizer {
     }
 
     generateHeader(pageNum, totalPages, timestamp, filtros) {
-        // Formatar período
-        const periodoTxt = `Período: ${filtros.inicio || 'Inicio'} a ${filtros.fim || 'Fim'}`;
+        // Formatar período para extenso (Dez/2023)
+        const formatarPeriodoExtenso = (mmaa) => {
+            if (!mmaa || mmaa.length !== 4) return mmaa || '-';
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const mesIndex = parseInt(mmaa.substring(0, 2)) - 1;
+            const ano = mmaa.substring(2, 4);
+            if (mesIndex >= 0 && mesIndex < 12) return `${meses[mesIndex]}/20${ano}`;
+            return mmaa;
+        };
+
+        const iniFmt = formatarPeriodoExtenso(filtros.inicio);
+        const fimFmt = formatarPeriodoExtenso(filtros.fim);
+
+        const periodoTxt = `Período: ${iniFmt} a ${fimFmt}`;
         const depositoTxt = filtros.deposito ? `• ${filtros.deposito}` : '';
 
         return `
@@ -106,8 +118,15 @@ export class ValidadePrintOptimizer {
         }
 
         const desc = row.descricao_produto || row.DESC || 'Produto sem descrição';
-        const barras = row.barras || row.BARRAS || '-';
-        const etiqueta = row.etiqueta || '-';
+
+        let barras = row.barras || row.BARRAS || '-';
+        let etiqueta = row.etiqueta || '-';
+
+        // CORREÇÃO: Se etiqueta tiver EAN (longo) e barras vazio, move para barras
+        if (String(etiqueta).length > 6 && (barras === '-' || barras === '--')) {
+            barras = etiqueta;
+            etiqueta = '-';
+        }
 
         return `
             <tr>
@@ -115,7 +134,7 @@ export class ValidadePrintOptimizer {
                 <td class="text-left">${this.escapeHtml(desc)}</td>
                 <td class="text-center font-mono bold validade-highlight">${validadeFmt}</td>
                 <td class="text-center font-mono bold">${row.endereco}</td>
-                <td class="text-center font-mono small">${this.escapeHtml(barras)}</td>
+                <td class="text-center font-mono bold">${this.escapeHtml(barras)}</td>
                 <td class="text-center font-mono bold">${this.escapeHtml(etiqueta)}</td>
             </tr>
         `;
@@ -189,7 +208,7 @@ export class ValidadePrintOptimizer {
                     margin-bottom: 20px;
                 }
                 
-                .page-logo { height: 50px; width: auto; }
+                .page-logo { height: 100px; width: auto; }
                 .header-content { flex: 1; text-align: center; }
                 
                 .page-title {

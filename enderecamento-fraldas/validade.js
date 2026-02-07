@@ -376,9 +376,13 @@ async function gerarCSV() {
 
   try {
     const data = await fetchReportData(inicio, fim);
-    if (!data.length) return;
 
-    baixarCSV(data, `validades_${inicio}_${fim}.csv`);
+    if (!data || data.length === 0) {
+      showToast('Nenhum registro encontrado para o período e depósito.', 'warning');
+      return;
+    }
+
+    baixarCSV(data, `validades_${inicio}_${fim}.xls`);
     showToast('Relatório gerado com sucesso!', 'success');
 
   } catch (e) {
@@ -387,14 +391,71 @@ async function gerarCSV() {
   } finally {
     btn.disabled = false;
     btn.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
         </svg>
-        Baixar Planilha (CSV)
+        Baixar Planilha (Excel)
     `;
   }
+}
+
+/**
+ * Busca o ID da etiqueta na base auxiliar BASE_ID.js
+ */
+function buscarEtiquetaNaBaseID(coddv, cd) {
+  // Verifica se a base está carregada no window.DB_BASE_ID
+  if (!window.DB_BASE_ID || !window.DB_BASE_ID.BASE_BASE_ID) {
+    console.warn('Base de IDs não carregada (BASE_ID.js)');
+    return null;
+  }
+
+  const coddvStr = String(coddv).trim();
+  const cdNum = parseInt(cd);
+
+  const registro = window.DB_BASE_ID.BASE_BASE_ID.find(r =>
+    String(r.CODDV).trim() === coddvStr && parseInt(r.CD) === cdNum
+  );
+
+  return registro ? registro.ID : null;
+}
+
+/**
+ * Exibe modal de confirmação customizado
+ */
+function mostrarModal(titulo, mensagem) {
+  return new Promise(resolve => {
+    const modal = document.getElementById('modalConfirmacao');
+    const titleEl = document.getElementById('modalConfirmTitle');
+    const msgEl = document.getElementById('modalConfirmMessage');
+    const btnOk = document.getElementById('btnModalConfirmOk');
+    const btnCancel = document.getElementById('btnModalConfirmCancel');
+    const btnClose = document.getElementById('btnModalConfirmClose');
+
+    if (!modal) {
+      // Fallback se modal não existir no HTML
+      resolve(confirm(`${titulo}\n\n${mensagem}`));
+      return;
+    }
+
+    titleEl.textContent = titulo;
+    msgEl.innerText = mensagem; // innerText respeita quebras de linha
+
+    const fechar = (valor) => {
+      modal.classList.remove('active');
+      btnOk.onclick = null;
+      btnCancel.onclick = null;
+      btnClose.onclick = null;
+      resolve(valor);
+    };
+
+    btnOk.onclick = () => fechar(true);
+    btnCancel.onclick = () => fechar(false);
+    btnClose.onclick = () => fechar(false);
+
+    modal.classList.add('active');
+  });
 }
 
 async function gerarRelatorioPDF() {
@@ -417,23 +478,38 @@ async function gerarRelatorioPDF() {
     // Feedback e Confirmação
     if (!data || data.length === 0) {
       showToast('Nenhum registro encontrado para o período e depósito.', 'warning');
-      return;
+      return; // Finally vai resetar o botão
     }
 
-    const confirmar = confirm(`${data.length} registros encontrados.\nDeseja gerar o relatório PDF?`);
-    if (!confirmar) return;
+    const confirmar = await mostrarModal(
+      'Gerar Relatório',
+      `${data.length} registros encontrados.\nDeseja gerar o relatório PDF?`
+    );
+
+    if (!confirmar) {
+      // Se cancelar, precisamos restaurar o botão manualmente aqui ou deixar pro finally?
+      // O finally executa sempre. Então basta dar return/throw.
+      return;
+    }
 
     btn.innerHTML = 'Gerando...';
 
     // Enriquecer dados com base local
+    // Enriquecer dados com base local
     const enrichedData = data.map(row => {
-      const local = buscarNaBaseLocal(String(row.coddv));
+      const dbLocal = buscarNaBaseLocal(String(row.coddv)); // Renomeei para evitar confusão
+      // Obter CD atual para buscar etiquetas (garantir que é inteiro)
+      const cdAtual = parseInt(sistema.cd || 2);
+      const etiquetaID = buscarEtiquetaNaBaseID(row.coddv, cdAtual);
+
       return {
         ...row,
-        // Campo 'etiqueta' solicitado: corresponde ao código de barras
-        etiqueta: local ? local.BARRAS : (row.barras || '--'),
+        // Campo 'barras': Código de barras da BASE_BARRAS
+        barras: dbLocal ? dbLocal.BARRAS : (row.barras || '--'),
+        // Campo 'etiqueta': ID da BASE_ID específica do CD
+        etiqueta: etiquetaID || '--',
         // Atualiza descrição se tiver local
-        descricao_produto: local ? local.DESC : (row.descricao_produto || 'Produto sem descrição')
+        descricao_produto: dbLocal ? dbLocal.DESC : (row.descricao_produto || 'Produto sem descrição')
       };
     });
 
@@ -519,25 +595,114 @@ async function fetchReportData(inicio, fim) {
 }
 
 function baixarCSV(dados, filename) {
-  // Cabeçalho
-  let csvContent = "CODDV,DESCRICAO,BARRAS,VALIDADE,ENDERECO,DATA_ALOCACAO,USUARIO\n";
+  // Gera conteúdo HTML compatível com Excel (Web Archive / MIME Excel)
+  // Isso permite ajustar largura de colunas e formatar células
+  let html = `
+  <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+  <head>
+      <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
+      <!--[if gte mso 9]>
+      <xml>
+      <x:ExcelWorkbook>
+      <x:ExcelWorksheets>
+          <x:ExcelWorksheet>
+              <x:Name>Relatorio</x:Name>
+              <x:WorksheetOptions>
+                  <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+          </x:ExcelWorksheet>
+      </x:ExcelWorksheets>
+      </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+      <style>
+          br { mso-data-placement: same-cell; }
+          body { font-family: Arial, sans-serif; font-size: 10pt; }
+          table { border-collapse: collapse; }
+          td, th { border: 1px solid #ccc; padding: 4px; vertical-align: middle; }
+          th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
+          .str { mso-number-format:"\\@"; } /* Texto Puro */
+          .num { mso-number-format:"0"; }    /* Número Inteiro */
+          .date { mso-number-format:"dd\\/mm\\/yyyy"; }
+      </style>
+  </head>
+  <body>
+  <table>
+      <!-- Definição de Larguras (aprox pixels) -->
+      <col width="80">  <!-- CODDV -->
+      <col width="350"> <!-- DESC -->
+      <col width="80">  <!-- VAL -->
+      <col width="120"> <!-- END -->
+      <col width="130"> <!-- BARRAS -->
+      <col width="80">  <!-- ETIQUETA -->
+      <col width="100"> <!-- USUARIO -->
+      <col width="100"> <!-- DATA -->
+      
+      <tr>
+          <th>CODDV</th>
+          <th>DESCRIÇÃO</th>
+          <th>VALIDADE</th>
+          <th>ENDEREÇO</th>
+          <th>BARRAS</th>
+          <th>ETIQUETA</th>
+          <th>USUÁRIO</th>
+          <th>DATA ALOCAÇÃO</th>
+      </tr>`;
 
   dados.forEach(row => {
-    // Tentar pegar dados completos da base local
-    const local = buscarNaBaseLocal(String(row.coddv));
-    const desc = local ? local.DESC : (row.descricao_produto || '');
-    const barras = local ? local.BARRAS : '';
-    const validadeFmt = sistema.formatarValidade(row.validade);
-    const dataAloc = row.data_alocacao ? new Date(row.data_alocacao).toLocaleDateString('pt-BR') : '';
+    // 1. Enriquecimento (Igual PDF)
+    const dbLocal = buscarNaBaseLocal(String(row.coddv));
+    const cdAtual = parseInt(sistema.cd || 2);
+    const etiquetaID = buscarEtiquetaNaBaseID(row.coddv, cdAtual);
 
-    // Escapar aspas
-    const descSafe = desc.replace(/"/g, '""');
+    let desc = dbLocal ? dbLocal.DESC : (row.descricao_produto || 'Produto sem descrição');
+    let barras = dbLocal ? dbLocal.BARRAS : (row.barras || '');
+    let etiqueta = etiquetaID || '';
 
-    csvContent += `"${row.coddv}","${descSafe}","${barras}","${validadeFmt}","${row.endereco}","${dataAloc}","${row.usuario || ''}"\n`;
+    // Formatar Validade
+    let validadeFmt = row.validade;
+    if (row.validade && row.validade.length === 4) {
+      validadeFmt = `${row.validade.substring(0, 2)}/20${row.validade.substring(2, 4)}`;
+    }
+
+    // Swap Barras/Etiqueta
+    if (String(etiqueta).length > 6 && (!barras || barras === '--' || barras === '-')) {
+      barras = etiqueta;
+      etiqueta = '';
+    }
+
+    // Formatar Data Alocação DD/MM/AAAA
+    let dataAloc = '';
+    if (row.data_alocacao) {
+      // Tenta parsear e formatar
+      try {
+        const d = new Date(row.data_alocacao);
+        if (!isNaN(d.getTime())) {
+          dataAloc = d.toLocaleDateString('pt-BR');
+        }
+      } catch (e) { }
+    }
+
+    // Escapar HTML básico
+    const escape = (s) => (s || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    html += `
+    <tr>
+        <td class="num" style="text-align:center">${row.coddv}</td>
+        <td class="str">${escape(desc)}</td>
+        <td class="str" style="text-align:center">${validadeFmt}</td>
+        <td class="str" style="text-align:center">${row.endereco}</td>
+        <td class="num" style="text-align:center">${escape(barras)}</td>
+        <td class="str" style="text-align:center">${escape(etiqueta)}</td>
+        <td class="str">${escape(row.usuario)}</td>
+        <td class="str" style="text-align:center">${dataAloc}</td>
+    </tr>`;
   });
 
-  // Download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  html += `</table></body></html>`;
+
+  // Download como arquivo Excel (MIME fake mas funcional)
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   link.setAttribute("href", url);
@@ -580,14 +745,87 @@ function imprimirEtiqueta() {
   setTimeout(() => template.classList.add('hide'), 500);
 }
 
-function showToast(msg, type = 'info') {
-  if (window.showToast) {
-    window.showToast(msg, type);
-  } else {
-    // Fallback para alert se não houver toast sistema
-    console.log(`[TOAST ${type}] ${msg}`);
-    if (type === 'error' || type === 'warning') {
-      alert(msg);
-    }
+function showToast(message, type = 'info') {
+  // Cria container se não existir
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.style.position = 'fixed';
+    container.style.bottom = '20px';
+    container.style.right = '20px';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '10px';
+    container.style.zIndex = '9999';
+    document.body.appendChild(container);
   }
+
+  // Define cores baseadas no tipo
+  const colors = {
+    error: '#ef4444',
+    warning: '#f59e0b',
+    success: '#10b981',
+    info: '#3b82f6'
+  };
+  const bg = colors[type] || colors.info;
+
+  // Cria toast
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+
+  // Estilos
+  Object.assign(toast.style, {
+    background: bg,
+    color: 'white',
+    padding: '12px 24px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    minWidth: '300px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    fontSize: '14px',
+    fontFamily: 'var(--font-primary, sans-serif)',
+    opacity: '0',
+    transform: 'translateY(10px)',
+    transition: 'all 0.3s ease'
+  });
+
+  toast.innerHTML = `<span style="flex:1">${message}</span>`;
+
+  // Botão fechar
+  const closeBtn = document.createElement('button');
+  closeBtn.innerHTML = '×'; // times
+  Object.assign(closeBtn.style, {
+    background: 'transparent',
+    border: 'none',
+    color: 'white',
+    fontSize: '20px',
+    cursor: 'pointer',
+    marginLeft: '12px',
+    lineHeight: '1',
+    padding: '0'
+  });
+  closeBtn.onclick = () => remover();
+
+  toast.appendChild(closeBtn);
+  container.appendChild(toast);
+
+  // Animação de entrada
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  });
+
+  const remover = () => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    setTimeout(() => {
+      if (toast.parentNode) toast.remove();
+    }, 300);
+  };
+
+  // Auto remove
+  setTimeout(remover, 4000);
 }

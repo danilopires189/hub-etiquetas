@@ -656,3 +656,92 @@ body {
     display: flex;
     justify-content: space-between;
 }
+
+/* =========================================
+   Botões de Relatório (PDF / Excel)
+   ========================================= */
+.btn-report {
+    width: 100%;
+    margin-bottom: 0 !important;
+    padding: 10px 16px !important;
+    /* Menor e mais elegante */
+    font-size: 13px !important;
+    /* Fonte menor */
+    font-weight: 500 !important;
+    /* Menos negrito */
+    border-radius: 6px !important;
+    /* Borda mais sutil */
+    border: none !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    /* Gap menor */
+    text-transform: none;
+    /* Sem Caixa Alta */
+    letter-spacing: normal;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    /* Sombra suave */
+    color: white !important;
+}
+
+.btn-report:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    filter: brightness(1.05);
+}
+
+.btn-report:active {
+    transform: translateY(0);
+}
+
+.btn-report svg {
+    width: 18px;
+    /* Ícone menor */
+    height: 18px;
+    opacity: 0.9;
+}
+
+.btn-report-pdf {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+}
+
+.btn-report-excel {
+    /* Verde Esmeralda Excel */
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+
+/* Botão Fechar Painel (Moderno) */
+.btn-close-panel {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    /* Cinza suave */
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-close-panel:hover {
+    background-color: #f1f5f9;
+    /* Fundo cinza claro */
+    color: #ef4444;
+    /* Vermelho no hover */
+    transform: rotate(90deg);
+    /* Efeito de rotação */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-close-panel svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5px;
+    /* Ícone mais encorpado */
+}
