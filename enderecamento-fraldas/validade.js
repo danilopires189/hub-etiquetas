@@ -119,10 +119,27 @@ function setupUI() {
 }
 
 function inicializarPagina() {
+  // Inicializar Base Cadastro Local (BARRAS)
   if (window.DB_CADASTRO && window.DB_CADASTRO.BASE_CADASTRO) {
     window.BASE_CADASTRO = window.DB_CADASTRO.BASE_CADASTRO;
-    console.log(`📦 Base local carregada com ${window.BASE_CADASTRO.length} produtos.`);
+    console.log(`📦 Base BARRAS carregada com ${window.BASE_CADASTRO.length} produtos.`);
   }
+  // Inicializar Base de IDs (Etiquetas por CD)
+  if (window.DB_BASE_ID && window.DB_BASE_ID.BASE_BASE_ID) {
+    window.BASE_ID = window.DB_BASE_ID.BASE_BASE_ID;
+    console.log(`🏷️ Base ID carregada com ${window.BASE_ID.length} etiquetas.`);
+  }
+}
+
+/**
+ * Busca a etiqueta (ID) correspondente ao CODDV para o CD atual
+ */
+function buscarEtiquetaNaBaseID(coddv, cd) {
+  if (!window.BASE_ID) return null;
+  const registro = window.BASE_ID.find(r =>
+    String(r.CODDV) === String(coddv) && parseInt(r.CD) === parseInt(cd)
+  );
+  return registro ? registro.ID : null;
 }
 
 function limparCampos() {
@@ -416,22 +433,34 @@ async function gerarRelatorioPDF() {
 
     // Feedback e Confirmação
     if (!data || data.length === 0) {
-      showToast('Nenhum registro encontrado para o período e depósito.', 'warning');
+      showToast('Nenhum registro encontrado para o período.', 'warning');
       return;
     }
 
-    const confirmar = confirm(`${data.length} registros encontrados.\nDeseja gerar o relatório PDF?`);
+    // Modal profissional de confirmação
+    const confirmar = await mostrarModalConfirmacao(
+      'Gerar Relatório PDF',
+      `Foram encontrados <strong>${data.length}</strong> registros no período de <strong>${inicio}</strong> a <strong>${fim}</strong>.<br><br>Deseja gerar o relatório PDF?`,
+      'Gerar PDF',
+      'Cancelar'
+    );
     if (!confirmar) return;
 
     btn.innerHTML = 'Gerando...';
 
+    // Obter CD atual para buscar etiquetas
+    const cdAtual = sistema.cd || 2;
+
     // Enriquecer dados com base local
     const enrichedData = data.map(row => {
       const local = buscarNaBaseLocal(String(row.coddv));
+      const etiquetaID = buscarEtiquetaNaBaseID(row.coddv, cdAtual);
       return {
         ...row,
-        // Campo 'etiqueta' solicitado: corresponde ao código de barras
-        etiqueta: local ? local.BARRAS : (row.barras || '--'),
+        // Código de barras da BASE_BARRAS
+        barras: local ? local.BARRAS : (row.barras || '--'),
+        // Etiqueta (ID) da BASE_ID específica do CD
+        etiqueta: etiquetaID || '--',
         // Atualiza descrição se tiver local
         descricao_produto: local ? local.DESC : (row.descricao_produto || 'Produto sem descrição')
       };
@@ -590,4 +619,76 @@ function showToast(msg, type = 'info') {
       alert(msg);
     }
   }
+}
+
+/**
+ * Modal de confirmação profissional
+ * @returns {Promise<boolean>}
+ */
+function mostrarModalConfirmacao(titulo, mensagem, btnConfirmar = 'Confirmar', btnCancelar = 'Cancelar') {
+  return new Promise((resolve) => {
+    // Criar overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.cssText = `
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10000; animation: fadeIn 0.2s ease;
+    `;
+
+    // Criar modal
+    const modal = document.createElement('div');
+    modal.className = 'modal-confirmacao';
+    modal.style.cssText = `
+      background: white; border-radius: 16px; padding: 24px 28px;
+      max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: slideUp 0.3s ease;
+    `;
+
+    modal.innerHTML = `
+      <style>
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-title { font-size: 1.25rem; font-weight: 700; color: #1e3a5f; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .modal-title svg { color: #0ea5e9; }
+        .modal-body { color: #475569; line-height: 1.6; margin-bottom: 24px; }
+        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
+        .modal-btn { padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; font-size: 0.95rem; }
+        .modal-btn-cancel { background: #f1f5f9; color: #64748b; }
+        .modal-btn-cancel:hover { background: #e2e8f0; }
+        .modal-btn-confirm { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; }
+        .modal-btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(14,165,233,0.4); }
+      </style>
+      <div class="modal-title">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        ${titulo}
+      </div>
+      <div class="modal-body">${mensagem}</div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" id="modalCancelar">${btnCancelar}</button>
+        <button class="modal-btn modal-btn-confirm" id="modalConfirmar">${btnConfirmar}</button>
+      </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Event listeners
+    const fecharModal = (resultado) => {
+      overlay.style.animation = 'fadeIn 0.2s ease reverse';
+      setTimeout(() => {
+        overlay.remove();
+        resolve(resultado);
+      }, 150);
+    };
+
+    modal.querySelector('#modalConfirmar').addEventListener('click', () => fecharModal(true));
+    modal.querySelector('#modalCancelar').addEventListener('click', () => fecharModal(false));
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) fecharModal(false);
+    });
+  });
 }

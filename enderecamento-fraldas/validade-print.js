@@ -59,11 +59,11 @@ export class ValidadePrintOptimizer {
                         <thead>
                             <tr>
                                 <th style="width: 10%">CODDV</th>
-                                <th style="width: 35%">Descrição</th>
-                                <th style="width: 15%">Validade</th>
-                                <th style="width: 15%">Endereço</th>
+                                <th style="width: 30%">Descrição</th>
+                                <th style="width: 12%">Validade</th>
+                                <th style="width: 13%">Endereço</th>
+                                <th style="width: 20%">Barras</th>
                                 <th style="width: 15%">Etiqueta</th>
-                                <th style="width: 10%">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -105,13 +105,9 @@ export class ValidadePrintOptimizer {
             validadeFmt = `${row.validade.substring(0, 2)}/20${row.validade.substring(2, 4)}`;
         }
 
-        // Status visual
-        // Assumindo que row já vem com dados processados ou brutos do supabase
-        // Precisamos calcular status se não vier
-        // Mas para relatório simples, vamos apenas exibir
-
         const desc = row.descricao_produto || row.DESC || 'Produto sem descrição';
-        const etiqueta = row.etiqueta || row.BARRAS || '-';
+        const barras = row.barras || row.BARRAS || '-';
+        const etiqueta = row.etiqueta || '-';
 
         return `
             <tr>
@@ -119,8 +115,8 @@ export class ValidadePrintOptimizer {
                 <td class="text-left">${this.escapeHtml(desc)}</td>
                 <td class="text-center font-mono bold validade-highlight">${validadeFmt}</td>
                 <td class="text-center font-mono bold">${row.endereco}</td>
+                <td class="text-center font-mono small">${this.escapeHtml(barras)}</td>
                 <td class="text-center font-mono bold">${this.escapeHtml(etiqueta)}</td>
-                <td class="text-center status-col">${this.getStatusIcon(row.validade)}</td>
             </tr>
         `;
     }
