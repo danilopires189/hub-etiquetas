@@ -391,55 +391,65 @@ async function gerarRelatorioPDF() {
   }
 
   const btn = $('#btnGerarPDF');
+  const originalText = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = 'Gerando PDF...';
+  btn.innerHTML = 'Buscando...';
 
   try {
     const data = await fetchReportData(inicio, fim);
-    if (!data.length) return;
 
-    // Enriquecer dados com base local (DESCRIÇÃO principalmente)
+    // Feedback e Confirmação
+    if (!data || data.length === 0) {
+      showToast('Nenhum registro encontrado para o período e depósito.', 'warning');
+      return;
+    }
+
+    const confirmar = confirm(`${data.length} registros encontrados.\nDeseja gerar o relatório PDF?`);
+    if (!confirmar) return;
+
+    btn.innerHTML = 'Gerando...';
+
+    // Enriquecer dados com base local
     const enrichedData = data.map(row => {
       const local = buscarNaBaseLocal(String(row.coddv));
       return {
         ...row,
-        DESC: local ? local.DESC : (row.descricao_produto || 'Produto sem descrição'),
-        BARRAS: local ? local.BARRAS : ''
+        // Campo 'etiqueta' solicitado: corresponde ao código de barras
+        etiqueta: local ? local.BARRAS : (row.barras || '--'),
+        // Atualiza descrição se tiver local
+        descricao_produto: local ? local.DESC : (row.descricao_produto || 'Produto sem descrição')
       };
     });
 
-    const optimizer = new ValidadePrintOptimizer();
-    const html = optimizer.generatePrintDocument(enrichedData, { inicio, fim });
+    const sessao = sistema.obterDadosSessao();
+    const filtrosInfo = {
+      inicio,
+      fim,
+      deposito: sessao.deposito || 'Depósito'
+    };
 
-    // Abrir janela de impressão
+    const optimizer = new ValidadePrintOptimizer();
+    const html = optimizer.generatePrintDocument(enrichedData, filtrosInfo);
+
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(html);
       printWindow.document.close();
-      // Aguardar carregamento (imagens, styles)
       setTimeout(() => {
         printWindow.focus();
         printWindow.print();
       }, 500);
       showToast('Impressão iniciada!', 'success');
     } else {
-      showToast('Pop-up bloqueado. Permita pop-ups para imprimir.', 'error');
+      showToast('Pop-up bloqueado. Permita pop-ups.', 'error');
     }
 
   } catch (e) {
     console.error(e);
-    showToast('Erro ao gerar PDF: ' + e.message, 'error');
+    showToast('Erro: ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-        </svg>
-        Imprimir Relatório (PDF)
-    `;
+    btn.innerHTML = originalText;
   }
 }
 
@@ -447,28 +457,42 @@ async function gerarRelatorioPDF() {
 async function fetchReportData(inicio, fim) {
   if (!sistema.client) throw new Error('Sem conexão com banco de dados');
 
+  const sessao = sistema.obterDadosSessao();
+  if (!sessao || !sessao.deposito) {
+    throw new Error('Sessão inválida ou sem depósito definido.');
+  }
+
+  // Busca TUDO do depósito ativo para filtrar no JS (correção de filtro MMAA string)
   const { data, error } = await sistema.client
     .from('alocacoes_fraldas')
     .select('*')
     .eq('ativo', true)
-    .gte('validade', inicio)
-    .lte('validade', fim);
+    .eq('deposito', sessao.deposito);
 
   if (error) throw error;
 
   if (!data || data.length === 0) {
-    showToast('Nenhum registro encontrado neste período.', 'info');
+    // Retorna vazio sem toast aqui para deixar o chamador decidir
     return [];
   }
 
-  // Ordenar logicamente (YYYYMM)
-  return data.sort((a, b) => {
-    const valA = a.validade || '0000';
-    const valB = b.validade || '0000';
-    // MMAA -> YYYYMM
-    const dateA = parseInt('20' + valA.substring(2, 4) + valA.substring(0, 2));
-    const dateB = parseInt('20' + valB.substring(2, 4) + valB.substring(0, 2));
-    return dateA - dateB;
+  // Converter filtros para inteiros YYYYMM
+  const parseDate = (mmaa) => {
+    if (!mmaa || mmaa.length !== 4) return 0;
+    const m = mmaa.substring(0, 2);
+    const a = mmaa.substring(2, 4);
+    return parseInt(`20${a}${m}`);
+  };
+
+  const dtInicio = parseDate(inicio);
+  const dtFim = parseDate(fim);
+
+  // Filtrar e Ordenar
+  return data.filter(item => {
+    const dtItem = parseDate(item.validade);
+    return dtItem >= dtInicio && dtItem <= dtFim;
+  }).sort((a, b) => {
+    return parseDate(a.validade) - parseDate(b.validade);
   });
 }
 

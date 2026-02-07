@@ -22,7 +22,7 @@ export class ValidadePrintOptimizer {
     generatePrintDocument(dados, filtros) {
         const pages = this.paginateData(dados);
         const timestamp = new Date().toLocaleString('pt-BR');
-        
+
         let html = `
             <!DOCTYPE html>
             <html lang="pt-br">
@@ -62,7 +62,7 @@ export class ValidadePrintOptimizer {
                                 <th style="width: 35%">Descrição</th>
                                 <th style="width: 15%">Validade</th>
                                 <th style="width: 15%">Endereço</th>
-                                <th style="width: 15%">Usuário</th>
+                                <th style="width: 15%">Etiqueta</th>
                                 <th style="width: 10%">Status</th>
                             </tr>
                         </thead>
@@ -79,6 +79,7 @@ export class ValidadePrintOptimizer {
     generateHeader(pageNum, totalPages, timestamp, filtros) {
         // Formatar período
         const periodoTxt = `Período: ${filtros.inicio || 'Inicio'} a ${filtros.fim || 'Fim'}`;
+        const depositoTxt = filtros.deposito ? `• ${filtros.deposito}` : '';
 
         return `
             <div class="page-header">
@@ -87,7 +88,7 @@ export class ValidadePrintOptimizer {
                 </div>
                 <div class="header-content">
                     <h1 class="page-title">RELATÓRIO DE VALIDADES</h1>
-                    <div class="page-subtitle">Controle de Vencimentos • ${periodoTxt}</div>
+                    <div class="page-subtitle">Controle de Vencimentos ${depositoTxt} • ${periodoTxt}</div>
                     <div class="page-info">
                         <span class="page-number">Página ${pageNum} de ${totalPages}</span>
                         <span class="page-timestamp">${timestamp}</span>
@@ -100,17 +101,17 @@ export class ValidadePrintOptimizer {
     generateRow(row) {
         // Formatar validade MMAA -> MM/YYYY (se possível)
         let validadeFmt = row.validade;
-        if(row.validade && row.validade.length === 4) {
-            validadeFmt = `${row.validade.substring(0,2)}/20${row.validade.substring(2,4)}`;
+        if (row.validade && row.validade.length === 4) {
+            validadeFmt = `${row.validade.substring(0, 2)}/20${row.validade.substring(2, 4)}`;
         }
-        
+
         // Status visual
         // Assumindo que row já vem com dados processados ou brutos do supabase
         // Precisamos calcular status se não vier
         // Mas para relatório simples, vamos apenas exibir
-        
+
         const desc = row.descricao_produto || row.DESC || 'Produto sem descrição';
-        const user = row.usuario || '-';
+        const etiqueta = row.etiqueta || row.BARRAS || '-';
 
         return `
             <tr>
@@ -118,7 +119,7 @@ export class ValidadePrintOptimizer {
                 <td class="text-left">${this.escapeHtml(desc)}</td>
                 <td class="text-center font-mono bold validade-highlight">${validadeFmt}</td>
                 <td class="text-center font-mono bold">${row.endereco}</td>
-                <td class="text-center small">${this.escapeHtml(user)}</td>
+                <td class="text-center font-mono bold">${this.escapeHtml(etiqueta)}</td>
                 <td class="text-center status-col">${this.getStatusIcon(row.validade)}</td>
             </tr>
         `;
@@ -145,16 +146,16 @@ export class ValidadePrintOptimizer {
     getStatusIcon(validade) {
         // Lógica simples de status visual
         // Se precisar de logica complexa de data, importar do sistema
-        return ''; 
+        return '';
     }
 
     escapeHtml(text) {
         if (!text) return '';
         return text.replace(/&/g, "&amp;")
-                   .replace(/</g, "&lt;")
-                   .replace(/>/g, "&gt;")
-                   .replace(/"/g, "&quot;")
-                   .replace(/'/g, "&#039;");
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
     getStyles() {
