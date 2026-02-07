@@ -448,8 +448,9 @@ async function gerarRelatorioPDF() {
 
     btn.innerHTML = 'Gerando...';
 
-    // Obter CD atual para buscar etiquetas
-    const cdAtual = sistema.cd || 2;
+    // Obter CD atual para buscar etiquetas (garantir que é inteiro)
+    const cdAtual = parseInt(sistema.cd || 2);
+    console.log(`[DEBUG] Enriquecendo ${data.length} registros para CD ${cdAtual}`);
 
     // Enriquecer dados com base local
     const enrichedData = data.map(row => {
@@ -509,7 +510,8 @@ async function fetchReportData(inicio, fim) {
   console.log('[DEBUG] Dados da sessão:', JSON.stringify(sessao));
 
   // Usar sistema.cd diretamente (já calculado na inicialização do sistema)
-  const cdAtual = sistema.cd || sessao.cd || 2;
+  // Garantir que seja número inteiro para a query
+  const cdAtual = parseInt(sistema.cd || sessao.cd || 2);
 
   console.log(`[DEBUG] Buscando dados para CD ${cdAtual}, período ${inicio} a ${fim}`);
 
