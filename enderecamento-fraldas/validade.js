@@ -537,17 +537,28 @@ async function fetchReportData(inicio, fim) {
 
   let data, error;
   try {
-    const result = await sistema.client
+    // Adicionar timeout de 10 segundos
+    const queryPromise = sistema.client
       .from('alocacoes_fraldas')
       .select('*')
       .eq('ativo', true)
       .eq('cd', cdAtual);
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout: A query demorou muito para responder')), 10000)
+    );
+
+    const result = await Promise.race([queryPromise, timeoutPromise]);
 
     data = result.data;
     error = result.error;
     console.log(`[DEBUG] Query retornou: ${data ? data.length : 0} registros, erro: ${error ? error.message : 'nenhum'}`);
   } catch (e) {
     console.error('[DEBUG] Erro na query:', e);
+    // Verificar se é timeout
+    if (e.message.includes('Timeout')) {
+      showToast('O servidor demorou para responder. Tente novamente mais tarde.', 'error');
+    }
     throw e;
   }
 
