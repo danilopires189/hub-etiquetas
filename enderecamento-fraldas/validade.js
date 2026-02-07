@@ -477,7 +477,10 @@ async function fetchReportData(inicio, fim) {
   }
 
   const sessao = sistema.obterDadosSessao();
-  const cdAtual = sessao.cd || 2; // Default CD 2
+  console.log('[DEBUG] Dados da sessão:', JSON.stringify(sessao));
+
+  // Usar sistema.cd diretamente (já calculado na inicialização do sistema)
+  const cdAtual = sistema.cd || sessao.cd || 2;
 
   console.log(`[DEBUG] Buscando dados para CD ${cdAtual}, período ${inicio} a ${fim}`);
 
