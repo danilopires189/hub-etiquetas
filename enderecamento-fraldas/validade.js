@@ -32,8 +32,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Configuração de UI
+  // Configuração de UI - chama independente do estado do sistema
   setupUI();
+  console.log('✅ setupUI chamado com sucesso.');
 });
 
 function setupUI() {
@@ -54,8 +55,20 @@ function setupUI() {
     $('#painelExportacao').classList.add('hide');
   });
 
-  $('#btnGerarCSV').addEventListener('click', gerarCSV);
-  $('#btnGerarPDF').addEventListener('click', gerarRelatorioPDF);
+  $('#btnGerarCSV').addEventListener('click', () => {
+    console.log('[DEBUG] Clique em btnGerarCSV');
+    gerarCSV().catch(e => {
+      console.error('Erro em gerarCSV:', e);
+      alert('Erro ao gerar CSV: ' + e.message);
+    });
+  });
+  $('#btnGerarPDF').addEventListener('click', () => {
+    console.log('[DEBUG] Clique em btnGerarPDF');
+    gerarRelatorioPDF().catch(e => {
+      console.error('Erro em gerarRelatorioPDF:', e);
+      alert('Erro ao gerar PDF: ' + e.message);
+    });
+  });
 
   // Input Search
   const inputBusca = $('#codigoProduto');
