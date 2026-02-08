@@ -727,17 +727,23 @@ function imprimirEtiqueta() {
   const alocacao = lista.find(a => a.coddv == produtoAtual.CODDV);
 
   const sessao = sistema.obterDadosSessao();
+  const validadeRaw = alocacao?.validade || '';
+  let validadeImpressao = sistema.formatarValidade(validadeRaw) || '--/--';
+  // Garantir formato MM/AA na etiqueta impressa
+  if (/^\d{4}$/.test(validadeRaw)) {
+    validadeImpressao = `${validadeRaw.substring(0, 2)}/${validadeRaw.substring(2)}`;
+  } else if (!/^\d{2}\/\d{2}$/.test(validadeImpressao)) {
+    validadeImpressao = '--/--';
+  }
 
   $('#printDesc').textContent = produtoAtual.DESC;
   $('#printCoddv').textContent = produtoAtual.CODDV;
-  $('#printBarras').textContent = produtoAtual.BARRAS;
-  $('#printValidade').textContent = alocacao ? sistema.formatarValidade(alocacao.validade) : '--/--';
+  $('#printValidade').textContent = validadeImpressao;
   $('#printEndereco').textContent = enderecoSelecionado;
 
   $('#printUsuario').textContent = alocacao?.usuario || sessao.usuario || 'Sistema';
   $('#printMatricula').textContent = sessao.matricula || '';
   $('#printData').textContent = new Date().toLocaleString('pt-BR');
-  $('#printIdBadge').textContent = alocacao?.id ? `ID: ${alocacao.id}` : '';
 
   const template = $('#printTemplate');
   template.classList.remove('hide');
