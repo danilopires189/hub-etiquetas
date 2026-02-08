@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>Pague Menos • Validades</title>
+    <link rel="icon" href="../assets/pm.png" />
+    <link rel="stylesheet" href="../shared/design-system.css">
+    <link rel="stylesheet" href="../shared/components.css">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./validade.css">
+    <link rel="stylesheet" href="./scanner.css">
+    <!-- Otimizações Mobile -->
+    <link rel="stylesheet" href="./enderecos-mobile.css">
+</head>
+
+<body class="fade-in">
+    <div class="screen-container">
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logos">
+                    <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary"
+                        onerror="this.style.display='none'">
+                    <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary"
+                        onerror="this.style.display='none'">
+                </div>
+                <div class="brand-text">
+                    <h1>Pague Menos</h1>
+                    <span class="app-subtitle">Controle de Validades</span>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-ghost" onclick="window.location.href='./enderecos.html'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5" />
+                        <path d="M12 19l-7-7 7-7" />
+                    </svg>
+                    Voltar
+                </button>
+                <button class="btn btn-ghost" onclick="window.location.href='../index.html'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9,22 9,12 15,12 15,22" />
+                    </svg>
+                    Hub
+                </button>
+            </div>
+        </header>
+
+        <!-- Painel Principal de Consulta -->
+        <section class="panel animate-slide-in-up">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Consultar Validade
+                </h2>
+                <div class="panel-actions">
+                    <button type="button" id="btnExportarToggle" class="btn btn-ghost btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14,2 14,8 20,8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                        </svg>
+                        Relatórios
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-section">
+                <div class="search-box">
+                    <label for="codigoProduto">Buscar Produto</label>
+                    <div class="search-row">
+                        <div class="search-input-wrapper">
+                            <input type="text" id="codigoProduto"
+                                placeholder="Digite CODDV, código de barras ou endereço..." autocomplete="off">
+                            <div class="scanner-icon" id="btnScan">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                                    </path>
+                                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                                </svg>
+                            </div>
+                            <button type="button" id="btnClearInput" class="icon-btn clear-btn hide" title="Limpar">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="search-actions">
+                            <button type="button" id="btnBuscar" class="btn btn-primary">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultado Único -->
+            <div id="produtoInfo" class="produto-result-card hide animate-fade-in">
+                <div class="card-header">
+                    <div class="card-badges">
+                        <span class="produto-coddv badge badge-neutral"></span>
+                        <span class="produto-status badge"></span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h3 class="produto-desc"></h3>
+                    <div class="produto-meta-grid">
+                        <div class="meta-item">
+                            <span class="label">Código de Barras</span>
+                            <span class="value produto-barras">--</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="label">Endereço</span>
+                            <span class="value produto-endereco highlight">--</span>
+                        </div>
+                        <div class="meta-item full-width">
+                            <span class="label">Validade</span>
+                            <span class="value produto-validade-conta">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="button" id="btnImprimir" class="btn btn-outline btn-block">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        Imprimir Etiqueta
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lista de Resultados (Múltiplos ou Endereço) -->
+            <div id="listaEnderecosContainer" class="hide animate-fade-in">
+                <div class="section-title">Resultados Encontrados</div>
+                <div class="enderecos-lista" id="listaEnderecos">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Exportação -->
+        <section id="painelExportacao" class="panel csv-panel hide animate-slide-in-up">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14,2 14,8 20,8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    Relatórios
+                </h2>
+                <button class="btn-close-panel" id="btnCloseExport" title="Fechar Painel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="csv-content">
+                <p class="text-sm text-muted">Gere relatórios de validades cadastradas por período.</p>
+                <div class="csv-inputs-row">
+                    <div class="form-group">
+                        <label>Início (MMAA)</label>
+                        <input type="text" id="validadeInicio" placeholder="Ex: 0126" maxlength="4" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label>Fim (MMAA)</label>
+                        <input type="text" id="validadeFim" placeholder="Ex: 1226" maxlength="4" inputmode="numeric">
+                    </div>
+                </div>
+
+                <div class="report-actions-grid"
+                    style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+                    <button type="button" id="btnGerarPDF" class="btn-report btn-report-pdf">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        Imprimir Relatório (PDF)
+                    </button>
+
+                    <button type="button" id="btnGerarCSV" class="btn-report btn-report-excel">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Baixar Planilha (Excel)
+                    </button>
+                </div>
+
+                <div class="csv-hint">
+                    <span>💡 Formato MMAA: 0126 = Janeiro/2026</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Print Template -->
+    <div id="printTemplate" class="print-template hide">
+        <div class="etiqueta-a4">
+            <div class="etiqueta-header">
+                <img src="../assets/pm.png" class="etiqueta-logo" alt="Pague Menos">
+                <div class="etiqueta-id-badge" id="printIdBadge">ID: --</div>
+            </div>
+            <div class="etiqueta-content">
+                <div class="etiqueta-field">
+                    <span class="etiqueta-label">Produto:</span>
+                    <span class="etiqueta-value" id="printDesc">--</span>
+                </div>
+                <div class="etiqueta-row">
+                    <div class="etiqueta-field">
+                        <span class="etiqueta-label">CODDV:</span>
+                        <span class="etiqueta-value" id="printCoddv">--</span>
+                    </div>
+                    <div class="etiqueta-field">
+                        <span class="etiqueta-label">Barras:</span>
+                        <span class="etiqueta-value" id="printBarras">--</span>
+                    </div>
+                </div>
+                <div class="etiqueta-field destaque">
+                    <span class="etiqueta-label">Validade:</span>
+                    <span class="etiqueta-value etiqueta-validade" id="printValidade">--</span>
+                </div>
+                <div class="etiqueta-field">
+                    <span class="etiqueta-label">Endereço:</span>
+                    <span class="etiqueta-value" id="printEndereco">--</span>
+                </div>
+            </div>
+            <div class="etiqueta-footer">
+                <div class="etiqueta-usuario">
+                    <span id="printUsuario">--</span> | <span id="printMatricula">--</span>
+                </div>
+                <div class="etiqueta-data" id="printData">--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação Customizado -->
+    <div id="modalConfirmacao" class="modal-overlay">
+        <div class="modal animate-pop-in">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalConfirmTitle">Confirmação</h3>
+                <button class="modal-close" id="btnModalConfirmClose">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalConfirmMessage">Deseja realmente realizar esta operação?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="btnModalConfirmCancel">Cancelar</button>
+                <button class="btn btn-primary" id="btnModalConfirmOk">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts - Ordem Correta de Carregamento -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.33.1/dist/umd/supabase.js"></script>
+    <script type="module" src="../supabase/init.js"></script>
+    <script src="../data_base/BASE_BARRAS.js"></script>
+    <script src="../data_base/BASE_ID.js"></script>
+    <!-- Sistema de Endereçamento Central -->
+    <script type="module" src="./enderecamento-supabase.js"></script>
+    <!-- Script da Página -->
+    <script type="module" src="./validade.js"></script>
+    <!-- Scanner -->
+    <script src="./scanner.js"></script>
+</body>
+
+</html>

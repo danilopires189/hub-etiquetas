@@ -1,0 +1,76 @@
+/* ===== Otimizações de Performance Mobile ===== */
+
+/* Ícone de scanner/código de barras nos inputs (mobile) */
+.scanner-icon {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.scanner-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #64748b;
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Reduzir motion para melhor performance */
+@media (max-width: 768px) {
+  * {
+    animation-duration: 0.3s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  /* Desabilitar efeitos pesados */
+  .panel.controls::before {
+    display: none !important;
+  }
+  
+  /* Simplificar gradientes */
+  .app-header {
+    background: #e0f2fe !important;
+  }
+  
+  .btn-primary::before {
+    display: none !important;
+  }
+  
+  /* Reduzir sombras */
+  .produto-card,
+  .panel.controls,
+  .btn {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  }
+  
+  /* Otimizar renders */
+  .produto-card,
+  .historico-item {
+    will-change: auto !important;
+    transform: none !important;
+  }
+  
+  /* Cache de elementos */
+  .produto-info,
+  .mobile-actions {
+    contain: layout style;
+  }
+}
+
+/* Lazy loading placeholder */
+.lazy-load {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.lazy-load.visible {
+  opacity: 1;
+}
+
+/* Reduzir motion quando preferido */
+.reduce-motion * {
+  animation: none !important;
+  transition: none !important;
+}

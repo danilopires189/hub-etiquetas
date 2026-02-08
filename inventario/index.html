@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pague Menos • Inventário</title>
+  <link rel="icon" href="../assets/pm.png" />
+  <link rel="stylesheet" href="../shared/design-system.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/mobile-dark-mode.css">
+  <link rel="stylesheet" href="../placas/busca.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="animations.css">
+  <link rel="stylesheet" href="performance-optimizations.css">
+</head>
+
+<body class="fade-in startup-loading">
+
+  <!-- 🚀 Overlay de Loading Inline - Aparece INSTANTANEAMENTE -->
+  <!-- Este overlay aparece imediatamente quando o HTML é parseado, -->
+  <!-- antes mesmo do JavaScript carregar, eliminando a tela branca -->
+  <div id="instant-loading-overlay" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  ">
+    <!-- Spinner -->
+    <div style="
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    "></div>
+
+    <!-- Mensagem -->
+    <p style="
+      color: #6b7280;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin: 0;
+      text-align: center;
+    ">Iniciando sistema...</p>
+
+    <!-- Animação do spinner -->
+    <style>
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </div>
+
+  <div class="screen-container">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logos">
+          <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary" onerror="this.style.display='none'">
+          <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary" onerror="this.style.display='none'">
+        </div>
+        <div class="brand-text">
+          <h1>Pague Menos</h1>
+          <span class="app-subtitle">Inventário • Endereços</span>
+        </div>
+      </div>
+      <div class="actions">
+        <span id="status" class="status chip">Carregando base…</span>
+        <button id="btnReload" class="btn btn-ghost hover-button" style="display:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+          </svg>
+          Tentar novamente
+        </button>
+        <button id="btnHub" class="btn btn-ghost hover-button" onclick="window.location.href='../index.html'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9,22 9,12 15,12 15,22" />
+          </svg>
+          Hub
+        </button>
+      </div>
+    </header>
+
+    <div id="loadHelp" class="panel search animate-fade-slide-up"
+      style="display:none; background:#fef3c7; border-color:#f59e0b;">
+      <div class="field full">
+        <h3 style="margin:0 0 12px 0; color:#92400e;">📁 Carregando dados de endereços</h3>
+        <p style="margin:0 0 8px 0; color:#92400e;">Aguarde enquanto carregamos a base de endereços...</p>
+      </div>
+    </div>
+
+    <section class="panel search animate-fade-slide-up">
+      <div class="field full">
+        <!-- CD Selection with integrated Tipo Flag -->
+        <div class="cd-selector animate-slide-up-field stagger-1">
+          <div class="cd-row">
+            <div class="cd-left">
+              <label for="cdSelect">Depósito</label>
+              <div class="cd-select-container">
+                <svg class="cd-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18" />
+                  <path d="M5 21V7l8-4v18" />
+                  <path d="M19 21V11l-6-4" />
+                  <path d="M9 9v.01" />
+                  <path d="M9 12v.01" />
+                  <path d="M9 15v.01" />
+                  <path d="M9 18v.01" />
+                </svg>
+                <select id="cdSelect" class="cd-select" disabled>
+                  <option value="">--</option>
+                  <option value="1">CD01 - Fortaleza/CE</option>
+                  <option value="2">CD02 - Hidrolândia/GO</option>
+                  <option value="3">CD03 - Jaboatão/PE</option>
+                  <option value="4">CD04 - Simões Filho/BA</option>
+                  <option value="5">CD05 - Contagem/MG</option>
+                  <option value="6">CD06 - Benevides/PA</option>
+                  <option value="7">CD07 - São Luís/MA</option>
+                  <option value="8">CD08 - Guarulhos/SP</option>
+                  <option value="9">CD09 - Aquiraz/CE</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Flag de Tipo integrado à direita -->
+            <div id="tipoFlag" class="tipo-flag-inline" style="display: none;">
+              <label class="tipo-label">Tipo:</label>
+              <div class="tipo-options">
+                <div class="tipo-option" data-tipo="sobra">
+                  <input type="radio" id="tipoSobra" name="tipoInventario" value="sobra">
+                  <label for="tipoSobra" class="tipo-button">SOBRA</label>
+                </div>
+                <div class="tipo-option" data-tipo="falta">
+                  <input type="radio" id="tipoFalta" name="tipoInventario" value="falta">
+                  <label for="tipoFalta" class="tipo-button">FALTA</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic CODDV Search (Enhanced) -->
+        <div class="search-section animate-slide-up-field stagger-2">
+          <div class="search-header">
+            <label for="coddvInput">Informe o Produto</label>
+            <div class="search-info" id="searchInfo">
+              <span class="cd-status" id="cdStatus">Selecione um depósito</span>
+            </div>
+          </div>
+
+          <div class="search-container">
+            <div class="search-input-group">
+              <div class="search-input-wrapper">
+                <input id="coddvInput" type="text" autocomplete="off" placeholder=". . ." disabled
+                  class="search-input" />
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                <div class="search-suggestions" id="searchSuggestions" style="display: none;"></div>
+              </div>
+              <button id="btnBuscar" class="btn primary search-btn hover-button" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                Buscar
+              </button>
+            </div>
+
+            <div class="search-stats" id="searchStats" style="display: none;">
+              <!-- Estatísticas removidas - não necessárias -->
+            </div>
+          </div>
+
+          <div id="searchStatus" class="search-status animate-slide-in-down" hidden></div>
+
+          <!-- Nota sobre Estoque Virtual -->
+          <div id="virtualStockHelp" class="virtual-stock-help animate-slide-up-field stagger-3"
+            style="margin-top: 1rem;">
+            <div class="help-content">
+              <div class="help-header">
+                <svg class="help-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                  <path d="M12 17h.01" />
+                </svg>
+                <span class="help-title">💡 Dica: Estoque Virtual</span>
+              </div>
+              <div class="help-details">
+                <p class="help-description">
+                  Para incluir o <strong>estoque virtual</strong> na folha de impressão, informe o CODDV seguido de
+                  hífen e o valor:
+                </p>
+                <div class="help-examples">
+                  <div class="example-item">
+                    <code class="example-code">86-1500</code>
+                    <span class="example-desc">→ Produto 86 com estoque virtual de 1.500 unidades</span>
+                  </div>
+                  <div class="example-item">
+                    <code class="example-code">87-0</code>
+                    <span class="example-desc">→ Produto 87 com estoque virtual de 0 unidades</span>
+                  </div>
+                  <div class="example-item">
+                    <code class="example-code">88</code>
+                    <span class="example-desc">→ Produto 88 sem estoque virtual (campo ficará vazio)</span>
+                  </div>
+                </div>
+                <div class="help-multiple">
+                  <strong>Múltiplos produtos:</strong> <code class="example-code">86-1500 87-250 88</code> ou <code
+                    class="example-code">86-1500, 87-250, 88</code>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions removidas - não necessárias -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Product List Management Section -->
+    <section id="productListSection" class="panel animate-fade-slide-up" style="display: none;">
+      <div class="field full">
+        <div class="list-header">
+          <h3>Lista de Produtos para Inventário</h3>
+          <div class="list-counter">
+            <span id="productCount">0</span> produto(s) adicionado(s)
+          </div>
+        </div>
+
+        <div id="productList" class="product-list">
+          <div class="empty-list">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4" />
+              <path d="M9 7V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3" />
+            </svg>
+            <p>Nenhum produto adicionado ainda</p>
+            <small>Use o campo de busca acima para adicionar produtos</small>
+          </div>
+        </div>
+
+        <div class="list-actions">
+          <button id="btnLimparLista" class="btn ghost hover-button" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            </svg>
+            Limpar Lista
+          </button>
+          <button id="btnGerarOtimizado" class="btn primary hover-button btn-primary-gradient" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14,2 14,8 20,8" />
+              <path d="M9 15l2 2 4-4" />
+            </svg>
+            Gerar Relatório de Inventário
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <main class="content">
+      <!-- Old single product card removed - replaced with dynamic list system -->
+    </main>
+
+    <footer class="app-footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-info">
+            <p class="footer-title">Sistema de Etiquetas Pague Menos</p>
+            <p class="footer-subtitle">Desenvolvido por Danilo Pires</p>
+          </div>
+          <div class="footer-links">
+            <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="footer-link">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+              </svg>
+              Suporte
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Carregamento das bases de dados integradas -->
+    <script src="../data_base/BASE_END.js"></script>
+    <script src="../data_base/BASE_BARRAS.js"></script>
+    <script src="../data_base/BASE_LOG_END.js"></script>
+
+    <!-- Sistema de carregamento assíncrono otimizado -->
+    <script src="browser-compatibility.js"></script>
+    <script src="loading-manager.js"></script>
+    <script src="animation-manager.js"></script>
+    <script src="animation-performance-monitor.js"></script>
+    <script src="animation-performance-optimizer.js"></script>
+    <script src="system-startup-animation.js"></script>
+    <script src="animation-integration.js"></script>
+    <script src="cd-names-mapper.js"></script>
+    <script src="data-indexer.js"></script>
+    <script src="async-database-loader.js"></script>
+    <script src="fix-database-loading.js"></script>
+    <script src="document-print-optimizer.js?v=20241226-final"></script>
+    <script src="script.js"></script>
+
+    <!-- Contador Global Centralizado -->
+    <script src="../js/contador-global-centralizado.js"></script>
+
+    <!-- Debug e Correção de Base de Dados -->
+    <script src="debug-database-status.js"></script>
+    <script src="diagnose-loading-issue.js"></script>
+    <script src="fix-product-loading.js"></script>
+    <script src="fix-loading-issues-comprehensive.js"></script>
+    <script src="validate-system-functionality.js"></script>
+
+    <script>
+      // Configurar contador para tipo 'inventario'
+      window.addEventListener('DOMContentLoaded', async () => {
+        console.log('📋 Aplicação de Inventário carregada');
+
+        // Geração de documento e incremento do contador global agora são tratados centralizadamente em script.js
+        // para evitar problemas de duplicidade e IDs incorretos.
+      });
+
+      // Função para mostrar popup de sucesso - Unificada com o sistema de toast
+      function mostrarPopupSucesso(titulo, subtitulo) {
+        console.log('🎯 mostrarPopupSucesso unificada:', titulo, subtitulo);
+
+        // Montar mensagem formatada para o toast
+        const mensagem = `
+        <div style="font-weight: 600;">${titulo}</div>
+        ${subtitulo ? `<div style="font-size: 0.85em; opacity: 0.9;">${subtitulo}</div>` : ''}
+      `;
+
+        // Chamar sistema global de toast
+        if (typeof window.toast === 'function') {
+          window.toast(mensagem, 'success', 5000);
+        } else {
+          console.warn('⚠️ Função toast não encontrada no escopo global.');
+        }
+      }
+    </script>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Modal System -->
+    <div id="modalOverlay" class="modal-overlay">
+      <div id="modalContainer" class="modal-container">
+        <div class="modal-header">
+          <div class="modal-icon" id="modalIcon"></div>
+          <h3 class="modal-title" id="modalTitle"></h3>
+        </div>
+        <div class="modal-body">
+          <p class="modal-message" id="modalMessage"></p>
+        </div>
+        <div class="modal-footer" id="modalFooter">
+          <!-- Buttons will be added dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,615 @@
+/* ===== Estilos para Scanner Mobile ===== */
+
+/* Container do input com scanner */
+.input-with-scanner {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-scanner input {
+  flex: 1;
+  padding-right: 50px; /* Espaço para o botão */
+}
+
+/* Botão do scanner */
+.scanner-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--brand-blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.scanner-btn:hover {
+  background: #0f3460;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.scanner-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Modal do scanner */
+.scanner-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.scanner-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scanner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.scanner-container {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* Header do scanner */
+.scanner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--brand-blue);
+  color: white;
+}
+
+.scanner-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.scanner-icon {
+  font-size: 1.2em;
+}
+
+.scanner-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.scanner-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Conteúdo do scanner */
+.scanner-content {
+  padding: 0;
+}
+
+.scanner-video-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: #000;
+  overflow: hidden;
+}
+
+.scanner-target {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.scanner-target video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scanner-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scanner-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Overlay da moldura */
+.scanner-overlay-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Moldura do scanner - Aumentada horizontalmente */
+.scanner-frame {
+  width: 320px; /* Aumentado de 250px para 320px */
+  height: 150px;
+  border: 3px solid #00ff00;
+  border-radius: 8px;
+  position: relative;
+  background: transparent;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.3s ease;
+}
+
+.scanner-frame::before,
+.scanner-frame::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #00ff00;
+}
+
+.scanner-frame::before {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.scanner-frame::after {
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Animação de scanning */
+.scanner-frame::after {
+  animation: scanLine 2s linear infinite;
+}
+
+@keyframes scanLine {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Sucesso no scan */
+.scanner-frame.scan-success {
+  border-color: #00ff00;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3), 0 0 20px #00ff00;
+  animation: scanSuccess 0.5s ease;
+}
+
+@keyframes scanSuccess {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Instruções */
+.scanner-instructions {
+  margin-top: 20px;
+  text-align: center;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.scanner-instructions p {
+  margin: 0 0 8px 0;
+  font-size: 0.9em;
+}
+
+.scanner-status {
+  font-size: 0.8em;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  display: inline-block;
+}
+
+.scanner-status.success {
+  background: rgba(16, 185, 129, 0.8);
+}
+
+.scanner-status.error {
+  background: rgba(239, 68, 68, 0.8);
+}
+
+.scanner-status.info {
+  background: rgba(59, 130, 246, 0.8);
+}
+
+/* Controles do scanner */
+.scanner-controls {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.scanner-controls .btn {
+  flex: 1;
+  font-size: 0.9em;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Responsividade - Molduras ajustadas */
+@media (max-width: 768px) {
+  .scanner-overlay {
+    padding: 10px;
+  }
+  
+  .scanner-container {
+    max-height: 95vh;
+  }
+  
+  .scanner-video-container {
+    height: 250px;
+  }
+  
+  .scanner-frame {
+    width: 280px; /* Aumentado de 200px para 280px */
+    height: 140px; /* Aumentado de 120px para 140px */
+  }
+  
+  .scanner-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .scanner-controls .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .scanner-header {
+    padding: 12px 16px;
+  }
+  
+  .scanner-title {
+    font-size: 1em;
+  }
+  
+  .scanner-video-container {
+    height: 200px;
+  }
+  
+  .scanner-frame {
+    width: 240px; /* Aumentado de 180px para 240px */
+    height: 120px; /* Aumentado de 100px para 120px */
+  }
+  
+  .scanner-controls {
+    padding: 12px 16px;
+  }
+}
+
+/* Orientação landscape em mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .scanner-container {
+    max-height: 95vh;
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .scanner-content {
+    display: flex;
+    flex: 1;
+  }
+  
+  .scanner-video-container {
+    flex: 1;
+    height: auto;
+  }
+  
+  .scanner-controls {
+    flex-direction: column;
+    width: 150px;
+    justify-content: center;
+  }
+}
+
+/* Animações de entrada */
+.scanner-modal.active .scanner-container {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Estados de loading */
+.scanner-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: white;
+  font-size: 0.9em;
+}
+
+.scanner-loading::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Indicador de dispositivo móvel - Melhorado */
+@media (hover: none) and (pointer: coarse) {
+  .scanner-btn {
+    background: #10b981; /* Verde para indicar dispositivo móvel */
+    position: relative;
+  }
+  
+  .scanner-btn::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: #f59e0b;
+    border-radius: 50%;
+    border: 2px solid white;
+    animation: pulse 2s infinite;
+  }
+  
+  .scanner-btn:hover {
+    background: #059669;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Ocultar em desktop por padrão */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .scanner-btn {
+    display: none;
+  }
+}
+
+/* Forçar exibição em dispositivos touch */
+@media (pointer: coarse) {
+  .scanner-btn {
+    display: flex !important;
+  }
+}
+
+/* Melhorias adicionais para a moldura */
+.scanner-frame {
+  /* Adicionar gradiente sutil na borda */
+  border-image: linear-gradient(45deg, #00ff00, #00cc00, #00ff00) 1;
+  box-shadow: 
+    0 0 0 9999px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 255, 0, 0.2),
+    0 0 30px rgba(0, 255, 0, 0.3);
+}
+
+/* Linha de scan animada */
+.scanner-frame::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -3px;
+  right: -3px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00ff00, transparent);
+  animation: scanLineHorizontal 2s linear infinite;
+  z-index: 1;
+}
+
+@keyframes scanLineHorizontal {
+  0% {
+    transform: translateY(-75px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(75px);
+    opacity: 0;
+  }
+}
+
+/* Cantos da moldura mais visíveis */
+.scanner-frame::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border: none;
+  background: 
+    linear-gradient(90deg, #00ff00 0%, #00ff00 30px, transparent 30px),
+    linear-gradient(180deg, #00ff00 0%, #00ff00 30px, transparent 30px),
+    linear-gradient(270deg, #00ff00 0%, #00ff00 30px, transparent 30px),
+    linear-gradient(0deg, #00ff00 0%, #00ff00 30px, transparent 30px);
+  background-position: top left, top left, top right, bottom left;
+  background-size: 30px 3px, 3px 30px, 3px 30px, 30px 3px;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+  animation: none;
+}
+
+/* Estados do botão flash */
+.scanner-controls .btn[onclick*="toggleFlash"] {
+  transition: all 0.3s ease;
+}
+
+.scanner-controls .btn[onclick*="toggleFlash"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.scanner-controls .btn[onclick*="toggleFlash"].flash-on {
+  background: #f59e0b;
+  color: white;
+}
+
+.scanner-controls .btn[onclick*="toggleFlash"].flash-on:hover {
+  background: #d97706;
+}
+
+/* Indicador de dispositivo móvel no título */
+.scanner-title .scanner-icon {
+  position: relative;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .scanner-title .scanner-icon::after {
+    content: '📱';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 0.7em;
+    animation: bounce 2s infinite;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-3px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Melhorar visibilidade em telas pequenas */
+@media (max-width: 360px) {
+  .scanner-frame {
+    width: 220px;
+    height: 110px;
+  }
+  
+  .scanner-video-container {
+    height: 180px;
+  }
+}
+
+/* Orientação portrait específica */
+@media (orientation: portrait) and (max-height: 700px) {
+  .scanner-frame {
+    width: 300px;
+    height: 140px;
+  }
+}
+
+/* Melhorar contraste em ambientes claros */
+@media (prefers-color-scheme: light) {
+  .scanner-overlay {
+    background: rgba(0, 0, 0, 0.98);
+  }
+  
+  .scanner-frame {
+    box-shadow: 
+      0 0 0 9999px rgba(0, 0, 0, 0.6),
+      inset 0 0 20px rgba(0, 255, 0, 0.3),
+      0 0 40px rgba(0, 255, 0, 0.4);
+  }
+}

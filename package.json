@@ -1,0 +1,34 @@
+{
+  "name": "hub-etiquetas",
+  "version": "2.0.0",
+  "description": "Sistema integrado de geração de etiquetas para a rede Pague Menos",
+  "private": true,
+  "author": {
+    "name": "Danilo Pires",
+    "url": "https://wa.me/5562981020272"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danilopires189/hub-etiquetas.git"
+  },
+  "keywords": [
+    "etiquetas",
+    "pague-menos",
+    "barcode",
+    "labels",
+    "logistica"
+  ],
+  "scripts": {
+    "dev": "npx serve -l 3000",
+    "start": "npx serve -l 3000",
+    "preview": "npx serve -l 8080"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

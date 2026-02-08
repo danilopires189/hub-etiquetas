@@ -1,0 +1,149 @@
+/* ===== Estilos para Validade dos Produtos ===== */
+
+/* Validade em produtos alocados */
+.endereco-produto .produto-validade {
+  font-size: 0.75rem;
+  color: #059669;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #ecfdf5;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+  border: 1px solid #a7f3d0;
+  transition: all 0.2s ease;
+}
+
+/* Validade vencida */
+.endereco-produto .produto-validade.vencida {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+/* Validade próxima do vencimento */
+.endereco-produto .produto-validade.proxima-vencimento {
+  color: #d97706;
+  background: #fffbeb;
+  border-color: #fed7aa;
+}
+
+/* Validade não informada */
+.endereco-produto .produto-validade.nao-informada {
+  color: #6b7280;
+  background: #f9fafb;
+  border-color: #d1d5db;
+  font-style: italic;
+}
+
+/* Responsividade mobile para validade */
+@media (max-width: 768px) {
+  .endereco-produto .produto-validade {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+/* Hover effect para validade */
+.endereco-produto:hover .produto-validade {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Ícones para validade */
+.produto-validade::before {
+  content: '📆';
+  margin-right: 0.25rem;
+}
+
+.produto-validade.vencida::before {
+  content: '⚠️';
+}
+
+.produto-validade.proxima-vencimento::before {
+  content: '⏰';
+}
+
+.produto-validade.nao-informada::before {
+  content: '❓';
+}
+
+/* ===== Estilos Mobile para Validade em Endereços ===== */
+
+/* Validade em endereços mobile */
+.endereco-validade-mobile {
+  font-size: 0.7rem;
+  color: #059669;
+  font-weight: 600;
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.4rem;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* Itens de endereço mobile com validade */
+.endereco-item-mobile {
+  padding: 0.5rem;
+  margin-bottom: 0.25rem;
+  background: #f8fafc;
+  border-radius: 4px;
+  border-left: 3px solid #0ea5e9;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* Lista de endereços mobile - exibe todos os endereços sem scroll interno */
+.endereco-list-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Data/Hora da alocação em endereços mobile */
+.endereco-data-alocacao-mobile {
+  font-size: 0.7rem;
+  color: #0369a1;
+  font-weight: 600;
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.4rem;
+  background: #e0f2fe;
+  border: 1px solid #7dd3fc;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* Responsividade específica para validade mobile */
+@media (max-width: 768px) {
+  .endereco-validade-mobile {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.3rem;
+  }
+  
+  .endereco-data-alocacao-mobile {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.3rem;
+  }
+  
+  .endereco-item-mobile {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.4rem;
+  }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 480px) {
+  .endereco-validade-mobile {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.25rem;
+  }
+  
+  .endereco-data-alocacao-mobile {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.25rem;
+  }
+}

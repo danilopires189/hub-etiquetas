@@ -1,0 +1,56 @@
+# =============================================
+# Hub de Etiquetas - .gitignore
+# =============================================
+
+# === Sistema Operacional ===
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# === Logs ===
+*.log
+npm-debug.log*
+
+# === Arquivos Temporários ===
+*.tmp
+*.temp
+*.cache
+
+# === Desenvolvimento ===
+.vscode/
+.idea/
+.kiro/
+*.sublime-*
+
+# === Dependências ===
+node_modules/
+
+# === Testes Locais ===
+*test*.html
+*test*.js
+*.test.js
+*.spec.js
+__tests__/
+coverage/
+
+# === Backups ===
+*.bak
+*~
+*.orig
+
+# === Build (se aplicável) ===
+dist/
+build/
+.next/
+out/
+
+# === Variáveis de Ambiente ===
+.env
+.env.local
+.env.*.local
+
+# === Não ignorar ===
+!README.md
+!CHANGELOG.md

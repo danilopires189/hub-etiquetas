@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pague Menos • Etiqueta de Mercadoria</title>
+    <link rel="icon" href="../assets/pm.png" />
+    <link rel="stylesheet" href="../shared/design-system.css">
+    <link rel="stylesheet" href="../shared/components.css">
+    <link rel="stylesheet" href="../shared/mobile-dark-mode.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p id="loading-text">Iniciando sistema...</p>
+    </div>
+
+    <!-- Screen UI -->
+    <div id="screen-ui" class="screen-container">
+        <!-- User greeting above header -->
+        <div id="user-greeting" class="user-greeting-top" style="display: none;">
+            <span class="greeting-text">Olá, Usuário</span>
+        </div>
+
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logos">
+                    <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary"
+                        onerror="this.style.display='none'">
+                    <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary"
+                        onerror="this.style.display='none'">
+                </div>
+                <div class="brand-text">
+                    <h1>Pague Menos</h1>
+                    <span class="app-subtitle">Etiquetas • Mercadoria</span>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9,22 9,12 15,12 15,22" />
+                    </svg>
+                    Hub
+                </button>
+                <button id="historico-btn" type="button" class="btn btn-ghost" title="Ver histórico">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14,2 14,8 20,8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10,9 9,9 8,9" />
+                    </svg>
+                    Histórico
+                </button>
+                <button id="config-machine-btn" type="button" class="btn btn-ghost" title="Configurar nome da máquina"
+                    style="font-size: 0.8rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" />
+                        <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                    PC
+                </button>
+                <button id="config-deposito-btn" type="button" class="btn btn-ghost" title="Configurar depósito"
+                    style="font-size: 0.8rem; display: none;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+                    </svg>
+                    <span id="deposito-display">CD: --</span>
+                </button>
+                <button id="imprimir" type="button" class="btn btn-ghost" title="Ctrl/Cmd+P" onclick="window.print()"
+                    aria-label="Imprimir">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6,9 6,2 18,2 18,9" />
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                        <rect x="6" y="14" width="12" height="8" />
+                    </svg>
+                    Imprimir
+                </button>
+            </div>
+        </header>
+
+        <div class="card search-card">
+            <form id="form-search" class="search-form">
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label for="input-barcode">Código de Barras (Bipe ou digite)</label>
+                        <div style="position: relative;">
+                            <input type="text" id="input-barcode" class="input-lg"
+                                placeholder="Código de barras (Bipe ou digite)" autocomplete="off"
+                                style="padding-left: 45px; width: 280px; max-width: 280px;">
+                            <div class="scanner-icon"
+                                style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                                    </path>
+                                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-matricula">Matrícula</label>
+                        <input type="text" id="input-matricula" class="input-lg" placeholder="00000000" required
+                            maxlength="8" autocomplete="off" title="Digite a matrícula do funcionário"
+                            style="width: 110px; max-width: 110px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-deposito">Depósito</label>
+                        <div style="position: relative;">
+                            <select id="input-deposito" class="input-lg"
+                                style="width: 80px; max-width: 80px; text-align: center; padding-left: 28px; font-weight: bold; color: #9ca3af;"
+                                required>
+                                <option value="" style="color: #9ca3af;">--</option>
+                                <option value="1" style="color: #374151;">1</option>
+                                <option value="2" style="color: #374151;">2</option>
+                                <option value="3" style="color: #374151;">3</option>
+                                <option value="4" style="color: #374151;">4</option>
+                                <option value="5" style="color: #374151;">5</option>
+                                <option value="6" style="color: #374151;">6</option>
+                                <option value="7" style="color: #374151;">7</option>
+                                <option value="8" style="color: #374151;">8</option>
+                                <option value="9" style="color: #374151;">9</option>
+                            </select>
+                            <div
+                                style="position: absolute; left: 6px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M3 21h18" />
+                                    <path d="M5 21V7l8-4v18" />
+                                    <path d="M19 21V11l-6-4" />
+                                    <path d="M9 9v.01" />
+                                    <path d="M9 12v.01" />
+                                    <path d="M9 15v.01" />
+                                    <path d="M9 18v.01" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-generate" class="btn-primary"
+                        style="height: 48px; padding: 0 2rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                            <line x1="7" y1="7" x2="7.01" y2="7" />
+                        </svg>
+                        Gerar Etiqueta
+                    </button>
+                </div>
+
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-start;">
+                    <!-- Destino -->
+                    <div class="form-group small-group">
+                        <label style="font-size: 0.8rem; margin-bottom: 0.3rem; display: block;">Destino</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                            <label
+                                style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
+                                <input type="radio" name="destino" value="automatico" checked> Automático
+                            </label>
+                            <label
+                                style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
+                                <input type="radio" name="destino" value="pulmao"> Pulmão
+                            </label>
+                            <label
+                                style="display: flex; align-items: center; gap: 0.4rem; font-weight: normal; cursor: pointer; font-size: 0.9rem;">
+                                <input type="radio" name="destino" value="separacao"> Separação
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Opções -->
+                    <div class="form-group small-group">
+                        <label style="font-size: 0.8rem; margin-bottom: 0.3rem; display: block;">Opções</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                            <label
+                                style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.9rem;">
+                                <input type="checkbox" id="check-validade" style="width: 16px; height: 16px;">
+                                Inserir Validade
+                            </label>
+                            <label
+                                style="display: flex; align-items: center; gap: 0.4rem; cursor: not-allowed; font-size: 0.9rem; opacity: 0.7;">
+                                <input type="checkbox" id="check-zona"
+                                    style="width: 16px; height: 16px; cursor: not-allowed;" checked disabled>
+                                Inserir Zona
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Print Adjustments -->
+            <!-- Print Adjustments -->
+            <div class="adjust-box" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                <label
+                    style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight:600;">Configuração
+                    da Etiqueta (mm)</label>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="form-group" style="flex:0 0 auto; width: 100px;">
+                        <label for="input-width" style="font-size: 0.8rem;">Largura</label>
+                        <input type="number" id="input-width" class="input-lg" value="93"
+                            style="font-size: 1rem; padding: 0.5rem;">
+                    </div>
+                    <div class="form-group" style="flex:0 0 auto; width: 100px;">
+                        <label for="input-height" style="font-size: 0.8rem;">Altura</label>
+                        <input type="number" id="input-height" class="input-lg" value="50"
+                            style="font-size: 1rem; padding: 0.5rem;">
+                    </div>
+                </div>
+
+                <!-- Nota discreta sobre direcionamento automático -->
+                <div
+                    style="margin-top: 0.8rem; padding: 0.5rem; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #e9ecef;">
+                    <p style="margin: 0; font-size: 0.75rem; color: #6c757d; line-height: 1.3;">
+                        <strong>Nota:</strong> Destino no modo <strong>Automático</strong>, produtos com 1 etiqueta são
+                        direcionados para Separação (estação), acima de 1 etiqueta são direcionados ao Pulmão. Nos modos
+                        <strong>Pulmão</strong> e <strong>Separação</strong>, a escolha é sempre respeitada independente
+                        da quantidade.
+                    </p>
+                </div>
+            </div>
+
+            <div id="status-msg" class="status-msg"></div>
+        </div>
+
+        <!-- Preview Area -->
+        <div id="preview-section" style="margin-top: 2rem;">
+            <h3 style="color: var(--text-secondary); margin-bottom: 1rem;">Visualização</h3>
+            <div id="screen-preview" class="preview-container"
+                style="background: #e5e7eb; padding: 2rem; border-radius: 1rem; display: flex; justify-content: center; align-items: center; min-height: 200px;">
+                <p style="color: #6b7280; font-style: italic;">A etiqueta gerada aparecerá aqui...</p>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>Instruções</h3>
+            <ul>
+                <li>Bipe o código de barras do produto.</li>
+                <li id="instruction-target">O sistema buscará automaticamente o endereço correspondente.</li>
+                <li>Se encontrado, a janela de impressão abrirá automaticamente.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Print Area (Hidden on screen) -->
+    <div id="print-area"></div>
+
+    <!-- Copies Modal -->
+    <div id="copies-modal" class="modal" style="display: none; z-index: 30000;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Quantidade de Cópias</h3>
+            </div>
+            <div class="modal-body"
+                style="padding: 2rem; display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+                <p style="text-align: center; color: var(--text-secondary); margin: 0;">Quantas etiquetas deseja
+                    imprimir?</p>
+                <input type="number" id="modal-input-copies" class="input-lg" value="1" min="1" max="100"
+                    style="text-align: center; font-size: 3rem; width: 120px; font-weight: bold; color: var(--brand-primary); padding: 0.5rem;">
+            </div>
+            <div class="modal-footer"
+                style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1.5rem; background: #f9fafb; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                <button id="cancel-copies" class="btn btn-ghost" style="border: 1px solid #ddd;">Cancelar</button>
+                <button id="confirm-copies" class="btn-primary" style="padding: 0.75rem 2rem;">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validity Modal -->
+    <div id="validity-modal" class="modal" style="display: none; z-index: 30001;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Inserir Validade</h3>
+            </div>
+            <div class="modal-body"
+                style="padding: 2rem; display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+                <p style="text-align: center; color: var(--text-secondary); margin: 0;">Informe a validade (MMAA):</p>
+                <input type="text" id="modal-input-validity" class="input-lg" placeholder="0000" maxlength="4"
+                    style="text-align: center; font-size: 3rem; width: 180px; font-weight: bold; color: var(--brand-primary); padding: 0.5rem;">
+                <p style="font-size: 0.8rem; color: #666;">Ex: 0126 para Janeiro/2026</p>
+            </div>
+            <div class="modal-footer"
+                style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1.5rem; background: #f9fafb; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                <button id="cancel-validity" class="btn btn-ghost" style="border: 1px solid #ddd;">Cancelar</button>
+                <button id="confirm-validity" class="btn-primary" style="padding: 0.75rem 2rem;">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposito Change Modal -->
+    <div id="deposito-change-modal" class="modal" style="display: none; z-index: 30002;">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>⚠️ Alterar Depósito</h3>
+            </div>
+            <div class="modal-body" style="padding: 2rem;">
+                <div
+                    style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: #fef3cd; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    <div>
+                        <p style="margin: 0; font-weight: 600; color: #92400e;">Atenção!</p>
+                        <p style="margin: 0; font-size: 0.9rem; color: #92400e;">Você está prestes a alterar o depósito
+                            atual.</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div style="text-align: center;">
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">Depósito Atual</p>
+                        <div id="current-deposito-display"
+                            style="font-size: 2rem; font-weight: bold; color: var(--brand-primary); margin: 0.5rem 0;">
+                            🏢 CD: --
+                        </div>
+                    </div>
+
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="color: var(--text-secondary);">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12,5 19,12 12,19" />
+                    </svg>
+
+                    <div style="text-align: center;">
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">Novo Depósito</p>
+                        <div style="margin: 0.5rem 0;">
+                            <select id="modal-deposito-select" class="input-lg"
+                                style="width: 100px; text-align: center; font-size: 1.5rem; font-weight: bold; color: var(--brand-primary);">
+                                <option value="">--</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <p style="margin: 0; font-size: 0.85rem; color: #4b5563; line-height: 1.4;">
+                        <strong>Importante:</strong> Esta alteração afetará todas as próximas etiquetas geradas.
+                        Certifique-se de que está selecionando o depósito correto para evitar problemas operacionais.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer"
+                style="display: flex; gap: 1rem; justify-content: flex-end; padding: 1.5rem; background: #f9fafb; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                <button id="cancel-deposito-change" class="btn btn-ghost"
+                    style="border: 1px solid #ddd;">Cancelar</button>
+                <button id="confirm-deposito-change" class="btn-primary"
+                    style="padding: 0.75rem 2rem; background: #f59e0b; border-color: #f59e0b;">
+                    Confirmar Alteração
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historico-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Histórico de Etiquetas</h3>
+                <div class="header-actions">
+                    <button id="toggle-search" class="btn-icon" title="Buscar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg>
+                    </button>
+                    <button class="modal-close" id="historico-close">×</button>
+                </div>
+            </div>
+
+            <div id="search-section" class="modal-search" style="display: none;">
+                <div class="search-container">
+                    <div class="search-input-group">
+                        <input type="text" id="search-input" placeholder="Buscar..." class="search-input" />
+                        <button id="clear-search" class="clear-search" title="Limpar">×</button>
+                    </div>
+                    <div class="search-filters">
+                        <label class="filter-option"><input type="radio" name="searchType" value="all" checked>
+                            <span>Todos</span></label>
+                        <label class="filter-option"><input type="radio" name="searchType" value="matricula">
+                            <span>Matrícula</span></label>
+                        <label class="filter-option"><input type="radio" name="searchType" value="data">
+                            <span>Data</span></label>
+                        <label class="filter-option"><input type="radio" name="searchType" value="coddv">
+                            <span>CODDV</span></label>
+                        <label class="filter-option"><input type="radio" name="searchType" value="descricao">
+                            <span>Descrição</span></label>
+                        <label class="filter-option"><input type="radio" name="searchType" value="ean">
+                            <span>EAN</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <div id="historico-list" class="historico-list"></div>
+            </div>
+
+            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                <small>Histórico salvo por 2 anos • IndexedDB + localStorage</small>
+                <button onclick="exportHistoryToCSV()" style="font-size: 0.75rem; padding: 4px 10px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">📥 Exportar CSV</button>
+            </div>
+        </div>
+    </div>
+
+
+    <footer class="app-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p class="footer-title">Sistema de Etiquetas Pague Menos</p>
+                    <p class="footer-subtitle">Desenvolvido por Danilo Pires</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="footer-link">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                        </svg>
+                        Suporte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="../shared/barcode.js"></script>
+
+    <!-- Supabase Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Contador Global Otimizado -->
+    <script src="../js/contador-global-otimizado.js"></script>
+
+    <!-- Supabase Init (Carrega após contador global) -->
+    <script type="module" src="../supabase/init.js"></script>
+
+    <script src="../data_base/BASE_BARRAS.js"></script>
+    <script src="../data_base/BASE_END.js"></script>
+    <script src="../data_base/BASE_USUARIO.js"></script>
+    
+    <!-- IndexedDB Storage -->
+    <script src="indexeddb-storage.js"></script>
+    
+    <script src="app.js"></script>
+</body>
+
+</html>

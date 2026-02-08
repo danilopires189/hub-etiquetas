@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pague Menos • Etiquetas de Produto</title>
+  <link rel="icon" href="../assets/pm.png" />
+  <link rel="stylesheet" href="../shared/design-system.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/mobile-dark-mode.css">
+  <link rel="stylesheet" href="busca.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="fade-in">
+
+  <div class="screen-container">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logos">
+          <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary" onerror="this.style.display='none'">
+          <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary" onerror="this.style.display='none'">
+        </div>
+        <div class="brand-text">
+          <h1>Pague Menos</h1>
+          <span class="app-subtitle">Etiquetas • Produto</span>
+        </div>
+      </div>
+      <div class="actions">
+        <span id="status" class="status chip">Carregando base…</span>
+        <button id="btnReload" class="btn btn-ghost" style="display:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+          </svg>
+          Tentar novamente
+        </button>
+        <label class="btn btn-ghost file-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14,2 14,8 20,8" />
+            <line x1="12" y1="11" x2="12" y2="17" />
+            <polyline points="9,14 12,11 15,14" />
+          </svg>
+          Carregar base
+          <input id="fileLoad" type="file" accept=".json,.txt,application/json" hidden>
+        </label>
+        <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9,22 9,12 15,12 15,22" />
+          </svg>
+          Hub
+        </button>
+      </div>
+    </header>
+
+    <div id="loadHelp" class="panel search" style="display:none; background:#fef3c7; border-color:#f59e0b;">
+      <div class="field full">
+        <h3 style="margin:0 0 12px 0; color:#92400e;">📁 Como carregar a base de dados</h3>
+        <p style="margin:0 0 8px 0; color:#92400e;">O carregamento automático falhou. Para usar o sistema:</p>
+        <ol style="margin:0; padding-left:20px; color:#92400e;">
+          <li>Clique no botão <strong>"Carregar base"</strong> acima</li>
+          <li>Selecione o arquivo <strong>BASE_BARRAS.json</strong> (formato de backup)</li>
+          <li>O arquivo deve estar na pasta <strong>data_base</strong></li>
+        </ol>
+        <p style="margin:8px 0 0 0; font-size:12px; color:#a16207;">💡 O sistema agora usa BASE_BARRAS.js
+          automaticamente</p>
+      </div>
+    </div>
+
+    <section class="panel search animate-slide-in-up">
+      <div class="field full">
+        <label for="q">Busque por CODDV, Código de Barras ou Descrição</label>
+        <div class="search-row">
+          <input id="q" autocomplete="off" placeholder="Ex.: 100005 • 7897076911070 • Dipirona 500mg" />
+          <button id="btnClear" class="icon-btn" title="Limpar">🧹</button>
+        </div>
+        <div id="noResults" class="no-results" hidden>Nenhuma correspondência encontrada.</div>
+        <div id="matchInfo" class="match-info" hidden></div>
+        <div id="hints" class="hints" hidden></div>
+      </div>
+    </section>
+
+    <main class="content">
+      <article id="card" class="card animate-slide-in-up" hidden>
+        <header class="card-head">
+          <div class="title">
+            <h1 id="desc">—</h1>
+            <p id="meta">—</p>
+          </div>
+          <div class="logos"><!-- logos escondidos no CSS --></div>
+        </header>
+
+        <section class="barcode-zone">
+          <svg id="barcodeSvg" class="barcode" aria-label="Código de barras"></svg>
+        </section>
+
+        <footer class="legend" id="legend">—</footer>
+
+        <div class="card-actions">
+          <div class="print-controls">
+            <label>Largura (mm)<input id="wmm" type="number" min="50" max="80" step="1"></label>
+            <label>Altura (mm)<input id="hmm" type="number" min="30" max="60" step="1"></label>
+            <label>Margem Esq. (mm)<input id="lmm" type="number" min="0" max="5" step="1"></label>
+            <label>Espaço barras<input id="space" type="range" min="1.0" max="1.8" step="0.05"></label>
+          </div>
+          <div class="spacer"></div>
+          <button id="btnCopyBarras" class="btn">Copiar BARRAS</button>
+          <button id="btnCopyCod" class="btn">Copiar CODDV</button>
+          <button id="btnPrint" class="btn primary">Imprimir</button>
+        </div>
+      </article>
+    </main>
+
+    <footer class="app-footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-info">
+            <p class="footer-title">Sistema de Etiquetas Pague Menos</p>
+            <p class="footer-subtitle">Desenvolvido por Danilo Pires</p>
+          </div>
+          <div class="footer-links">
+            <a href="https://wa.me/5562981020272" target="_blank" rel="noopener" class="footer-link">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+              </svg>
+              Suporte
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Carregamento da base de dados -->
+    <script src="../data_base/BASE_BARRAS.js"></script>
+    <script src="busca.js"></script>
+    <script src="script.js"></script>
+
+    <!-- Contador Global Centralizado -->
+    <script src="../js/contador-global-centralizado.js"></script>
+
+    <script>
+      // Configurar contador para tipo 'placas'
+      window.addEventListener('DOMContentLoaded', async () => {
+        console.log('🏷️ Aplicação de Etiquetas de Produto carregada');
+
+        // Aguardar contador estar pronto
+        setTimeout(async () => {
+          if (window.contadorGlobal) {
+            console.log('✅ Contador Global disponível');
+
+            // Interceptar impressões para contar etiquetas
+            const btnPrint = document.getElementById('btnPrint');
+            if (btnPrint) {
+              console.log('🔗 Botão imprimir encontrado, configurando interceptação...');
+
+              const originalClick = btnPrint.onclick;
+              btnPrint.onclick = async function (e) {
+                try {
+                  console.log('🖱️ Botão imprimir clicado');
+
+                  // Incrementar contador global antes de imprimir
+                  const novoValor = await window.contadorGlobal.incrementarContador(1, 'placas');
+                  console.log(`✅ Contador incrementado: +1 placas = ${novoValor}`);
+
+                  // Mostrar popup de sucesso
+                  console.log('🎉 Chamando mostrarPopupSucesso...');
+                  mostrarPopupSucesso('Etiqueta gerada com sucesso!', `Total: ${novoValor.toLocaleString('pt-BR')} etiquetas`);
+                  console.log('✅ Popup chamado com sucesso');
+
+                  // Feedback visual discreto
+                  const valorFormatado = novoValor.toLocaleString('pt-BR');
+                  console.log(`📊 Total atual: ${valorFormatado} etiquetas`);
+
+                  // Executar função original de impressão
+                  if (originalClick) {
+                    originalClick.call(this, e);
+                  } else {
+                    window.print();
+                  }
+                } catch (error) {
+                  console.error('❌ Erro ao incrementar contador:', error);
+                  // Continuar com impressão mesmo se contador falhar
+                  if (originalClick) {
+                    originalClick.call(this, e);
+                  } else {
+                    window.print();
+                  }
+                }
+              };
+            } else {
+              console.warn('⚠️ Botão imprimir não encontrado');
+            }
+          } else {
+            console.warn('⚠️ Contador Global não disponível');
+          }
+        }, 2000);
+      });
+
+      // Função para mostrar popup de sucesso
+      function mostrarPopupSucesso(titulo, subtitulo) {
+        console.log('🎯 mostrarPopupSucesso chamada com:', titulo, subtitulo);
+
+        // Remover popup existente se houver
+        const existingPopup = document.getElementById('popup-sucesso');
+        if (existingPopup) {
+          console.log('🗑️ Removendo popup existente');
+          existingPopup.remove();
+        }
+
+        // Criar popup
+        const popup = document.createElement('div');
+        popup.id = 'popup-sucesso';
+        popup.innerHTML = `
+        <div class="popup-content">
+          <div class="popup-icon">✅</div>
+          <div class="popup-text">
+            <div class="popup-titulo">${titulo}</div>
+            <div class="popup-subtitulo">${subtitulo}</div>
+          </div>
+        </div>
+      `;
+
+        console.log('📝 Popup criado, adicionando ao body...');
+
+        // Adicionar ao body
+        document.body.appendChild(popup);
+        console.log('✅ Popup adicionado ao body');
+
+        // Mostrar com animação
+        setTimeout(() => {
+          console.log('🎬 Adicionando classe show...');
+          popup.classList.add('show');
+          console.log('✅ Classe show adicionada');
+        }, 100);
+
+        // Remover após 2 segundos
+        setTimeout(() => {
+          console.log('⏰ Removendo popup...');
+          popup.classList.remove('show');
+          setTimeout(() => {
+            if (popup.parentNode) {
+              popup.parentNode.removeChild(popup);
+              console.log('🗑️ Popup removido do DOM');
+            }
+          }, 300);
+        }, 2000);
+      }
+    </script>
+
+    <style>
+      /* Popup de Sucesso */
+      #popup-sucesso {
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        z-index: 99999 !important;
+        background: white !important;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        border: 2px solid #10b981 !important;
+        padding: 0;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 320px;
+        overflow: hidden;
+        pointer-events: auto !important;
+      }
+
+      #popup-sucesso.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .popup-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+      }
+
+      .popup-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+      }
+
+      .popup-text {
+        flex: 1;
+      }
+
+      .popup-titulo {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 14px;
+        margin-bottom: 2px;
+      }
+
+      .popup-subtitulo {
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      /* Barra de progresso */
+      #popup-sucesso::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #10b981, #059669);
+        width: 100%;
+        animation: progress 2s linear forwards;
+      }
+
+      @keyframes progress {
+        from {
+          width: 100%;
+        }
+
+        to {
+          width: 0%;
+        }
+      }
+
+      /* Responsivo */
+      @media (max-width: 640px) {
+        #popup-sucesso {
+          top: 10px;
+          right: 10px;
+          left: 10px;
+          max-width: none;
+        }
+      }
+    </style>
+  </div>
+</body>
+
+</html>

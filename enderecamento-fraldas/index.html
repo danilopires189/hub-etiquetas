@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>Pague Menos • Gestão de Endereçamento</title>
+    <link rel="icon" href="../assets/pm.png" />
+    <link rel="stylesheet" href="../shared/design-system.css">
+    <link rel="stylesheet" href="../shared/components.css">
+    <!-- Tema escuro removido para este módulo - mantendo visual claro consistente -->
+    <!-- <link rel="stylesheet" href="../shared/mobile-dark-mode.css"> -->
+    <link rel="stylesheet" href="./styles.css">
+    <script>
+        // Only load scanner CSS on desktop devices
+        if (window.innerWidth > 768 && !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            const scannerCss = document.createElement('link');
+            scannerCss.rel = 'stylesheet';
+            scannerCss.href = './scanner.css';
+            document.head.appendChild(scannerCss);
+            console.log('📱 Scanner CSS loaded for desktop device');
+        } else {
+            console.log('🚫 Scanner CSS loading skipped for mobile device');
+        }
+    </script>
+    <!-- Otimizações de Performance Mobile -->
+    <link rel="stylesheet" href="./mobile-performance.css">
+</head>
+
+<body class="fade-in">
+
+    <div class="screen-container">
+        <header class="app-header">
+            <!-- Top Row: History - Brand - User -->
+            <div class="header-top-row">
+                <!-- History Toggle Button (Mobile Left) -->
+                <button id="historyToggle" class="history-toggle-btn" onclick="toggleHistory()" style="display: none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12,6 12,12 16,14" />
+                    </svg>
+                </button>
+
+                <div class="brand">
+                    <div class="brand-logos">
+                        <img src="../assets/pm.png" alt="Pague Menos" class="brand-logo primary"
+                            onerror="this.style.display='none'">
+                        <img src="../assets/logo.png" alt="Danilo" class="brand-logo secondary"
+                            onerror="this.style.display='none'">
+                    </div>
+                    <div class="brand-text">
+                        <h1>Pague Menos</h1>
+                        <span class="app-subtitle">Gestão de Endereçamento</span>
+                    </div>
+                </div>
+
+                <!-- User Toggle Button (Mobile Right) -->
+                <button id="userToggle" class="user-toggle-btn" onclick="toggleUserInfo()" style="display: none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Collapsible Navigation Section -->
+            <div class="nav-container">
+                <div class="nav-content" id="mobileNavContent">
+                    <button id="btnEnderecos" class="btn btn-ghost" onclick="window.location.href='enderecos.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                            <polyline points="3.27,6.96 12,12.01 20.73,6.96" />
+                            <line x1="12" y1="22.08" x2="12" y2="12" />
+                        </svg>
+                        Endereços
+                    </button>
+                    <button id="btnValidade" class="btn btn-ghost" onclick="window.location.href='./validade.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                            <path d="M8 14h.01"/>
+                            <path d="M12 14h.01"/>
+                            <path d="M16 14h.01"/>
+                            <path d="M8 18h.01"/>
+                            <path d="M12 18h.01"/>
+                            <path d="M16 18h.01"/>
+                        </svg>
+                        Validade
+                    </button>
+                    <button id="btnHub" class="btn btn-ghost" onclick="window.location.href='../index.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                            <polyline points="9,22 9,12 15,12 15,22" />
+                        </svg>
+                        Hub
+                    </button>
+                </div>
+
+                <!-- Expander Button (Mobile Only) -->
+                <button id="mobileNavToggle" class="mobile-nav-toggle" onclick="toggleMobileNav()">
+                    <span id="mobileNavToggleText">Mostrar mais</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="toggle-icon">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <section class="panel controls animate-slide-in-up">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                        <polyline points="3.27,6.96 12,12.01 20.73,6.96" />
+                        <line x1="12" y1="22.08" x2="12" y2="12" />
+                    </svg>
+                    Sistema de Gestão de Endereçamento
+                </h2>
+                <p class="panel-description">
+                    Gerencie alocação e desalocação de produtos no estoque usando CODDV ou código de barras
+                </p>
+            </div>
+
+            <!-- Busca de Produto -->
+            <div class="field">
+                <label for="codigoProduto">Código do Produto</label>
+                <div class="search-row" style="position: relative;">
+                    <input type="text" id="codigoProduto" placeholder="Digite CODDV ou código de barras" maxlength="20"
+                        style="padding-left: 45px; padding-right: 46px;">
+                    <div class="scanner-icon"
+                        style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; z-index: 10;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                            </path>
+                            <line x1="4" y1="12" x2="20" y2="12"></line>
+                        </svg>
+                    </div>
+                    <button type="button" id="btnClearInput" class="icon-btn" title="Limpar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18"/>
+                            <path d="M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <span class="hint">CODDV ou código de barras do produto</span>
+            </div>
+
+            <!-- Informações do Produto -->
+            <div class="field full">
+                <div id="produtoInfo" class="produto-info hide">
+                    <div class="produto-card">
+                        <div class="produto-header">
+                            <span class="produto-coddv"></span>
+                            <div class="status-container">
+                                <span class="sync-indicator" id="syncIndicator" title="Sincronizando com o servidor...">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                                    </svg>
+                                </span>
+                                <span class="produto-status"></span>
+                            </div>
+                        </div>
+                        <div class="produto-desc"></div>
+                        <div class="produto-barras"></div>
+                        <div class="produto-endereco-container">
+                            <div class="produto-endereco"></div>
+                            <div class="produto-acoes hide" id="produtoAcoes">
+                                <div class="btn-acao-container">
+                                    <button type="button" id="btnAlocar" class="btn-acao btn-alocar"
+                                        title="Opções de Alocação" onclick="toggleDropdownAlocar()">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M12 5v14" />
+                                            <path d="M5 12h14" />
+                                        </svg>
+                                    </button>
+                                    <div class="dropdown-menu hide" id="dropdownAlocar">
+                                        <div class="dropdown-item" onclick="alocarEmListaEnderecos(); fecharDropdown()">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path d="M8 6h13" />
+                                                <path d="M8 12h13" />
+                                                <path d="M8 18h13" />
+                                                <path d="M3 6h.01" />
+                                                <path d="M3 12h.01" />
+                                                <path d="M3 18h.01" />
+                                            </svg>
+                                            <span>Lista de Endereços</span>
+                                        </div>
+
+                                        <div class="dropdown-item"
+                                            onclick="alocarBuscandoEnderecos(); fecharDropdown()">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <circle cx="11" cy="11" r="8" />
+                                                <path d="m21 21-4.35-4.35" />
+                                            </svg>
+                                            <span>Buscar Endereços</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="btnTransferir" class="btn-acao btn-transferir hide"
+                                    title="Transferir Produto">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M7 17L17 7" />
+                                        <path d="M17 17H7V7" />
+                                    </svg>
+                                </button>
+                                <div class="btn-acao-container">
+                                    <button type="button" id="btnAdicionarMais" class="btn-acao btn-adicionar-mais hide"
+                                        title="Adicionar em Mais Endereços" onclick="toggleDropdownAdicionarMais()">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M12 5v14" />
+                                            <path d="M5 12h14" />
+                                        </svg>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" class="plus-overlay">
+                                            <path d="M12 5v14" />
+                                            <path d="M5 12h14" />
+                                        </svg>
+                                    </button>
+                                    <div class="dropdown-menu hide" id="dropdownAdicionarMais">
+                                        <div class="dropdown-item" onclick="adicionarMaisEnderecos(); fecharDropdown()">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path d="M8 6h13" />
+                                                <path d="M8 12h13" />
+                                                <path d="M8 18h13" />
+                                                <path d="M3 6h.01" />
+                                                <path d="M3 12h.01" />
+                                                <path d="M3 18h.01" />
+                                            </svg>
+                                            <span>Lista de Endereços</span>
+                                        </div>
+
+                                        <div class="dropdown-item" onclick="abrirPopupBuscarEnderecos()">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <circle cx="11" cy="11" r="8" />
+                                                <path d="m21 21-4.35-4.35" />
+                                            </svg>
+                                            <span>Buscar Endereços</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="btnDesalocar" class="btn-acao btn-desalocar hide"
+                                    title="Desalocar Produto">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M18 6L6 18" />
+                                        <path d="M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Action Buttons -->
+                    <div class="mobile-actions hide" id="mobileActions">
+                        <button type="button" id="btnAlocarMobile" class="action-btn-mobile btn-alocar-mobile"
+                            onclick="executarAlocacaoMobile()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 5v14" />
+                                <path d="M5 12h14" />
+                            </svg>
+                            Alocar
+                        </button>
+                        <button type="button" id="btnAdicionarMaisMobile"
+                            class="action-btn-mobile btn-adicionar-mobile hide" onclick="executarAdicaoExtraMobile()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 5v14" />
+                                <path d="M5 12h14" />
+                            </svg>
+                            Adicionar
+                        </button>
+                        <button type="button" id="btnDesalocarMobile" class="action-btn-mobile btn-desalocar-mobile"
+                            onclick="executarDesalocacaoMobile()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M18 6L6 18" />
+                                <path d="M6 6l12 12" />
+                            </svg>
+                            Desalocar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="field full">
+                <div class="row">
+                    <button type="button" id="btnBuscar" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg>
+                        Buscar Produto
+                    </button>
+                    <button type="button" id="btnLimpar" class="btn btn-ghost">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M3 6h18l-2 13H5L3 6z" />
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                        Limpar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Histórico de Operações -->
+        <section id="historico" class="historico-container">
+            <h3>Histórico de Operações</h3>
+            <div id="historicoLista" class="historico-lista">
+                <!-- Operações serão adicionadas aqui -->
+            </div>
+        </section>
+
+        <!-- Supabase SDK -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.js"></script>
+
+        <!-- Inicialização do Supabase -->
+        <script type="module" src="../supabase/init.js"></script>
+
+        <!-- Base de dados local (produtos) -->
+        <script src="../data_base/BASE_BARRAS.js"></script>
+        
+        <!-- Base de dados de ID (código de etiqueta) -->
+        <script src="../data_base/BASE_ID.js"></script>
+        
+        <!-- Base de dados de usuários -->
+        <script src="../data_base/BASE_USUARIO.js"></script>
+        
+        <!-- Sistema de validação de usuário -->
+        <script src="../shared/user-validation.js"></script>
+        
+        <!-- Correção para dados de usuário -->
+        <script src="./fix-user-data.js"></script>
+
+        <!-- Contador global -->
+        <script src="../js/contador-global-centralizado.js"></script>
+
+        <!-- Sistema de Endereçamento com Supabase (Substitui o enderecamento.js) -->
+        <script type="module" src="./enderecamento-supabase.js"></script>
+
+        <!-- Correção para problema de Invalid Date no histórico -->
+        <script src="./correcao-historico.js"></script>
+
+        <!-- Aplicação principal -->
+        <script src="./app.js"></script>
+        
+        <!-- Otimizações de Performance -->
+        <script src="./performance-optimization.js"></script>
+
+        <!-- Popup de Seleção de Endereços -->
+        <div id="popupEnderecos" class="popup-overlay hide">
+            <div class="popup-container">
+                <div class="popup-header">
+                    <h3>Selecionar Endereço Disponível</h3>
+                    <button class="popup-close" onclick="fecharPopupEnderecos()">×</button>
+                </div>
+                <div class="popup-content">
+                    <div class="produto-selecionado">
+                        <strong>Produto:</strong> <span id="popupProdutoDesc"></span><br>
+                        <strong>CODDV:</strong> <span id="popupProdutoCoddv"></span>
+                    </div>
+                    <div class="filtros-popup">
+                        <input type="text" id="filtroEnderecoPopup" placeholder="Filtrar por endereço ou descrição..."
+                            class="filtro-input">
+                        <select id="filtroZonaPopup" class="filtro-select">
+                            <option value="">Todas as Zonas</option>
+                        </select>
+                        <select id="filtroNivelPopup" class="filtro-select">
+                            <option value="">Todos os Níveis</option>
+                            <option value="T">Térreo (A0T)</option>
+                            <option value="1">1º Andar (A01)</option>
+                            <option value="2">2º Andar (A02)</option>
+                            <option value="4">4º Andar (A04)</option>
+                            <option value="5">5º Andar (A05)</option>
+                            <option value="6">6º Andar (A06)</option>
+                        </select>
+                    </div>
+                    <div class="enderecos-disponiveis" id="enderecosDisponiveisLista">
+                        <!-- Lista será preenchida dinamicamente -->
+                    </div>
+                </div>
+                <div class="popup-footer">
+                    <button class="btn btn-ghost" onclick="fecharPopupEnderecos()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popup de Desalocação -->
+        <div id="popupDesalocacao" class="popup-overlay hide">
+            <div class="popup-container">
+                <div class="popup-header">
+                    <h3>Selecionar Endereço para Desalocar</h3>
+                    <button class="popup-close" onclick="fecharPopupDesalocacao()">×</button>
+                </div>
+                <div class="popup-content">
+                    <div class="produto-selecionado">
+                        <strong>Produto:</strong> <span id="popupDesalocacaoProdutoDesc"></span><br>
+                        <strong>CODDV:</strong> <span id="popupDesalocacaoProdutoCoddv"></span>
+                    </div>
+                    <div class="desalocacao-info">
+                        <p>Este produto está alocado em múltiplos endereços. Selecione de qual endereço deseja
+                            desalocar:</p>
+                    </div>
+                    <div class="enderecos-desalocacao" id="enderecosDesalocacaoLista">
+                        <!-- Lista será preenchida dinamicamente -->
+                    </div>
+                </div>
+                <div class="popup-footer">
+                    <button class="btn btn-danger" onclick="desalocarDeTodos()">Desalocar de Todos</button>
+                    <button class="btn btn-ghost" onclick="fecharPopupDesalocacao()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popup de Transferência -->
+        <div id="popupTransferencia" class="popup-overlay hide">
+            <div class="popup-container">
+                <div class="popup-header">
+                    <h3>Selecionar Endereço de Origem para Transferir</h3>
+                    <button class="popup-close" onclick="fecharPopupTransferencia()">×</button>
+                </div>
+                <div class="popup-content">
+                    <div class="produto-selecionado">
+                        <strong>Produto:</strong> <span id="popupTransferenciaProdutoDesc"></span><br>
+                        <strong>CODDV:</strong> <span id="popupTransferenciaProdutoCoddv"></span>
+                    </div>
+                    <div class="transferencia-info">
+                        <p>Este produto está alocado em múltiplos endereços. Selecione de qual endereço deseja
+                            transferir:</p>
+                    </div>
+                    <div class="enderecos-transferencia" id="enderecosTransferenciaLista">
+                        <!-- Lista será preenchida dinamicamente -->
+                    </div>
+                </div>
+                <div class="popup-footer">
+                    <button class="btn btn-ghost" onclick="fecharPopupTransferencia()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Confirmação Customizado -->
+        <div id="modalConfirmacao" class="modal-overlay">
+            <div class="modal animate-pop-in">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modalConfirmTitle">Confirmação</h3>
+                    <button class="modal-close" id="btnModalConfirmClose">×</button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalConfirmMessage">Deseja realmente realizar esta operação?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" id="btnModalConfirmCancel">Cancelar</button>
+                    <button class="btn btn-primary" id="btnModalConfirmOk">Confirmar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Address Input Modal -->
+        <div id="mobileAddressModal" class="mobile-modal-overlay hide">
+            <div class="mobile-modal">
+                <div class="mobile-modal-header">
+                    <h3 id="mobileModalTitle">Informar Endereço</h3>
+                    <button class="mobile-modal-close" onclick="closeMobileAddressModal()">×</button>
+                </div>
+                <div class="mobile-modal-content">
+                    <div class="mobile-product-info" id="mobileProductInfo">
+                        <strong>Produto:</strong> <span id="mobileProductDesc"></span><br>
+                        <strong>CODDV:</strong> <span id="mobileProductCoddv"></span>
+                    </div>
+
+                    <div class="mobile-address-input-section">
+                        <label for="mobileAddressInput">Endereço de Destino</label>
+                        <div class="mobile-input-group">
+                            <input type="text" id="mobileAddressInput" placeholder="Ex: PF01.001.001.A01" maxlength="20"
+                                autocomplete="off" style="padding-left: 42px;">
+                            <div class="scanner-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                                    <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                                    <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                                    <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                                </svg>
+                            </div>
+                            <button type="button" id="btnValidateAddress" class="btn-validate-address"
+                                onclick="validateMobileAddress()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="20,6 9,17 4,12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="mobile-address-feedback" id="mobileAddressFeedback"></div>
+                        <div class="mobile-address-suggestions" id="mobileAddressSuggestions"></div>
+                    </div>
+
+                    <!-- Seção de Validade (aparece após validação do endereço) -->
+                    <div class="mobile-validity-section hide" id="mobileValiditySection">
+                        <label for="mobileValidityInput">Validade do Produto</label>
+                        <div class="mobile-input-group">
+                            <input type="text" id="mobileValidityInput" placeholder="MMAA (ex: 0526)" maxlength="4"
+                                inputmode="numeric" autocomplete="off">
+                        </div>
+                        <div class="mobile-validity-feedback" id="mobileValidityFeedback"></div>
+                        <div class="mobile-validity-hint">
+                            <small>Formato: MMAA (Mês e Ano - ex: 0526 para Maio/2026)</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mobile-modal-footer">
+                    <button class="btn btn-ghost" onclick="closeMobileAddressModal()">Cancelar</button>
+                    <button class="btn btn-primary" id="btnConfirmMobileAllocation" onclick="confirmMobileAllocation()"
+                        disabled>
+                        Confirmar Alocação
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Address Selection Modal for Deallocation -->
+        <div id="mobileDeallocationModal" class="mobile-modal-overlay hide">
+            <div class="mobile-modal">
+                <div class="mobile-modal-header">
+                    <h3 id="mobileDeallocationTitle">Selecionar Endereço para Desalocar</h3>
+                    <button class="mobile-modal-close" onclick="closeMobileDeallocationModal()">×</button>
+                </div>
+                <div class="mobile-modal-content">
+                    <div class="mobile-product-info" id="mobileDeallocationProductInfo">
+                        <strong>Produto:</strong> <span id="mobileDeallocationProductDesc"></span><br>
+                        <strong>CODDV:</strong> <span id="mobileDeallocationProductCoddv"></span>
+                    </div>
+
+                    <div class="mobile-deallocation-info">
+                        <p>Este produto está alocado em múltiplos endereços. Selecione de qual endereço deseja
+                            desalocar:</p>
+                    </div>
+
+                    <div class="mobile-address-list" id="mobileDeallocationAddressList">
+                        <!-- Address list will be populated dynamically -->
+                    </div>
+                </div>
+                <div class="mobile-modal-footer">
+                    <button class="btn btn-ghost" onclick="closeMobileDeallocationModal()">Cancelar</button>
+                    <button class="btn btn-danger" id="btnDeallocationFromAll" onclick="confirmDeallocationFromAll()">
+                        Desalocar de Todos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Address Selection Modal for Transfer -->
+        <div id="mobileTransferModal" class="mobile-modal-overlay hide">
+            <div class="mobile-modal">
+                <div class="mobile-modal-header">
+                    <h3 id="mobileTransferTitle">Selecionar Endereço de Origem</h3>
+                    <button class="mobile-modal-close" onclick="closeMobileTransferModal()">×</button>
+                </div>
+                <div class="mobile-modal-content">
+                    <div class="mobile-product-info" id="mobileTransferProductInfo">
+                        <strong>Produto:</strong> <span id="mobileTransferProductDesc"></span><br>
+                        <strong>CODDV:</strong> <span id="mobileTransferProductCoddv"></span>
+                    </div>
+
+                    <div class="mobile-transfer-info">
+                        <p>Este produto está alocado em múltiplos endereços. Selecione de qual endereço deseja
+                            transferir:</p>
+                    </div>
+
+                    <div class="mobile-address-list" id="mobileTransferAddressList">
+                        <!-- Address list will be populated dynamically -->
+                    </div>
+                </div>
+                <div class="mobile-modal-footer">
+                    <button class="btn btn-ghost" onclick="closeMobileTransferModal()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Confirmation Modal -->
+        <div id="mobileConfirmationModal" class="mobile-modal-overlay hide">
+            <div class="mobile-modal">
+                <div class="mobile-modal-header">
+                    <h3 id="mobileConfirmationTitle">Confirmação</h3>
+                    <button class="mobile-modal-close" onclick="closeMobileConfirmationModal()">×</button>
+                </div>
+                <div class="mobile-modal-content">
+                    <div class="mobile-confirmation-message" id="mobileConfirmationMessage">
+                        <!-- Confirmation message will be set dynamically -->
+                    </div>
+                </div>
+                <div class="mobile-modal-footer">
+                    <button class="btn btn-ghost" id="btnMobileConfirmCancel"
+                        onclick="closeMobileConfirmationModal()">Cancelar</button>
+                    <button class="btn btn-primary" id="btnMobileConfirmOk"
+                        onclick="executeMobileConfirmation()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Success/Error Toast -->
+        <div id="mobileToast" class="mobile-toast hide">
+            <div class="mobile-toast-content">
+                <div class="mobile-toast-icon" id="mobileToastIcon"></div>
+                <div class="mobile-toast-message" id="mobileToastMessage"></div>
+            </div>
+        </div>
+        <!-- Modal de Validade -->
+        <div id="modalValidade" class="modal-overlay">
+            <div class="modal animate-pop-in">
+                <div class="modal-header">
+                    <h3 class="modal-title">Validade do Produto</h3>
+                    <button class="modal-close" onclick="fecharModalValidade()">×</button>
+                </div>
+                <div class="modal-body">
+                    <p>Informe a validade do produto para continuar:</p>
+                    <div class="field" style="margin-top: 15px;">
+                        <label for="inputValidade">Validade (MMAA)</label>
+                        <input type="text" id="inputValidade" placeholder="Ex: 1225" maxlength="4"
+                            style="font-size: 1.5rem; text-align: center; letter-spacing: 5px; height: 60px;">
+                        <div id="validadeFeedback" class="field-error"
+                            style="display: none; color: #dc2626; font-size: 0.85rem; margin-top: 5px;">
+                            Formato inválido. Use MMAA (ex: 1225 para Dez/2025)
+                        </div>
+                    </div>
+                    <div
+                        style="background: #fef3c7; border: 1px solid #fbbf24; padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 0.85rem; color: #92400e;">
+                        ⚠️ <strong>Atenção:</strong> A validade é obrigatória para este CD.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost" onclick="fecharModalValidade()">Cancelar</button>
+                    <button class="btn btn-primary" id="btnConfirmarValidade">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scanner Mobile - Only load on desktop -->
+    <script>
+        // Only load scanner on desktop devices
+        if (window.innerWidth > 768 && !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            const scannerScript = document.createElement('script');
+            scannerScript.src = './scanner.js';
+            scannerScript.async = true;
+            document.head.appendChild(scannerScript);
+            console.log('📱 Scanner loaded for desktop device');
+        } else {
+            console.log('🚫 Scanner loading skipped for mobile device');
+        }
+    </script>
+
+
+</body>
+
+</html>

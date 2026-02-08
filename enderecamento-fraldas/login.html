@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Endereçamento de Fraldas</title>
+    <link rel="icon" href="../assets/pm.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../shared/design-system.css">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            /* Mobile viewport friendly */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+            /* Prevent keyboard issues on mobile */
+            box-sizing: border-box;
+            background-attachment: fixed;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        .login-header {
+            margin-bottom: 30px;
+        }
+
+        .login-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 8px 0;
+        }
+
+        .login-subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-select {
+            cursor: pointer;
+        }
+
+        .login-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 20px;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #374151;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="../assets/pm.png" alt="Pague Menos" class="login-logo" onerror="this.style.display='none'">
+            <h1 class="login-title">Endereçamento de Fraldas</h1>
+            <p class="login-subtitle">Sistema de Gestão de Endereçamento</p>
+        </div>
+
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="cd" class="form-label">Centro de Distribuição</label>
+                <select id="cd" class="form-select" required>
+                    <option value="" disabled selected>Selecione o CD</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="matricula" class="form-label">Matrícula</label>
+                <input type="number" id="matricula" class="form-input" placeholder="Digite sua matrícula" required
+                    autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="nome" class="form-label">Nome</label>
+                <input type="text" id="nome" class="form-input" placeholder="Nome do colaborador" readonly disabled
+                    style="background-color: #f3f4f6; color: #4b5563;">
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" id="password" class="form-input" placeholder="••••••••" required
+                    autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <div class="btn-content">
+                    <div class="loading-spinner" id="loadingSpinner"></div>
+                    <span id="btnText">Entrar</span>
+                </div>
+            </button>
+        </form>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <a href="../index.html" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5" />
+                <path d="M12 19l-7-7 7-7" />
+            </svg>
+            Voltar ao Hub
+        </a>
+    </div>
+
+    <script>
+        // Dados carregados
+        let CDS_DISPONIVEIS = [];
+        let USUARIOS_DISPONIVEIS = [];
+
+        // Carregar dados dos CDs e Usuários
+        async function loadData() {
+            try {
+                // Carregar CDs
+                const responseCD = await fetch('../data_base/BASE_CDS.js');
+                const textCD = await responseCD.text();
+                const matchCD = textCD.match(/module\.exports\s*=\s*(\[[\s\S]*?\]);/);
+                if (matchCD) {
+                    CDS_DISPONIVEIS = eval(matchCD[1]);
+                    console.log('✓ Dados de CDs carregados:', CDS_DISPONIVEIS.length);
+                    populateSelectCD();
+                } else {
+                    useFallbackCDs();
+                }
+
+                // Carregar Usuários
+                const responseUser = await fetch('../data_base/BASE_USUARIO.js');
+                const textUser = await responseUser.text();
+                // O arquivo BASE_USUARIO define window.DB_USUARIO diretamente
+                // Vamos executar o script para carregar no window
+                eval(textUser);
+
+                if (window.DB_USUARIO && window.DB_USUARIO.BASE_USUARIO) {
+                    USUARIOS_DISPONIVEIS = window.DB_USUARIO.BASE_USUARIO;
+                    console.log('✓ Dados de Usuários carregados:', USUARIOS_DISPONIVEIS.length);
+                } else {
+                    console.error('Erro ao carregar estrutura de usuários');
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                useFallbackCDs();
+            }
+        }
+
+        // Dados de fallback para CDs
+        function useFallbackCDs() {
+            CDS_DISPONIVEIS = [
+                { id: 1, nome: "CD01 - Fortaleza/CE" },
+                { id: 9, nome: "CD09 - Aquiraz/CE" }
+            ];
+            populateSelectCD();
+        }
+
+        // Popular o select de CDs
+        function populateSelectCD() {
+            const selectCD = document.getElementById('cd');
+            selectCD.innerHTML = '<option value="" disabled selected>Selecione o CD</option>';
+            CDS_DISPONIVEIS.forEach(cd => {
+                const option = document.createElement('option');
+                option.value = cd.id;
+                option.textContent = cd.nome;
+                selectCD.appendChild(option);
+            });
+        }
+
+        // Elementos do DOM
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const matriculaInput = document.getElementById('matricula');
+        const nomeInput = document.getElementById('nome');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        // Buscar usuário ao digitar matrícula
+        let timeoutId;
+        matriculaInput.addEventListener('input', function (e) {
+            clearTimeout(timeoutId);
+            const matricula = e.target.value.trim();
+
+            // Limpar nome se matrícula estiver vazia
+            if (!matricula) {
+                nomeInput.value = '';
+                return;
+            }
+
+            // Debounce para buscar
+            timeoutId = setTimeout(() => {
+                buscarUsuario(matricula);
+            }, 500);
+        });
+
+        // Handler de blur (sair do campo)
+        matriculaInput.addEventListener('blur', function (e) {
+            const matricula = e.target.value.trim();
+            if (matricula) buscarUsuario(matricula);
+        });
+
+        function buscarUsuario(matricula) {
+            if (!USUARIOS_DISPONIVEIS.length) return;
+
+            const usuarioEncontrado = USUARIOS_DISPONIVEIS.find(u => u.Matricula == matricula);
+
+            if (usuarioEncontrado) {
+                nomeInput.value = usuarioEncontrado.Nome;
+                errorMessage.style.display = 'none';
+                matriculaInput.classList.remove('error-border');
+                matriculaInput.classList.add('success-border');
+            } else {
+                nomeInput.value = '';
+                // Opcional: mostrar erro inline ou esperar o submit
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        // Handler do formulário de login
+        loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const matricula = matriculaInput.value.trim();
+            const nome = nomeInput.value.trim();
+            const cd = document.getElementById('cd').value;
+            const password = document.getElementById('password').value;
+
+            // Validações
+            if (!cd) {
+                showError('Selecione um CD');
+                return;
+            }
+            if (!matricula) {
+                showError('Informe sua matrícula');
+                return;
+            }
+            if (!nome) {
+                // Tenta buscar novamente
+                const usuarioEncontrado = USUARIOS_DISPONIVEIS.find(u => u.Matricula == matricula);
+                if (!usuarioEncontrado) {
+                    showError('Matrícula não encontrada na base de dados');
+                    return;
+                }
+                nomeInput.value = usuarioEncontrado.Nome; // Preenche se achou agora
+            }
+            if (!password) {
+                showError('Digite a senha');
+                return;
+            }
+
+            // Login bem sucedido
+            loginBtn.disabled = true;
+            loginBtn.querySelector('#btnText').textContent = 'Entrando...';
+            errorMessage.style.display = 'none';
+
+            console.log('🔐 Fazendo login...', { matricula, nome, cd });
+
+            // Obter nome do CD
+            let nomeCD = 'CD' + cd;
+            const cdSelecionado = CDS_DISPONIVEIS.find(c => c.id == cd);
+            if (cdSelecionado) nomeCD = cdSelecionado.nome;
+
+            // Criar sessão de longa duração
+            const sessionData = {
+                usuario: nome, // Usar nome real
+                matricula: matricula,
+                cd: cd,
+                nomeCD: nomeCD,
+                loginTime: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            };
+
+            localStorage.setItem('enderecamento_fraldas_session', JSON.stringify(sessionData));
+
+            showSuccess('Login realizado! Bem-vindo(a) ' + nome.split(' ')[0]);
+
+            setTimeout(function () {
+                window.location.href = './index.html';
+            }, 800);
+        });
+
+        // Inicialização
+        function initialize() {
+            console.log('🚀 Iniciando sistema de login...');
+            loadData();
+            document.getElementById('cd').focus();
+        }
+
+        initialize();
+    </script>
+</body>
+
+</html>

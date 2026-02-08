@@ -1,0 +1,541 @@
+/* Performance Optimizations CSS - Task 12.2
+ * Otimizações específicas para minimizar reflows e repaints
+ * Requirements: 8.5 - Minimizar reflows e repaints
+ */
+
+/* ========================================
+   CONTAINMENT OPTIMIZATIONS
+   Isolate layout, style, and paint operations
+   ======================================== */
+
+/* Main containers - Full containment */
+.app-header,
+.app-footer,
+.content {
+  contain: layout style paint;
+}
+
+/* Panel containment - Layout and style only to allow backdrop-filter */
+.panel {
+  contain: layout style;
+  isolation: isolate; /* Create new stacking context */
+}
+
+/* Product list containment - Critical for performance */
+.product-list {
+  contain: layout style paint;
+  overflow-anchor: none; /* Prevent anchor scrolling issues */
+}
+
+/* Individual product items - Layout containment */
+.product-item {
+  contain: layout style;
+  isolation: isolate;
+}
+
+/* Form elements containment */
+.form-group,
+.field {
+  contain: layout style;
+}
+
+/* Button containment */
+.btn {
+  contain: layout style;
+}
+
+/* Toast containment */
+.toast,
+.toast-progress {
+  contain: layout style paint;
+  isolation: isolate;
+}
+
+/* ========================================
+   GPU ACCELERATION OPTIMIZATIONS
+   Force elements onto GPU layers
+   ======================================== */
+
+/* Critical animated elements - Force GPU layers */
+.animate-fade-slide-up,
+.animate-slide-up-field,
+.animate-slide-in-down,
+.animate-slide-in-up,
+.animate-slide-in-right {
+  will-change: transform, opacity;
+  transform: translateZ(0); /* Force GPU layer */
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Interactive elements - GPU acceleration */
+.hover-card,
+.hover-button,
+.hover-input {
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Glassmorphism elements - Optimize backdrop-filter */
+.glassmorphism-panel,
+.glassmorphism-simple,
+.glassmorphism-floating {
+  will-change: backdrop-filter, transform;
+  transform: translateZ(0);
+  isolation: isolate;
+  /* Optimize backdrop-filter performance */
+  -webkit-backdrop-filter: var(--glassmorphism-blur);
+  backdrop-filter: var(--glassmorphism-blur);
+}
+
+/* Loading elements - Optimize spinning animations */
+.spinner,
+.loading-spinner::after {
+  will-change: transform;
+  transform: translateZ(0);
+  contain: layout style paint;
+  /* Use transform instead of changing properties */
+  animation: spin 1s linear infinite;
+}
+
+/* Button gradients - Optimize background animations */
+.btn-primary-gradient {
+  will-change: background-position, transform;
+  transform: translateZ(0);
+  /* Use background-position instead of background-image changes */
+  background-size: 200% 200%;
+}
+
+.btn-primary-gradient::before {
+  will-change: transform;
+  transform: translateZ(0);
+  /* Optimize shine animation */
+  animation: shine 3s infinite;
+}
+
+/* ========================================
+   LAYOUT OPTIMIZATION
+   Minimize layout thrashing
+   ======================================== */
+
+/* Fixed dimensions to prevent layout shifts */
+.cd-select {
+  min-width: 260px; /* Prevent width changes */
+  height: 48px; /* Fixed height */
+}
+
+.search-input {
+  height: 48px; /* Fixed height */
+}
+
+.btn {
+  min-height: 40px; /* Prevent height changes */
+  min-width: 80px; /* Prevent width changes */
+}
+
+/* Product item fixed dimensions */
+.product-item {
+  min-height: 120px; /* Prevent height changes during loading */
+  /* Use flexbox instead of changing dimensions */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Status elements - Fixed positioning */
+.search-status {
+  position: relative; /* Prevent layout shifts */
+  min-height: 48px; /* Reserve space */
+}
+
+.cd-status {
+  min-width: 120px; /* Prevent width changes */
+  text-align: center;
+}
+
+/* Toast positioning - Use transform instead of changing position */
+.toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  /* Use transform for positioning changes */
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast-progress {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  /* Use transform for positioning changes */
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.toast-progress.show {
+  transform: translateX(0);
+}
+
+/* ========================================
+   PAINT OPTIMIZATION
+   Minimize paint operations
+   ======================================== */
+
+/* Optimize border-radius rendering */
+.panel,
+.btn,
+.product-item,
+.toast {
+  /* Use consistent border-radius values */
+  border-radius: 12px;
+  /* Optimize border rendering */
+  border-style: solid;
+  border-width: 1px;
+}
+
+/* Optimize box-shadow rendering */
+.panel {
+  /* Use single box-shadow instead of multiple */
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+}
+
+.hover-card:hover {
+  /* Use transform instead of changing box-shadow */
+  box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Optimize gradient rendering */
+.btn-primary-gradient {
+  /* Use conic-gradient for better performance */
+  background: linear-gradient(135deg, #062e6f 0%, #0ea5e9 100%);
+  /* Optimize gradient size */
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+}
+
+/* Optimize text rendering */
+.product-coddv,
+.product-desc {
+  /* Optimize text rendering */
+  text-rendering: optimizeSpeed;
+  font-smooth: never;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* ========================================
+   SCROLL OPTIMIZATION
+   Optimize scrolling performance
+   ======================================== */
+
+/* Optimize scrollable containers */
+.product-list {
+  /* Use momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+  /* Optimize scroll behavior */
+  scroll-behavior: auto;
+  /* Prevent scroll anchoring */
+  overflow-anchor: none;
+  /* Use will-change for scroll */
+  will-change: scroll-position;
+}
+
+/* Optimize scroll indicators */
+.product-list::-webkit-scrollbar {
+  width: 8px;
+  /* Use simple colors to reduce paint */
+  background: transparent;
+}
+
+.product-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  /* Optimize scrollbar rendering */
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+
+/* ========================================
+   ANIMATION PERFORMANCE OPTIMIZATIONS
+   Optimize specific animations
+   ======================================== */
+
+/* Entry animations - Use transform only */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+@keyframes slideUpField {
+  from {
+    opacity: 0;
+    transform: translateY(20px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateZ(0);
+  }
+}
+
+/* Loading animations - Optimize rotation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg) translateZ(0);
+  }
+  to {
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+/* Gradient animations - Use transform instead of background-position */
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Shine animation - Optimize transform */
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) translateZ(0);
+  }
+  100% {
+    transform: translateX(100%) translateZ(0);
+  }
+}
+
+/* ========================================
+   RESPONSIVE PERFORMANCE OPTIMIZATIONS
+   Device-specific optimizations
+   ======================================== */
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Reduce animation complexity on mobile */
+  .animate-fade-slide-up,
+  .animate-slide-up-field,
+  .animate-slide-in-down {
+    animation-duration: 0.3s;
+  }
+  
+  /* Simplify glassmorphism on mobile */
+  .glassmorphism-panel,
+  .glassmorphism-simple {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  
+  /* Optimize hover effects for touch */
+  .hover-card:hover,
+  .hover-button:hover {
+    transform: none;
+  }
+  
+  .hover-card:active {
+    transform: scale(0.98) translateZ(0);
+  }
+  
+  .hover-button:active {
+    transform: scale(0.95) translateZ(0);
+  }
+}
+
+/* Small mobile optimizations */
+@media (max-width: 480px) {
+  /* Minimal animations on small screens */
+  .animate-fade-slide-up,
+  .animate-slide-up-field {
+    animation-duration: 0.2s;
+  }
+  
+  /* Disable complex effects */
+  .glassmorphism-panel::before {
+    animation: none;
+    opacity: 0.3;
+  }
+  
+  .btn-primary-gradient::before {
+    animation: none;
+    opacity: 0.2;
+  }
+}
+
+/* High-DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Optimize borders for high-DPI */
+  .panel,
+  .btn,
+  .product-item {
+    border-width: 0.5px;
+  }
+  
+  /* Optimize shadows for high-DPI */
+  .panel {
+    box-shadow: 0 4px 16px rgba(31, 38, 135, 0.08);
+  }
+}
+
+/* ========================================
+   MEMORY OPTIMIZATION
+   Reduce memory usage
+   ======================================== */
+
+/* Limit will-change usage */
+.animate-fade-slide-up.animation-complete,
+.animate-slide-up-field.animation-complete,
+.animate-slide-in-down.animation-complete,
+.animate-slide-in-up.animation-complete,
+.animate-slide-in-right.animation-complete {
+  will-change: auto; /* Remove will-change after animation */
+}
+
+/* Optimize background images */
+.btn-primary-gradient {
+  /* Use CSS gradients instead of images */
+  background-image: linear-gradient(135deg, #062e6f 0%, #0ea5e9 100%);
+}
+
+/* Optimize pseudo-elements */
+.glassmorphism-panel::before {
+  /* Limit pseudo-element complexity */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  pointer-events: none;
+}
+
+/* ========================================
+   CRITICAL RENDERING PATH OPTIMIZATION
+   Optimize initial render
+   ======================================== */
+
+/* Above-the-fold optimizations */
+.app-header,
+.panel.search {
+  /* Optimize critical elements */
+  contain: layout style;
+  will-change: auto; /* Don't use will-change on initial render */
+}
+
+/* Defer non-critical animations */
+.product-list {
+  /* Don't animate on initial load */
+  animation: none;
+}
+
+.product-item {
+  /* Defer item animations */
+  animation-delay: 0.1s;
+}
+
+/* Optimize font loading */
+body {
+  /* Use system fonts for better performance */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+               'Helvetica Neue', Arial, sans-serif;
+  /* Optimize text rendering */
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   DEBUGGING AND MONITORING
+   Performance monitoring helpers
+   ======================================== */
+
+/* Performance debugging (only in development) */
+.performance-debug * {
+  /* Highlight elements with will-change */
+  outline: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.performance-debug [style*="will-change"] {
+  /* Highlight elements with will-change */
+  outline: 2px solid rgba(255, 0, 0, 0.6);
+}
+
+.performance-debug .animate-fade-slide-up,
+.performance-debug .animate-slide-up-field {
+  /* Highlight animated elements */
+  outline: 2px solid rgba(0, 255, 0, 0.6);
+}
+
+/* Performance monitoring classes */
+.performance-monitor-fps::before {
+  content: attr(data-fps) ' FPS';
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+.performance-monitor-memory::after {
+  content: attr(data-memory) ' MB';
+  position: fixed;
+  top: 35px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 99999;
+  pointer-events: none;
+}
