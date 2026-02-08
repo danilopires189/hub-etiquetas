@@ -8,6 +8,8 @@ const $$ = (sel) => document.querySelectorAll(sel);
 let produtoAtual = null;
 let enderecoSelecionado = null;
 let sistema = null; // Instância do SistemaEnderecamentoSupabase
+let baseEndIndex = null; // Índice BASE_END filtrado por CD logado (CODDV -> ENDERECO)
+let baseEndIndexCd = null; // CD atualmente indexado
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
@@ -123,6 +125,52 @@ function inicializarPagina() {
     window.BASE_CADASTRO = window.DB_CADASTRO.BASE_CADASTRO;
     console.log(`📦 Base local carregada com ${window.BASE_CADASTRO.length} produtos.`);
   }
+
+  const sessao = sistema?.obterDadosSessao?.() || {};
+  const cdAtual = parseInt(sistema?.cd || sessao?.cd || 2, 10);
+  prepararIndiceBaseEnd(cdAtual);
+}
+
+function prepararIndiceBaseEnd(cd) {
+  if (!window.DB_END || !Array.isArray(window.DB_END.BASE_END)) {
+    console.warn('Base de endereços não carregada (BASE_END.js)');
+    baseEndIndex = null;
+    baseEndIndexCd = null;
+    return;
+  }
+
+  const cdNum = parseInt(cd, 10);
+  if (Number.isNaN(cdNum)) {
+    baseEndIndex = null;
+    baseEndIndexCd = null;
+    return;
+  }
+
+  // Reaproveita cache se o CD não mudou
+  if (baseEndIndex && baseEndIndexCd === cdNum) return;
+
+  const index = new Map();
+  const lista = window.DB_END.BASE_END;
+
+  for (const r of lista) {
+    if (!r) continue;
+    const tipo = String(r.TIPO || '').trim().toUpperCase();
+    if (tipo !== 'SEPARACAO') continue;
+    if (parseInt(r.CD, 10) !== cdNum) continue;
+
+    const coddv = String(r.CODDV || '').trim();
+    const endereco = String(r.ENDERECO || '').toUpperCase().replace(/\s+/g, '');
+    if (!coddv || !endereco) continue;
+
+    // Mantém a primeira ocorrência do CODDV para o CD
+    if (!index.has(coddv)) {
+      index.set(coddv, endereco);
+    }
+  }
+
+  baseEndIndex = index;
+  baseEndIndexCd = cdNum;
+  console.log(`📍 Índice BASE_END carregado para CD ${cdNum}: ${index.size} CODDVs`);
 }
 
 function limparCampos() {
@@ -419,6 +467,63 @@ function buscarEtiquetaNaBaseID(coddv, cd) {
   );
 
   return registro ? registro.ID : null;
+}
+
+/**
+ * Busca endereço de separação na BASE_END.js e retorna formato PP.999
+ * Exemplo: ENDERECO "D01 .001.011.056" => "D0.056"
+ */
+function buscarCodigoSeparacao(coddv, cd) {
+  const coddvStr = String(coddv || '').trim();
+  const cdNum = parseInt(cd, 10);
+  if (!coddvStr || Number.isNaN(cdNum)) return null;
+
+  prepararIndiceBaseEnd(cdNum);
+  if (!baseEndIndex || baseEndIndexCd !== cdNum) return null;
+
+  const endereco = baseEndIndex.get(coddvStr);
+  if (!endereco) return null;
+  if (endereco.length < 5) return null;
+
+  const prefixo = endereco.slice(0, 2);
+  const sufixo = endereco.slice(-3);
+  if (prefixo.length < 2 || sufixo.length < 3) return null;
+
+  return `${prefixo}.${sufixo}`;
+}
+
+function preencherCodigoSeparacaoImpressao(valor) {
+  const el = $('#printSeparacaoCode');
+  if (!el) return;
+
+  const raw = String(valor || '').trim().toUpperCase();
+  let prefixo = '00';
+  let sufixo = '000';
+
+  if (raw.includes('.')) {
+    const [p, s] = raw.split('.', 2);
+    prefixo = (p || '').slice(0, 2);
+    sufixo = (s || '').replace(/\D/g, '').slice(-3);
+  } else {
+    prefixo = raw.slice(0, 2);
+    sufixo = raw.replace(/\D/g, '').slice(-3);
+  }
+
+  prefixo = prefixo.padEnd(2, '0');
+  sufixo = sufixo.padStart(3, '0');
+
+  el.innerHTML = '';
+
+  const spanPrefixo = document.createElement('span');
+  spanPrefixo.className = 'etiqueta-xxxx-prefix';
+  spanPrefixo.textContent = prefixo;
+
+  const spanSufixo = document.createElement('span');
+  spanSufixo.className = 'etiqueta-xxxx-suffix';
+  spanSufixo.textContent = `.${sufixo}`;
+
+  el.appendChild(spanPrefixo);
+  el.appendChild(spanSufixo);
 }
 
 /**
@@ -739,6 +844,10 @@ function imprimirEtiqueta() {
   $('#printDesc').textContent = produtoAtual.DESC;
   $('#printCoddv').textContent = produtoAtual.CODDV;
   $('#printValidade').textContent = validadeImpressao;
+
+  const cdAtual = parseInt(sistema?.cd || sessao?.cd || 2, 10);
+  const codigoSeparacao = buscarCodigoSeparacao(produtoAtual.CODDV, cdAtual) || '00.000';
+  preencherCodigoSeparacaoImpressao(codigoSeparacao);
 
   const usuarioPrint = alocacao?.usuario || sessao.usuario || 'Sistema';
   const matriculaPrint = sessao.matricula || '--';

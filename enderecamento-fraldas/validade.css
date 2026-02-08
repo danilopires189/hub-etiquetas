@@ -705,6 +705,19 @@ body {
     font-weight: 900;
     letter-spacing: 0.14em;
     line-height: 0.82;
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 0.02em;
+}
+
+.etiqueta-xxxx-prefix {
+    font-size: 0.5em;
+    line-height: 1;
+}
+
+.etiqueta-xxxx-suffix {
+    font-size: 1em;
+    line-height: 1;
 }
 
 .etiqueta-validade {

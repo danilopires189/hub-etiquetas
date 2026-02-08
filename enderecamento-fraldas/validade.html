@@ -240,7 +240,9 @@
             </div>
             <div class="etiqueta-content">
                 <div class="etiqueta-validade-bloco">
-                    <div class="etiqueta-xxxx">000</div>
+                    <div class="etiqueta-xxxx" id="printSeparacaoCode">
+                        <span class="etiqueta-xxxx-prefix">00</span><span class="etiqueta-xxxx-suffix">.000</span>
+                    </div>
                     <div class="etiqueta-validade" id="printValidade">--/--</div>
                 </div>
             </div>
@@ -272,6 +274,7 @@
     <script type="module" src="../supabase/init.js"></script>
     <script src="../data_base/BASE_BARRAS.js"></script>
     <script src="../data_base/BASE_ID.js"></script>
+    <script src="../data_base/BASE_END.js"></script>
     <!-- Sistema de Endereçamento Central -->
     <script type="module" src="./enderecamento-supabase.js"></script>
     <!-- Script da Página -->
