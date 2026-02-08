@@ -1452,19 +1452,34 @@ function enhanceMobileProductSearch() {
   let firstCharTime = 0;
   let charCount = 0;
   let inputBuffer = [];
+  let previousValueLength = 0;
+
+  // Evitar listeners duplicados caso a função rode mais de uma vez
+  if (codigoInput._scannerInputHandler) {
+    codigoInput.removeEventListener('input', codigoInput._scannerInputHandler);
+  }
+  if (codigoInput._scannerKeydownHandler) {
+    codigoInput.removeEventListener('keydown', codigoInput._scannerKeydownHandler);
+  }
+  if (codigoInput._scannerFocusHandler) {
+    codigoInput.removeEventListener('focus', codigoInput._scannerFocusHandler);
+  }
+
+  async function dispararBuscaAutomaticaProduto() {
+    const codigoAtual = codigoInput.value.trim();
+    if (!codigoAtual) return;
+    console.log('⏰ EXECUTANDO BUSCA AUTOMÁTICA!');
+    await buscarProdutoHandler();
+  }
 
   // Função para processar scanner
-  function processarScanner() {
-    console.log('⏰ EXECUTANDO BUSCA AUTOMÁTICA!');
-    const btnBuscar = $('#btnBuscar');
-    if (btnBuscar && !btnBuscar.disabled) {
-      btnBuscar.click();
-    }
+  async function processarScanner() {
+    await dispararBuscaAutomaticaProduto();
     barcodeTimer = null;
   }
 
   // Add input formatting with scanner detection
-  codigoInput.addEventListener('input', function (e) {
+  codigoInput._scannerInputHandler = function (e) {
     // Ignorar eventos de composition (teclado virtual Android)
     if (e.isComposing) {
       console.log('📝 Ignorando evento de composition');
@@ -1478,6 +1493,8 @@ function enhanceMobileProductSearch() {
 
     const currentTime = Date.now();
     const timeSinceLastInput = currentTime - lastInputTime;
+    const lengthDelta = value.length - previousValueLength;
+    const bulkInsertDetected = lengthDelta > 2;
     
     // Guardar no buffer para análise
     inputBuffer.push({ char: value.slice(-1), time: currentTime });
@@ -1501,6 +1518,7 @@ function enhanceMobileProductSearch() {
         isManualEntry = false;
         inputBuffer = [{ char: value, time: currentTime }];
         codigoInput.placeholder = "Aguardando leitor...";
+        previousValueLength = value.length;
         console.log('📱 Iniciando... (threshold:', SCANNER_THRESHOLD, 'ms)');
         return;
       }
@@ -1520,7 +1538,8 @@ function enhanceMobileProductSearch() {
 
       // Detectar método de entrada
       // Usar tanto o último delay quanto a média móvel
-      const isFastInput = timeSinceLastInput <= SCANNER_THRESHOLD || 
+      const isFastInput = bulkInsertDetected ||
+                          timeSinceLastInput <= SCANNER_THRESHOLD || 
                           (velocidadeMedia > 0 && velocidadeMedia <= SCANNER_THRESHOLD + 20);
 
       if (!isFastInput) {
@@ -1551,11 +1570,13 @@ function enhanceMobileProductSearch() {
       inputBuffer = [];
       codigoInput.placeholder = isColetor ? 'Bipe o código' : 'Bipe ou digite o código';
     }
-  });
+    previousValueLength = value.length;
+  };
+  codigoInput.addEventListener('input', codigoInput._scannerInputHandler);
 
   // Add Enter key handler
-  codigoInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
+  codigoInput._scannerKeydownHandler = async function (e) {
+    if (e.key === 'Enter' || e.keyCode === 13 || (e.key === 'Tab' && codigoInput.value.trim().length >= 5)) {
       e.preventDefault();
       console.log('⏎ Enter pressionado');
 
@@ -1564,18 +1585,18 @@ function enhanceMobileProductSearch() {
         barcodeTimer = null;
       }
 
-      const btnBuscar = $('#btnBuscar');
-      if (btnBuscar && !btnBuscar.disabled) {
-        btnBuscar.click();
-      }
+      await dispararBuscaAutomaticaProduto();
     }
-  });
+  };
+  codigoInput.addEventListener('keydown', codigoInput._scannerKeydownHandler);
 
   // Fallback: detectar quando o input recebe foco (alguns scanners disparam assim)
-  codigoInput.addEventListener('focus', function() {
+  codigoInput._scannerFocusHandler = function () {
     console.log('🎯 Input recebeu foco');
     lastInputTime = Date.now();
-  });
+    previousValueLength = codigoInput.value.length;
+  };
+  codigoInput.addEventListener('focus', codigoInput._scannerFocusHandler);
 
   console.log('📱 Scanner configurado! Threshold:', SCANNER_THRESHOLD, 'ms');
 }
@@ -1764,6 +1785,9 @@ function configurarScannerMobileAddressInput() {
   if (addressInput._scannerKeydownHandler) {
     addressInput.removeEventListener('keydown', addressInput._scannerKeydownHandler);
   }
+  if (addressInput._scannerFocusHandler) {
+    addressInput.removeEventListener('focus', addressInput._scannerFocusHandler);
+  }
 
   // Adicionar atributos para melhor experiência mobile
   addressInput.setAttribute('autocomplete', 'off');
@@ -1789,6 +1813,7 @@ function configurarScannerMobileAddressInput() {
   let isManualEntry = false;
   let charCount = 0;
   let firstCharTime = 0;
+  let previousValueLength = 0;
 
   // Handler para evento input
   addressInput._scannerInputHandler = function(e) {
@@ -1799,6 +1824,8 @@ function configurarScannerMobileAddressInput() {
 
     const currentTime = Date.now();
     const timeSinceLastInput = currentTime - lastInputTime;
+    const lengthDelta = value.length - previousValueLength;
+    const bulkInsertDetected = lengthDelta > 3;
 
     // SEMPRE atualizar lastInputTime
     lastInputTime = currentTime;
@@ -1817,6 +1844,7 @@ function configurarScannerMobileAddressInput() {
         firstCharTime = currentTime;
         charCount = 1;
         addressInput.placeholder = "Aguardando leitor...";
+        previousValueLength = value.length;
         console.log('📱 Modal: Iniciando... (threshold:', SCANNER_THRESHOLD, 'ms)');
         return;
       }
@@ -1826,7 +1854,7 @@ function configurarScannerMobileAddressInput() {
 
       // Detectar método de entrada baseado no timing
       // Coletores: < 30ms | Celulares: < 50ms = scanner
-      if (timeSinceLastInput > SCANNER_THRESHOLD) {
+      if (!bulkInsertDetected && timeSinceLastInput > SCANNER_THRESHOLD) {
         // Entrada manual - NÃO executa timer
         isManualEntry = true;
         addressInput.placeholder = "Ex: PF01.001.001.A01";
@@ -1860,11 +1888,12 @@ function configurarScannerMobileAddressInput() {
       charCount = 0;
       addressInput.placeholder = 'Ex: PF01.001.001.A01';
     }
+    previousValueLength = value.length;
   };
 
   // Handler para evento keydown (Enter)
   addressInput._scannerKeydownHandler = function(e) {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' || e.keyCode === 13 || (e.key === 'Tab' && addressInput.value.trim().length >= 14)) {
       e.preventDefault();
       console.log('⏎ Modal Endereço: Enter pressionado - validando endereço');
 
@@ -1881,6 +1910,11 @@ function configurarScannerMobileAddressInput() {
   // Adicionar event listeners
   addressInput.addEventListener('input', addressInput._scannerInputHandler);
   addressInput.addEventListener('keydown', addressInput._scannerKeydownHandler);
+  addressInput._scannerFocusHandler = function () {
+    lastInputTime = Date.now();
+    previousValueLength = addressInput.value.length;
+  };
+  addressInput.addEventListener('focus', addressInput._scannerFocusHandler);
 
   console.log('📱 Detecção de scanner configurada para input de endereço mobile');
 }
