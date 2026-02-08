@@ -3579,6 +3579,7 @@ async function transferirParaEnderecoDestino(produto, origem, destino) {
 
 /* ===== Gestão de Produtos ===== */
 let produtoAtual = null;
+let buscaEmAndamentoToken = 0;
 
 let enderecosProdutos = JSON.parse(localStorage.getItem('enderecos_produtos') || '{}');
 
@@ -4184,6 +4185,7 @@ async function exibirHistoricoCompleto() {
 
 /* ===== Event Handlers ===== */
 async function buscarProdutoHandler() {
+  const tokenBuscaAtual = ++buscaEmAndamentoToken;
   const codigoElement = $('#codigoProduto');
 
   if (!codigoElement) {
@@ -4222,7 +4224,7 @@ async function buscarProdutoHandler() {
   
   // Em paralelo, verificar no banco (sem bloquear a interface)
   if (window.sistemaEnderecamento && window.sistemaEnderecamento.verificarStatusProdutoRealTime) {
-    verificarStatusEmBackground(produto, statusCache);
+    verificarStatusEmBackground(produto, statusCache, tokenBuscaAtual);
   }
 }
 
@@ -4230,10 +4232,13 @@ async function buscarProdutoHandler() {
  * Verifica o status do produto em background e atualiza a interface se necessário
  * Não bloqueia a interface - ideal para internet lenta
  */
-async function verificarStatusEmBackground(produto, statusCache) {
+async function verificarStatusEmBackground(produto, statusCache, tokenBusca) {
   const syncIndicator = $('#syncIndicator');
   
   try {
+    // Busca mais recente já mudou; não atualizar interface com resultado antigo
+    if (tokenBusca !== buscaEmAndamentoToken) return;
+
     console.log('🔄 [Background] Verificando status atualizado...');
     
     // Mostrar indicador de sincronização
@@ -4249,6 +4254,9 @@ async function verificarStatusEmBackground(produto, statusCache) {
       window.sistemaEnderecamento.verificarStatusProdutoRealTime(produto.CODDV),
       timeoutPromise
     ]);
+
+    // Ignorar resposta atrasada de uma busca antiga
+    if (tokenBusca !== buscaEmAndamentoToken) return;
     
     console.log('✅ [Background] Status obtido:', statusReal);
     
@@ -4290,6 +4298,8 @@ async function verificarStatusEmBackground(produto, statusCache) {
 
 function limparCampos() {
   const codigoElement = $('#codigoProduto');
+  // Invalida verificações assíncronas pendentes de buscas anteriores
+  buscaEmAndamentoToken++;
 
   if (codigoElement) {
     codigoElement.value = '';
@@ -4297,6 +4307,27 @@ function limparCampos() {
 
   produtoAtual = null;
   exibirProduto(null);
+
+  // Hard reset de estado de modais/backdrops mobile para evitar tela "travada"
+  if (isMobileDevice()) {
+    try {
+      if (typeof mobileModalManager?.closeAllModals === 'function') {
+        mobileModalManager.closeAllModals();
+      }
+    } catch (error) {
+      console.warn('⚠️ Falha ao fechar modais mobile no limpar:', error);
+    }
+
+    ['mobileAddressModal', 'mobileTransferModal', 'mobileDeallocationModal', 'mobileConfirmationModal']
+      .forEach((modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.add('hide');
+      });
+
+    document.querySelectorAll('.mobile-modal-backdrop').forEach((el) => el.remove());
+    document.body.classList.remove('modal-open');
+  }
+
   $('#codigoProduto').focus();
 }
 
