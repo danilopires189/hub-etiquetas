@@ -492,13 +492,40 @@ function buscarCodigoSeparacao(coddv, cd) {
   return { prefixo, sufixo };
 }
 
+function buscarProdutoCadastroPorCoddv(coddv) {
+  const coddvStr = String(coddv || '').trim();
+  if (!coddvStr) return null;
+
+  const base = window.BASE_CADASTRO
+    || (window.DB_CADASTRO && Array.isArray(window.DB_CADASTRO.BASE_CADASTRO)
+      ? window.DB_CADASTRO.BASE_CADASTRO
+      : null);
+
+  if (!Array.isArray(base)) return null;
+  return base.find((p) => String(p.CODDV || '').trim() === coddvStr) || null;
+}
+
 function obterBarrasPrincipal(produto) {
-  if (!produto || produto.BARRAS == null || produto.BARRAS === '') return '--';
-  if (Array.isArray(produto.BARRAS)) {
-    const primeiro = produto.BARRAS.find(v => String(v || '').trim());
-    return primeiro ? String(primeiro).trim() : '--';
-  }
-  return String(produto.BARRAS).trim() || '--';
+  const extrairPrimeiro = (valor) => {
+    if (valor == null || valor === '') return '';
+    if (Array.isArray(valor)) {
+      const primeiro = valor.find(v => String(v || '').trim());
+      return primeiro ? String(primeiro).trim() : '';
+    }
+    return String(valor).trim();
+  };
+
+  // 1) Tenta o próprio objeto recebido
+  const barrasDireto = extrairPrimeiro(produto?.BARRAS);
+  if (barrasDireto) return barrasDireto;
+
+  // 2) Fallback pelo CODDV na base local (BASE_BARRAS.js -> DB_CADASTRO)
+  const coddv = produto?.CODDV;
+  const produtoBase = buscarProdutoCadastroPorCoddv(coddv);
+  const barrasBase = extrairPrimeiro(produtoBase?.BARRAS);
+  if (barrasBase) return barrasBase;
+
+  return '--';
 }
 
 function preencherCodigoSeparacaoImpressao(codigoSeparacao) {
