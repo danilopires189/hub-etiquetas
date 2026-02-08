@@ -260,19 +260,42 @@ function validarFormatoEndereco(termo) {
   return /^PF\d{2}/.test(termo) || /^\d{2}-\d{3}/.test(termo); // Aceitar formatos diversos
 }
 
+function obterCdAtual() {
+  const sessao = sistema?.obterDadosSessao?.() || {};
+  return parseInt(sistema?.cd || sessao?.cd || 2, 10);
+}
+
+async function garantirCacheDoCdLogado() {
+  if (!sistema) return;
+
+  const cdAtual = obterCdAtual();
+  if (!Number.isNaN(cdAtual) && sistema.cd !== cdAtual) {
+    sistema.cd = cdAtual;
+    sistema.cacheCarregado = false;
+  }
+
+  if (!sistema.cacheCarregado && typeof sistema.carregarCache === 'function') {
+    await sistema.carregarCache();
+  }
+}
+
 async function buscarAlocaDireta(termo) {
   if (!sistema.client) return [];
+  const cdAtual = obterCdAtual();
+
   // Tenta buscar por CODDV
   const { data } = await sistema.client.from('alocacoes_fraldas')
     .select('*')
     .eq('coddv', termo)
-    .eq('ativo', true);
+    .eq('ativo', true)
+    .eq('cd', cdAtual);
   return data || [];
 }
 
 async function processarProduto(produto) {
   // Buscar onde está alocado
   // Usar sistema.cacheAlocacoes se disponivel, ou buscar direto
+  await garantirCacheDoCdLogado();
 
   const alocacoes = [];
 
@@ -294,16 +317,21 @@ async function processarProduto(produto) {
 }
 
 async function processarEndereco(endereco) {
+  await garantirCacheDoCdLogado();
+
   // Normalizar endereço?
   // Buscar no cache
   const produtosNoEndereco = sistema.cacheAlocacoes[endereco.toUpperCase()] || [];
 
   if (produtosNoEndereco.length === 0) {
+    const cdAtual = obterCdAtual();
+
     // Tentar buscar direto no banco pra garantir
     const { data } = await sistema.client.from('alocacoes_fraldas')
       .select('*')
       .eq('endereco', endereco.toUpperCase())
-      .eq('ativo', true);
+      .eq('ativo', true)
+      .eq('cd', cdAtual);
 
     if (data && data.length > 0) {
       mostrarListaEnderecos(data.map(p => ({ ...p, endereco: endereco.toUpperCase() })));
