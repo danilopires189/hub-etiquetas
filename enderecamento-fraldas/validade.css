@@ -700,7 +700,7 @@ body {
 
 .etiqueta-xxxx {
     color: #000000;
-    font-family: 'Courier New', monospace;
+    font-family: 'Arial Black', Arial, sans-serif;
     font-size: clamp(14rem, 42vh, 30rem);
     font-weight: 900;
     letter-spacing: 0.14em;
@@ -711,7 +711,7 @@ body {
     color: #0b3a88;
     font-size: clamp(6rem, 19vh, 14rem);
     font-weight: 900;
-    font-family: 'Courier New';
+    font-family: 'Arial Black', Arial, sans-serif;
     line-height: 0.95;
 }
 
