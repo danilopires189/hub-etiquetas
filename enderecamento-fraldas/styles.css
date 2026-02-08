@@ -235,14 +235,14 @@ body {
 .panel-header {
   grid-column: 1 / -1;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.35rem;
 }
 
 .panel-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--brand-blue);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -252,6 +252,41 @@ body {
 .panel-description {
   color: var(--muted);
   font-size: 0.95rem;
+}
+
+/* Ajustes desktop do bloco de busca principal */
+@media (min-width: 769px) {
+  .field-codigo-produto {
+    grid-column: span 3;
+    max-width: 640px;
+  }
+
+  .field-codigo-produto .search-row input {
+    min-height: 50px;
+    font-size: 1.05rem;
+  }
+
+  .field-codigo-produto .hint {
+    margin-top: 6px;
+    display: inline-block;
+  }
+
+  .field.full .row {
+    gap: 10px;
+  }
+
+  .field.full .row .btn {
+    min-height: 48px;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .field.full .row .btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
 }
 
 /* Mobile Action Buttons */
