@@ -739,11 +739,12 @@ function imprimirEtiqueta() {
   $('#printDesc').textContent = produtoAtual.DESC;
   $('#printCoddv').textContent = produtoAtual.CODDV;
   $('#printValidade').textContent = validadeImpressao;
-  $('#printEndereco').textContent = enderecoSelecionado;
 
-  $('#printUsuario').textContent = alocacao?.usuario || sessao.usuario || 'Sistema';
-  $('#printMatricula').textContent = sessao.matricula || '';
-  $('#printData').textContent = new Date().toLocaleString('pt-BR');
+  const usuarioPrint = alocacao?.usuario || sessao.usuario || 'Sistema';
+  const matriculaPrint = sessao.matricula || '--';
+  const enderecoPrint = enderecoSelecionado || '--';
+  const dataPrint = new Date().toLocaleString('pt-BR');
+  $('#printFooterLine').textContent = `${usuarioPrint} . ${matriculaPrint} . ${enderecoPrint} . ${dataPrint}`;
 
   const template = $('#printTemplate');
   template.classList.remove('hide');

@@ -563,7 +563,7 @@ body {
 @media print {
     @page {
         size: A4 landscape;
-        margin: 10mm 5mm;
+        margin: 0;
     }
 
     body * {
@@ -586,6 +586,8 @@ body {
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 0;
+        margin: 0;
     }
 }
 
@@ -611,51 +613,70 @@ body {
 }
 
 .etiqueta-a4 {
-    border: 4px solid #0b3a88;
-    border-radius: 20px;
-    padding: 30px;
+    border: 2px solid #0b3a88;
+    border-radius: 14px;
+    padding: 16px 18px;
     background: white;
-    width: 100%;
-    max-width: 820px;
-    min-height: 420px;
+    width: calc(100vw - 1cm);
+    height: calc(100vh - 1cm);
+    margin: 0.5cm;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
 }
 
 .etiqueta-header {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
     border-bottom: 3px solid #e2e8f0;
-    padding-bottom: 20px;
-    margin-bottom: 25px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
 }
 
 .etiqueta-logo {
-    height: 60px;
+    height: 42px;
+    flex-shrink: 0;
 }
 
 .etiqueta-header-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
     min-width: 0;
+    flex: 1;
+}
+
+.etiqueta-header-line {
+    width: 100%;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .etiqueta-desc {
-    font-size: 1.45rem;
+    font-size: clamp(1.3rem, 2.4vw, 2.1rem);
     font-weight: 700;
     color: #0f172a;
-    line-height: 1.2;
-    word-break: break-word;
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.etiqueta-sep {
+    color: #0b3a88;
+    font-weight: 700;
+    font-size: clamp(1.1rem, 2vw, 1.8rem);
+    flex-shrink: 0;
 }
 
 .etiqueta-coddv {
     font-family: 'Courier New', monospace;
-    font-size: 1.4rem;
+    font-size: clamp(1.2rem, 2.2vw, 1.95rem);
     font-weight: 700;
     color: #0b3a88;
+    flex-shrink: 0;
+    line-height: 1.1;
 }
 
 .etiqueta-content {
@@ -678,7 +699,7 @@ body {
 .etiqueta-xxxx {
     color: #0b3a88;
     font-family: 'Courier New', monospace;
-    font-size: 5.5rem;
+    font-size: clamp(4.8rem, 12vw, 8.5rem);
     font-weight: 800;
     letter-spacing: 0.14em;
     line-height: 1;
@@ -686,33 +707,29 @@ body {
 
 .etiqueta-validade {
     color: #dc2626;
-    font-size: 2.2rem;
+    font-size: clamp(1.9rem, 4.8vw, 3.4rem);
     font-weight: 800;
     font-family: 'Courier New';
+    line-height: 1;
 }
 
 .etiqueta-footer {
-    margin-top: 25px;
-    padding-top: 20px;
+    margin-top: 12px;
+    padding-top: 12px;
     border-top: 3px solid #e2e8f0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    font-size: 1.1rem;
+    display: block;
 }
 
-.etiqueta-usuario,
-.etiqueta-endereco,
-.etiqueta-data {
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    color: #1f2937;
-}
-
-.etiqueta-endereco {
+.etiqueta-footer-line {
+    width: 100%;
     text-align: center;
-    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: clamp(0.95rem, 1.75vw, 1.35rem);
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* =========================================
