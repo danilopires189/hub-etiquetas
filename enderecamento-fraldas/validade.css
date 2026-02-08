@@ -679,6 +679,15 @@ body {
     line-height: 1.1;
 }
 
+.etiqueta-barras {
+    font-family: 'Courier New', monospace;
+    font-size: clamp(1.2rem, 2.2vw, 1.95rem);
+    font-weight: 700;
+    color: #0b3a88;
+    flex-shrink: 0;
+    line-height: 1.1;
+}
+
 .etiqueta-content {
     display: flex;
     align-items: center;
@@ -701,31 +710,28 @@ body {
 .etiqueta-xxxx {
     color: #000000;
     font-family: 'Arial Black', Arial, sans-serif;
-    font-size: clamp(9.8rem, 29.4vh, 21rem);
+    font-size: clamp(14rem, 42vh, 30rem);
     font-weight: 900;
     letter-spacing: 0.14em;
     line-height: 0.82;
-    display: inline-flex;
-    align-items: flex-end;
-    gap: 0.02em;
-}
-
-.etiqueta-xxxx-prefix {
-    font-size: 0.5em;
-    line-height: 1;
-}
-
-.etiqueta-xxxx-suffix {
-    font-size: 1em;
-    line-height: 1;
 }
 
 .etiqueta-validade {
     color: #0b3a88;
-    font-size: clamp(4.2rem, 13.3vh, 9.8rem);
+    font-size: clamp(6rem, 19vh, 14rem);
     font-weight: 900;
     font-family: 'Arial Black', Arial, sans-serif;
     line-height: 0.95;
+}
+
+.etiqueta-prefix-line {
+    margin-top: 6px;
+    text-align: left;
+    font-family: 'Courier New', monospace;
+    font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+    font-weight: 800;
+    color: #111827;
+    min-height: 1.2em;
 }
 
 .etiqueta-footer {

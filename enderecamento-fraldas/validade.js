@@ -325,7 +325,7 @@ function exibirProdutoNaoAlocado(produto) {
   $('.produto-status').textContent = 'Não Alocado';
   $('.produto-status').className = 'produto-status badge badge-neutral';
   $('.produto-desc').textContent = produto.DESC;
-  $('.produto-barras').textContent = Array.isArray(produto.BARRAS) ? produto.BARRAS.join(', ') : produto.BARRAS;
+  $('.produto-barras').textContent = obterBarrasPrincipal(produto);
   $('.produto-endereco').textContent = '-';
   $('.produto-validade-conta').textContent = 'Produto sem alocação ativa';
 
@@ -345,7 +345,7 @@ function exibirProdutoAlocado(produto, alocacao) {
   $('.produto-status').textContent = 'Alocado';
   $('.produto-status').className = 'produto-status badge badge-success';
   $('.produto-desc').textContent = alocacao.descricao_produto || produto.DESC;
-  $('.produto-barras').textContent = Array.isArray(produto.BARRAS) ? produto.BARRAS.join(', ') : produto.BARRAS;
+  $('.produto-barras').textContent = obterBarrasPrincipal(produto);
 
   $('.produto-endereco').textContent = alocacao.endereco;
   $('.produto-validade-conta').textContent = validadeFmt;
@@ -489,41 +489,28 @@ function buscarCodigoSeparacao(coddv, cd) {
   const sufixo = endereco.slice(-3);
   if (prefixo.length < 2 || sufixo.length < 3) return null;
 
-  return `${prefixo}.${sufixo}`;
+  return { prefixo, sufixo };
 }
 
-function preencherCodigoSeparacaoImpressao(valor) {
-  const el = $('#printSeparacaoCode');
-  if (!el) return;
-
-  const raw = String(valor || '').trim().toUpperCase();
-  let prefixo = '00';
-  let sufixo = '000';
-
-  if (raw.includes('.')) {
-    const [p, s] = raw.split('.', 2);
-    prefixo = (p || '').slice(0, 2);
-    sufixo = (s || '').replace(/\D/g, '').slice(-3);
-  } else {
-    prefixo = raw.slice(0, 2);
-    sufixo = raw.replace(/\D/g, '').slice(-3);
+function obterBarrasPrincipal(produto) {
+  if (!produto || produto.BARRAS == null || produto.BARRAS === '') return '--';
+  if (Array.isArray(produto.BARRAS)) {
+    const primeiro = produto.BARRAS.find(v => String(v || '').trim());
+    return primeiro ? String(primeiro).trim() : '--';
   }
+  return String(produto.BARRAS).trim() || '--';
+}
 
-  prefixo = prefixo.padEnd(2, '0');
-  sufixo = sufixo.padStart(3, '0');
+function preencherCodigoSeparacaoImpressao(codigoSeparacao) {
+  const elCentro = $('#printSeparacaoCode');
+  const elPrefixo = $('#printSeparacaoPrefix');
+  if (!elCentro || !elPrefixo) return;
 
-  el.innerHTML = '';
+  const prefixo = (codigoSeparacao?.prefixo || '00').toString().toUpperCase().slice(0, 2).padEnd(2, '0');
+  const sufixo = (codigoSeparacao?.sufixo || '000').toString().replace(/\D/g, '').slice(-3).padStart(3, '0');
 
-  const spanPrefixo = document.createElement('span');
-  spanPrefixo.className = 'etiqueta-xxxx-prefix';
-  spanPrefixo.textContent = prefixo;
-
-  const spanSufixo = document.createElement('span');
-  spanSufixo.className = 'etiqueta-xxxx-suffix';
-  spanSufixo.textContent = `.${sufixo}`;
-
-  el.appendChild(spanPrefixo);
-  el.appendChild(spanSufixo);
+  elCentro.textContent = sufixo;
+  elPrefixo.textContent = prefixo;
 }
 
 /**
@@ -843,10 +830,11 @@ function imprimirEtiqueta() {
 
   $('#printDesc').textContent = produtoAtual.DESC;
   $('#printCoddv').textContent = produtoAtual.CODDV;
+  $('#printBarras').textContent = obterBarrasPrincipal(produtoAtual);
   $('#printValidade').textContent = validadeImpressao;
 
   const cdAtual = parseInt(sistema?.cd || sessao?.cd || 2, 10);
-  const codigoSeparacao = buscarCodigoSeparacao(produtoAtual.CODDV, cdAtual) || '00.000';
+  const codigoSeparacao = buscarCodigoSeparacao(produtoAtual.CODDV, cdAtual) || { prefixo: '00', sufixo: '000' };
   preencherCodigoSeparacaoImpressao(codigoSeparacao);
 
   const usuarioPrint = alocacao?.usuario || sessao.usuario || 'Sistema';
