@@ -403,6 +403,13 @@ body {
     gap: 1rem;
 }
 
+.report-actions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
 .csv-inputs-row {
     display: flex;
     gap: 1rem;

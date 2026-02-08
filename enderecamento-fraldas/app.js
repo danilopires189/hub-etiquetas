@@ -4332,11 +4332,15 @@ async function verificarStatusEmBackground(produto, statusCache, tokenBusca) {
 
 function limparCampos() {
   const codigoElement = $('#codigoProduto');
+  const btnClearInput = $('#btnClearInput');
   // Invalida verificações assíncronas pendentes de buscas anteriores
   buscaEmAndamentoToken++;
 
   if (codigoElement) {
     codigoElement.value = '';
+  }
+  if (btnClearInput) {
+    btnClearInput.classList.add('hide');
   }
 
   produtoAtual = null;
@@ -5387,6 +5391,17 @@ function configurarEventos() {
     btnClearInput.addEventListener('click', () => {
       limparCampos();
     });
+  }
+
+  const codigoInput = $('#codigoProduto');
+  if (codigoInput && btnClearInput) {
+    const atualizarBotaoLimparInput = () => {
+      const temValor = codigoInput.value.trim().length > 0;
+      btnClearInput.classList.toggle('hide', !temValor);
+    };
+
+    codigoInput.addEventListener('input', atualizarBotaoLimparInput);
+    atualizarBotaoLimparInput();
   }
 
   // Botões de ação do produto
