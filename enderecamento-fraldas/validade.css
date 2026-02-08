@@ -83,19 +83,22 @@ body {
     position: relative;
     display: flex;
     align-items: center;
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     /* Ocupar todo espaço restante */
 }
 
 .search-input-wrapper input {
     width: 100%;
+    min-width: 0;
     height: 52px;
     /* Ajuste padding: 3.5rem na esq (scanner) e 3rem na dir (limpar) */
     padding: 0.5rem 3rem 0.5rem 3.5rem;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 1.1rem;
-    transition: all 0.2s;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     background: white;
     color: #1e293b;
 }
@@ -109,6 +112,8 @@ body {
 .search-input-wrapper .scanner-icon {
     position: absolute;
     left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
     color: #64748b;
     cursor: pointer;
     display: flex;
@@ -141,6 +146,7 @@ body {
 .search-actions {
     display: flex;
     margin-top: 0;
+    flex-shrink: 0;
     /* Remove margem topo pois está na linha */
 }
 
@@ -522,6 +528,29 @@ body {
 
     .search-actions {
         width: 100%;
+    }
+
+    .search-input-wrapper input {
+        height: 48px;
+        padding-left: 3.1rem !important;
+        padding-right: 2.9rem !important;
+        font-size: 16px;
+    }
+
+    .search-input-wrapper .scanner-icon {
+        left: 0.75rem;
+        width: 22px;
+        height: 22px;
+    }
+
+    .search-input-wrapper .clear-btn {
+        right: 6px;
+        padding: 4px;
+    }
+
+    .search-input-wrapper .clear-btn svg {
+        width: 16px;
+        height: 16px;
     }
 
     #btnBuscar {

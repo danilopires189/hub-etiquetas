@@ -610,7 +610,18 @@ function addScannerButtons() {
 
 // Adicionar botão de scanner a um campo específico
 function addScannerButton(inputElement, scanType, callback) {
+    // Permitir que páginas controlem scanner manualmente sem injeção automática
+    if (inputElement.dataset && inputElement.dataset.noAutoScanner === 'true') {
+        return;
+    }
+
     const container = inputElement.parentElement;
+
+    // Se o campo já possui UI própria de scanner, não injetar wrapper/botão extra
+    if (!container) return;
+    if (container.querySelector('#btnScan') || container.classList.contains('search-input-wrapper')) {
+        return;
+    }
     
     // Criar wrapper se não existir
     if (!container.classList.contains('input-with-scanner')) {
