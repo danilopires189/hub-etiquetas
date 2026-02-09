@@ -1196,7 +1196,7 @@ async function imprimirEtiqueta() {
 
   const matriculaPrint = sessao.matricula || '--';
   const dataPrint = new Date().toLocaleString('pt-BR');
-  $('#printFooterLine').textContent = `${matriculaPrint} . ${enderecoPrint} . ${dataPrint}`;
+  $('#printFooterLine').textContent = `Mat: ${matriculaPrint} . ${enderecoPrint} . ${dataPrint}`;
 
   const template = $('#printTemplate');
   template.classList.remove('hide');
