@@ -138,6 +138,14 @@ function inicializarPagina() {
   prepararIndiceBaseEnd(cdAtual);
 }
 
+function normalizarTipoEndereco(tipo) {
+  return String(tipo || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toUpperCase();
+}
+
 function prepararIndiceBaseEnd(cd) {
   if (!window.DB_END || !Array.isArray(window.DB_END.BASE_END)) {
     console.warn('Base de endereços não carregada (BASE_END.js)');
@@ -161,7 +169,7 @@ function prepararIndiceBaseEnd(cd) {
 
   for (const r of lista) {
     if (!r) continue;
-    const tipo = String(r.TIPO || '').trim().toUpperCase();
+    const tipo = normalizarTipoEndereco(r.TIPO);
     if (tipo !== 'SEPARACAO') continue;
     if (parseInt(r.CD, 10) !== cdNum) continue;
 
@@ -194,7 +202,7 @@ function limparCampos() {
 }
 
 function obterTipoNaoAlocadoSelecionado() {
-  const valor = ($('#naoAlocadoTipo')?.value || 'SEPARACAO').toString().toUpperCase();
+  const valor = normalizarTipoEndereco($('#naoAlocadoTipo')?.value || 'SEPARACAO');
   return valor === 'PULMAO' ? 'PULMAO' : 'SEPARACAO';
 }
 
@@ -570,10 +578,10 @@ function buscarRegistroBaseEnd(coddv, cd, tipo = 'SEPARACAO') {
   const cdNum = parseInt(cd, 10);
   if (!coddvStr || Number.isNaN(cdNum)) return null;
 
-  const tipoNormalizado = String(tipo || 'SEPARACAO').trim().toUpperCase();
+  const tipoNormalizado = normalizarTipoEndereco(tipo || 'SEPARACAO');
 
   return window.DB_END.BASE_END.find((r) => {
-    const tipoRegistro = String(r.TIPO || '').trim().toUpperCase();
+    const tipoRegistro = normalizarTipoEndereco(r.TIPO);
     return (
       String(r.CODDV || '').trim() === coddvStr
       && parseInt(r.CD, 10) === cdNum
