@@ -1,5 +1,5 @@
 // BASE_LOJAS.js - Auto-convertido de BASE_LOJAS.xlsx
-// 09/02/2026, 08:11:24
+// 09/02/2026, 12:08:59
 
 window.DB_LOJAS = {
   BASE_LOJAS:   {
