@@ -848,3 +848,15 @@ body {
     stroke-width: 2.5px;
     /* Ícone mais encorpado */
 }
+
+.modal-validade-input {
+    width: 100%;
+    max-width: 220px;
+    margin: 0.75rem auto 0;
+    display: block;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-family: 'Courier New', monospace;
+}

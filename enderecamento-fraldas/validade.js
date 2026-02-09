@@ -580,28 +580,69 @@ function preencherCodigoSeparacaoImpressao(codigoSeparacao) {
 }
 
 function solicitarValidadeManual() {
-  while (true) {
-    const entrada = window.prompt('Informe a validade (MMAA ou MM/AA):', '');
-    if (entrada === null) return null;
+  return new Promise((resolve) => {
+    const modal = $('#modalValidadeManual');
+    const input = $('#inputModalValidade');
+    const btnConfirmar = $('#btnModalValidadeConfirmar');
+    const btnCancelar = $('#btnModalValidadeCancelar');
+    const btnClose = $('#btnModalValidadeClose');
 
-    const valor = String(entrada).trim().toUpperCase();
-    if (!valor) {
-      showToast('Validade não informada.', 'warning');
-      continue;
+    if (!modal || !input || !btnConfirmar || !btnCancelar || !btnClose) {
+      const fallback = window.prompt('Informe a validade (MMAA):', '');
+      if (!fallback) return resolve(null);
+      const valor = String(fallback).replace(/\D/g, '').slice(0, 4);
+      if (!/^\d{4}$/.test(valor)) return resolve(null);
+      return resolve(`${valor.substring(0, 2)}/${valor.substring(2)}`);
     }
 
-    const soDigitos = valor.replace(/\D/g, '');
-    if (/^\d{4}$/.test(soDigitos)) {
-      return `${soDigitos.substring(0, 2)}/${soDigitos.substring(2)}`;
-    }
+    const fechar = (valor) => {
+      modal.classList.remove('active');
+      input.removeEventListener('input', tratarInput);
+      input.removeEventListener('keydown', tratarTecla);
+      btnConfirmar.onclick = null;
+      btnCancelar.onclick = null;
+      btnClose.onclick = null;
+      resolve(valor);
+    };
 
-    const normalizado = valor.replace(/\s+/g, '');
-    if (/^\d{2}\/\d{2}$/.test(normalizado)) {
-      return normalizado;
-    }
+    const confirmar = () => {
+      const valor = input.value.replace(/\D/g, '').slice(0, 4);
+      if (!/^\d{4}$/.test(valor)) {
+        showToast('Informe a validade no formato MMAA (4 dígitos).', 'warning');
+        input.focus();
+        input.select();
+        return;
+      }
+      fechar(`${valor.substring(0, 2)}/${valor.substring(2)}`);
+    };
 
-    showToast('Formato inválido. Use MMAA ou MM/AA.', 'warning');
-  }
+    const tratarInput = () => {
+      input.value = input.value.replace(/\D/g, '').slice(0, 4);
+    };
+
+    const tratarTecla = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        confirmar();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        fechar(null);
+      }
+    };
+
+    input.value = '';
+    input.addEventListener('input', tratarInput);
+    input.addEventListener('keydown', tratarTecla);
+    btnConfirmar.onclick = confirmar;
+    btnCancelar.onclick = () => fechar(null);
+    btnClose.onclick = () => fechar(null);
+
+    modal.classList.add('active');
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 30);
+  });
 }
 
 /**
@@ -900,7 +941,7 @@ function baixarCSV(dados, filename) {
 // IMPRESSÃO / UTILS
 // =========================================================
 
-function imprimirEtiqueta() {
+async function imprimirEtiqueta() {
   if (!produtoAtual) return;
   const sessao = sistema.obterDadosSessao();
   const cdAtual = parseInt(sistema?.cd || sessao?.cd || 2, 10);
@@ -933,7 +974,7 @@ function imprimirEtiqueta() {
       return;
     }
 
-    const validadeManual = solicitarValidadeManual();
+    const validadeManual = await solicitarValidadeManual();
     if (!validadeManual) return;
 
     validadeImpressao = validadeManual;

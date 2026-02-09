@@ -272,6 +272,25 @@
         </div>
     </div>
 
+    <!-- Modal de Validade Manual -->
+    <div id="modalValidadeManual" class="modal-overlay">
+        <div class="modal animate-pop-in">
+            <div class="modal-header">
+                <h3 class="modal-title">Inserir Validade</h3>
+                <button type="button" class="modal-close" id="btnModalValidadeClose" aria-label="Fechar modal">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Informe a validade (MMAA):</p>
+                <input type="text" id="inputModalValidade" class="modal-validade-input" placeholder="0000" maxlength="4"
+                    inputmode="numeric" autocomplete="off">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" id="btnModalValidadeCancelar">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnModalValidadeConfirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts - Ordem Correta de Carregamento -->
     <script src="https://unpkg.com/@supabase/supabase-js@2.33.1/dist/umd/supabase.js"></script>
     <script type="module" src="../supabase/init.js"></script>
