@@ -159,9 +159,7 @@ function buscarProdutoNaBase(termo) {
   return found || null;
 }
 
-function obterBarrasPrincipal(produto, codigoDigitado = '') {
-  const digitado = String(codigoDigitado || '').trim();
-  if (digitado) return digitado;
+function obterBarrasPrincipal(produto) {
   if (!produto) return '--';
   if (Array.isArray(produto.BARRAS)) {
     const primeiro = produto.BARRAS.find((v) => String(v || '').trim());
@@ -203,7 +201,7 @@ async function buscarProdutoColeta() {
   produtoSelecionado = {
     CODDV: String(produto.CODDV || '').trim(),
     DESC: String(produto.DESC || '').trim(),
-    BARRAS: obterBarrasPrincipal(produto, termo)
+    BARRAS: obterBarrasPrincipal(produto)
   };
 
   $('#coletaDesc').textContent = produtoSelecionado.DESC || '--';
@@ -393,7 +391,7 @@ function renderListaDesktop() {
           CODDV: ${escapeHtml(item.coddv || '--')} . Barras: ${escapeHtml(item.barras || '--')}
         </div>
         <div class="coleta-item-meta">
-          Tipo: ${escapeHtml(tipo)} . Validade: ${escapeHtml(validade)}${escapeHtml(lote)}
+          Destino: ${escapeHtml(tipo)} . Validade: ${escapeHtml(validade)}${escapeHtml(lote)}
         </div>
         <div class="coleta-item-meta">
           ${escapeHtml(horario)} . ${escapeHtml(item.usuario_nome || 'Sistema')}
