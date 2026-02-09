@@ -739,6 +739,7 @@ body {
     font-weight: 800;
     color: #111827;
     min-height: 1.2em;
+    white-space: pre;
 }
 
 .etiqueta-footer {

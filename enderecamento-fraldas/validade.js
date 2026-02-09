@@ -349,12 +349,15 @@ function exibirProdutoNaoAlocado(produto) {
   $('#produtoInfo').classList.remove('hide');
   $('#listaEnderecosContainer').classList.add('hide');
 
+  const cdAtual = obterCdAtual();
+  const enderecoBase = buscarEnderecoSeparacao(produto.CODDV, cdAtual);
+
   $('.produto-coddv').textContent = produto.CODDV;
   $('.produto-status').textContent = 'Não Alocado';
   $('.produto-status').className = 'produto-status badge badge-neutral';
   $('.produto-desc').textContent = produto.DESC;
   $('.produto-barras').textContent = obterBarrasPrincipal(produto);
-  $('.produto-endereco').textContent = '-';
+  $('.produto-endereco').textContent = enderecoBase || '-';
   $('.produto-validade-conta').textContent = 'Validade será solicitada na impressão';
 
   $('#btnImprimir').disabled = false;
@@ -506,16 +509,18 @@ function buscarCodigoSeparacao(coddv, cd) {
   const cdNum = parseInt(cd, 10);
   if (!coddvStr || Number.isNaN(cdNum)) return null;
 
-  prepararIndiceBaseEnd(cdNum);
-  if (!baseEndIndex || baseEndIndexCd !== cdNum) return null;
+  const registro = buscarRegistroBaseEnd(coddvStr, cdNum);
+  if (!registro || !registro.ENDERECO) return null;
 
-  const endereco = baseEndIndex.get(coddvStr);
-  if (!endereco) return null;
-  if (endereco.length < 5) return null;
+  const enderecoOriginal = String(registro.ENDERECO).toUpperCase();
+  const enderecoNormalizado = enderecoOriginal.replace(/\s+/g, '');
+  if (enderecoNormalizado.length < 5) return null;
 
-  const prefixo = endereco.slice(0, 2);
-  const sufixo = endereco.slice(-3);
-  if (prefixo.length < 2 || sufixo.length < 3) return null;
+  // Prefixo: 4 primeiros caracteres do endereço original (incluindo espaços)
+  const prefixo = enderecoOriginal.slice(0, 4);
+  // Sufixo: 3 últimos dígitos úteis do endereço normalizado
+  const sufixo = enderecoNormalizado.slice(-3);
+  if (prefixo.length < 1 || sufixo.length < 3) return null;
 
   return { prefixo, sufixo };
 }
@@ -525,10 +530,25 @@ function buscarEnderecoSeparacao(coddv, cd) {
   const cdNum = parseInt(cd, 10);
   if (!coddvStr || Number.isNaN(cdNum)) return null;
 
-  prepararIndiceBaseEnd(cdNum);
-  if (!baseEndIndex || baseEndIndexCd !== cdNum) return null;
+  const registro = buscarRegistroBaseEnd(coddvStr, cdNum);
+  return registro?.ENDERECO ? String(registro.ENDERECO).toUpperCase() : null;
+}
 
-  return baseEndIndex.get(coddvStr) || null;
+function buscarRegistroBaseEnd(coddv, cd) {
+  if (!window.DB_END || !Array.isArray(window.DB_END.BASE_END)) return null;
+
+  const coddvStr = String(coddv || '').trim();
+  const cdNum = parseInt(cd, 10);
+  if (!coddvStr || Number.isNaN(cdNum)) return null;
+
+  return window.DB_END.BASE_END.find((r) => {
+    const tipo = String(r.TIPO || '').trim().toUpperCase();
+    return (
+      String(r.CODDV || '').trim() === coddvStr
+      && parseInt(r.CD, 10) === cdNum
+      && tipo === 'SEPARACAO'
+    );
+  }) || null;
 }
 
 function buscarProdutoCadastroPorCoddv(coddv) {
@@ -572,7 +592,7 @@ function preencherCodigoSeparacaoImpressao(codigoSeparacao) {
   const elPrefixo = $('#printSeparacaoPrefix');
   if (!elCentro || !elPrefixo) return;
 
-  const prefixo = (codigoSeparacao?.prefixo || '00').toString().toUpperCase().slice(0, 2).padEnd(2, '0');
+  const prefixo = (codigoSeparacao?.prefixo || '').toString().toUpperCase().slice(0, 4).padEnd(4, ' ');
   const sufixo = (codigoSeparacao?.sufixo || '000').toString().replace(/\D/g, '').slice(-3).padStart(3, '0');
 
   elCentro.textContent = sufixo;
