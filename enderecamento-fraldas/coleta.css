@@ -1,0 +1,83 @@
+.mobile-only {
+    display: none;
+}
+
+.desktop-only {
+    display: block;
+}
+
+.coleta-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.coleta-tabs .btn.active {
+    background: #dbeafe;
+    color: #0b3a88;
+    border-color: #93c5fd;
+}
+
+.coleta-lista {
+    display: grid;
+    gap: 10px;
+}
+
+.coleta-item {
+    border: 1px solid #dbe4f0;
+    border-radius: 12px;
+    padding: 12px;
+    background: #f8fafc;
+    display: grid;
+    gap: 8px;
+}
+
+.coleta-item-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+}
+
+.coleta-item-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.coleta-item-meta {
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+.coleta-item-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.coleta-vazio {
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+    color: #64748b;
+}
+
+#coletaValidade,
+#coletaTipo,
+#coletaLote {
+    width: 100%;
+    margin-top: 6px;
+}
+
+@media (max-width: 900px) {
+    .mobile-only {
+        display: block;
+    }
+
+    .desktop-only {
+        display: none;
+    }
+}
