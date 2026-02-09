@@ -10,7 +10,8 @@ export class ValidadePrintOptimizer {
             logoPath: '../assets/pm.png',
             pageSize: 'A4',
             margins: '10mm',
-            rowsPerPage: 20 // Estimativa conservadora para A4 com header/footer
+            // A4 comporta mais linhas; 20 quebrava cedo e gerava páginas com muito vazio
+            rowsPerPage: 36
         };
     }
 
@@ -43,11 +44,27 @@ export class ValidadePrintOptimizer {
     }
 
     paginateData(dados) {
+        const rowsPerPage = this.calculateRowsPerPage();
         const pages = [];
-        for (let i = 0; i < dados.length; i += this.config.rowsPerPage) {
-            pages.push(dados.slice(i, i + this.config.rowsPerPage));
+        for (let i = 0; i < dados.length; i += rowsPerPage) {
+            pages.push(dados.slice(i, i + rowsPerPage));
         }
         return pages;
+    }
+
+    calculateRowsPerPage() {
+        // Cálculo simples para evitar paginação conservadora demais.
+        // Mantém faixa segura entre 30 e 40 linhas.
+        const pageHeightMm = 296; // altura útil da página usada no CSS
+        const pagePaddingMm = 20; // 10mm top + 10mm bottom
+        const headerApproxMm = 38;
+        const footerApproxMm = 30;
+        const thApproxMm = 8;
+        const rowApproxMm = 5.4;
+
+        const usableMm = pageHeightMm - pagePaddingMm - headerApproxMm - footerApproxMm - thApproxMm;
+        const estimated = Math.floor(usableMm / rowApproxMm);
+        return Math.min(40, Math.max(30, estimated || this.config.rowsPerPage));
     }
 
     generatePage(rows, pageNum, totalPages, filtros, timestamp) {
