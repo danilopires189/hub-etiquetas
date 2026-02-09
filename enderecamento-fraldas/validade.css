@@ -760,15 +760,6 @@ body {
     text-overflow: ellipsis;
 }
 
-.etiqueta-footer-note {
-    margin-top: 6px;
-    text-align: center;
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: #6b7280;
-    letter-spacing: 0.01em;
-}
-
 /* =========================================
    Botões de Relatório (PDF / Excel)
    ========================================= */

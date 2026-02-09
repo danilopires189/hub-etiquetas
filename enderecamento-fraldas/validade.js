@@ -953,15 +953,6 @@ function imprimirEtiqueta() {
   const dataPrint = new Date().toLocaleString('pt-BR');
   $('#printFooterLine').textContent = `${usuarioPrint} . ${matriculaPrint} . ${enderecoPrint} . ${dataPrint}`;
 
-  const manualNote = $('#printManualNote');
-  if (manualNote) {
-    if (temAlocacaoAtiva) {
-      manualNote.classList.add('hide');
-    } else {
-      manualNote.classList.remove('hide');
-    }
-  }
-
   const template = $('#printTemplate');
   template.classList.remove('hide');
   window.print();
