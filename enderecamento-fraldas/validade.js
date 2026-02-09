@@ -649,7 +649,7 @@ function preencherLoteImpressao(lote) {
     return;
   }
 
-  elLote.textContent = valor;
+  elLote.textContent = `Lote: ${valor}`;
   elLote.classList.remove('hide');
 }
 
@@ -750,10 +750,19 @@ function solicitarValidadeManual() {
     btnClose.onclick = () => fechar(null);
 
     modal.classList.add('active');
-    setTimeout(() => {
+
+    const focarInput = () => {
       input.focus();
       input.select();
-    }, 30);
+    };
+
+    // Reforça foco automático sem exigir clique do usuário.
+    requestAnimationFrame(() => {
+      focarInput();
+      requestAnimationFrame(focarInput);
+    });
+    setTimeout(focarInput, 120);
+    setTimeout(focarInput, 260);
   });
 }
 
