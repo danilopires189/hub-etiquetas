@@ -653,6 +653,39 @@ function preencherLoteImpressao(lote) {
   elLote.classList.remove('hide');
 }
 
+function extrairMmaa(valor) {
+  return String(valor || '').replace(/\D/g, '').slice(0, 4);
+}
+
+function parseMmaa(mmaa) {
+  const valor = extrairMmaa(mmaa);
+  if (!/^\d{4}$/.test(valor)) return null;
+
+  const mes = parseInt(valor.slice(0, 2), 10);
+  const ano = 2000 + parseInt(valor.slice(2), 10);
+  if (mes < 1 || mes > 12) return null;
+
+  return { valor, mes, ano };
+}
+
+function validarValidadeMinimaMeses(mmaa, minMeses = 6) {
+  const parsed = parseMmaa(mmaa);
+  if (!parsed) {
+    return { ok: false, motivo: 'invalida' };
+  }
+
+  const agora = new Date();
+  const mesAtual = agora.getMonth() + 1;
+  const anoAtual = agora.getFullYear();
+  const difMeses = ((parsed.ano - anoAtual) * 12) + (parsed.mes - mesAtual);
+
+  if (difMeses < minMeses) {
+    return { ok: false, motivo: 'minimo', difMeses };
+  }
+
+  return { ok: true, valor: parsed.valor };
+}
+
 function solicitarValidadeManual() {
   return new Promise((resolve) => {
     const modal = $('#modalValidadeManual');
@@ -664,8 +697,9 @@ function solicitarValidadeManual() {
     if (!modal || !input || !btnConfirmar || !btnCancelar || !btnClose) {
       const fallback = window.prompt('Informe a validade (MMAA):', '');
       if (!fallback) return resolve(null);
-      const valor = String(fallback).replace(/\D/g, '').slice(0, 4);
-      if (!/^\d{4}$/.test(valor)) return resolve(null);
+      const analise = validarValidadeMinimaMeses(fallback, 6);
+      if (!analise.ok) return resolve(null);
+      const valor = analise.valor;
       return resolve(`${valor.substring(0, 2)}/${valor.substring(2)}`);
     }
 
@@ -680,18 +714,22 @@ function solicitarValidadeManual() {
     };
 
     const confirmar = () => {
-      const valor = input.value.replace(/\D/g, '').slice(0, 4);
-      if (!/^\d{4}$/.test(valor)) {
-        showToast('Informe a validade no formato MMAA (4 dígitos).', 'warning');
+      const analise = validarValidadeMinimaMeses(input.value, 6);
+      if (!analise.ok) {
+        const mensagem = analise.motivo === 'minimo'
+          ? 'Validade deve ser maior ou igual a 6 meses.'
+          : 'Informe validade válida no formato MMAA.';
+        showToast(mensagem, 'warning');
         input.focus();
         input.select();
         return;
       }
+      const valor = analise.valor;
       fechar(`${valor.substring(0, 2)}/${valor.substring(2)}`);
     };
 
     const tratarInput = () => {
-      input.value = input.value.replace(/\D/g, '').slice(0, 4);
+      input.value = extrairMmaa(input.value);
     };
 
     const tratarTecla = (e) => {
@@ -1092,14 +1130,16 @@ async function imprimirEtiqueta() {
     alocacao = lista.find(a => a.coddv == produtoAtual.CODDV) || null;
 
     const validadeRaw = alocacao?.validade || '';
-    validadeImpressao = sistema.formatarValidade(validadeRaw) || '--/--';
-
-    // Garantir formato MM/AA na etiqueta impressa
-    if (/^\d{4}$/.test(validadeRaw)) {
-      validadeImpressao = `${validadeRaw.substring(0, 2)}/${validadeRaw.substring(2)}`;
-    } else if (!/^\d{2}\/\d{2}$/.test(validadeImpressao)) {
-      validadeImpressao = '--/--';
+    const analiseValidade = validarValidadeMinimaMeses(validadeRaw, 6);
+    if (!analiseValidade.ok) {
+      const msg = analiseValidade.motivo === 'minimo'
+        ? 'Validade do produto alocado é menor que 6 meses.'
+        : 'Validade do produto alocado é inválida.';
+      showToast(msg, 'warning');
+      return;
     }
+    const valor = analiseValidade.valor;
+    validadeImpressao = `${valor.substring(0, 2)}/${valor.substring(2)}`;
 
     enderecoPrint = enderecoSelecionado || '--';
   } else {
