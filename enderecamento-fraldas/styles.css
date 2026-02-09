@@ -10,6 +10,14 @@
   --grad2: #f0f9ff;
 }
 
+/* Desktop: igual ao gradiente do módulo etiqueta-mercadoria no topo */
+@media (min-width: 901px) {
+  :root {
+    --grad1: #efe7ef;
+    --grad2: #eef2ff;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
