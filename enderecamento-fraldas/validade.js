@@ -355,9 +355,9 @@ function exibirProdutoNaoAlocado(produto) {
   $('.produto-desc').textContent = produto.DESC;
   $('.produto-barras').textContent = obterBarrasPrincipal(produto);
   $('.produto-endereco').textContent = '-';
-  $('.produto-validade-conta').textContent = 'Produto sem alocação ativa';
+  $('.produto-validade-conta').textContent = 'Validade será solicitada na impressão';
 
-  $('#btnImprimir').disabled = true;
+  $('#btnImprimir').disabled = false;
   produtoAtual = produto;
   enderecoSelecionado = null;
 }
@@ -520,6 +520,17 @@ function buscarCodigoSeparacao(coddv, cd) {
   return { prefixo, sufixo };
 }
 
+function buscarEnderecoSeparacao(coddv, cd) {
+  const coddvStr = String(coddv || '').trim();
+  const cdNum = parseInt(cd, 10);
+  if (!coddvStr || Number.isNaN(cdNum)) return null;
+
+  prepararIndiceBaseEnd(cdNum);
+  if (!baseEndIndex || baseEndIndexCd !== cdNum) return null;
+
+  return baseEndIndex.get(coddvStr) || null;
+}
+
 function buscarProdutoCadastroPorCoddv(coddv) {
   const coddvStr = String(coddv || '').trim();
   if (!coddvStr) return null;
@@ -566,6 +577,31 @@ function preencherCodigoSeparacaoImpressao(codigoSeparacao) {
 
   elCentro.textContent = sufixo;
   elPrefixo.textContent = prefixo;
+}
+
+function solicitarValidadeManual() {
+  while (true) {
+    const entrada = window.prompt('Informe a validade (MMAA ou MM/AA):', '');
+    if (entrada === null) return null;
+
+    const valor = String(entrada).trim().toUpperCase();
+    if (!valor) {
+      showToast('Validade não informada.', 'warning');
+      continue;
+    }
+
+    const soDigitos = valor.replace(/\D/g, '');
+    if (/^\d{4}$/.test(soDigitos)) {
+      return `${soDigitos.substring(0, 2)}/${soDigitos.substring(2)}`;
+    }
+
+    const normalizado = valor.replace(/\s+/g, '');
+    if (/^\d{2}\/\d{2}$/.test(normalizado)) {
+      return normalizado;
+    }
+
+    showToast('Formato inválido. Use MMAA ou MM/AA.', 'warning');
+  }
 }
 
 /**
@@ -865,22 +901,43 @@ function baixarCSV(dados, filename) {
 // =========================================================
 
 function imprimirEtiqueta() {
-  if (!produtoAtual || !enderecoSelecionado) return;
-
-  // Obter dados da alocacao específica
-  // Precisamos achar de novo qual alocacao é essa pra pegar o ID se precisar
-  // Simplificação: pegar do cache pelo endereço
-  const lista = sistema.cacheAlocacoes[enderecoSelecionado] || [];
-  const alocacao = lista.find(a => a.coddv == produtoAtual.CODDV);
-
+  if (!produtoAtual) return;
   const sessao = sistema.obterDadosSessao();
-  const validadeRaw = alocacao?.validade || '';
-  let validadeImpressao = sistema.formatarValidade(validadeRaw) || '--/--';
-  // Garantir formato MM/AA na etiqueta impressa
-  if (/^\d{4}$/.test(validadeRaw)) {
-    validadeImpressao = `${validadeRaw.substring(0, 2)}/${validadeRaw.substring(2)}`;
-  } else if (!/^\d{2}\/\d{2}$/.test(validadeImpressao)) {
-    validadeImpressao = '--/--';
+  const cdAtual = parseInt(sistema?.cd || sessao?.cd || 2, 10);
+
+  const temAlocacaoAtiva = Boolean(enderecoSelecionado);
+  let alocacao = null;
+  let validadeImpressao = '--/--';
+  let enderecoPrint = '--';
+
+  if (temAlocacaoAtiva) {
+    // Obter dados da alocacao específica
+    const lista = sistema.cacheAlocacoes[enderecoSelecionado] || [];
+    alocacao = lista.find(a => a.coddv == produtoAtual.CODDV) || null;
+
+    const validadeRaw = alocacao?.validade || '';
+    validadeImpressao = sistema.formatarValidade(validadeRaw) || '--/--';
+
+    // Garantir formato MM/AA na etiqueta impressa
+    if (/^\d{4}$/.test(validadeRaw)) {
+      validadeImpressao = `${validadeRaw.substring(0, 2)}/${validadeRaw.substring(2)}`;
+    } else if (!/^\d{2}\/\d{2}$/.test(validadeImpressao)) {
+      validadeImpressao = '--/--';
+    }
+
+    enderecoPrint = enderecoSelecionado || '--';
+  } else {
+    const enderecoBase = buscarEnderecoSeparacao(produtoAtual.CODDV, cdAtual);
+    if (!enderecoBase) {
+      showToast('Produto sem alocação e sem endereço na BASE_END para o CD logado.', 'warning');
+      return;
+    }
+
+    const validadeManual = solicitarValidadeManual();
+    if (!validadeManual) return;
+
+    validadeImpressao = validadeManual;
+    enderecoPrint = enderecoBase;
   }
 
   $('#printDesc').textContent = produtoAtual.DESC;
@@ -888,15 +945,22 @@ function imprimirEtiqueta() {
   $('#printBarras').textContent = obterBarrasPrincipal(produtoAtual);
   $('#printValidade').textContent = validadeImpressao;
 
-  const cdAtual = parseInt(sistema?.cd || sessao?.cd || 2, 10);
   const codigoSeparacao = buscarCodigoSeparacao(produtoAtual.CODDV, cdAtual) || { prefixo: '00', sufixo: '000' };
   preencherCodigoSeparacaoImpressao(codigoSeparacao);
 
   const usuarioPrint = alocacao?.usuario || sessao.usuario || 'Sistema';
   const matriculaPrint = sessao.matricula || '--';
-  const enderecoPrint = enderecoSelecionado || '--';
   const dataPrint = new Date().toLocaleString('pt-BR');
   $('#printFooterLine').textContent = `${usuarioPrint} . ${matriculaPrint} . ${enderecoPrint} . ${dataPrint}`;
+
+  const manualNote = $('#printManualNote');
+  if (manualNote) {
+    if (temAlocacaoAtiva) {
+      manualNote.classList.add('hide');
+    } else {
+      manualNote.classList.remove('hide');
+    }
+  }
 
   const template = $('#printTemplate');
   template.classList.remove('hide');
