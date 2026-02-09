@@ -779,9 +779,11 @@ body {
 .etiqueta-content {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     flex: 1;
     min-height: 0;
+    order: 3;
+    padding-bottom: 10px;
 }
 
 .etiqueta-validade-bloco {
@@ -791,7 +793,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 14px;
 }
 
@@ -813,7 +815,8 @@ body {
 }
 
 .etiqueta-prefix-line {
-    margin-top: 6px;
+    margin-top: 0;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -822,6 +825,7 @@ body {
     font-weight: 800;
     color: #111827;
     min-height: 1.2em;
+    order: 2;
 }
 
 #printSeparacaoPrefix {
