@@ -1185,10 +1185,9 @@ async function imprimirEtiqueta() {
   preencherCodigoSeparacaoImpressao(codigoSeparacao);
   preencherLoteImpressao(loteImpressao);
 
-  const usuarioPrint = alocacao?.usuario || sessao.usuario || 'Sistema';
   const matriculaPrint = sessao.matricula || '--';
   const dataPrint = new Date().toLocaleString('pt-BR');
-  $('#printFooterLine').textContent = `${usuarioPrint} . ${matriculaPrint} . ${enderecoPrint} . ${dataPrint}`;
+  $('#printFooterLine').textContent = `${matriculaPrint} . ${enderecoPrint} . ${dataPrint}`;
 
   const template = $('#printTemplate');
   template.classList.remove('hide');
