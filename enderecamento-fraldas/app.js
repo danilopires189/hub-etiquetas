@@ -268,40 +268,90 @@ function redirecionarParaLogin(motivo) {
 }
 
 function atualizarInfoUsuario(session) {
-  // Atualizar header com informações do usuário
-  const userInfo = document.createElement('div');
-  userInfo.className = 'user-info';
-  userInfo.innerHTML = `
-        <div class="user-details">
-            <span class="user-name">${session.usuario.split(' ')[0]}</span>
-            <span class="user-cd">${session.nomeCD}</span>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="logout()" title="Sair">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16,17 21,12 16,7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-        </button>
+  const nomeCurto = (session.usuario || 'Sistema').split(' ')[0];
+  const nomeCD = session.nomeCD || `CD ${session.cd || 2}`;
+
+  // Desktop no index: ícone final no menu com dropdown de usuário/cd/sair
+  const navContent = document.getElementById('mobileNavContent');
+  if (navContent && !isMobileDevice()) {
+    const btnExistente = document.getElementById('btnContaMenu');
+    const menuExistente = document.getElementById('userNavMenu');
+    if (btnExistente) btnExistente.remove();
+    if (menuExistente) menuExistente.remove();
+
+    const btnConta = document.createElement('button');
+    btnConta.id = 'btnContaMenu';
+    btnConta.className = 'btn btn-ghost';
+    btnConta.type = 'button';
+    btnConta.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+      Conta
     `;
 
-  // Inserir na interface
-  let actions = document.querySelector('.actions');
+    const menuConta = document.createElement('div');
+    menuConta.id = 'userNavMenu';
+    menuConta.className = 'user-nav-menu hide';
+    menuConta.innerHTML = `
+      <div class="user-nav-row"><strong>${nomeCurto}</strong></div>
+      <div class="user-nav-row">${nomeCD}</div>
+      <button type="button" class="btn btn-ghost btn-sm user-nav-logout" id="btnContaLogout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16,17 21,12 16,7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        Sair
+      </button>
+    `;
 
-  if (actions) {
-    // Enderecos.html e outras páginas com .actions
-    actions.insertBefore(userInfo, actions.firstChild);
-  } else {
-    // Index.html (Mobile Header)
-    // Tentar encontrar o container de navegação ou o header top row
-    const navContainer = document.querySelector('.header-top-row');
-    if (navContainer) {
-      // Adicionar classe para estilização mobile específica se necessário
-      userInfo.classList.add('mobile-user-menu');
-      navContainer.appendChild(userInfo);
-    } else {
-      console.warn('Container para user-info não encontrado');
+    navContent.appendChild(btnConta); // último ícone
+    const navContainer = navContent.closest('.nav-container');
+    if (navContainer) navContainer.appendChild(menuConta);
+
+    btnConta.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuConta.classList.toggle('hide');
+    });
+
+    const btnLogout = menuConta.querySelector('#btnContaLogout');
+    if (btnLogout) {
+      btnLogout.addEventListener('click', () => logout());
     }
+
+    document.addEventListener('click', (e) => {
+      if (!menuConta.classList.contains('hide') && !menuConta.contains(e.target) && e.target !== btnConta) {
+        menuConta.classList.add('hide');
+      }
+    });
+    return;
+  }
+
+  // Mobile no index: mantém card de usuário expansível existente
+  document.querySelectorAll('.user-info').forEach(el => el.remove());
+  const userInfo = document.createElement('div');
+  userInfo.className = 'user-info mobile-user-menu';
+  userInfo.innerHTML = `
+      <div class="user-details">
+          <span class="user-name">${nomeCurto}</span>
+          <span class="user-cd">${nomeCD}</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()" title="Sair">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16,17 21,12 16,7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+      </button>
+  `;
+
+  const headerTop = document.querySelector('.header-top-row');
+  if (headerTop) {
+    headerTop.appendChild(userInfo);
+  } else {
+    console.warn('Container para user-info não encontrado');
   }
 }
 

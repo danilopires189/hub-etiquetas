@@ -1,5 +1,10 @@
 /* ===== Estilos específicos para Gestão de Endereços ===== */
 
+.app-header {
+  padding: 0.75rem 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
 /* Banner do Produto Selecionado */
 .produto-selecionado-banner {
   max-width: 1200px;
@@ -959,4 +964,3 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-
