@@ -268,7 +268,7 @@ function redirecionarParaLogin(motivo) {
 }
 
 function atualizarInfoUsuario(session) {
-  const nomeCurto = (session.usuario || 'Sistema').split(' ')[0];
+  const nomeCompleto = String(session.usuario || 'Sistema').trim();
   const nomeCD = session.nomeCD || `CD ${session.cd || 2}`;
 
   // Desktop no index: ícone final no menu com dropdown de usuário/cd/sair
@@ -295,7 +295,7 @@ function atualizarInfoUsuario(session) {
     menuConta.id = 'userNavMenu';
     menuConta.className = 'user-nav-menu hide';
     menuConta.innerHTML = `
-      <div class="user-nav-row"><strong>${nomeCurto}</strong></div>
+      <div class="user-nav-row"><strong>${nomeCompleto}</strong></div>
       <div class="user-nav-row">${nomeCD}</div>
       <button type="button" class="btn btn-ghost btn-sm user-nav-logout" id="btnContaLogout">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -335,7 +335,7 @@ function atualizarInfoUsuario(session) {
   userInfo.className = 'user-info mobile-user-menu';
   userInfo.innerHTML = `
       <div class="user-details">
-          <span class="user-name">${nomeCurto}</span>
+          <span class="user-name">${nomeCompleto}</span>
           <span class="user-cd">${nomeCD}</span>
       </div>
       <button class="btn btn-ghost btn-sm" onclick="logout()" title="Sair">
