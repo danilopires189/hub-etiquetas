@@ -118,6 +118,13 @@ function setupUI() {
       });
     }
   });
+
+  const tipoNaoAlocado = $('#naoAlocadoTipo');
+  if (tipoNaoAlocado) {
+    tipoNaoAlocado.addEventListener('change', () => {
+      atualizarEnderecoNaoAlocadoView();
+    });
+  }
 }
 
 function inicializarPagina() {
@@ -181,7 +188,26 @@ function limparCampos() {
   $('#listaEnderecos').innerHTML = '';
   produtoAtual = null;
   enderecoSelecionado = null;
+  const cfg = $('#naoAlocadoConfig');
+  if (cfg) cfg.classList.add('hide');
   $('#codigoProduto').focus();
+}
+
+function obterTipoNaoAlocadoSelecionado() {
+  const valor = ($('#naoAlocadoTipo')?.value || 'SEPARACAO').toString().toUpperCase();
+  return valor === 'PULMAO' ? 'PULMAO' : 'SEPARACAO';
+}
+
+function deveSolicitarLoteNaoAlocado() {
+  return Boolean($('#naoAlocadoSolicitarLote')?.checked);
+}
+
+function atualizarEnderecoNaoAlocadoView() {
+  if (!produtoAtual || enderecoSelecionado) return;
+  const cdAtual = obterCdAtual();
+  const tipoSelecionado = obterTipoNaoAlocadoSelecionado();
+  const enderecoBase = buscarEnderecoSeparacao(produtoAtual.CODDV, cdAtual, tipoSelecionado);
+  $('.produto-endereco').textContent = enderecoBase || '-';
 }
 
 async function buscarProduto() {
@@ -350,7 +376,8 @@ function exibirProdutoNaoAlocado(produto) {
   $('#listaEnderecosContainer').classList.add('hide');
 
   const cdAtual = obterCdAtual();
-  const enderecoBase = buscarEnderecoSeparacao(produto.CODDV, cdAtual);
+  const tipoSelecionado = obterTipoNaoAlocadoSelecionado();
+  const enderecoBase = buscarEnderecoSeparacao(produto.CODDV, cdAtual, tipoSelecionado);
 
   $('.produto-coddv').textContent = produto.CODDV;
   $('.produto-status').textContent = 'Não Alocado';
@@ -359,6 +386,7 @@ function exibirProdutoNaoAlocado(produto) {
   $('.produto-barras').textContent = obterBarrasPrincipal(produto);
   $('.produto-endereco').textContent = enderecoBase || '-';
   $('.produto-validade-conta').textContent = 'Validade será solicitada na impressão';
+  $('#naoAlocadoConfig')?.classList.remove('hide');
 
   $('#btnImprimir').disabled = false;
   produtoAtual = produto;
@@ -381,6 +409,7 @@ function exibirProdutoAlocado(produto, alocacao) {
   $('.produto-endereco').textContent = alocacao.endereco;
   $('.produto-validade-conta').textContent = validadeFmt;
   $('.produto-validade-conta').className = `value produto-validade-conta status-${statusVal}`; // Adicionar cor
+  $('#naoAlocadoConfig')?.classList.add('hide');
 
   $('#btnImprimir').disabled = false;
   produtoAtual = produto;
@@ -504,12 +533,12 @@ function buscarEtiquetaNaBaseID(coddv, cd) {
  * Busca endereço de separação na BASE_END.js e retorna formato PP.999
  * Exemplo: ENDERECO "D01 .001.011.056" => "D0.056"
  */
-function buscarCodigoSeparacao(coddv, cd) {
+function buscarCodigoSeparacao(coddv, cd, tipo = 'SEPARACAO') {
   const coddvStr = String(coddv || '').trim();
   const cdNum = parseInt(cd, 10);
   if (!coddvStr || Number.isNaN(cdNum)) return null;
 
-  const registro = buscarRegistroBaseEnd(coddvStr, cdNum);
+  const registro = buscarRegistroBaseEnd(coddvStr, cdNum, tipo);
   if (!registro || !registro.ENDERECO) return null;
 
   const enderecoOriginal = String(registro.ENDERECO).toUpperCase();
@@ -525,28 +554,30 @@ function buscarCodigoSeparacao(coddv, cd) {
   return { prefixo, sufixo };
 }
 
-function buscarEnderecoSeparacao(coddv, cd) {
+function buscarEnderecoSeparacao(coddv, cd, tipo = 'SEPARACAO') {
   const coddvStr = String(coddv || '').trim();
   const cdNum = parseInt(cd, 10);
   if (!coddvStr || Number.isNaN(cdNum)) return null;
 
-  const registro = buscarRegistroBaseEnd(coddvStr, cdNum);
+  const registro = buscarRegistroBaseEnd(coddvStr, cdNum, tipo);
   return registro?.ENDERECO ? String(registro.ENDERECO).toUpperCase() : null;
 }
 
-function buscarRegistroBaseEnd(coddv, cd) {
+function buscarRegistroBaseEnd(coddv, cd, tipo = 'SEPARACAO') {
   if (!window.DB_END || !Array.isArray(window.DB_END.BASE_END)) return null;
 
   const coddvStr = String(coddv || '').trim();
   const cdNum = parseInt(cd, 10);
   if (!coddvStr || Number.isNaN(cdNum)) return null;
 
+  const tipoNormalizado = String(tipo || 'SEPARACAO').trim().toUpperCase();
+
   return window.DB_END.BASE_END.find((r) => {
-    const tipo = String(r.TIPO || '').trim().toUpperCase();
+    const tipoRegistro = String(r.TIPO || '').trim().toUpperCase();
     return (
       String(r.CODDV || '').trim() === coddvStr
       && parseInt(r.CD, 10) === cdNum
-      && tipo === 'SEPARACAO'
+      && tipoRegistro === tipoNormalizado
     );
   }) || null;
 }
@@ -597,6 +628,21 @@ function preencherCodigoSeparacaoImpressao(codigoSeparacao) {
 
   elCentro.textContent = sufixo;
   elPrefixo.textContent = prefixo;
+}
+
+function preencherLoteImpressao(lote) {
+  const elLote = $('#printLoteValor');
+  if (!elLote) return;
+
+  const valor = String(lote || '').trim().toUpperCase();
+  if (!valor) {
+    elLote.textContent = '';
+    elLote.classList.add('hide');
+    return;
+  }
+
+  elLote.textContent = valor;
+  elLote.classList.remove('hide');
 }
 
 function solicitarValidadeManual() {
@@ -652,6 +698,65 @@ function solicitarValidadeManual() {
 
     input.value = '';
     input.addEventListener('input', tratarInput);
+    input.addEventListener('keydown', tratarTecla);
+    btnConfirmar.onclick = confirmar;
+    btnCancelar.onclick = () => fechar(null);
+    btnClose.onclick = () => fechar(null);
+
+    modal.classList.add('active');
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 30);
+  });
+}
+
+function solicitarLoteManual() {
+  return new Promise((resolve) => {
+    const modal = $('#modalLoteManual');
+    const input = $('#inputModalLote');
+    const btnConfirmar = $('#btnModalLoteConfirmar');
+    const btnCancelar = $('#btnModalLoteCancelar');
+    const btnClose = $('#btnModalLoteClose');
+
+    if (!modal || !input || !btnConfirmar || !btnCancelar || !btnClose) {
+      const fallback = window.prompt('Informe o lote:', '');
+      if (!fallback) return resolve(null);
+      const valor = String(fallback).trim().toUpperCase();
+      return resolve(valor || null);
+    }
+
+    const fechar = (valor) => {
+      modal.classList.remove('active');
+      input.removeEventListener('keydown', tratarTecla);
+      btnConfirmar.onclick = null;
+      btnCancelar.onclick = null;
+      btnClose.onclick = null;
+      resolve(valor);
+    };
+
+    const confirmar = () => {
+      const valor = input.value.trim().toUpperCase();
+      if (!valor) {
+        showToast('Informe o lote.', 'warning');
+        input.focus();
+        input.select();
+        return;
+      }
+      fechar(valor);
+    };
+
+    const tratarTecla = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        confirmar();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        fechar(null);
+      }
+    };
+
+    input.value = '';
     input.addEventListener('keydown', tratarTecla);
     btnConfirmar.onclick = confirmar;
     btnCancelar.onclick = () => fechar(null);
@@ -970,6 +1075,8 @@ async function imprimirEtiqueta() {
   let alocacao = null;
   let validadeImpressao = '--/--';
   let enderecoPrint = '--';
+  let tipoNaoAlocado = 'SEPARACAO';
+  let loteImpressao = '';
 
   if (temAlocacaoAtiva) {
     // Obter dados da alocacao específica
@@ -988,14 +1095,21 @@ async function imprimirEtiqueta() {
 
     enderecoPrint = enderecoSelecionado || '--';
   } else {
-    const enderecoBase = buscarEnderecoSeparacao(produtoAtual.CODDV, cdAtual);
+    tipoNaoAlocado = obterTipoNaoAlocadoSelecionado();
+    const enderecoBase = buscarEnderecoSeparacao(produtoAtual.CODDV, cdAtual, tipoNaoAlocado);
     if (!enderecoBase) {
-      showToast('Produto sem alocação e sem endereço na BASE_END para o CD logado.', 'warning');
+      showToast(`Produto sem alocação e sem endereço ${tipoNaoAlocado} na BASE_END para o CD logado.`, 'warning');
       return;
     }
 
     const validadeManual = await solicitarValidadeManual();
     if (!validadeManual) return;
+
+    if (deveSolicitarLoteNaoAlocado()) {
+      const loteManual = await solicitarLoteManual();
+      if (!loteManual) return;
+      loteImpressao = loteManual;
+    }
 
     validadeImpressao = validadeManual;
     enderecoPrint = enderecoBase;
@@ -1006,8 +1120,13 @@ async function imprimirEtiqueta() {
   $('#printBarras').textContent = obterBarrasPrincipal(produtoAtual);
   $('#printValidade').textContent = validadeImpressao;
 
-  const codigoSeparacao = buscarCodigoSeparacao(produtoAtual.CODDV, cdAtual) || { prefixo: '00', sufixo: '000' };
+  const codigoSeparacao = buscarCodigoSeparacao(
+    produtoAtual.CODDV,
+    cdAtual,
+    temAlocacaoAtiva ? 'SEPARACAO' : tipoNaoAlocado
+  ) || { prefixo: '00', sufixo: '000' };
   preencherCodigoSeparacaoImpressao(codigoSeparacao);
+  preencherLoteImpressao(loteImpressao);
 
   const usuarioPrint = alocacao?.usuario || sessao.usuario || 'Sistema';
   const matriculaPrint = sessao.matricula || '--';

@@ -233,6 +233,64 @@ body {
     margin-top: 0.5rem;
 }
 
+.nao-alocado-config {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.nao-alocado-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+}
+
+.nao-alocado-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.nao-alocado-field label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    color: #475569;
+    font-weight: 600;
+}
+
+#naoAlocadoTipo {
+    width: 100%;
+    max-width: 220px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.nao-alocado-flag {
+    align-items: center;
+    justify-content: center;
+}
+
+.nao-alocado-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    text-transform: none !important;
+}
+
+.nao-alocado-checkbox input {
+    width: 16px;
+    height: 16px;
+}
+
+.nao-alocado-checkbox span {
+    font-size: 0.95rem;
+    color: #1e3a8a;
+    font-weight: 600;
+}
+
 .meta-item .label {
     font-size: 0.75rem;
     text-transform: uppercase;
@@ -519,6 +577,10 @@ body {
         grid-column: span 1;
     }
 
+    .nao-alocado-grid {
+        grid-template-columns: 1fr;
+    }
+
     .csv-inputs-row {
         flex-direction: column;
         gap: 0.8rem;
@@ -733,13 +795,30 @@ body {
 
 .etiqueta-prefix-line {
     margin-top: 6px;
-    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-family: 'Courier New', monospace;
     font-size: clamp(4.2rem, 7.8vw, 6.6rem);
     font-weight: 800;
     color: #111827;
     min-height: 1.2em;
+}
+
+#printSeparacaoPrefix {
     white-space: pre;
+}
+
+.etiqueta-lote-valor {
+    font-family: 'Courier New', monospace;
+    font-size: clamp(1.4rem, 2.6vw, 2.4rem);
+    font-weight: 700;
+    color: #111827;
+    text-align: right;
+    max-width: 45%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .etiqueta-footer {

@@ -137,6 +137,23 @@
                             <span class="label">Validade</span>
                             <span class="value produto-validade-conta">-</span>
                         </div>
+                        <div class="meta-item full-width nao-alocado-config hide" id="naoAlocadoConfig">
+                            <div class="nao-alocado-grid">
+                                <div class="nao-alocado-field">
+                                    <label for="naoAlocadoTipo">Tipo</label>
+                                    <select id="naoAlocadoTipo">
+                                        <option value="SEPARACAO">Separação</option>
+                                        <option value="PULMAO">Pulmão</option>
+                                    </select>
+                                </div>
+                                <div class="nao-alocado-field nao-alocado-flag">
+                                    <label class="nao-alocado-checkbox">
+                                        <input type="checkbox" id="naoAlocadoSolicitarLote">
+                                        <span>Informar lote</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card-footer">
@@ -248,7 +265,10 @@
                     <div class="etiqueta-validade" id="printValidade">--/--</div>
                 </div>
             </div>
-            <div class="etiqueta-prefix-line" id="printSeparacaoPrefix">--</div>
+            <div class="etiqueta-prefix-line">
+                <span id="printSeparacaoPrefix">--</span>
+                <span class="etiqueta-lote-valor hide" id="printLoteValor">--</span>
+            </div>
             <div class="etiqueta-footer">
                 <div class="etiqueta-footer-line" id="printFooterLine">--</div>
             </div>
@@ -287,6 +307,25 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost" id="btnModalValidadeCancelar">Cancelar</button>
                 <button type="button" class="btn btn-primary" id="btnModalValidadeConfirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Lote Manual -->
+    <div id="modalLoteManual" class="modal-overlay">
+        <div class="modal animate-pop-in">
+            <div class="modal-header">
+                <h3 class="modal-title">Inserir Lote</h3>
+                <button type="button" class="modal-close" id="btnModalLoteClose" aria-label="Fechar modal">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Informe o lote:</p>
+                <input type="text" id="inputModalLote" class="modal-validade-input" placeholder="LOTE" maxlength="20"
+                    autocomplete="off">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" id="btnModalLoteCancelar">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnModalLoteConfirmar">Confirmar</button>
             </div>
         </div>
     </div>
