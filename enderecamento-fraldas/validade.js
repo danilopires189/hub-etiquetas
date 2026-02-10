@@ -562,6 +562,18 @@ function buscarCodigoSeparacao(coddv, cd, tipo = 'SEPARACAO') {
   return { prefixo, sufixo };
 }
 
+function buscarCodigoSeparacaoPorEndereco(endereco) {
+  const enderecoOriginal = String(endereco || '').toUpperCase();
+  const enderecoNormalizado = enderecoOriginal.replace(/\s+/g, '');
+  if (!enderecoNormalizado) return null;
+
+  const prefixo = enderecoOriginal.slice(0, 4);
+  const sufixo = enderecoNormalizado.slice(-3);
+  if (!prefixo || sufixo.length < 3) return null;
+
+  return { prefixo, sufixo };
+}
+
 function buscarEnderecoSeparacao(coddv, cd, tipo = 'SEPARACAO') {
   const coddvStr = String(coddv || '').trim();
   const cdNum = parseInt(cd, 10);
@@ -1186,11 +1198,13 @@ async function imprimirEtiqueta() {
   $('#printBarras').textContent = obterBarrasPrincipal(produtoAtual);
   $('#printValidade').textContent = validadeImpressao;
 
-  const codigoSeparacao = buscarCodigoSeparacao(
-    produtoAtual.CODDV,
-    cdAtual,
-    temAlocacaoAtiva ? 'SEPARACAO' : tipoNaoAlocado
-  ) || { prefixo: '00', sufixo: '000' };
+  const codigoSeparacao = temAlocacaoAtiva
+    ? (buscarCodigoSeparacaoPorEndereco(enderecoPrint) || { prefixo: '00', sufixo: '000' })
+    : (buscarCodigoSeparacao(
+      produtoAtual.CODDV,
+      cdAtual,
+      tipoNaoAlocado
+    ) || { prefixo: '00', sufixo: '000' });
   preencherCodigoSeparacaoImpressao(codigoSeparacao);
   preencherLoteImpressao(loteImpressao);
 
