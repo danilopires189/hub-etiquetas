@@ -800,7 +800,7 @@ body {
 .etiqueta-xxxx {
     color: #000000;
     font-family: 'Arial Black', Arial, sans-serif;
-    font-size: clamp(14rem, 42vh, 30rem);
+    font-size: clamp(16.1rem, 48.3vh, 34.5rem);
     font-weight: 900;
     letter-spacing: 0.14em;
     line-height: 0.82;
@@ -808,7 +808,7 @@ body {
 
 .etiqueta-validade {
     color: #0b3a88;
-    font-size: clamp(6rem, 19vh, 14rem);
+    font-size: clamp(6.9rem, 21.85vh, 16.1rem);
     font-weight: 900;
     font-family: 'Arial Black', Arial, sans-serif;
     line-height: 0.95;
@@ -821,7 +821,7 @@ body {
     align-items: center;
     justify-content: space-between;
     font-family: 'Courier New', monospace;
-    font-size: clamp(5.46rem, 10.14vw, 8.58rem);
+    font-size: clamp(6.279rem, 11.661vw, 9.867rem);
     font-weight: 800;
     color: #111827;
     min-height: 1.2em;
@@ -834,7 +834,7 @@ body {
 
 .etiqueta-lote-valor {
     font-family: 'Courier New', monospace;
-    font-size: clamp(1.4rem, 2.6vw, 2.4rem);
+    font-size: clamp(1.61rem, 2.99vw, 2.76rem);
     font-weight: 700;
     color: #111827;
     text-align: right;
