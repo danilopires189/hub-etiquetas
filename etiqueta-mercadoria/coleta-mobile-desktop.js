@@ -716,16 +716,14 @@
     }
 
     function getDesktopListaFiltrada() {
+        const today = todayKeySaoPaulo();
+        const coletasDoDia = state.desktop.coletas.filter((item) => toDateKeySaoPaulo(item.dt_hr_coleta) === today);
+
         if (state.desktop.tab === 'impresso') {
-            const today = todayKeySaoPaulo();
-            return state.desktop.coletas.filter((item) => {
-                const impresso = normalizeText(item.status_impressao) === 'SIM';
-                const dia = toDateKeySaoPaulo(item.dt_hr_impressao);
-                return impresso && dia === today;
-            });
+            return coletasDoDia.filter((item) => normalizeText(item.status_impressao) === 'SIM');
         }
 
-        return state.desktop.coletas.filter((item) => normalizeText(item.status_impressao) !== 'SIM');
+        return coletasDoDia.filter((item) => normalizeText(item.status_impressao) !== 'SIM');
     }
 
     function renderDesktopLista() {
@@ -734,7 +732,7 @@
 
         const lista = getDesktopListaFiltrada();
         if (!lista.length) {
-            container.innerHTML = '<div class="coleta-vazio">Nenhum registro nesta visao.</div>';
+            container.innerHTML = '<div class="coleta-vazio">Nenhum registro do dia nesta visao.</div>';
             return;
         }
 
