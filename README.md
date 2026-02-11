@@ -159,5 +159,5 @@ Este projeto é de uso interno da rede **Pague Menos**. Todos os direitos reserv
 ---
 
 <div align="center">
-  <sub>Desenvolvido com ❤️ por Danilo Pires © 2026</sub>
+  <sub>Desenvolvido por ❤️ por Danilo Pires © 2026</sub>
 </div>
