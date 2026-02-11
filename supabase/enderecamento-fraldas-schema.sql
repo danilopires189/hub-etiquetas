@@ -42,6 +42,9 @@ CREATE TABLE IF NOT EXISTS alocacoes_fraldas (
     endereco VARCHAR(100) NOT NULL,
     coddv VARCHAR(100) NOT NULL,
     descricao_produto TEXT,
+    validade VARCHAR(4),
+    barras VARCHAR(100),
+    lote VARCHAR(50),
     cd INTEGER NOT NULL DEFAULT 2,
     data_alocacao TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     usuario VARCHAR(100),
@@ -57,9 +60,11 @@ CREATE TABLE IF NOT EXISTS alocacoes_fraldas (
 -- Índices para alocações
 CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_endereco ON alocacoes_fraldas(endereco);
 CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_coddv ON alocacoes_fraldas(coddv);
+CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_barras ON alocacoes_fraldas(barras);
 CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_endereco_id ON alocacoes_fraldas(endereco_id);
 CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_ativo ON alocacoes_fraldas(ativo);
 CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_cd ON alocacoes_fraldas(cd);
+CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_validade ON alocacoes_fraldas(validade);
 
 -- =========================================================
 -- TABELA: historico_enderecamento_fraldas
@@ -69,9 +74,11 @@ CREATE TABLE IF NOT EXISTS historico_enderecamento_fraldas (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('CADASTRO', 'ALOCACAO', 'DESALOCACAO', 'TRANSFERENCIA')),
     endereco VARCHAR(100) NOT NULL,
+    endereco_origem VARCHAR(100),
     endereco_destino VARCHAR(100),
     coddv VARCHAR(100),
     descricao_produto TEXT,
+    validade VARCHAR(4),
     observacao TEXT,
     usuario VARCHAR(100),
     matricula VARCHAR(100),
@@ -215,6 +222,7 @@ RETURNS TABLE (
     id UUID,
     coddv VARCHAR,
     descricao_produto TEXT,
+    validade VARCHAR,
     data_alocacao TIMESTAMP WITH TIME ZONE,
     usuario VARCHAR
 ) AS $$
@@ -224,6 +232,7 @@ BEGIN
         a.id,
         a.coddv,
         a.descricao_produto,
+        a.validade,
         a.data_alocacao,
         a.usuario
     FROM alocacoes_fraldas a
@@ -235,10 +244,14 @@ $$ LANGUAGE plpgsql;
 -- =========================================================
 -- FUNÇÃO: Alocar produto com validação
 -- =========================================================
+DROP FUNCTION IF EXISTS alocar_produto_fralda(VARCHAR, VARCHAR, TEXT, VARCHAR, VARCHAR, INTEGER);
+DROP FUNCTION IF EXISTS alocar_produto_fralda(VARCHAR, VARCHAR, TEXT, VARCHAR, VARCHAR, VARCHAR, INTEGER);
+
 CREATE OR REPLACE FUNCTION alocar_produto_fralda(
     p_endereco VARCHAR,
     p_coddv VARCHAR,
     p_descricao_produto TEXT,
+    p_validade VARCHAR DEFAULT NULL,
     p_usuario VARCHAR DEFAULT NULL,
     p_matricula VARCHAR DEFAULT NULL,
     p_cd INTEGER DEFAULT 2
@@ -267,13 +280,13 @@ BEGIN
     END IF;
     
     -- Inserir alocação
-    INSERT INTO alocacoes_fraldas (endereco_id, endereco, coddv, descricao_produto, usuario, matricula, cd)
-    VALUES (v_endereco_id, p_endereco, p_coddv, p_descricao_produto, p_usuario, p_matricula, p_cd)
+    INSERT INTO alocacoes_fraldas (endereco_id, endereco, coddv, descricao_produto, validade, usuario, matricula, cd)
+    VALUES (v_endereco_id, p_endereco, p_coddv, p_descricao_produto, p_validade, p_usuario, p_matricula, p_cd)
     RETURNING id INTO v_alocacao_id;
     
     -- Registrar no histórico
-    INSERT INTO historico_enderecamento_fraldas (tipo, endereco, coddv, descricao_produto, usuario, matricula, cd)
-    VALUES ('ALOCACAO', p_endereco, p_coddv, p_descricao_produto, p_usuario, p_matricula, p_cd);
+    INSERT INTO historico_enderecamento_fraldas (tipo, endereco, endereco_origem, coddv, descricao_produto, validade, usuario, matricula, cd)
+    VALUES ('ALOCACAO', p_endereco, p_endereco, p_coddv, p_descricao_produto, p_validade, p_usuario, p_matricula, p_cd);
     
     RETURN v_alocacao_id;
 END;
@@ -291,9 +304,10 @@ CREATE OR REPLACE FUNCTION desalocar_produto_fralda(
 DECLARE
     v_alocacao_id UUID;
     v_descricao TEXT;
+    v_validade VARCHAR(4);
 BEGIN
     -- Buscar alocação
-    SELECT id, descricao_produto INTO v_alocacao_id, v_descricao
+    SELECT id, descricao_produto, validade INTO v_alocacao_id, v_descricao, v_validade
     FROM alocacoes_fraldas
     WHERE endereco = p_endereco AND coddv = p_coddv AND ativo = TRUE;
     
@@ -307,8 +321,8 @@ BEGIN
     WHERE id = v_alocacao_id;
     
     -- Registrar no histórico
-    INSERT INTO historico_enderecamento_fraldas (tipo, endereco, coddv, descricao_produto, usuario, matricula)
-    VALUES ('DESALOCACAO', p_endereco, p_coddv, v_descricao, p_usuario, p_matricula);
+    INSERT INTO historico_enderecamento_fraldas (tipo, endereco, endereco_origem, coddv, descricao_produto, validade, usuario, matricula)
+    VALUES ('DESALOCACAO', p_endereco, p_endereco, p_coddv, v_descricao, v_validade, p_usuario, p_matricula);
     
     RETURN TRUE;
 END;
@@ -329,6 +343,7 @@ DECLARE
     v_endereco_destino_id UUID;
     v_alocacao_id UUID;
     v_descricao TEXT;
+    v_validade VARCHAR(4);
     v_nova_alocacao_id UUID;
 BEGIN
     -- Buscar ID do endereço destino
@@ -341,7 +356,7 @@ BEGIN
     END IF;
     
     -- Buscar alocação origem
-    SELECT id, descricao_produto INTO v_alocacao_id, v_descricao
+    SELECT id, descricao_produto, validade INTO v_alocacao_id, v_descricao, v_validade
     FROM alocacoes_fraldas
     WHERE endereco = p_endereco_origem AND coddv = p_coddv AND ativo = TRUE;
     
@@ -355,13 +370,13 @@ BEGIN
     WHERE id = v_alocacao_id;
     
     -- Criar nova alocação no destino
-    INSERT INTO alocacoes_fraldas (endereco_id, endereco, coddv, descricao_produto, usuario, matricula, cd)
-    VALUES (v_endereco_destino_id, p_endereco_destino, p_coddv, v_descricao, p_usuario, p_matricula, p_cd)
+    INSERT INTO alocacoes_fraldas (endereco_id, endereco, coddv, descricao_produto, validade, usuario, matricula, cd)
+    VALUES (v_endereco_destino_id, p_endereco_destino, p_coddv, v_descricao, v_validade, p_usuario, p_matricula, p_cd)
     RETURNING id INTO v_nova_alocacao_id;
     
     -- Registrar no histórico
-    INSERT INTO historico_enderecamento_fraldas (tipo, endereco, endereco_destino, coddv, descricao_produto, usuario, matricula, observacao)
-    VALUES ('TRANSFERENCIA', p_endereco_origem, p_endereco_destino, p_coddv, v_descricao, p_usuario, p_matricula, 
+    INSERT INTO historico_enderecamento_fraldas (tipo, endereco, endereco_origem, endereco_destino, coddv, descricao_produto, validade, usuario, matricula, observacao)
+    VALUES ('TRANSFERENCIA', p_endereco_origem, p_endereco_origem, p_endereco_destino, p_coddv, v_descricao, v_validade, p_usuario, p_matricula, 
             'De: ' || p_endereco_origem || ' Para: ' || p_endereco_destino);
     
     RETURN v_nova_alocacao_id;

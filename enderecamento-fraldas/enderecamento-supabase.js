@@ -29,13 +29,51 @@ class SistemaEnderecamentoSupabase {
      */
     formatarDataBR(date = new Date()) {
         const d = date instanceof Date ? date : new Date(date);
-        const dd = String(d.getDate()).padStart(2, '0');
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const yyyy = d.getFullYear();
-        const hh = String(d.getHours()).padStart(2, '0');
-        const mi = String(d.getMinutes()).padStart(2, '0');
-        const ss = String(d.getSeconds()).padStart(2, '0');
-        return `${dd}/${mm}/${yyyy} ${hh}:${mi}:${ss}`;
+        const formatter = new Intl.DateTimeFormat('pt-BR', {
+            timeZone: 'America/Sao_Paulo',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+
+        const parts = formatter.formatToParts(d).reduce((acc, part) => {
+            if (part.type !== 'literal') {
+                acc[part.type] = part.value;
+            }
+            return acc;
+        }, {});
+
+        return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}:${parts.second}`;
+    }
+
+    /**
+     * Formatar data para persistência SQL no fuso de Brasília: YYYY-MM-DD HH:MM:SS
+     */
+    formatarDataSqlBrasilia(date = new Date()) {
+        const d = date instanceof Date ? date : new Date(date);
+        const formatter = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Sao_Paulo',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+
+        const parts = formatter.formatToParts(d).reduce((acc, part) => {
+            if (part.type !== 'literal') {
+                acc[part.type] = part.value;
+            }
+            return acc;
+        }, {});
+
+        return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
     }
 
     /**
@@ -1423,7 +1461,7 @@ class SistemaEnderecamentoSupabase {
                         usuario: sessao.usuario,
                         matricula: sessao.matricula,
                         cd: this.cd,
-                        data_hora: new Date().toISOString()
+                        data_hora: this.formatarDataSqlBrasilia()
                     }]);
 
                 // Atualizar cache

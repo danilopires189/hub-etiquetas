@@ -41,6 +41,10 @@ body {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
+.header-spacer {
+  display: none;
+}
+
 .user-nav-menu {
   position: absolute;
   right: 0;
@@ -893,7 +897,7 @@ body {
     overflow: visible;
   }
 
-  /* Top Row: History - Brand - User */
+  /* Top Row: Spacer - Brand - User */
   .header-top-row {
     display: flex;
     align-items: center;
@@ -907,8 +911,14 @@ body {
     position: relative;
   }
 
-  /* Ensure toggle buttons are visible in top row */
-  .header-top-row .history-toggle-btn,
+  .header-top-row .header-spacer {
+    display: block;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+  }
+
+  /* Ensure toggle button is visible in top row */
   .header-top-row .user-toggle-btn {
     display: flex !important;
   }
@@ -1082,8 +1092,8 @@ body {
     justify-content: flex-start;
   }
 
-  /* Hide mobile toggles on desktop */
-  .header-top-row .history-toggle-btn,
+  /* Hide mobile-only elements on desktop */
+  .header-top-row .header-spacer,
   .header-top-row .user-toggle-btn {
     display: none !important;
   }
@@ -2086,43 +2096,6 @@ select:focus {
     min-height: 20px;
   }
 
-  /* History Toggle Button */
-  .history-toggle-btn {
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid rgba(14, 165, 233, 0.3);
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--brand-blue);
-  }
-
-  .history-toggle-btn:hover {
-    background: rgba(255, 255, 255, 1);
-    border-color: var(--brand-accent);
-    transform: scale(1.05);
-  }
-
-  .history-toggle-btn.active {
-    background: var(--brand-accent);
-    color: white;
-    border-color: var(--brand-accent);
-  }
-
-  /* History Section Mobile */
-  .historico-container {
-    display: none;
-    animation: slideDown 0.3s ease-out;
-  }
-
-  .historico-container.mobile-visible {
-    display: block;
-  }
-
   @keyframes slideDown {
     from {
       opacity: 0;
@@ -2445,7 +2418,6 @@ select:focus {
   @media print {
 
     .mobile-actions,
-    .history-toggle-btn,
     .user-toggle-btn,
     .mobile-modal-overlay {
       display: none !important;

@@ -32,15 +32,9 @@
 
     <div class="screen-container">
         <header class="app-header">
-            <!-- Top Row: History - Brand - User -->
+            <!-- Top Row: Spacer - Brand - User -->
             <div class="header-top-row">
-                <!-- History Toggle Button (Mobile Left) -->
-                <button id="historyToggle" class="history-toggle-btn" onclick="toggleHistory()" style="display: none;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12,6 12,12 16,14" />
-                    </svg>
-                </button>
+                <div class="header-spacer" aria-hidden="true"></div>
 
                 <div class="brand">
                     <div class="brand-logos">
@@ -328,14 +322,6 @@
             </div>
         </section>
 
-        <!-- Histórico de Operações -->
-        <section id="historico" class="historico-container">
-            <h3>Histórico de Operações</h3>
-            <div id="historicoLista" class="historico-lista">
-                <!-- Operações serão adicionadas aqui -->
-            </div>
-        </section>
-
         <!-- Supabase SDK -->
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.js"></script>
 
@@ -362,9 +348,6 @@
 
         <!-- Sistema de Endereçamento com Supabase (Substitui o enderecamento.js) -->
         <script type="module" src="./enderecamento-supabase.js"></script>
-
-        <!-- Correção para problema de Invalid Date no histórico -->
-        <script src="./correcao-historico.js"></script>
 
         <!-- Aplicação principal -->
         <script src="./app.js"></script>

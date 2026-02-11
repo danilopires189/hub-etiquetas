@@ -124,7 +124,7 @@ Foi implementado um sistema completo de autenticação para o Hub de Etiquetas u
 O sistema de autenticação está completo e pronto para uso. Os próximos passos seriam:
 
 1. Implementar o painel administrativo completo (task 5)
-2. Adicionar funcionalidades de relatórios
+2. Manter monitoramento operacional básico (sem relatórios avançados)
 3. Integrar com outros módulos do sistema
 
 ## Logs e Monitoramento

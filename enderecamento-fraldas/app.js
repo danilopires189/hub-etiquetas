@@ -451,40 +451,6 @@ function logout() {
 
 /* ===== Mobile Toggle Functions ===== */
 
-// Toggle history visibility on mobile
-function toggleHistory() {
-  if (!isMobileDevice()) {
-    console.log('📱 Não é dispositivo móvel - ignorando toggle de histórico');
-    return;
-  }
-
-  const historico = document.querySelector('.historico-container');
-  const toggleBtn = $('#historyToggle');
-
-  if (!historico || !toggleBtn) {
-    console.warn('📱 Elementos de histórico não encontrados');
-    return;
-  }
-
-  console.log('📱 Alternando visibilidade do histórico');
-
-  const isVisible = mobileState.getState('historyVisible');
-
-  if (isVisible) {
-    // Hide history
-    historico.classList.remove('mobile-visible');
-    toggleBtn.classList.remove('active');
-    mobileState.updateState('historyVisible', false);
-    console.log('📱 Histórico ocultado');
-  } else {
-    // Show history
-    historico.classList.add('mobile-visible');
-    toggleBtn.classList.add('active');
-    mobileState.updateState('historyVisible', true);
-    console.log('📱 Histórico exibido');
-  }
-}
-
 // Toggle user info visibility on mobile
 function toggleUserInfo() {
   if (!isMobileDevice()) {
@@ -534,25 +500,11 @@ function initializeMobileInterface() {
   mobileState.resetState();
 
   // Show mobile toggle buttons
-  const historyToggle = $('#historyToggle');
   const userToggle = $('#userToggle');
-
-  if (historyToggle) {
-    historyToggle.style.display = 'flex';
-    console.log('📱 Botão de toggle do histórico exibido');
-  }
 
   if (userToggle) {
     userToggle.style.display = 'flex';
     console.log('📱 Botão de toggle do usuário exibido');
-  }
-
-  // Hide history by default on mobile
-  const historico = document.querySelector('.historico-container');
-  if (historico) {
-    historico.classList.remove('mobile-visible');
-    mobileState.updateState('historyVisible', false);
-    console.log('📱 Histórico ocultado por padrão');
   }
 
   // Hide user info by default on mobile
@@ -599,7 +551,6 @@ function getMobileDeviceInfo() {
 
 // Mobile state management
 const mobileState = {
-  historyVisible: false,
   userInfoExpanded: false,
   currentProduct: null,
   availableActions: [],
@@ -624,7 +575,6 @@ const mobileState = {
 
   // Reset state
   resetState() {
-    this.historyVisible = false;
     this.userInfoExpanded = false;
     this.currentProduct = null;
     this.availableActions = [];
@@ -3214,45 +3164,6 @@ function formatarDataSegura(dataStr) {
   return typeof dataStr === 'string' ? dataStr : 'Data inválida';
 }
 
-// Função utilitária para formatar datas do histórico
-function formatarDataHistorico(dataHora) {
-  if (!dataHora) return 'Data não disponível';
-
-  try {
-    let data;
-
-    // Se já é uma string formatada em português (DD/MM/AAAA HH:MM:SS)
-    if (typeof dataHora === 'string' && dataHora.includes('/')) {
-      const partes = dataHora.split(' ');
-      if (partes.length >= 1) {
-        const [dia, mes, ano] = partes[0].split('/');
-        const hora = partes[1] || '00:00:00';
-        // Criar data no formato ISO para parsing correto
-        data = new Date(`${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}T${hora}`);
-      }
-    } else {
-      // Tentar como ISO string ou timestamp
-      data = new Date(dataHora);
-    }
-
-    if (!isNaN(data.getTime())) {
-      return data.toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } else {
-      // Se não conseguiu converter, usar a string original se for válida
-      return typeof dataHora === 'string' ? dataHora : 'Data inválida';
-    }
-  } catch (e) {
-    console.warn('Erro ao converter data do histórico:', dataHora, e);
-    return typeof dataHora === 'string' ? dataHora : 'Data inválida';
-  }
-}
-
 // Função para sugerir endereços próximos
 function sugerirEnderecosSimilares(enderecoInvalido) {
   if (!window.sistemaEnderecamento) return [];
@@ -3983,7 +3894,8 @@ async function executarOperacao() {
 
 async function adicionarHistorico(tipo, produto, enderecoAnterior, enderecoNovo) {
   const agora = new Date();
-  const timestamp = agora.toLocaleString('pt-BR');
+  const timestamp = formatarDataHoraBrasiliaBr(agora);
+  const dataHoraBrasiliaSql = formatarDataHoraBrasiliaSql(agora);
 
   // Obter dados da sessão
   const sessionData = JSON.parse(localStorage.getItem('enderecamento_fraldas_session') || '{}');
@@ -4017,7 +3929,7 @@ async function adicionarHistorico(tipo, produto, enderecoAnterior, enderecoNovo)
           usuario: sessionData.usuario || 'Sistema',
           matricula: sessionData.matricula,
           cd: window.sistemaEnderecamento.cd,
-          data_hora: agora.toISOString()
+          data_hora: dataHoraBrasiliaSql
         }]);
 
       showSyncIndicator('✅ Salvo no servidor', 'success');
@@ -4039,9 +3951,36 @@ async function adicionarHistorico(tipo, produto, enderecoAnterior, enderecoNovo)
   }
 
   salvarLocalStorageSeguro('historico_operacoes', JSON.stringify(historicoOperacoes));
+}
 
-  // Atualizar exibição
-  exibirHistorico();
+function obterPartesDataHoraBrasilia(date = new Date()) {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
+  return formatter.formatToParts(date).reduce((acc, part) => {
+    if (part.type !== 'literal') {
+      acc[part.type] = part.value;
+    }
+    return acc;
+  }, {});
+}
+
+function formatarDataHoraBrasiliaBr(date = new Date()) {
+  const p = obterPartesDataHoraBrasilia(date);
+  return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}:${p.second}`;
+}
+
+function formatarDataHoraBrasiliaSql(date = new Date()) {
+  const p = obterPartesDataHoraBrasilia(date);
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
 }
 
 // Função para mostrar indicador de sincronização
@@ -4071,200 +4010,6 @@ function showSyncIndicator(message, type = 'info') {
       indicator.remove();
     }, 300);
   }, 3000);
-}
-
-async function exibirHistorico() {
-  const lista = $('#historicoLista');
-  let historicoOperacoes = [];
-
-  // Tentar buscar do Supabase primeiro
-  if (window.sistemaEnderecamento && window.sistemaEnderecamento.isConnected && !window.sistemaEnderecamento.modoOffline) {
-    try {
-      lista.innerHTML = '<div class="historico-loading">Carregando histórico...</div>';
-
-      const historicoSupabase = await window.sistemaEnderecamento.obterHistorico(50);
-
-      // Converter formato do Supabase para formato local
-      historicoOperacoes = historicoSupabase.map(item => ({
-        timestamp: formatarDataHistorico(item.data_hora),
-        dataHoraRaw: item.data_hora, // Guardar data original para ordenação
-        tipo: item.tipo,
-        coddv: item.coddv,
-        desc: item.descricao_produto || 'Produto não identificado',
-        enderecoAnterior: item.endereco_origem,
-        enderecoNovo: item.endereco_destino || item.endereco,
-        usuario: item.usuario,
-        matricula: item.matricula,
-        cd: item.cd
-      }));
-
-      // O Supabase já retorna ordenado por data_hora DESC
-      // Não precisamos reordenar, apenas usar na ordem que veio
-      console.log('✅ Histórico carregado do Supabase:', historicoOperacoes.length, 'registros');
-      
-      // Debug: mostrar as datas para verificar ordenação
-      if (historicoOperacoes.length > 0) {
-        console.log('📅 Primeiro registro:', historicoOperacoes[0].dataHoraRaw);
-        console.log('📅 Último registro:', historicoOperacoes[historicoOperacoes.length - 1].dataHoraRaw);
-      }
-
-    } catch (error) {
-      console.error('❌ Erro ao carregar histórico do Supabase:', error);
-      // Fallback para localStorage
-      historicoOperacoes = JSON.parse(localStorage.getItem('historico_operacoes') || '[]');
-    }
-  } else {
-    // Usar localStorage como fallback
-    historicoOperacoes = JSON.parse(localStorage.getItem('historico_operacoes') || '[]');
-  }
-
-  if (historicoOperacoes.length === 0) {
-    lista.innerHTML = '<p class="historico-vazio">Nenhuma operação realizada ainda</p>';
-    return;
-  }
-
-  // Pegar apenas os últimos 10 movimentos
-  const ultimosMovimentos = historicoOperacoes.slice(0, 10);
-  const totalMovimentos = historicoOperacoes.length;
-
-  // Cabeçalho com informação de quantos movimentos estão sendo exibidos
-  const fonteIndicador = window.sistemaEnderecamento && window.sistemaEnderecamento.isConnected && !window.sistemaEnderecamento.modoOffline ?
-    '<span class="historico-fonte supabase">Supabase</span>' :
-    '<span class="historico-fonte local">Local</span>';
-
-  const cabecalhoInfo = totalMovimentos > 10 ?
-    `<div class="historico-info">
-      <span class="historico-contador">📊 Exibindo os últimos 10 de ${totalMovimentos} movimentos ${fonteIndicador}</span>
-      <button class="btn btn-ghost btn-sm" onclick="exibirHistoricoCompleto()" title="Ver histórico completo">
-        📋 Ver Todos
-      </button>
-    </div>` :
-    `<div class="historico-info">
-      <span class="historico-contador">📊 ${totalMovimentos} movimento${totalMovimentos !== 1 ? 's' : ''} registrado${totalMovimentos !== 1 ? 's' : ''} ${fonteIndicador}</span>
-    </div>`;
-
-  const itensHTML = ultimosMovimentos.map((op, index) => {
-    // Formatar informações dos endereços
-    const enderecoAnteriorInfo = op.enderecoAnterior ? formatarInfoEndereco(op.enderecoAnterior) : null;
-    const enderecoNovoInfo = op.enderecoNovo ? formatarInfoEndereco(op.enderecoNovo) : null;
-
-    return `
-    <div class="historico-item ${index === 0 ? 'historico-item-recente' : ''}">
-      <div class="historico-header">
-        <span class="historico-tipo tipo-${op.tipo.toLowerCase().replace(/\s+/g, '-').replace('ç', 'c').replace('ã', 'a')}">${op.tipo}</span>
-        <span class="historico-timestamp">${op.timestamp}</span>
-      </div>
-      <div class="historico-produto">
-        <strong>${op.coddv}</strong> - ${op.desc}
-      </div>
-      <div class="historico-endereco">
-        ${op.enderecoAnterior ? `De: ${op.enderecoAnterior}${enderecoAnteriorInfo ? ` (${enderecoAnteriorInfo.formatado})` : ''}` : ''}
-        ${op.enderecoNovo ? `Para: ${op.enderecoNovo}${enderecoNovoInfo ? ` (${enderecoNovoInfo.formatado})` : ''}` : ''}
-        ${!op.enderecoNovo && op.enderecoAnterior ? `Removido${enderecoAnteriorInfo ? ` (${enderecoAnteriorInfo.formatado})` : ''}` : ''}
-      </div>
-      ${op.usuario ? `
-        <div class="historico-usuario">
-          <span class="usuario-info">👤 ${op.usuario}</span>
-          ${op.matricula ? `<span class="matricula-info">🆔 ${op.matricula}</span>` : ''}
-          ${op.cd ? `<span class="cd-info">📍 ${op.cd}</span>` : ''}
-        </div>
-      ` : ''}
-    </div>
-  `;
-  }).join('');
-
-  lista.innerHTML = cabecalhoInfo + itensHTML;
-}
-
-async function exibirHistoricoCompleto() {
-  const lista = $('#historicoLista');
-  let historicoOperacoes = [];
-
-  // Tentar buscar do Supabase primeiro
-  if (window.sistemaEnderecamento && window.sistemaEnderecamento.isConnected && !window.sistemaEnderecamento.modoOffline) {
-    try {
-      lista.innerHTML = '<div class="historico-loading">Carregando histórico completo...</div>';
-
-      const historicoSupabase = await window.sistemaEnderecamento.obterHistorico(200); // Buscar mais registros
-
-      // Converter formato do Supabase para formato local
-      historicoOperacoes = historicoSupabase.map(item => ({
-        timestamp: formatarDataHistorico(item.data_hora),
-        dataHoraRaw: item.data_hora, // Guardar data original para ordenação
-        tipo: item.tipo,
-        coddv: item.coddv,
-        desc: item.descricao_produto || 'Produto não identificado',
-        enderecoAnterior: item.endereco_origem,
-        enderecoNovo: item.endereco_destino || item.endereco,
-        usuario: item.usuario,
-        matricula: item.matricula,
-        cd: item.cd
-      }));
-
-      // O Supabase já retorna ordenado por data_hora DESC
-      // Não precisamos reordenar, apenas usar na ordem que veio
-      console.log('✅ Histórico completo carregado do Supabase:', historicoOperacoes.length, 'registros');
-
-    } catch (error) {
-      console.error('❌ Erro ao carregar histórico completo do Supabase:', error);
-      // Fallback para localStorage
-      historicoOperacoes = JSON.parse(localStorage.getItem('historico_operacoes') || '[]');
-    }
-  } else {
-    // Usar localStorage como fallback
-    historicoOperacoes = JSON.parse(localStorage.getItem('historico_operacoes') || '[]');
-  }
-
-  if (historicoOperacoes.length === 0) {
-    lista.innerHTML = '<p class="historico-vazio">Nenhuma operação realizada ainda</p>';
-    return;
-  }
-
-  // Cabeçalho para histórico completo
-  const fonteIndicador = window.sistemaEnderecamento && window.sistemaEnderecamento.isConnected && !window.sistemaEnderecamento.modoOffline ?
-    '<span class="historico-fonte supabase">Supabase</span>' :
-    '<span class="historico-fonte local">Local</span>';
-
-  const cabecalhoInfo = `
-    <div class="historico-info historico-completo">
-      <span class="historico-contador">📊 Histórico Completo - ${historicoOperacoes.length} movimento${historicoOperacoes.length !== 1 ? 's' : ''} ${fonteIndicador}</span>
-      <button class="btn btn-ghost btn-sm" onclick="exibirHistorico()" title="Voltar aos últimos 10">
-        🔙 Últimos 10
-      </button>
-    </div>
-  `;
-
-  const itensHTML = historicoOperacoes.map((op, index) => {
-    // Formatar informações dos endereços
-    const enderecoAnteriorInfo = op.enderecoAnterior ? formatarInfoEndereco(op.enderecoAnterior) : null;
-    const enderecoNovoInfo = op.enderecoNovo ? formatarInfoEndereco(op.enderecoNovo) : null;
-
-    return `
-    <div class="historico-item ${index === 0 ? 'historico-item-recente' : ''}">
-      <div class="historico-header">
-        <span class="historico-tipo tipo-${op.tipo.toLowerCase().replace(/\s+/g, '-').replace('ç', 'c').replace('ã', 'a')}">${op.tipo}</span>
-        <span class="historico-timestamp">${op.timestamp}</span>
-      </div>
-      <div class="historico-produto">
-        <strong>${op.coddv}</strong> - ${op.desc}
-      </div>
-      <div class="historico-endereco">
-        ${op.enderecoAnterior ? `De: ${op.enderecoAnterior}${enderecoAnteriorInfo ? ` (${enderecoAnteriorInfo.formatado})` : ''}` : ''}
-        ${op.enderecoNovo ? `Para: ${op.enderecoNovo}${enderecoNovoInfo ? ` (${enderecoNovoInfo.formatado})` : ''}` : ''}
-        ${!op.enderecoNovo && op.enderecoAnterior ? `Removido${enderecoAnteriorInfo ? ` (${enderecoAnteriorInfo.formatado})` : ''}` : ''}
-      </div>
-      ${op.usuario ? `
-        <div class="historico-usuario">
-          <span class="usuario-info">👤 ${op.usuario}</span>
-          ${op.matricula ? `<span class="matricula-info">🆔 ${op.matricula}</span>` : ''}
-          ${op.cd ? `<span class="cd-info">📍 ${op.cd}</span>` : ''}
-        </div>
-      ` : ''}
-    </div>
-  `;
-  }).join('');
-
-  lista.innerHTML = cabecalhoInfo + itensHTML;
 }
 
 /* ===== Event Handlers ===== */
@@ -5592,13 +5337,9 @@ function inicializar() {
     updateMobileActionButtons(null); // Initialize with no product
   }
 
-  // Exibir histórico
-  exibirHistorico();
-
-  // Ouvir evento de sistema pronto para recarregar dados
+  // Ouvir evento de sistema pronto para recarregar dados essenciais
   window.addEventListener('sistemaEnderecamentoPronto', () => {
-    console.log('🔄 Recarregando histórico (sistema pronto)');
-    exibirHistorico();
+    console.log('🔄 Sistema pronto, atualizando dados do produto atual');
     if (produtoAtual) exibirProduto(produtoAtual);
   });
 

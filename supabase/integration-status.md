@@ -10,7 +10,7 @@
 
 ### 2. Admin Panel and Authentication
 - ✅ Created admin login page with authentication
-- ✅ Built comprehensive dashboard with real-time statistics
+- ✅ Kept admin flow available while disabling advanced analytics paths
 - ✅ Added admin button to main navigation
 - ✅ Implemented responsive design for admin panel
 
@@ -103,20 +103,11 @@ Each module now collects and sends the following data to Supabase:
 
 ## 🎯 Next Steps
 
-The core integration is now complete. Remaining optional tasks include:
+The core integration is complete and was simplified to reduce storage and egress risk.
 
-1. **Authentication System** (Task 4)
-   - Configure Supabase Auth for admin access
-   - Implement 24-hour sessions
-
-2. **Data Migration** (Task 7)
-   - Migrate existing localStorage data to Supabase
-   - Handle historical data preservation
-
-3. **Advanced Features** (Tasks 8-11)
-   - Conflict resolution for offline/online sync
-   - Performance optimizations
-   - Advanced reporting and analytics
+1. Keep schema and app code aligned with `supabase/setup-hub-pmenos.sql`
+2. Perform manual migration from the previous database only for needed records
+3. Re-enable advanced analytics only if there is clear budget and operational need
 
 ## 🚀 System Status
 
@@ -129,4 +120,4 @@ All 9 application modules are now integrated with Supabase and actively collecti
 - Email: admin@example.com
 - Password: change-me-admin-password
 
-**Database**: All label generations are now being persisted to Supabase with detailed metadata for comprehensive analytics and reporting.
+**Database**: Label generations are persisted to Supabase with operational metadata, prioritizing low egress and lower storage usage.

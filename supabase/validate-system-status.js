@@ -77,7 +77,7 @@ class SystemStatusValidator {
         this.checkFileExists('supabase/config.js', 'Configuração Supabase');
         this.checkFileContent('supabase/config.js', 'Config - Credenciais', [
             'SUPABASE_CONFIG',
-            'jomwkkhhhekbyanftpoc.supabase.co',
+            'esaomlrwutuwqmztxsat.supabase.co',
             'anonKey'
         ]);
 
@@ -112,25 +112,20 @@ class SystemStatusValidator {
         this.checkFileExists('supabase/conflict-resolver.js', 'Resolvedor de Conflitos');
         this.checkFileExists('supabase/conflict-resolution-functions.sql', 'Funções SQL de Conflitos');
 
-        // 7. Análise de Relatórios
-        console.log('\n📊 7. Análise de Relatórios:');
-        this.checkFileExists('supabase/report-analyzer.js', 'Analisador de Relatórios');
-
-        // 8. Testes
-        console.log('\n🧪 8. Arquivos de Teste:');
+        // 7. Testes
+        console.log('\n🧪 7. Arquivos de Teste:');
         this.checkFileExists('supabase/test-conflict-resolver.js', 'Teste de Conflitos');
-        this.checkFileExists('supabase/test-report-analyzer.js', 'Teste de Relatórios');
         this.checkFileExists('supabase/final-validation.js', 'Validação Final');
 
-        // 9. Integração com Módulos
-        console.log('\n🔗 9. Integração com Módulos:');
+        // 8. Integração com Módulos
+        console.log('\n🔗 8. Integração com Módulos:');
         this.checkFileExists('js/contador-global-centralizado.js', 'Contador Global');
         this.checkFileContent('js/contador-global-centralizado.js', 'Contador - Integração Supabase', [
             'supabase'
         ]);
 
-        // 10. Documentação
-        console.log('\n📚 10. Documentação:');
+        // 9. Documentação
+        console.log('\n📚 9. Documentação:');
         this.checkFileExists('supabase/README.md', 'README Principal');
         this.checkFileExists('supabase/final-configuration-summary.md', 'Resumo de Configuração');
 

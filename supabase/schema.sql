@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS labels (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     application_type VARCHAR(50) NOT NULL CHECK (application_type IN (
         'placas', 'caixa', 'avulso', 'enderec', 'transfer', 
-        'termo', 'pedido-direto', 'etiqueta-mercadoria', 'inventario'
+        'termo', 'pedido-direto', 'etiqueta-mercadoria', 'inventario', 'geral'
     )),
-    coddv VARCHAR(20),
+    coddv VARCHAR(50),
     quantity INTEGER NOT NULL CHECK (quantity > 0),
     copies INTEGER DEFAULT 1 CHECK (copies > 0),
     label_type VARCHAR(20),
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS global_counter (
 
 -- Inserir registro inicial do contador se não existir
 INSERT INTO global_counter (total_count, last_updated, version)
-SELECT 20430, NOW(), 1
+SELECT 0, NOW(), 1
 WHERE NOT EXISTS (SELECT 1 FROM global_counter);
 
 -- Tabela de sessões de usuário
@@ -97,7 +97,7 @@ DECLARE
 BEGIN
     -- Validar tipo de aplicação
     IF app_type NOT IN ('placas', 'caixa', 'avulso', 'enderec', 'transfer', 
-                       'termo', 'pedido-direto', 'etiqueta-mercadoria', 'inventario') THEN
+                       'termo', 'pedido-direto', 'etiqueta-mercadoria', 'inventario', 'geral') THEN
         RAISE EXCEPTION 'Tipo de aplicação inválido: %', app_type;
     END IF;
     
@@ -154,7 +154,7 @@ $$ LANGUAGE plpgsql;
 -- Função para registrar geração de etiqueta
 CREATE OR REPLACE FUNCTION register_label_generation(
     p_application_type VARCHAR(50),
-    p_coddv VARCHAR(20) DEFAULT NULL,
+    p_coddv VARCHAR(50) DEFAULT NULL,
     p_quantity INTEGER DEFAULT 1,
     p_copies INTEGER DEFAULT 1,
     p_label_type VARCHAR(20) DEFAULT NULL,

@@ -145,8 +145,7 @@ class SupabaseBatchProcessor {
             label_type: op.data.labelType,
             orientation: op.data.orientation,
             cd: op.data.cd,
-            metadata: op.data.metadata,
-            created_at: new Date().toISOString()
+            metadata: op.data.metadata
         }));
 
         const { data, error } = await window.supabaseManager.client

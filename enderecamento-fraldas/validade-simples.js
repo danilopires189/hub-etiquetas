@@ -8,8 +8,8 @@ let enderecoSelecionado = null;
 let supabaseClient = null;
 
 // Configuração do Supabase
-const SUPABASE_URL = 'https://fqxkcgjnlkrqroazzsld.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxeGtjZ2pubGtycXJvYXp6c2xkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyMTQ3OTUsImV4cCI6MjA1Mzc5MDc5NX0.3dNxv0uT9o3_JQdF4rCq1VBbDyxMmfPk-ZEp4K3q0Zo';
+const SUPABASE_URL = 'https://esaomlrwutuwqmztxsat.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzYW9tbHJ3dXR1d3FtenR4c2F0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4MDIxNzQsImV4cCI6MjA4NjM3ODE3NH0.oPutmXC7S2kewHZkjPsceo0pUPx4TSgqKnsfoSt2OVA';
 
 // Verificar autenticação e inicializar
 document.addEventListener('DOMContentLoaded', async () => {

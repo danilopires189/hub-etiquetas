@@ -451,7 +451,7 @@ async function imprimirColeta(item) {
 
 async function marcarComoImpresso(id) {
   if (!sistema?.client) return;
-  const agoraIso = new Date().toISOString();
+  const agoraIso = dataHoraBrasiliaSql();
   const { error } = await sistema.client
     .from('coletas_fraldas')
     .update({ print: 'Sim', printed_at: agoraIso })

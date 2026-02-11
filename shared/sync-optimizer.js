@@ -142,9 +142,6 @@ class SyncOptimizer {
                 case 'save_label':
                     result = await this.syncLabel(item.data);
                     break;
-                case 'get_stats':
-                    result = await this.syncStats(item.data);
-                    break;
                 default:
                     console.warn(`⚠️ Operação desconhecida: ${item.operation}`);
                     return;
@@ -193,17 +190,6 @@ class SyncOptimizer {
         }
 
         return await window.supabaseManager.saveLabelGeneration(data);
-    }
-
-    /**
-     * Sincronizar estatísticas
-     */
-    async syncStats(data) {
-        if (!window.supabaseManager) {
-            throw new Error('SupabaseManager não disponível');
-        }
-
-        return await window.supabaseManager.getStatistics(data);
     }
 
     /**

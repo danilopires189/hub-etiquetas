@@ -138,6 +138,68 @@ class SupabaseManager {
     }
 
     /**
+     * Obter partes de data/hora no fuso de Brasília
+     */
+    getBrasiliaDateTimeParts(date = new Date()) {
+        const formatter = new Intl.DateTimeFormat('pt-BR', {
+            timeZone: 'America/Sao_Paulo',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+
+        return formatter.formatToParts(date).reduce((acc, part) => {
+            if (part.type !== 'literal') {
+                acc[part.type] = part.value;
+            }
+            return acc;
+        }, {});
+    }
+
+    /**
+     * Formatar data/hora no padrão BR (DD/MM/AAAA HH:MM:SS) no fuso de Brasília
+     */
+    getBrasiliaDateTimeString(date = new Date()) {
+        const parts = this.getBrasiliaDateTimeParts(date);
+        return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}:${parts.second}`;
+    }
+
+    /**
+     * Formatar data/hora para persistência SQL (YYYY-MM-DD HH:MM:SS) no fuso de Brasília
+     */
+    getBrasiliaSqlDateTimeString(date = new Date()) {
+        const parts = this.getBrasiliaDateTimeParts(date);
+        return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
+    }
+
+    /**
+     * Extrair total de respostas RPC em formatos diferentes (INTEGER, JSON, JSONB)
+     */
+    getCounterTotalFromRpcResult(counterResult) {
+        if (Number.isFinite(counterResult)) {
+            return Number(counterResult);
+        }
+
+        if (counterResult && typeof counterResult === 'object') {
+            if (Number.isFinite(counterResult.new_total)) {
+                return Number(counterResult.new_total);
+            }
+            if (Number.isFinite(counterResult.total_count)) {
+                return Number(counterResult.total_count);
+            }
+            if (Number.isFinite(counterResult.value)) {
+                return Number(counterResult.value);
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Aplicar dados resolvidos do contador
      */
     async applyResolvedCounterData(resolvedData) {
@@ -202,8 +264,7 @@ class SupabaseManager {
                         orientation: generationData.orientation,
                         cd: generationData.cd,
                         user_session_id: generationData.user_session_id,
-                        metadata: generationData.metadata,
-                        created_at: new Date().toISOString()
+                        metadata: generationData.metadata
                     }])
                     .select('id, application_type, quantity, copies, created_at')
                     .single();
@@ -223,7 +284,10 @@ class SupabaseManager {
 
                 try {
                     const counterResult = await this.updateGlobalCounter(totalIncrement, generationData.application_type);
-                    newTotal = counterResult ? counterResult.new_total : 0;
+                    const parsedTotal = this.getCounterTotalFromRpcResult(counterResult);
+                    if (Number.isFinite(parsedTotal)) {
+                        newTotal = parsedTotal;
+                    }
                 } catch (cntErr) {
                     console.warn('⚠️ Falha ao atualizar contador global após insert (mas label foi salva):', cntErr);
                 }
@@ -293,9 +357,8 @@ class SupabaseManager {
      * Salvar registro da aplicação Termo
      */
     async saveTermoLabel(data) {
-        // Ajustar Data Hora para Brasil (DD/MM/AAAA HH:MM:SS)
-        const now = new Date();
-        const dataHoraBrasil = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        // A tabela termo usa TIMESTAMP WITH TIME ZONE, então persistimos em formato SQL
+        const dataHoraBrasil = this.getBrasiliaSqlDateTimeString();
 
         const termoData = {
             id_et: data.id_et,
@@ -333,7 +396,7 @@ class SupabaseManager {
                         quantity: data.qtd_vol,
                         copies: 1,
                         cd: data.cd,
-                        metadata: { ...termoData, source: 'termo_table_sync' }
+                        metadata: { source: 'termo_table_sync' }
                     });
                 } catch (counterError) {
                     console.warn('⚠️ Falha ao atualizar contador global, mas registro Termo foi salvo:', counterError);
@@ -370,9 +433,8 @@ class SupabaseManager {
      * Salvar registro da aplicação Etiqueta Entrada (Mercadoria)
      */
     async saveEtiquetaEntrada(data) {
-        // Ajustar Data Hora para Brasil
-        const now = new Date();
-        const dataHoraBrasil = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        // Data/hora sempre no fuso de Brasília
+        const dataHoraBrasil = this.getBrasiliaDateTimeString();
 
         const entryData = {
             cd: data.cd,
@@ -413,7 +475,7 @@ class SupabaseManager {
                         quantity: entryData.quantidade,
                         copies: 1,
                         cd: data.cd,
-                        metadata: { ...entryData, source: 'etiqueta_entrada_sync' }
+                        metadata: { source: 'etiqueta_entrada_sync' }
                     });
                 } catch (counterError) {
                     console.warn('⚠️ Falha ao atualizar contador global, mas registro de Entrada foi salvo:', counterError);
@@ -447,9 +509,8 @@ class SupabaseManager {
      * Salvar registro da aplicação Caixa
      */
     async saveCaixaLabel(data) {
-        // Ajustar Data Hora para Brasil
-        const now = new Date();
-        const dataHoraBrasil = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        // Data/hora sempre no fuso de Brasília
+        const dataHoraBrasil = this.getBrasiliaDateTimeString();
 
         const caixaData = {
             num_inicial: data.num_inicial,
@@ -482,7 +543,7 @@ class SupabaseManager {
                         coddv: data.num_inicial,
                         quantity: caixaData.total_et,
                         copies: 1,
-                        metadata: { ...caixaData, source: 'caixa_module_sync' }
+                        metadata: { source: 'caixa_module_sync' }
                     });
                 } catch (counterError) {
                     console.warn('⚠️ Falha ao atualizar contador global, mas registro Caixa foi salvo:', counterError);
@@ -516,9 +577,8 @@ class SupabaseManager {
      * Salvar registro da aplicação Avulso
      */
     async saveAvulsoLabel(data) {
-        // Ajustar Data Hora para Brasil
-        const now = new Date();
-        const dataHoraBrasil = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        // Data/hora sempre no fuso de Brasília
+        const dataHoraBrasil = this.getBrasiliaDateTimeString();
 
         const avulsoData = {
             id_mov: data.id_mov,
@@ -553,7 +613,7 @@ class SupabaseManager {
                         quantity: avulsoData.qtd_cx,
                         copies: 1,
                         cd: data.cd,
-                        metadata: { ...avulsoData, source: 'avulso_module_sync' }
+                        metadata: { source: 'avulso_module_sync' }
                     });
                 } catch (counterError) {
                     console.warn('⚠️ Falha ao atualizar contador global, mas registro Avulso foi salvo:', counterError);
@@ -589,15 +649,7 @@ class SupabaseManager {
     async saveEnderecLabel(data) {
         if (this.isOnline()) {
             try {
-                // Data e hora atual no formato brasileiro
-                const now = new Date();
-                const dd = String(now.getDate()).padStart(2, '0');
-                const mm = String(now.getMonth() + 1).padStart(2, '0');
-                const yyyy = now.getFullYear();
-                const hh = String(now.getHours()).padStart(2, '0');
-                const mi = String(now.getMinutes()).padStart(2, '0');
-                const ss = String(now.getSeconds()).padStart(2, '0');
-                const dataHora = `${dd}/${mm}/${yyyy} ${hh}:${mi}:${ss}`;
+                const dataHora = this.getBrasiliaDateTimeString();
 
                 const enderecData = {
                     tipo: data.tipo,
@@ -627,7 +679,7 @@ class SupabaseManager {
                         quantity: 1,
                         copies: data.num_copia,
                         cd: null,
-                        metadata: { ...enderecData, source: 'enderec_module_sync' }
+                        metadata: { source: 'enderec_module_sync' }
                     });
                 } catch (counterError) {
                     console.warn('⚠️ Falha ao atualizar contador global, mas registro Enderec foi salvo:', counterError);
@@ -737,78 +789,29 @@ class SupabaseManager {
     }
 
     /**
-     * Obter estatísticas com filtros
+     * Estatísticas avançadas desativadas para reduzir egress.
+     * Mantém somente retorno leve baseado no contador global.
      */
-    async getStatistics(filters = {}) {
+    async getStatistics(_filters = {}) {
         try {
-            const cacheKey = this.buildStatisticsCacheKey(filters);
-            const cached = this.getCachedStatistics(cacheKey);
-            if (cached) {
-                return cached;
-            }
-
-            const maxRows = Number.isFinite(filters.maxRows) && Number(filters.maxRows) > 0
-                ? Math.min(Number(filters.maxRows), 50000)
-                : this.statisticsMaxRows;
-            const pageSize = Math.min(this.statisticsPageSize, maxRows);
-
-            let allData = [];
-            let from = 0;
-
-            while (allData.length < maxRows) {
-                let query = this.client
-                    .from('labels')
-                    .select('application_type, quantity, copies, created_at')
-                    .order('created_at', { ascending: false })
-                    .range(from, from + pageSize - 1);
-
-                if (filters.startDate) {
-                    query = query.gte('created_at', filters.startDate);
-                }
-
-                if (filters.endDate) {
-                    query = query.lte('created_at', filters.endDate);
-                }
-
-                if (filters.applicationType) {
-                    query = query.eq('application_type', filters.applicationType);
-                }
-
-                if (filters.cd) {
-                    query = query.eq('cd', filters.cd);
-                }
-
-                const { data, error } = await query;
-
-                if (error) {
-                    console.error('❌ Erro ao obter estatísticas filtradas:', error);
-                    throw error;
-                }
-
-                if (!data || data.length === 0) {
-                    break;
-                }
-
-                allData.push(...data);
-
-                if (data.length < pageSize) {
-                    break;
-                }
-
-                from += pageSize;
-            }
-
-            if (allData.length > maxRows) {
-                allData = allData.slice(0, maxRows);
-                console.warn(`⚠️ getStatistics limitado a ${maxRows} registros para reduzir egress.`);
-            }
-
-            const processed = this.processStatistics(allData);
-            this.setCachedStatistics(cacheKey, processed);
-            return processed;
+            console.warn('⚠️ getStatistics avançado está desativado para reduzir egress.');
+            const counter = await this.getCounterStats();
+            return {
+                totalLabels: Number(counter?.total_count || 0),
+                applicationBreakdown: counter?.application_breakdown || {},
+                timeSeriesData: [],
+                disabled: true,
+                reason: 'advanced_statistics_disabled_to_reduce_egress'
+            };
         } catch (error) {
-            console.error('❌ Falha ao obter estatísticas filtradas:', error);
-            return { totalLabels: 0, applicationBreakdown: {}, timeSeriesData: [] };
+            console.error('❌ Falha ao obter estatísticas leves:', error);
+            return {
+                totalLabels: 0,
+                applicationBreakdown: {},
+                timeSeriesData: [],
+                disabled: true,
+                reason: 'advanced_statistics_disabled_to_reduce_egress'
+            };
         }
     }
 
@@ -839,7 +842,7 @@ class SupabaseManager {
 
             // Dados de série temporal (agrupados por dia local)
             // Usar 'en-CA' para obter formato YYYY-MM-DD respeitando o fuso local do navegador
-            const date = new Date(record.created_at).toLocaleDateString('en-CA');
+            const date = new Date(record.created_at).toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
             const existingPoint = stats.timeSeriesData.find(point => point.date === date);
 
             if (existingPoint) {

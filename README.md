@@ -27,7 +27,7 @@ O **Hub de Etiquetas** é uma plataforma web completa para geração de diversos
 ### ✨ Funcionalidades Principais
 
 - 🏷️ Geração de múltiplos tipos de etiquetas
-- 📊 Dashboard com estatísticas em tempo real
+- 📊 Contador global sincronizado com Supabase
 - 🔄 Sincronização com banco de dados Supabase
 - 📱 Interface responsiva (desktop e mobile)
 - 🌙 Suporte a Dark Mode
