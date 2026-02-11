@@ -356,7 +356,7 @@
 .coleta-toast.warning { background: #f59e0b; }
 .coleta-toast.error { background: #ef4444; }
 
-@media (max-width: 900px) {
+@media screen and (max-width: 900px) {
     body {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
@@ -404,8 +404,18 @@
     }
 }
 
-@media (min-width: 901px) {
+@media screen and (min-width: 901px) {
     .mobile-coleta-shell {
         display: none !important;
+    }
+}
+
+@media print {
+    .mobile-coleta-shell,
+    #coleta-modal,
+    #coleta-modal.show,
+    #coleta-modal .coleta-modal-dialog {
+        display: none !important;
+        visibility: hidden !important;
     }
 }
