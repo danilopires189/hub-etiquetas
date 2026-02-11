@@ -133,11 +133,11 @@
         
         <div class="step">
             <h3>🔐 Passo 2: Configurar Usuário Admin</h3>
-            <p>Crie o usuário administrativo no Supabase Auth:</p>
+            <p>Defina credenciais admin no runtime e depois crie o usuário no Supabase Auth:</p>
             
             <div class="credentials">
-                <strong>Email:</strong> danilo_pires189@hotmail.com<br>
-                <strong>Senha:</strong> Danilo189
+                <strong>window.__HUB_ADMIN_EMAIL</strong> e <strong>window.__HUB_ADMIN_PASSWORD</strong><br>
+                (não mantenha credenciais fixas no frontend)
             </div>
             
             <button class="button" onclick="createAdminUser()">👤 Criar Usuário Admin</button>
@@ -200,6 +200,11 @@
             showStatus('adminStatus', 'Criando usuário admin...', 'info');
             
             try {
+                if (!ADMIN_CONFIG.email || !ADMIN_CONFIG.password) {
+                    showStatus('adminStatus', 'Credenciais admin não configuradas no runtime.', 'error');
+                    return;
+                }
+
                 await supabaseManager.initialize();
                 
                 const result = await supabaseManager.client.auth.signUp({

@@ -78,7 +78,7 @@ class SystemStatusValidator {
         this.checkFileContent('supabase/config.js', 'Config - Credenciais', [
             'SUPABASE_CONFIG',
             'jomwkkhhhekbyanftpoc.supabase.co',
-            'danilo_pires189@hotmail.com'
+            'anonKey'
         ]);
 
         // 2. Schema do Banco

@@ -17,8 +17,8 @@
 - **Credenciais Configuradas:**
   - URL: `https://jomwkkhhhekbyanftpoc.supabase.co`
   - Chave Anônima: Configurada
-  - Email Admin: `danilo_pires189@hotmail.com`
-  - Senha Admin: `Danilo189`
+  - Email Admin: `admin@example.com`
+  - Senha Admin: `change-me-admin-password`
 
 ### 2. ✅ Cliente Supabase e Sincronização
 - **Status:** COMPLETO
@@ -181,15 +181,15 @@
 SUPABASE_CONFIG = {
   url: 'https://jomwkkhhhekbyanftpoc.supabase.co',
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvbXdra2hoaGVrYnlhbmZ0cG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5OTMxNjMsImV4cCI6MjA4MzU2OTE2M30.hWo1X0j5XcDPtsG1JdBTMY_kTTFi6ff6Xw3uqZdEPvc',
-  serviceRoleKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvbXdra2hoaGVrYnlhbmZ0cG9jIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Nzk5MzE2MywiZXhwIjoyMDgzNTY5MTYzfQ.bJyJN70qG0VGlGlwndp3fqWcAk4bNsDyvQ9qyqEfxKE'
+  serviceRoleKey: 'REDACTED_SERVICE_ROLE_KEY'
 }
 ```
 
 ### Credenciais Admin
 ```javascript
 ADMIN_CONFIG = {
-  email: 'danilo_pires189@hotmail.com',
-  password: 'Danilo189',
+  email: 'admin@example.com',
+  password: 'change-me-admin-password',
   sessionDuration: 24 * 60 * 60 * 1000 // 24 horas
 }
 ```

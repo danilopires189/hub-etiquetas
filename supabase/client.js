@@ -62,8 +62,12 @@ class SupabaseManager {
             this.isConnected = true;
             console.log('✅ Conexão com Supabase estabelecida');
 
-            // Garantir que o usuário admin existe
-            await this.ensureAdminUserExists();
+            // Fluxo admin opcional e desativado por padrão
+            if (this.hasAdminCredentialsConfigured()) {
+                await this.ensureAdminUserExists();
+            } else {
+                console.log('ℹ️ Credenciais admin não configuradas no frontend. Pulando bootstrap admin.');
+            }
 
             // Carregar queue offline se existir
             this.loadOfflineQueue();
@@ -848,12 +852,22 @@ class SupabaseManager {
         return stats;
     }
 
+    hasAdminCredentialsConfigured() {
+        const email = String(ADMIN_CONFIG.email || '').trim();
+        const password = String(ADMIN_CONFIG.password || '');
+        return Boolean(email && password);
+    }
+
     /**
      * Autenticação administrativa
      */
     async authenticateAdmin(email, password) {
         try {
             console.log('🔐 Tentando autenticação admin...');
+
+            if (!this.hasAdminCredentialsConfigured()) {
+                throw new Error('Autenticação admin desabilitada nesta instalação');
+            }
 
             // Verificar se as credenciais correspondem ao admin configurado
             if (email !== ADMIN_CONFIG.email || password !== ADMIN_CONFIG.password) {
@@ -981,7 +995,7 @@ class SupabaseManager {
 
             return {
                 user: {
-                    email: ADMIN_CONFIG.email,
+                    email: ADMIN_CONFIG.email || 'admin@local',
                     role: 'admin',
                     aud: 'authenticated'
                 },
@@ -1005,6 +1019,10 @@ class SupabaseManager {
      * Criar usuário admin se não existir
      */
     async ensureAdminUserExists() {
+        if (!this.hasAdminCredentialsConfigured()) {
+            return { exists: false, created: false, skipped: true };
+        }
+
         try {
             console.log('👤 Verificando se usuário admin existe...');
 
@@ -1060,6 +1078,9 @@ class SupabaseManager {
      * Validar credenciais admin
      */
     validateAdminCredentials(email, password) {
+        if (!this.hasAdminCredentialsConfigured()) {
+            return false;
+        }
         return email === ADMIN_CONFIG.email && password === ADMIN_CONFIG.password;
     }
 

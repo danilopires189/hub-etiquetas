@@ -106,9 +106,9 @@ class ProductionValidator {
             issues.push('Chave anônima parece inválida (muito curta)');
         }
         
-        // Verificar configuração admin
+        // Verificar configuração admin (opcional, pode estar desabilitada)
         if (!ADMIN_CONFIG.email || !ADMIN_CONFIG.password) {
-            issues.push('Credenciais de admin não configuradas');
+            warnings.push('Credenciais de admin não configuradas (autenticação admin desabilitada)');
         }
         
         return {
@@ -232,13 +232,9 @@ class ProductionValidator {
                 warnings.push('Possível problema no servidor de autenticação');
             }
             
-            // Verificar se as credenciais admin estão configuradas
-            if (ADMIN_CONFIG.email !== 'danilo_pires189@hotmail.com') {
-                issues.push('Email admin não configurado corretamente');
-            }
-            
-            if (ADMIN_CONFIG.password !== 'Danilo189') {
-                issues.push('Senha admin não configurada corretamente');
+            // Verificar se as credenciais admin foram definidas quando o fluxo admin estiver ativo
+            if (!ADMIN_CONFIG.email || !ADMIN_CONFIG.password) {
+                warnings.push('Credenciais admin ausentes. Fluxo admin pode estar desabilitado por segurança.');
             }
             
             return {

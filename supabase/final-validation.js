@@ -620,8 +620,8 @@ class FinalSystemValidator {
     }
 
     async simulateAuthentication(credentials) {
-        const validEmail = 'danilo_pires189@hotmail.com';
-        const validPassword = 'Danilo189';
+        const validEmail = 'admin@example.com';
+        const validPassword = 'change-me-admin-password';
         
         const isValid = credentials.email === validEmail && credentials.password === validPassword;
         

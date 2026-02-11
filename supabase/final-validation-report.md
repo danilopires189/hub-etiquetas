@@ -74,8 +74,8 @@ O sistema de integração Supabase para o Hub de Etiquetas foi **completamente i
 - **Chave de Serviço:** Configurada para operações administrativas
 
 #### Credenciais Admin Configuradas
-- **Email:** `danilo_pires189@hotmail.com`
-- **Senha:** `Danilo189`
+- **Email:** `admin@example.com`
+- **Senha:** `change-me-admin-password`
 - **Duração da Sessão:** 24 horas
 
 #### Configurações da Aplicação

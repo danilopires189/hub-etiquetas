@@ -65,8 +65,8 @@ Foi implementado um sistema completo de autenticação para o Hub de Etiquetas u
 
 ## Credenciais Admin Configuradas
 
-- **Email:** danilo_pires189@hotmail.com
-- **Senha:** Danilo189
+- **Email:** admin@example.com
+- **Senha:** change-me-admin-password
 - **Criação:** Automática na inicialização do sistema
 
 ## Funcionalidades de Segurança
@@ -107,7 +107,7 @@ Foi implementado um sistema completo de autenticação para o Hub de Etiquetas u
 
 ### Para Usuários
 1. Acessar `admin/login.html`
-2. Usar credenciais: danilo_pires189@hotmail.com / Danilo189
+2. Usar credenciais: admin@example.com / change-me-admin-password
 3. Sistema manterá sessão por 24 horas
 4. Logout automático quando sessão expirar
 

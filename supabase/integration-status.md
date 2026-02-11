@@ -126,7 +126,7 @@ All 9 application modules are now integrated with Supabase and actively collecti
 
 **Admin Access**: 
 - URL: `/admin/login.html`
-- Email: danilo_pires189@hotmail.com
-- Password: Danilo189
+- Email: admin@example.com
+- Password: change-me-admin-password
 
 **Database**: All label generations are now being persisted to Supabase with detailed metadata for comprehensive analytics and reporting.

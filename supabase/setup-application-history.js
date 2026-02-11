@@ -6,8 +6,22 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { SUPABASE_CONFIG } from './config.js';
 
-// Criar cliente Supabase com service role key para operações administrativas
-const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.serviceRoleKey);
+function getServiceRoleKeyRuntime() {
+    // Browser: configure manualmente window.SUPABASE_SERVICE_ROLE_KEY antes de executar setupApplicationHistory()
+    if (typeof window !== 'undefined' && window.SUPABASE_SERVICE_ROLE_KEY) {
+        return String(window.SUPABASE_SERVICE_ROLE_KEY);
+    }
+
+    // Node: configure variável de ambiente SUPABASE_SERVICE_ROLE_KEY
+    if (typeof process !== 'undefined' && process?.env?.SUPABASE_SERVICE_ROLE_KEY) {
+        return String(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    }
+
+    return '';
+}
+
+const SERVICE_ROLE_KEY = getServiceRoleKeyRuntime();
+const supabase = createClient(SUPABASE_CONFIG.url, SERVICE_ROLE_KEY || SUPABASE_CONFIG.anonKey);
 
 /**
  * SQL para criar a tabela application_history
@@ -98,6 +112,12 @@ async function setupApplicationHistory() {
     console.log('🔄 Configurando tabela application_history no Supabase...');
     
     try {
+        if (!SERVICE_ROLE_KEY) {
+            console.error('❌ SUPABASE_SERVICE_ROLE_KEY ausente. A configuração automática foi bloqueada por segurança.');
+            console.log('📝 Defina window.SUPABASE_SERVICE_ROLE_KEY (browser) ou SUPABASE_SERVICE_ROLE_KEY (Node) para usar este script.');
+            return false;
+        }
+
         // 1. Criar tabela
         console.log('📋 Criando tabela application_history...');
         const { error: tableError } = await supabase.rpc('exec_sql', { 

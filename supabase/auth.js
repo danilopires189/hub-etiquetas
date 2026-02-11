@@ -4,7 +4,6 @@
  */
 
 import supabaseManager from './client.js';
-import { ADMIN_CONFIG } from './config.js';
 
 class AuthManager {
     constructor() {
