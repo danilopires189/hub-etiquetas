@@ -88,6 +88,16 @@
         showToast(message, type);
     }
 
+    function syncDesktopLabelDimensions() {
+        const widthInput = $id('input-width');
+        const heightInput = $id('input-height');
+        const width = String(widthInput?.value || '90').trim() || '90';
+        const height = String(heightInput?.value || '42').trim() || '42';
+
+        document.documentElement.style.setProperty('--label-width', `${width}mm`);
+        document.documentElement.style.setProperty('--label-height', `${height}mm`);
+    }
+
     function nowSaoPauloSql() {
         const parts = new Intl.DateTimeFormat('en-CA', {
             timeZone: 'America/Sao_Paulo',
@@ -899,6 +909,7 @@
         const previousMat = matInput ? matInput.value : '';
         if (matInput) matInput.value = String(item.mat || '---');
 
+        syncDesktopLabelDimensions();
         const labelEl = window.generateLabel(product, addressItem, barcode, copies, validade, true, String(cd));
 
         if (matInput) matInput.value = previousMat;

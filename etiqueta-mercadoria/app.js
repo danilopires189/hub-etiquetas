@@ -2634,6 +2634,7 @@ function updateDimensions() {
 ui.form.addEventListener('submit', handleSearch);
 ui.widthInput.addEventListener('input', updateDimensions);
 ui.heightInput.addEventListener('input', updateDimensions);
+updateDimensions();
 
 // Enhanced Barcode Input - Support both scanner and manual entry
 let barcodeTimer = null;
@@ -3956,5 +3957,4 @@ async function showStorageStats() {
         showStatus('❌ Erro ao obter estatísticas', 'error');
     }
 }
-
 
