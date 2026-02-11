@@ -33,6 +33,33 @@
             .replace(/'/g, '&#039;');
     }
 
+    function safeSetLocalStorage(key, value) {
+        try {
+            localStorage.setItem(key, value);
+            return true;
+        } catch (error) {
+            console.warn(`Falha ao salvar localStorage (${key}):`, error);
+            return false;
+        }
+    }
+
+    function safeGetLocalStorage(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch (error) {
+            console.warn(`Falha ao ler localStorage (${key}):`, error);
+            return null;
+        }
+    }
+
+    function safeRemoveLocalStorage(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (error) {
+            console.warn(`Falha ao remover localStorage (${key}):`, error);
+        }
+    }
+
     function showToast(message, type = 'info') {
         let container = document.querySelector('.coleta-toast-container');
         if (!container) {
@@ -258,11 +285,11 @@
     }
 
     function loadDestinoPreferencia() {
-        return normalizeDestino(localStorage.getItem(DESTINO_PREF_KEY) || 'AUTOMATICO');
+        return normalizeDestino(safeGetLocalStorage(DESTINO_PREF_KEY) || 'AUTOMATICO');
     }
 
     function saveDestinoPreferencia(destino) {
-        localStorage.setItem(DESTINO_PREF_KEY, normalizeDestino(destino));
+        safeSetLocalStorage(DESTINO_PREF_KEY, normalizeDestino(destino));
     }
 
     function getCdDisplayName(cd) {
@@ -326,18 +353,19 @@
     }
 
     function saveMobileSession(sessionData) {
-        localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+        const persisted = safeSetLocalStorage(SESSION_KEY, JSON.stringify(sessionData));
         state.mobile.session = sessionData;
+        return persisted;
     }
 
     function clearMobileSession() {
-        localStorage.removeItem(SESSION_KEY);
+        safeRemoveLocalStorage(SESSION_KEY);
         state.mobile.session = null;
     }
 
     function restoreMobileSession() {
         try {
-            const raw = localStorage.getItem(SESSION_KEY);
+            const raw = safeGetLocalStorage(SESSION_KEY);
             if (!raw) return false;
 
             const parsed = JSON.parse(raw);
@@ -405,51 +433,61 @@
         const inputSenha = $id('mobile-login-senha');
         const btnLogin = $id('mobile-login-btn');
 
-        const cd = String(inputCd?.value || '').trim();
-        const matricula = normalizeBarcode(inputMat?.value || '');
-        const nome = String(inputNome?.value || '').trim();
-        const senha = String(inputSenha?.value || '').trim();
+        try {
+            const cd = String(inputCd?.value || '').trim();
+            const matricula = normalizeBarcode(inputMat?.value || '');
+            const nome = String(inputNome?.value || '').trim();
+            const senha = String(inputSenha?.value || '').trim();
 
-        if (!cd) {
-            setMobileLoginFeedback('Selecione o deposito.', 'error');
-            return;
-        }
-        if (!matricula) {
-            setMobileLoginFeedback('Informe a matricula.', 'error');
-            return;
-        }
+            if (!cd) {
+                setMobileLoginFeedback('Selecione o deposito.', 'error');
+                return;
+            }
+            if (!matricula) {
+                setMobileLoginFeedback('Informe a matricula.', 'error');
+                return;
+            }
 
-        const user = getUserByMatricula(matricula);
-        if (!user || !nome) {
-            setMobileLoginFeedback('Matricula nao encontrada na base de usuarios.', 'error');
-            return;
-        }
+            const user = getUserByMatricula(matricula);
+            if (!user || !nome) {
+                setMobileLoginFeedback('Matricula nao encontrada na base de usuarios.', 'error');
+                return;
+            }
 
-        if (!senha) {
-            setMobileLoginFeedback('Digite a senha.', 'error');
-            return;
-        }
+            if (!senha) {
+                setMobileLoginFeedback('Digite a senha.', 'error');
+                return;
+            }
 
-        if (btnLogin) btnLogin.disabled = true;
+            if (btnLogin) btnLogin.disabled = true;
 
-        const sessionData = {
-            usuario: String(user.Nome || '').trim(),
-            matricula,
-            cd,
-            nomeCD: getCdDisplayName(cd),
-            loginTime: new Date().toISOString(),
-            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        };
+            const sessionData = {
+                usuario: String(user.Nome || '').trim(),
+                matricula,
+                cd,
+                nomeCD: getCdDisplayName(cd),
+                loginTime: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            };
 
-        saveMobileSession(sessionData);
-        setMobileLoginFeedback(`Login realizado. Bem-vindo(a) ${sessionData.usuario.split(' ')[0]}.`, 'success');
+            const persisted = saveMobileSession(sessionData);
+            if (!persisted) {
+                console.warn('Sessao mobile ativa apenas em memoria (localStorage indisponivel).');
+            }
 
-        setTimeout(() => {
+            setMobileLoginFeedback(`Login realizado. Bem-vindo(a) ${sessionData.usuario.split(' ')[0]}.`, 'success');
+
+            setTimeout(() => {
+                if (btnLogin) btnLogin.disabled = false;
+                showMobileColeta();
+                const codigo = $id('mobile-codigo');
+                if (codigo) codigo.focus();
+            }, 550);
+        } catch (error) {
+            console.error('Erro no login mobile:', error);
+            setMobileLoginFeedback('Erro ao processar login. Tente novamente.', 'error');
             if (btnLogin) btnLogin.disabled = false;
-            showMobileColeta();
-            const codigo = $id('mobile-codigo');
-            if (codigo) codigo.focus();
-        }, 550);
+        }
     }
 
     function bindMobileEvents() {
@@ -497,6 +535,13 @@
         }
 
         if (codigoInput) {
+            codigoInput.addEventListener('input', () => {
+                const onlyDigits = normalizeBarcode(codigoInput.value).slice(0, 20);
+                if (codigoInput.value !== onlyDigits) {
+                    codigoInput.value = onlyDigits;
+                }
+            });
+
             codigoInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();

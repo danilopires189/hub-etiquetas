@@ -71,8 +71,31 @@
     gap: 8px;
 }
 
-.mobile-search-row input {
+.mobile-codigo-wrapper {
+    position: relative;
     flex: 1;
+}
+
+.mobile-codigo-wrapper input {
+    padding-left: 44px !important;
+}
+
+.mobile-codigo-wrapper .scanner-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-codigo-wrapper .scanner-icon svg {
+    width: 20px;
+    height: 20px;
 }
 
 .mobile-produto-card {
