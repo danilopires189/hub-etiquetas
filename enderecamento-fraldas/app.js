@@ -2226,11 +2226,6 @@ async function executeMobileAllocation(address, validity) {
     // Update product display
     exibirProduto(produtoAtual);
 
-    // Increment global counter
-    if (window.contadorGlobal) {
-      window.contadorGlobal.incrementar();
-    }
-
     console.log('📱 Alocação mobile concluída com sucesso');
 
   } catch (error) {
@@ -2280,11 +2275,6 @@ async function executeMobileTransfer(sourceAddress, destinationAddress) {
 
     // Update product display
     exibirProduto(produtoAtual);
-
-    // Increment global counter
-    if (window.contadorGlobal) {
-      window.contadorGlobal.incrementar();
-    }
 
     console.log('📱 Transferência mobile concluída com sucesso');
 
@@ -2807,11 +2797,6 @@ async function executeMobileDeallocation(address, showSuccessMessage = true) {
 
       // Update product display
       exibirProduto(produtoAtual);
-    }
-
-    // Increment global counter
-    if (window.contadorGlobal) {
-      window.contadorGlobal.incrementar();
     }
 
     console.log('📱 Desalocação mobile concluída com sucesso');
@@ -3886,10 +3871,6 @@ async function executarOperacao() {
   // Atualizar exibição do produto
   exibirProduto(produtoAtual);
 
-  // Incrementar contador global
-  if (window.contadorGlobal) {
-    window.contadorGlobal.incrementar();
-  }
 }
 
 async function adicionarHistorico(tipo, produto, enderecoAnterior, enderecoNovo) {
@@ -4561,11 +4542,6 @@ async function executarDesalocacao(endereco, atualizarInterface = true) {
     // Salvar no localStorage
     salvarLocalStorageSeguro('enderecos_produtos', JSON.stringify(enderecosProdutos));
 
-    // Incrementar contador global
-    if (window.contadorGlobal) {
-      window.contadorGlobal.incrementar();
-    }
-
   } catch (error) {
     showToast('Erro na desalocação: ' + error.message, 'error');
   }
@@ -4902,11 +4878,6 @@ async function selecionarEnderecoParaAdicionar(endereco) {
       fecharPopupEnderecos();
       exibirProduto(produtoAtual);
 
-      // Incrementar contador global
-      if (window.contadorGlobal) {
-        window.contadorGlobal.incrementar();
-      }
-
     } catch (error) {
       showToast('Erro ao adicionar produto: ' + error.message, 'error');
     }
@@ -5163,11 +5134,6 @@ function alocarProdutoNoEndereco(endereco) {
       // Atualizar exibição do produto
       exibirProduto(produtoAtual);
 
-      // Incrementar contador global
-      if (window.contadorGlobal) {
-        window.contadorGlobal.incrementar();
-      }
-
     } catch (error) {
       console.error('❌ Erro na alocação:', error);
       showToast('Erro na alocação: ' + error.message, 'error');
@@ -5419,11 +5385,6 @@ async function executeMobileAddition(address, validity) {
 
     // Update product display
     exibirProduto(produtoAtual);
-
-    // Increment global counter
-    if (window.contadorGlobal) {
-      window.contadorGlobal.incrementar();
-    }
 
     console.log('📱 Adição extra mobile concluída com sucesso');
 

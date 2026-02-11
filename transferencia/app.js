@@ -214,7 +214,7 @@ function setup() {
     generate();
     
     // Registrar geração no Supabase após gerar etiquetas
-    if (window.supabaseManager && window.contadorGlobal && window.contadorGlobal.isSupabaseIntegrated()) {
+    if (window.supabaseManager) {
       try {
         const v = validateForm();
         if (v.ok) {

@@ -46,13 +46,11 @@ async function processLabelGenerationFixed(product, targetAddress, barcode, copi
         if (window.contadorGlobal) {
             try {
                 if (typeof window.contadorGlobal.incrementarLocalmente === 'function') {
-                    window.contadorGlobal.incrementarLocalmente(copies);
+                    await window.contadorGlobal.incrementarLocalmente(copies, 'etiqueta-mercadoria');
+                } else if (typeof window.contadorGlobal.incrementarContador === 'function') {
+                    await window.contadorGlobal.incrementarContador(copies, 'etiqueta-mercadoria');
                 } else {
-                    window.contadorGlobal.valorAtual += copies;
-                    window.contadorGlobal.salvarEstadoLocal();
-                    window.dispatchEvent(new CustomEvent('contador-atualizado', {
-                        detail: { valor: window.contadorGlobal.valorAtual, incremento: copies, tipo: 'mercadoria' }
-                    }));
+                    console.warn('⚠️ API de contador indisponível para incremento local');
                 }
                 console.log(`⚡ Contador local atualizado: +${copies}`);
             } catch (counterError) {

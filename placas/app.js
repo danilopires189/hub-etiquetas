@@ -29,8 +29,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                             }
                         };
 
-                        // Registrar geração no Supabase se disponível
-                        if (window.supabaseManager && window.contadorGlobal.isSupabaseIntegrated()) {
+                        // Registrar geração no Supabase quando disponível
+                        if (window.supabaseManager) {
                             try {
                                 await window.supabaseManager.saveLabelGeneration(labelData);
                                 console.log('✅ Geração registrada no Supabase');

@@ -490,16 +490,6 @@ class SupabaseManager {
             }
         } else {
             console.log('📱 Offline: adicionando Etiqueta Entrada à queue');
-
-            // Incrementar localmente mesmo offline
-            if (window.contadorGlobal) {
-                window.contadorGlobal.valorAtual += entryData.quantidade;
-                window.contadorGlobal.salvarEstadoLocal();
-                window.dispatchEvent(new CustomEvent('contador-atualizado', {
-                    detail: { valor: window.contadorGlobal.valorAtual, incremento: entryData.quantidade, tipo: 'etiqueta-mercadoria' }
-                }));
-            }
-
             this.addToOfflineQueue('saveEtiquetaEntrada', entryData);
             return null;
         }
@@ -561,11 +551,15 @@ class SupabaseManager {
 
             // Incrementar localmente mesmo offline
             if (window.contadorGlobal) {
-                window.contadorGlobal.valorAtual += caixaData.total_et;
-                window.contadorGlobal.salvarEstadoLocal();
-                window.dispatchEvent(new CustomEvent('contador-atualizado', {
-                    detail: { valor: window.contadorGlobal.valorAtual, incremento: caixaData.total_et, tipo: 'caixa' }
-                }));
+                if (typeof window.contadorGlobal.incrementarLocalmente === 'function') {
+                    await window.contadorGlobal.incrementarLocalmente(caixaData.total_et, 'caixa');
+                } else {
+                    window.contadorGlobal.valorAtual += caixaData.total_et;
+                    window.contadorGlobal.salvarEstadoLocal();
+                    window.dispatchEvent(new CustomEvent('contador-atualizado', {
+                        detail: { valor: window.contadorGlobal.valorAtual, incremento: caixaData.total_et, tipo: 'caixa' }
+                    }));
+                }
             }
 
             this.addToOfflineQueue('saveCaixaLabel', caixaData);
@@ -631,11 +625,15 @@ class SupabaseManager {
 
             // Incrementar localmente mesmo offline
             if (window.contadorGlobal) {
-                window.contadorGlobal.valorAtual += avulsoData.qtd_cx;
-                window.contadorGlobal.salvarEstadoLocal();
-                window.dispatchEvent(new CustomEvent('contador-atualizado', {
-                    detail: { valor: window.contadorGlobal.valorAtual, incremento: avulsoData.qtd_cx, tipo: 'avulso' }
-                }));
+                if (typeof window.contadorGlobal.incrementarLocalmente === 'function') {
+                    await window.contadorGlobal.incrementarLocalmente(avulsoData.qtd_cx, 'avulso');
+                } else {
+                    window.contadorGlobal.valorAtual += avulsoData.qtd_cx;
+                    window.contadorGlobal.salvarEstadoLocal();
+                    window.dispatchEvent(new CustomEvent('contador-atualizado', {
+                        detail: { valor: window.contadorGlobal.valorAtual, incremento: avulsoData.qtd_cx, tipo: 'avulso' }
+                    }));
+                }
             }
 
             this.addToOfflineQueue('saveAvulsoLabel', avulsoData);
@@ -647,18 +645,17 @@ class SupabaseManager {
      * Salvar registro da aplicação Enderec
      */
     async saveEnderecLabel(data) {
+        const dataHora = this.getBrasiliaDateTimeString();
+        const enderecData = {
+            tipo: data.tipo,
+            modelo: data.modelo,
+            id_etiqueta: data.id_etiqueta,
+            num_copia: Math.max(1, parseInt(data.num_copia, 10) || 1),
+            data_hora: data.data_hora || dataHora
+        };
+
         if (this.isOnline()) {
             try {
-                const dataHora = this.getBrasiliaDateTimeString();
-
-                const enderecData = {
-                    tipo: data.tipo,
-                    modelo: data.modelo,
-                    id_etiqueta: data.id_etiqueta,
-                    num_copia: parseInt(data.num_copia, 10),
-                    data_hora: data.data_hora || dataHora
-                };
-
                 console.log('📝 Salvando registro Enderec:', enderecData);
 
                 const { data: result, error } = await this.client
@@ -675,9 +672,9 @@ class SupabaseManager {
                 try {
                     await this.saveLabelGeneration({
                         applicationType: 'enderec',
-                        coddv: data.id_etiqueta,
+                        coddv: enderecData.id_etiqueta,
                         quantity: 1,
-                        copies: data.num_copia,
+                        copies: enderecData.num_copia,
                         cd: null,
                         metadata: { source: 'enderec_module_sync' }
                     });
@@ -694,17 +691,7 @@ class SupabaseManager {
             }
         } else {
             console.log('📱 Offline: adicionando registro Enderec à queue');
-
-            // Atualizar contador local se disponível
-            if (window.contadorGlobal) {
-                window.contadorGlobal.incrementarContador(data.num_copia, 'enderec');
-                window.contadorGlobal.salvarEstadoLocal();
-                window.dispatchEvent(new CustomEvent('contador-atualizado', {
-                    detail: { valor: window.contadorGlobal.valorAtual, incremento: data.num_copia, tipo: 'enderec' }
-                }));
-            }
-
-            this.addToOfflineQueue('saveEnderecLabel', data);
+            this.addToOfflineQueue('saveEnderecLabel', enderecData);
             return null;
         }
     }
@@ -757,13 +744,13 @@ class SupabaseManager {
                 console.log('✅ Contador atualizado:', data);
                 return data;
             } catch (error) {
-                console.warn('⚠️ Falha ao atualizar contador online, adicionando à queue:', error);
-                this.addToOfflineQueue('updateGlobalCounter', { increment, type });
+                console.warn('⚠️ Falha ao atualizar contador online:', error);
+                console.warn('⚠️ Queue de updateGlobalCounter desativada para evitar duplicidade de contagem');
                 throw error;
             }
         } else {
-            console.log('📱 Offline: adicionando atualização de contador à queue');
-            this.addToOfflineQueue('updateGlobalCounter', { increment, type });
+            console.log('📱 Offline: atualização direta de contador não será enfileirada');
+            console.warn('⚠️ Queue de updateGlobalCounter desativada para evitar duplicidade de contagem');
             return null;
         }
     }
@@ -1260,9 +1247,9 @@ class SupabaseManager {
                         break;
 
                     case 'updateGlobalCounter':
-                        const updateResult = await this.updateGlobalCounterWithConflictHandling(item.data.increment, item.data.type);
+                        // Caminho legado: removido para impedir replay de incrementos sem registro de label.
+                        console.warn('⚠️ Ignorando item legado updateGlobalCounter da queue offline');
                         success = true;
-                        conflictResolved = updateResult.conflictResolved || false;
                         break;
 
                     case 'saveTermoLabel':

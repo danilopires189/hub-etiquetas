@@ -619,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const success = gerar();
 
     // Registrar geração no Supabase após gerar etiquetas com sucesso
-    if (success && window.supabaseManager && window.contadorGlobal && window.contadorGlobal.isSupabaseIntegrated()) {
+    if (success && window.supabaseManager) {
       try {
         const depo = $('#deposito').value;
         const depCode = DEPOSITO_MAP[depo]; // Pegar código do depósito (ex: 0124)

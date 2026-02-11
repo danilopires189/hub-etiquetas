@@ -630,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Registrar geração no Supabase após gerar etiquetas
     // Registrar geração no Supabase após gerar etiquetas
-    if (window.supabaseManager && window.contadorGlobal && window.contadorGlobal.isSupabaseIntegrated()) {
+    if (window.supabaseManager) {
       try {
         const base = $('#base').value.trim();
         const qtd = parseInt($('#qtd').value, 10);

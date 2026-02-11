@@ -57,6 +57,12 @@ class ContadorGlobalOtimizado {
     try {
       await this.carregarEstadoLocal();
 
+      // Em modo somente local, não manter backlog antigo de sync.
+      if (!this.supabaseIntegrated && this.batchPendente.length > 0) {
+        this.batchPendente = [];
+        await this.salvarEstadoLocal();
+      }
+
       // Sincronização inicial com delay
       setTimeout(async () => {
         if (window.supabaseManager && !this.syncInProgress) {
@@ -156,35 +162,42 @@ class ContadorGlobalOtimizado {
 
   async incrementar(quantidade = 1, tipo = 'geral') {
     try {
-      if (quantidade <= 0) {
+      const incremento = this.normalizarNumero(quantidade, 0);
+      if (incremento <= 0) {
         throw new Error('Quantidade deve ser positiva');
       }
 
       // Incrementar localmente primeiro (UX responsiva)
       const valorAnterior = this.valorAtual;
-      this.valorAtual += quantidade;
+      this.valorAtual += incremento;
       this.ultimaAtualizacao = new Date().toISOString();
 
-      // Adicionar ao batch pendente
-      this.batchPendente.push({
-        quantidade,
-        tipo,
-        valorAnterior,
-        valorNovo: this.valorAtual,
-        timestamp: this.ultimaAtualizacao
-      });
+      // Apenas registrar batch quando a integração remota estiver habilitada.
+      if (this.supabaseIntegrated) {
+        this.batchPendente.push({
+          quantidade: incremento,
+          tipo,
+          valorAnterior,
+          valorNovo: this.valorAtual,
+          timestamp: this.ultimaAtualizacao
+        });
+      } else if (this.batchPendente.length > 0) {
+        this.batchPendente = [];
+      }
 
       // Salvar estado local
       await this.salvarEstadoLocal();
 
       // Disparar eventos para UX
-      this.dispararEventos(quantidade, tipo, valorAnterior);
+      this.dispararEventos(incremento, tipo, valorAnterior);
 
-      // Usar debouncer se disponível
-      if (window.supabaseDebouncer) {
-        window.supabaseDebouncer.debounceCounterUpdate(quantidade, tipo);
-      } else {
-        this.processarBatchComDebounce();
+      // Sync remoto apenas quando explicitamente habilitado.
+      if (this.supabaseIntegrated) {
+        if (window.supabaseDebouncer) {
+          window.supabaseDebouncer.debounceCounterUpdate(incremento, tipo);
+        } else {
+          this.processarBatchComDebounce();
+        }
       }
 
       return this.valorAtual;
@@ -281,6 +294,25 @@ class ContadorGlobalOtimizado {
     if (window.supabaseDebouncer) {
       await window.supabaseDebouncer.flushAll();
     }
+  }
+
+  async incrementarLocalmente(quantidade = 1, tipo = 'geral') {
+    const incremento = this.normalizarNumero(quantidade, 0);
+    if (incremento <= 0) {
+      return this.valorAtual;
+    }
+
+    const valorAnterior = this.valorAtual;
+    this.valorAtual += incremento;
+    this.ultimaAtualizacao = new Date().toISOString();
+
+    if (!this.supabaseIntegrated && this.batchPendente.length > 0) {
+      this.batchPendente = [];
+    }
+
+    await this.salvarEstadoLocal();
+    this.dispararEventos(incremento, tipo, valorAnterior);
+    return this.valorAtual;
   }
 
   // API Pública

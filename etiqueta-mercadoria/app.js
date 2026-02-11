@@ -2531,16 +2531,13 @@ async function executePrint(copies, validityDate = null) {
     });
 
     // Feedback visual imediato no contador global (Atualização Otimista)
-    if (window.contadorGlobal && typeof window.contadorGlobal.incrementarLocalmente === 'function') {
-        window.contadorGlobal.incrementarLocalmente(copies);
-        console.log(`⚡ Contador global incrementado localmente: +${copies}`);
-    } else if (window.contadorGlobal) {
-        // Fallback manual se a função não existir
-        window.contadorGlobal.valorAtual += copies;
-        window.contadorGlobal.salvarEstadoLocal();
-        window.dispatchEvent(new CustomEvent('contador-atualizado', {
-            detail: { valor: window.contadorGlobal.valorAtual, incremento: copies, tipo: 'mercadoria' }
-        }));
+    if (window.contadorGlobal) {
+        if (typeof window.contadorGlobal.incrementarLocalmente === 'function') {
+            await window.contadorGlobal.incrementarLocalmente(copies, 'etiqueta-mercadoria');
+            console.log(`⚡ Contador global incrementado localmente: +${copies}`);
+        } else if (typeof window.contadorGlobal.incrementarContador === 'function') {
+            await window.contadorGlobal.incrementarContador(copies, 'etiqueta-mercadoria');
+        }
     }
 
     // ABRIR IMPRESSÃO IMEDIATAMENTE (não esperar Supabase)
@@ -3957,4 +3954,3 @@ async function showStorageStats() {
         showStatus('❌ Erro ao obter estatísticas', 'error');
     }
 }
-

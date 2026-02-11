@@ -1737,11 +1737,11 @@ function generateOptimizedDocument() {
           progressToast.hide();
 
           // Registrar geração no Supabase
-          if (window.supabaseManager && window.contadorGlobal && window.contadorGlobal.isSupabaseIntegrated()) {
+          if (window.supabaseManager) {
             try {
               const labelData = {
                 applicationType: 'inventario',
-                quantity: APP_STATE.productList.size,
+                quantity: 1,
                 copies: 1,
                 metadata: {
                   source: 'inventario_module',
