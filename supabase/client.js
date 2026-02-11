@@ -781,10 +781,33 @@ class SupabaseManager {
                 throw error;
             }
 
-            return data[0] || { total_count: 0, application_breakdown: {}, last_updated: new Date(), version: 1 };
+            const row = Array.isArray(data) ? data[0] : data;
+            if (!row) {
+                return {
+                    total_count: 0,
+                    application_breakdown: {},
+                    last_updated: new Date(),
+                    version: 1,
+                    isFallback: false
+                };
+            }
+
+            return {
+                ...row,
+                total_count: Number.isFinite(Number(row.total_count)) ? Number(row.total_count) : 0,
+                application_breakdown: row.application_breakdown || {},
+                version: Number.isFinite(Number(row.version)) ? Number(row.version) : 1,
+                isFallback: false
+            };
         } catch (error) {
             console.error('❌ Falha ao obter estatísticas:', error);
-            return { total_count: 0, application_breakdown: {}, last_updated: new Date(), version: 1 };
+            return {
+                total_count: 0,
+                application_breakdown: {},
+                last_updated: new Date(),
+                version: 1,
+                isFallback: true
+            };
         }
     }
 
@@ -1356,17 +1379,27 @@ class SupabaseManager {
 
                 // Obter estado atual
                 const currentCounter = await this.getCounterStats();
+                const baseTotal = Number.isFinite(Number(currentCounter.total_count))
+                    ? Number(currentCounter.total_count)
+                    : 0;
+                const baseBreakdown = currentCounter.application_breakdown || {};
+                const baseTypeCount = Number.isFinite(Number(baseBreakdown[type]))
+                    ? Number(baseBreakdown[type])
+                    : 0;
+                const baseVersion = Number.isFinite(Number(currentCounter.version))
+                    ? Number(currentCounter.version)
+                    : 1;
 
                 // Simular dados locais com incremento
                 const localCounter = {
                     ...currentCounter,
-                    total_count: currentCounter.total_count + increment,
+                    total_count: baseTotal + increment,
                     application_breakdown: {
-                        ...currentCounter.application_breakdown,
-                        [type]: (currentCounter.application_breakdown[type] || 0) + increment
+                        ...baseBreakdown,
+                        [type]: baseTypeCount + increment
                     },
                     last_updated: new Date().toISOString(),
-                    version: currentCounter.version + 1
+                    version: baseVersion + 1
                 };
 
                 const conflictResult = await conflictResolver.detectAndResolveConflicts(

@@ -7,7 +7,7 @@
 class ContadorGlobalOtimizado {
   constructor() {
     this.config = this.detectarConfiguracao();
-    this.valorInicial = 134456;
+    this.valorInicial = 0;
     this.chaveStorage = 'contador_global_v2';
     this.intervaloSync = 600000; // 10 minutos
     this.isOnline = navigator.onLine;
@@ -22,6 +22,14 @@ class ContadorGlobalOtimizado {
     this.syncInProgress = false;
 
     this.inicializar();
+  }
+
+  normalizarNumero(valor, fallback = 0) {
+    const numero = Number(valor);
+    if (!Number.isFinite(numero) || numero < 0) {
+      return fallback;
+    }
+    return Math.floor(numero);
   }
 
   detectarConfiguracao() {
@@ -71,9 +79,9 @@ class ContadorGlobalOtimizado {
       const dados = localStorage.getItem(this.chaveStorage);
       if (dados) {
         const parsed = JSON.parse(dados);
-        this.valorAtual = parsed.totalEtiquetas || this.valorInicial;
-        this.ultimaAtualizacao = parsed.ultimaAtualizacao;
-        this.batchPendente = parsed.batchPendente || [];
+        this.valorAtual = this.normalizarNumero(parsed?.totalEtiquetas, this.valorInicial);
+        this.ultimaAtualizacao = parsed?.ultimaAtualizacao || new Date().toISOString();
+        this.batchPendente = Array.isArray(parsed?.batchPendente) ? parsed.batchPendente : [];
       } else {
         this.valorAtual = this.valorInicial;
         this.ultimaAtualizacao = new Date().toISOString();
@@ -119,25 +127,25 @@ class ContadorGlobalOtimizado {
       }
 
       const stats = await window.supabaseManager.getCounterStats();
+      if (stats?.isFallback) {
+        return;
+      }
 
-      if (stats && typeof stats.total_count === 'number') {
-        const valorRemoto = stats.total_count;
+      const valorRemoto = this.normalizarNumero(stats?.total_count, null);
+      if (valorRemoto !== null && valorRemoto !== this.valorAtual) {
+        this.valorAtual = valorRemoto;
+        this.ultimaAtualizacao = stats.last_updated || new Date().toISOString();
+        await this.salvarEstadoLocal();
 
-        if (valorRemoto > 0 && valorRemoto !== this.valorAtual) {
-          this.valorAtual = valorRemoto;
-          this.ultimaAtualizacao = stats.last_updated || new Date().toISOString();
-          await this.salvarEstadoLocal();
+        this.dispararEvento('atualizado', {
+          valor: this.valorAtual,
+          fonte: 'servidor'
+        });
+      }
 
-          this.dispararEvento('atualizado', {
-            valor: this.valorAtual,
-            fonte: 'servidor'
-          });
-        }
-
-        // Salvar no cache
-        if (window.cacheManager) {
-          window.cacheManager.set(cacheKey, { stats, timestamp: Date.now() });
-        }
+      // Salvar no cache
+      if (window.cacheManager) {
+        window.cacheManager.set(cacheKey, { stats, timestamp: Date.now() });
       }
     } catch (error) {
       // Silent fail - will retry on next sync

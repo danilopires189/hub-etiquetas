@@ -25,8 +25,8 @@ class SupabaseIntegration {
 
             if (connected) {
                 console.log('✅ Supabase conectado, iniciando serviços...');
-                // Integracao com contador global desativada temporariamente para evitar loop de erro 400
-                // await this.integrateWithGlobalCounter();
+                // Sincronização do contador em modo somente leitura (Supabase -> UI local)
+                await this.integrateWithGlobalCounter();
                 await this.runMigrationIfEnabled();
                 this.initialized = true;
                 this.fallbackMode = false;
@@ -67,25 +67,36 @@ class SupabaseIntegration {
             }
         }
 
-        // Habilitar integração Supabase no contador global
-        window.contadorGlobal.enableSupabaseIntegration();
-
-        // Sincronizar valor inicial do contador
+        // Sincronizar valor inicial do contador (somente leitura)
+        // Importante: não empurrar valor local para o banco para evitar inflação por cache local.
         try {
             const supabaseStats = await supabaseManager.getCounterStats();
+            if (supabaseStats?.isFallback) {
+                console.warn('⚠️ Supabase indisponível para sincronizar contador neste momento');
+                return;
+            }
+
             const localValue = window.contadorGlobal.obterValor();
+            const remoteValue = Number.isFinite(Number(supabaseStats.total_count))
+                ? Number(supabaseStats.total_count)
+                : null;
 
-            console.log(`📊 Valores: Local=${localValue}, Supabase=${supabaseStats.total_count}`);
+            console.log(`📊 Valores: Local=${localValue}, Supabase=${remoteValue}`);
 
-            // Usar o maior valor entre local e Supabase
-            if (supabaseStats.total_count > localValue) {
-                console.log(`🔄 Atualizando contador local: ${localValue} → ${supabaseStats.total_count}`);
-                window.contadorGlobal.valorAtual = supabaseStats.total_count;
+            if (remoteValue === null) {
+                console.warn('⚠️ Valor de contador remoto inválido, mantendo valor local');
+                return;
+            }
+
+            if (remoteValue !== localValue) {
+                console.log(`🔄 Atualizando contador local: ${localValue} → ${remoteValue}`);
+                window.contadorGlobal.valorAtual = remoteValue;
+                window.contadorGlobal.ultimaAtualizacao = supabaseStats.last_updated || new Date().toISOString();
                 await window.contadorGlobal.salvarEstadoLocal();
-            } else if (localValue > supabaseStats.total_count) {
-                console.log(`🔄 Atualizando contador Supabase: ${supabaseStats.total_count} → ${localValue}`);
-                const diff = localValue - supabaseStats.total_count;
-                await supabaseManager.updateGlobalCounter(diff, 'geral');
+
+                window.dispatchEvent(new CustomEvent('contador-atualizado', {
+                    detail: { valor: window.contadorGlobal.valorAtual, incremento: 0, tipo: 'sync' }
+                }));
             }
         } catch (error) {
             console.error('❌ Erro na sincronização inicial do contador:', error);
