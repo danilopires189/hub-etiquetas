@@ -339,7 +339,7 @@ async function carregarListaDesktop() {
 
   const { data, error } = await sistema.client
     .from('coletas_fraldas')
-    .select('*')
+    .select('id, cd, usuario_nome, usuario_matricula, coddv, barras, validade, lote, tipo, descricao, data_hora_brasilia, print, printed_at')
     .eq('cd', cdAtual)
     .order('data_hora_brasilia', { ascending: false })
     .limit(500);

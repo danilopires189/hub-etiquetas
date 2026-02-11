@@ -9,6 +9,8 @@ class SupabaseIntegration {
     constructor() {
         this.initialized = false;
         this.fallbackMode = false;
+        this.autoMigrationKey = 'supabase_auto_migration_enabled';
+        this.migrationCompletedKey = 'supabase_migration_completed';
 
         console.log('🚀 Inicializando integração Supabase...');
     }
@@ -25,7 +27,7 @@ class SupabaseIntegration {
                 console.log('✅ Supabase conectado, iniciando serviços...');
                 // Integracao com contador global desativada temporariamente para evitar loop de erro 400
                 // await this.integrateWithGlobalCounter();
-                await this.migrateExistingData();
+                await this.runMigrationIfEnabled();
                 this.initialized = true;
                 this.fallbackMode = false;
             } else {
@@ -93,6 +95,29 @@ class SupabaseIntegration {
     }
 
     /**
+     * Executar migração legada somente quando habilitada manualmente
+     */
+    async runMigrationIfEnabled() {
+        try {
+            const migrationDone = localStorage.getItem(this.migrationCompletedKey);
+            if (migrationDone) {
+                console.log('ℹ️ Migração legada já concluída anteriormente.');
+                return;
+            }
+
+            const autoMigrationEnabled = localStorage.getItem(this.autoMigrationKey) === 'true';
+            if (!autoMigrationEnabled) {
+                console.log(`ℹ️ Migração legada desativada. Para executar uma vez, defina localStorage['${this.autoMigrationKey}']='true'.`);
+                return;
+            }
+
+            await this.migrateExistingData();
+        } catch (error) {
+            console.warn('⚠️ Não foi possível avaliar execução de migração legada:', error);
+        }
+    }
+
+    /**
      * Migrar dados existentes do localStorage
      */
     async migrateExistingData() {
@@ -136,12 +161,14 @@ class SupabaseIntegration {
 
             if (migratedCount > 0) {
                 console.log(`✅ Migração concluída: ${migratedCount} registros migrados`);
-
-                // Marcar migração como concluída
-                localStorage.setItem('supabase_migration_completed', new Date().toISOString());
             } else {
                 console.log('ℹ️ Nenhum dado histórico encontrado para migração');
             }
+
+            // Marcar migração como concluída mesmo sem dados para evitar reprocessamento contínuo
+            localStorage.setItem(this.migrationCompletedKey, new Date().toISOString());
+            // Limpar flag de execução manual
+            localStorage.removeItem(this.autoMigrationKey);
         } catch (error) {
             console.error('❌ Erro na migração de dados:', error);
         }

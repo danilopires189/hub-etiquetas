@@ -252,8 +252,12 @@ function boot() {
     // Admin button
     const adminBtn = document.getElementById('admin-btn');
     if (adminBtn) {
-        adminBtn.addEventListener('click', () => {
-            window.location.href = './admin/login.html';
+        adminBtn.setAttribute('aria-disabled', 'true');
+        adminBtn.title = 'Modulo administrativo desabilitado';
+        adminBtn.style.opacity = '0.55';
+        adminBtn.style.cursor = 'not-allowed';
+        adminBtn.addEventListener('click', (event) => {
+            event.preventDefault();
         });
     }
 

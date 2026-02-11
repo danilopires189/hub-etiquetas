@@ -656,13 +656,15 @@ class SupabaseManager {
     /**
      * Atualizar contador global com resolução de conflitos
      */
-    async updateGlobalCounter(increment, type) {
+    async updateGlobalCounter(increment, type, options = {}) {
         if (this.isOnline()) {
             try {
                 console.log(`📈 Atualizando contador: +${increment} ${type}`);
-
-                // Obter estado atual do contador antes da atualização
-                const currentCounter = await this.getCounterStats();
+                const shouldCheckConflicts = options?.checkConflicts === true;
+                let currentCounter = null;
+                if (shouldCheckConflicts) {
+                    currentCounter = await this.getCounterStats();
+                }
 
                 const { data, error } = await this.client
                     .rpc('update_global_counter', {
@@ -675,23 +677,25 @@ class SupabaseManager {
                     throw error;
                 }
 
-                // Verificar se houve conflito durante a atualização
-                const updatedCounter = await this.getCounterStats();
+                if (shouldCheckConflicts && currentCounter) {
+                    // Verificar se houve conflito durante a atualização
+                    const updatedCounter = await this.getCounterStats();
 
-                // Detectar e resolver conflitos se necessário
-                const conflictResult = await conflictResolver.detectAndResolveConflicts(
-                    currentCounter,
-                    updatedCounter,
-                    'global_counter'
-                );
+                    // Detectar e resolver conflitos se necessário
+                    const conflictResult = await conflictResolver.detectAndResolveConflicts(
+                        currentCounter,
+                        updatedCounter,
+                        'global_counter'
+                    );
 
-                if (conflictResult.hasConflict) {
-                    console.log('⚔️ Conflito detectado no contador global, aplicando resolução...');
+                    if (conflictResult.hasConflict) {
+                        console.log('⚔️ Conflito detectado no contador global, aplicando resolução...');
 
-                    // Aplicar dados resolvidos
-                    await this.applyResolvedCounterData(conflictResult.resolvedData);
+                        // Aplicar dados resolvidos
+                        await this.applyResolvedCounterData(conflictResult.resolvedData);
 
-                    console.log('✅ Conflito de contador resolvido automaticamente');
+                        console.log('✅ Conflito de contador resolvido automaticamente');
+                    }
                 }
 
                 console.log('✅ Contador atualizado:', data);

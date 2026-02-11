@@ -777,7 +777,7 @@
 
         const { data, error } = await client
             .from(TABLE_NAME)
-            .select('*')
+            .select('id, cd, mat, nome, coddv, barras, descricao, destino, validade, qtd, dt_hr_coleta, dt_hr_impressao, status_impressao')
             .eq('cd', cd)
             .order('dt_hr_coleta', { ascending: false })
             .limit(500);

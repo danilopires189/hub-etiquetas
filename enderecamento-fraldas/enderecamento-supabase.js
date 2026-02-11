@@ -267,7 +267,7 @@ class SistemaEnderecamentoSupabase {
 
                 const { data: enderecosPagina, error: errEnd } = await this.client
                     .from('enderecos_fraldas')
-                    .select('*')
+                    .select('id, endereco, zona, bloco, coluna, nivel, descricao, cd, ativo, created_at, updated_at')
                     .eq('cd', this.cd)
                     .eq('ativo', true)
                     .order('endereco')
@@ -316,7 +316,7 @@ class SistemaEnderecamentoSupabase {
 
                 const { data: alocacoesPagina, error: errAloc } = await this.client
                     .from('alocacoes_fraldas')
-                    .select('*')
+                    .select('id, endereco, coddv, descricao_produto, validade, usuario, matricula, cd, ativo, data_alocacao, barras, lote')
                     .eq('cd', this.cd)
                     .eq('ativo', true)
                     .range(pagina * tamanhoPagina, (pagina + 1) * tamanhoPagina - 1);
@@ -1196,7 +1196,7 @@ class SistemaEnderecamentoSupabase {
             try {
                 const { data, error } = await this.client
                     .from('historico_enderecamento_fraldas')
-                    .select('*')
+                    .select('id, tipo, endereco, endereco_origem, endereco_destino, coddv, descricao_produto, observacao, usuario, matricula, cd, data_hora')
                     .eq('cd', this.cd)
                     .order('data_hora', { ascending: false })
                     .limit(limite);

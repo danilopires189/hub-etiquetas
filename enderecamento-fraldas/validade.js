@@ -319,7 +319,7 @@ async function buscarAlocaDireta(termo) {
 
   // Tenta buscar por CODDV
   const { data } = await sistema.client.from('alocacoes_fraldas')
-    .select('*')
+    .select('id, cd, endereco, coddv, descricao_produto, validade, usuario, matricula, barras')
     .eq('coddv', termo)
     .eq('ativo', true)
     .eq('cd', cdAtual);
@@ -362,7 +362,7 @@ async function processarEndereco(endereco) {
 
     // Tentar buscar direto no banco pra garantir
     const { data } = await sistema.client.from('alocacoes_fraldas')
-      .select('*')
+      .select('id, cd, endereco, coddv, descricao_produto, validade, usuario, matricula, barras')
       .eq('endereco', endereco.toUpperCase())
       .eq('ativo', true)
       .eq('cd', cdAtual);
@@ -971,6 +971,63 @@ async function gerarRelatorioPDF() {
 }
 
 
+function normalizarMmaa(valor) {
+  const digits = String(valor || '').replace(/\D/g, '').slice(0, 4);
+  if (!/^\d{4}$/.test(digits)) return null;
+  const mes = parseInt(digits.substring(0, 2), 10);
+  if (mes < 1 || mes > 12) return null;
+  return digits;
+}
+
+function mmaaParaChave(mmaa) {
+  const v = normalizarMmaa(mmaa);
+  if (!v) return 0;
+  const mes = parseInt(v.substring(0, 2), 10);
+  const ano = 2000 + parseInt(v.substring(2, 4), 10);
+  return (ano * 100) + mes;
+}
+
+function montarFaixaMmaa(inicio, fim, maxMeses = 240) {
+  const inicioNorm = normalizarMmaa(inicio);
+  const fimNorm = normalizarMmaa(fim);
+  if (!inicioNorm || !fimNorm) {
+    return { valores: [], lookup: new Set(), valida: false };
+  }
+
+  let inicioKey = mmaaParaChave(inicioNorm);
+  let fimKey = mmaaParaChave(fimNorm);
+  if (!inicioKey || !fimKey) {
+    return { valores: [], lookup: new Set(), valida: false };
+  }
+
+  if (inicioKey > fimKey) {
+    const troca = inicioKey;
+    inicioKey = fimKey;
+    fimKey = troca;
+  }
+
+  const anoInicio = Math.floor(inicioKey / 100);
+  const mesInicio = inicioKey % 100;
+  const anoFim = Math.floor(fimKey / 100);
+  const mesFim = fimKey % 100;
+
+  let ano = anoInicio;
+  let mes = mesInicio;
+  const valores = [];
+
+  while ((ano < anoFim || (ano === anoFim && mes <= mesFim)) && valores.length < maxMeses) {
+    const mmaa = `${String(mes).padStart(2, '0')}${String(ano).slice(-2)}`;
+    valores.push(mmaa);
+    mes += 1;
+    if (mes > 12) {
+      mes = 1;
+      ano += 1;
+    }
+  }
+
+  return { valores, lookup: new Set(valores), valida: valores.length > 0 };
+}
+
 async function fetchReportData(inicio, fim) {
   if (!sistema || !sistema.client) {
     showToast('Erro critico: Sistema não inicializado. Recarregue a página.', 'error');
@@ -985,37 +1042,43 @@ async function fetchReportData(inicio, fim) {
 
   console.log(`[DEBUG] Buscando dados para CD ${cdAtual}, período ${inicio} a ${fim}`);
 
-  // Busca TUDO do CD ativo para filtrar no JS (correção de filtro MMAA string)
-  const { data, error } = await sistema.client
-    .from('alocacoes_fraldas')
-    .select('*')
-    .eq('ativo', true)
-    .eq('cd', cdAtual);
+  const faixa = montarFaixaMmaa(inicio, fim);
+  if (!faixa.valida) {
+    throw new Error('Período inválido. Use o formato MMAA.');
+  }
 
-  if (error) throw error;
+  const campos = 'id, cd, endereco, coddv, descricao_produto, validade, usuario, matricula, barras';
+  const chunkSize = 60;
+  const data = [];
+
+  // Filtra diretamente no banco para evitar transferir todo o CD
+  for (let i = 0; i < faixa.valores.length; i += chunkSize) {
+    const lote = faixa.valores.slice(i, i + chunkSize);
+
+    const { data: loteData, error } = await sistema.client
+      .from('alocacoes_fraldas')
+      .select(campos)
+      .eq('ativo', true)
+      .eq('cd', cdAtual)
+      .in('validade', lote);
+
+    if (error) throw error;
+    if (Array.isArray(loteData) && loteData.length) {
+      data.push(...loteData);
+    }
+  }
 
   if (!data || data.length === 0) {
     // Retorna vazio sem toast aqui para deixar o chamador decidir
     return [];
   }
 
-  // Converter filtros para inteiros YYYYMM
-  const parseDate = (mmaa) => {
-    if (!mmaa || mmaa.length !== 4) return 0;
-    const m = mmaa.substring(0, 2);
-    const a = mmaa.substring(2, 4);
-    return parseInt(`20${a}${m}`);
-  };
-
-  const dtInicio = parseDate(inicio);
-  const dtFim = parseDate(fim);
-
-  // Filtrar e Ordenar
+  // Filtro defensivo local + ordenação
   return data.filter(item => {
-    const dtItem = parseDate(item.validade);
-    return dtItem >= dtInicio && dtItem <= dtFim;
+    const valor = normalizarMmaa(item.validade);
+    return valor ? faixa.lookup.has(valor) : false;
   }).sort((a, b) => {
-    return parseDate(a.validade) - parseDate(b.validade);
+    return mmaaParaChave(a.validade) - mmaaParaChave(b.validade);
   });
 }
 
