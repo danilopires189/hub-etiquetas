@@ -337,6 +337,25 @@
         if (coletaView) coletaView.style.display = 'none';
     }
 
+    function resetMobileLoginFields(options = {}) {
+        const keepCd = options.keepCd === true;
+        const inputCd = $id('mobile-login-cd');
+        const inputMat = $id('mobile-login-matricula');
+        const inputNome = $id('mobile-login-nome');
+        const inputSenha = $id('mobile-login-senha');
+        const currentCd = String(inputCd?.value || '');
+
+        if (inputMat) inputMat.value = '';
+        if (inputNome) inputNome.value = '';
+        if (inputSenha) inputSenha.value = '';
+
+        if (!keepCd && inputCd) {
+            inputCd.value = '';
+        } else if (keepCd && inputCd) {
+            inputCd.value = currentCd;
+        }
+    }
+
     function showMobileColeta() {
         const loginView = $id('mobile-login-view');
         const coletaView = $id('mobile-coleta-view');
@@ -511,8 +530,10 @@
             logoutBtn.addEventListener('click', () => {
                 clearMobileSession();
                 resetMobileProduto();
+                resetMobileLoginFields({ keepCd: true });
                 showMobileLogin();
                 setMobileLoginFeedback('Sessao encerrada.', 'success');
+                $id('mobile-login-matricula')?.focus();
             });
         }
 
@@ -648,6 +669,7 @@
         }
 
         showMobileLogin();
+        resetMobileLoginFields({ keepCd: true });
         $id('mobile-login-cd')?.focus();
     }
 
