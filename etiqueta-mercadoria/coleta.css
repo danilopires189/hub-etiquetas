@@ -1,0 +1,411 @@
+.mobile-coleta-shell {
+    display: none;
+}
+
+.mobile-coleta-shell .hide {
+    display: none !important;
+}
+
+.mobile-inline-feedback {
+    margin-top: 12px;
+    font-size: 13px;
+    text-align: center;
+    color: #dc2626;
+    min-height: 18px;
+}
+
+.mobile-inline-feedback.success {
+    color: #16a34a;
+}
+
+.mobile-coleta-shell .btn-block {
+    width: 100%;
+    justify-content: center;
+}
+
+.mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    padding: 12px;
+}
+
+.mobile-user-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mobile-user-meta strong {
+    color: #111827;
+    font-size: 14px;
+}
+
+.mobile-user-meta span {
+    color: #4b5563;
+    font-size: 12px;
+}
+
+.mobile-panel {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    padding: 14px;
+}
+
+.mobile-panel label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.mobile-search-row {
+    display: flex;
+    gap: 8px;
+}
+
+.mobile-search-row input {
+    flex: 1;
+}
+
+.mobile-produto-card {
+    margin-top: 12px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    padding: 14px;
+    display: grid;
+    gap: 10px;
+}
+
+.mobile-produto-card h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 16px;
+    line-height: 1.3;
+}
+
+.mobile-produto-meta {
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    color: #475569;
+}
+
+.mobile-form-grid {
+    display: grid;
+    gap: 10px;
+}
+
+.mobile-form-group {
+    display: grid;
+    gap: 6px;
+}
+
+.mobile-form-group label {
+    font-size: 12px;
+    color: #374151;
+    font-weight: 600;
+}
+
+.mobile-form-group input,
+.mobile-form-group select,
+.mobile-panel input {
+    width: 100%;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 11px 12px;
+    font-size: 15px;
+    box-sizing: border-box;
+    background: #ffffff;
+}
+
+.mobile-form-group input:focus,
+.mobile-form-group select:focus,
+.mobile-panel input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.mobile-login-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+}
+
+.mobile-login-header {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.mobile-login-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto 12px;
+}
+
+.mobile-login-header h1 {
+    margin: 0;
+    color: #111827;
+    font-size: 22px;
+}
+
+.mobile-login-header p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.mobile-login-form {
+    display: grid;
+    gap: 12px;
+}
+
+.mobile-login-form label {
+    font-size: 13px;
+    color: #374151;
+    font-weight: 600;
+}
+
+.mobile-login-form input,
+.mobile-login-form select {
+    width: 100%;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 11px 12px;
+    font-size: 15px;
+    box-sizing: border-box;
+    background: #ffffff;
+}
+
+.mobile-login-form input:focus,
+.mobile-login-form select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.coleta-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 40000;
+    display: none;
+    padding: 22px;
+    box-sizing: border-box;
+}
+
+.coleta-modal-overlay.show {
+    display: flex;
+}
+
+.coleta-modal-dialog {
+    width: 100%;
+    height: 100%;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 1px solid #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.coleta-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+
+.coleta-modal-header h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.coleta-modal-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.coleta-modal-subtitle {
+    padding: 10px 20px;
+    color: #475569;
+    font-size: 13px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+
+.coleta-modal-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.coleta-modal-tabs .btn.active {
+    background: #dbeafe;
+    color: #0b3a88;
+    border-color: #93c5fd;
+}
+
+.coleta-modal-list {
+    flex: 1;
+    overflow: auto;
+    padding: 14px 20px 20px;
+    display: grid;
+    gap: 10px;
+}
+
+.coleta-item {
+    border: 1px solid #dbe4f0;
+    border-radius: 12px;
+    padding: 12px;
+    background: #ffffff;
+    display: grid;
+    gap: 8px;
+}
+
+.coleta-item-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.coleta-item-head h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #0f172a;
+}
+
+.coleta-item-meta {
+    font-size: 13px;
+    color: #475569;
+}
+
+.coleta-item-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.coleta-badge {
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    background: #f3f4f6;
+    color: #334155;
+}
+
+.coleta-vazio {
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+    color: #64748b;
+    background: #ffffff;
+}
+
+.coleta-toast-container {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 41000;
+}
+
+.coleta-toast {
+    min-width: 240px;
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #ffffff;
+    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.25s ease;
+}
+
+.coleta-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.coleta-toast.info { background: #3b82f6; }
+.coleta-toast.success { background: #10b981; }
+.coleta-toast.warning { background: #f59e0b; }
+.coleta-toast.error { background: #ef4444; }
+
+@media (max-width: 900px) {
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    #screen-ui,
+    .app-footer,
+    #copies-modal,
+    #validity-modal,
+    #historico-modal,
+    #coleta-modal,
+    #deposito-change-modal {
+        display: none !important;
+    }
+
+    #loading-overlay {
+        display: none !important;
+    }
+
+    .mobile-coleta-shell {
+        display: block;
+        min-height: 100vh;
+        min-height: 100dvh;
+        box-sizing: border-box;
+        padding: 16px;
+    }
+
+    .mobile-coleta-container {
+        max-width: 520px;
+        margin: 0 auto;
+    }
+
+    .mobile-view {
+        display: block;
+    }
+
+    .coleta-toast-container {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+    }
+
+    .coleta-toast {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+@media (min-width: 901px) {
+    .mobile-coleta-shell {
+        display: none !important;
+    }
+}

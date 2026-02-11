@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../shared/components.css">
     <link rel="stylesheet" href="../shared/mobile-dark-mode.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="coleta.css">
 </head>
 
 <body>
@@ -18,6 +19,93 @@
     <div id="loading-overlay" class="loading-overlay">
         <div class="spinner"></div>
         <p id="loading-text">Iniciando sistema...</p>
+    </div>
+
+    <!-- Mobile Coleta Shell -->
+    <div id="mobile-coleta-shell" class="mobile-coleta-shell">
+        <div class="mobile-coleta-container">
+            <div id="mobile-login-view" class="mobile-view">
+                <div class="mobile-login-card">
+                    <div class="mobile-login-header">
+                        <img src="../assets/pm.png" alt="Pague Menos" class="mobile-login-logo"
+                            onerror="this.style.display='none'">
+                        <h1>Etiqueta Mercadoria</h1>
+                        <p>Coleta Mobile</p>
+                    </div>
+                    <form id="mobile-login-form" class="mobile-login-form">
+                        <div class="mobile-form-group">
+                            <label for="mobile-login-cd">Depósito</label>
+                            <select id="mobile-login-cd" required>
+                                <option value="" disabled selected>Selecione o CD</option>
+                            </select>
+                        </div>
+                        <div class="mobile-form-group">
+                            <label for="mobile-login-matricula">Matrícula</label>
+                            <input type="number" id="mobile-login-matricula" placeholder="Digite sua matrícula"
+                                autocomplete="username" required>
+                        </div>
+                        <div class="mobile-form-group">
+                            <label for="mobile-login-nome">Nome</label>
+                            <input type="text" id="mobile-login-nome" placeholder="Nome do colaborador" readonly
+                                disabled>
+                        </div>
+                        <div class="mobile-form-group">
+                            <label for="mobile-login-senha">Senha</label>
+                            <input type="password" id="mobile-login-senha" placeholder="••••••••"
+                                autocomplete="current-password" required>
+                        </div>
+                        <button type="submit" id="mobile-login-btn" class="btn btn-primary btn-block">Entrar</button>
+                    </form>
+                    <div id="mobile-login-feedback" class="mobile-inline-feedback"></div>
+                </div>
+            </div>
+
+            <div id="mobile-coleta-view" class="mobile-view" style="display:none;">
+                <div class="mobile-topbar">
+                    <div class="mobile-user-meta">
+                        <strong id="mobile-user-name">--</strong>
+                        <span id="mobile-user-cd">CD --</span>
+                    </div>
+                    <button type="button" id="mobile-logout-btn" class="btn btn-ghost btn-sm">Sair</button>
+                </div>
+
+                <div class="mobile-panel">
+                    <label for="mobile-codigo">Código (Barras ou Interno)</label>
+                    <div class="mobile-search-row">
+                        <input type="text" id="mobile-codigo" placeholder="Bipe ou digite o código" autocomplete="off">
+                        <button type="button" id="mobile-btn-buscar" class="btn btn-primary">Buscar</button>
+                    </div>
+                </div>
+
+                <div id="mobile-produto-card" class="mobile-produto-card hide">
+                    <h3 id="mobile-produto-desc">--</h3>
+                    <div class="mobile-produto-meta">
+                        <span>CODDV: <strong id="mobile-produto-coddv">--</strong></span>
+                        <span>Barras: <strong id="mobile-produto-barras">--</strong></span>
+                    </div>
+                    <div class="mobile-form-grid">
+                        <div class="mobile-form-group">
+                            <label for="mobile-destino">Destino</label>
+                            <select id="mobile-destino">
+                                <option value="AUTOMATICO">Automático</option>
+                                <option value="SEPARACAO">Separação</option>
+                                <option value="PULMAO">Pulmão</option>
+                            </select>
+                        </div>
+                        <div class="mobile-form-group">
+                            <label for="mobile-validade">Validade (MM/AA) - opcional</label>
+                            <input type="text" id="mobile-validade" maxlength="5" inputmode="numeric"
+                                placeholder="MM/AA">
+                        </div>
+                        <div class="mobile-form-group">
+                            <label for="mobile-qtd">Quantidade de Etiquetas</label>
+                            <input type="number" id="mobile-qtd" min="1" step="1" placeholder="Ex: 1">
+                        </div>
+                    </div>
+                    <button type="button" id="mobile-btn-salvar" class="btn btn-primary btn-block">Salvar Coleta</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Screen UI -->
@@ -47,6 +135,12 @@
                         <polyline points="9,22 9,12 15,12 15,22" />
                     </svg>
                     Hub
+                </button>
+                <button id="coleta-btn" type="button" class="btn btn-ghost" title="Coleta">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 7h18M3 12h18M3 17h18"></path>
+                    </svg>
+                    Coleta
                 </button>
                 <button id="historico-btn" type="button" class="btn btn-ghost" title="Ver histórico">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -425,6 +519,29 @@
         </div>
     </div>
 
+    <!-- Coleta Desktop Modal -->
+    <div id="coleta-modal" class="coleta-modal-overlay">
+        <div class="coleta-modal-dialog">
+            <div class="coleta-modal-header">
+                <h3>Coleta de Etiquetas</h3>
+                <div class="coleta-modal-actions">
+                    <button type="button" id="coleta-refresh-btn" class="btn btn-ghost btn-sm">Atualizar</button>
+                    <button type="button" id="coleta-close-btn" class="btn btn-ghost btn-sm">Fechar</button>
+                </div>
+            </div>
+
+            <div class="coleta-modal-subtitle">
+                Visualização por CD selecionado na tela principal
+            </div>
+
+            <div class="coleta-modal-tabs">
+                <button type="button" id="coleta-tab-nao" class="btn btn-ghost active">Não impresso</button>
+                <button type="button" id="coleta-tab-impresso" class="btn btn-ghost">Impresso hoje</button>
+            </div>
+
+            <div id="coleta-list" class="coleta-modal-list"></div>
+        </div>
+    </div>
 
     <footer class="app-footer">
         <div class="container">
@@ -447,28 +564,51 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
-    <script src="../shared/barcode.js"></script>
+    <script>
+        (function () {
+            const isMobile = window.matchMedia('(max-width: 900px)').matches;
 
-    <!-- Supabase Integration -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+            function loadScript(src, isModule) {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    if (isModule) script.type = 'module';
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('Falha ao carregar: ' + src));
+                    document.body.appendChild(script);
+                });
+            }
 
-    <!-- Contador Global Otimizado -->
-    <script src="../js/contador-global-otimizado.js"></script>
+            async function bootstrap() {
+                try {
+                    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', false);
 
-    <!-- Supabase Init (Carrega após contador global) -->
-    <script type="module" src="../supabase/init.js"></script>
+                    if (!isMobile) {
+                        await loadScript('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js', false);
+                        await loadScript('https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js', false);
+                        await loadScript('../shared/barcode.js', false);
+                        await loadScript('../js/contador-global-otimizado.js', false);
+                    }
 
-    <script src="../data_base/BASE_BARRAS.js"></script>
-    <script src="../data_base/BASE_END.js"></script>
-    <script src="../data_base/BASE_USUARIO.js"></script>
-    
-    <!-- IndexedDB Storage -->
-    <script src="indexeddb-storage.js"></script>
-    
-    <script src="app.js"></script>
+                    await loadScript('../supabase/init.js', true);
+                    await loadScript('../data_base/BASE_BARRAS.js', false);
+                    await loadScript('../data_base/BASE_USUARIO.js', false);
+
+                    if (!isMobile) {
+                        await loadScript('../data_base/BASE_END.js', false);
+                        await loadScript('indexeddb-storage.js', false);
+                        await loadScript('app.js', false);
+                    }
+
+                    await loadScript('coleta-mobile-desktop.js', false);
+                } catch (error) {
+                    console.error('Erro ao inicializar módulo etiqueta-mercadoria:', error);
+                }
+            }
+
+            bootstrap();
+        })();
+    </script>
 </body>
 
 </html>
