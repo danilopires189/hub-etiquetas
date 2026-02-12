@@ -1340,6 +1340,21 @@ class SupabaseManager {
                         success = true;
                         break;
 
+                    case 'saveCaixaLabel':
+                        await this.saveCaixaLabel(item.data);
+                        success = true;
+                        break;
+
+                    case 'saveAvulsoLabel':
+                        await this.saveAvulsoLabel(item.data);
+                        success = true;
+                        break;
+
+                    case 'saveEtiquetaEntrada':
+                        await this.saveEtiquetaEntrada(item.data);
+                        success = true;
+                        break;
+
                     case 'saveEnderecLabel':
                         await this.saveEnderecLabel(item.data);
                         success = true;
