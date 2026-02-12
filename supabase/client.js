@@ -13,6 +13,28 @@ if (!createClient) {
     console.error('❌ Supabase não encontrado! Certifique-se de que o script do Supabase foi carregado antes deste módulo.');
 }
 
+const ALLOWED_LABEL_APPLICATION_TYPES = new Set([
+    'placas',
+    'caixa',
+    'avulso',
+    'enderec',
+    'transfer',
+    'termo',
+    'pedido-direto',
+    'etiqueta-mercadoria',
+    'inventario',
+    'geral'
+]);
+
+const LABEL_APPLICATION_TYPE_ALIASES = {
+    'transferencia': 'transfer',
+    'transferência': 'transfer',
+    'pedido_direto': 'pedido-direto',
+    'pedido direto': 'pedido-direto',
+    'etiqueta_mercadoria': 'etiqueta-mercadoria',
+    'etiqueta mercadoria': 'etiqueta-mercadoria'
+};
+
 class SupabaseManager {
     constructor() {
         this.client = null;
@@ -223,21 +245,77 @@ class SupabaseManager {
         }
     }
 
+    normalizeApplicationType(rawValue) {
+        if (rawValue === null || rawValue === undefined) return null;
+
+        const normalized = String(rawValue).trim().toLowerCase();
+        if (!normalized) return null;
+
+        return LABEL_APPLICATION_TYPE_ALIASES[normalized] || normalized;
+    }
+
+    normalizeLabelGenerationData(data = {}) {
+        const rawApplicationType = data.applicationType ?? data.application_type ?? data.appType ?? null;
+        const applicationType = this.normalizeApplicationType(rawApplicationType);
+
+        const quantityRaw = data.quantity ?? data.quantidade ?? 1;
+        const copiesRaw = data.copies ?? data.copia ?? data.copias ?? 1;
+        const quantity = parseInt(quantityRaw, 10);
+        const copies = parseInt(copiesRaw, 10);
+
+        return {
+            application_type: applicationType,
+            coddv: data.coddv || null,
+            quantity: Number.isFinite(quantity) ? quantity : 0,
+            copies: Number.isFinite(copies) ? copies : 1,
+            label_type: data.labelType || data.label_type || null,
+            orientation: data.orientation || data.orient || 'h',
+            cd: data.cd || null,
+            user_session_id: data.userSessionId || data.user_session_id || null,
+            metadata: data.metadata || {}
+        };
+    }
+
+    validateLabelGenerationData(generationData) {
+        if (!generationData.application_type) {
+            throw new Error('application_type obrigatório para salvar em labels.');
+        }
+
+        if (!ALLOWED_LABEL_APPLICATION_TYPES.has(generationData.application_type)) {
+            throw new Error(`application_type inválido: ${generationData.application_type}`);
+        }
+
+        if (!Number.isInteger(generationData.quantity) || generationData.quantity <= 0) {
+            throw new Error(`quantity inválido: ${generationData.quantity}`);
+        }
+
+        if (!Number.isInteger(generationData.copies) || generationData.copies <= 0) {
+            throw new Error(`copies inválido: ${generationData.copies}`);
+        }
+    }
+
+    isLabelValidationError(error) {
+        if (!error) return false;
+
+        const msg = `${error.message || ''} ${error.details || ''} ${error.hint || ''}`.toLowerCase();
+        const codes = new Set(['23502', '23514', '22P02']);
+
+        return codes.has(error.code) ||
+            msg.includes('application_type') ||
+            msg.includes('not-null constraint') ||
+            msg.includes('check constraint') ||
+            msg.includes('quantity inválido') ||
+            msg.includes('copies inválido') ||
+            msg.includes('application_type obrigatório') ||
+            msg.includes('application_type inválido');
+    }
+
     /**
      * Salvar geração de etiqueta com resolução de conflitos
      */
     async saveLabelGeneration(data) {
-        const generationData = {
-            application_type: data.applicationType,
-            coddv: data.coddv || null,
-            quantity: parseInt(data.quantity) || 0,
-            copies: parseInt(data.copies) || 1,
-            label_type: data.labelType || null,
-            orientation: data.orientation || 'h',
-            cd: data.cd || null,
-            user_session_id: data.userSessionId || null,
-            metadata: data.metadata || {}
-        };
+        const generationData = this.normalizeLabelGenerationData(data);
+        this.validateLabelGenerationData(generationData);
 
         if (this.isOnline()) {
             try {
@@ -342,6 +420,11 @@ class SupabaseManager {
                 console.log('✅ Geração salva com sucesso:', result);
                 return result;
             } catch (error) {
+                if (this.isLabelValidationError(error)) {
+                    console.error('❌ Erro de validação em labels (não será reenfileirado):', error);
+                    throw error;
+                }
+
                 console.warn('⚠️ Falha ao salvar online (direct insert), adicionando à queue:', error);
                 this.addToOfflineQueue('saveLabelGeneration', generationData);
                 throw error;
@@ -1285,6 +1368,17 @@ class SupabaseManager {
                 }
             } catch (error) {
                 console.error(`❌ Erro ao sincronizar operação ${item.operation}:`, error);
+
+                if (item.operation === 'saveLabelGeneration' && this.isLabelValidationError(error)) {
+                    console.error(`❌ Operação ${item.operation} inválida, removendo da queue sem retry:`, item.data);
+                    this.offlineQueue = this.offlineQueue.filter(q => q.id !== item.id);
+                    results.errors.push({
+                        operation: item.operation,
+                        error: error.message,
+                        data: item.data
+                    });
+                    continue;
+                }
 
                 item.retries = (item.retries || 0) + 1;
 

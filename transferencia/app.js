@@ -222,7 +222,7 @@ function setup() {
           const d = byId(v.destino);
           
           const labelData = {
-            applicationType: 'transferencia',
+            applicationType: 'transfer',
             quantity: v.qtd,
             copies: 1,
             metadata: {

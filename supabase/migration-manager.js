@@ -198,7 +198,7 @@ class MigrationManager {
             { key: 'caixa-etiquetas-history', type: 'caixa' },
             { key: 'enderec-etiquetas-history', type: 'enderec' },
             { key: 'placas-etiquetas-history', type: 'placas' },
-            { key: 'transfer-etiquetas-history', type: 'transferencia' },
+            { key: 'transfer-etiquetas-history', type: 'transfer' },
             { key: 'termo-etiquetas-history', type: 'termo' },
             { key: 'pedido-direto-etiquetas-history', type: 'pedido-direto' },
             { key: 'etiqueta-mercadoria-etiquetas-history', type: 'etiqueta-mercadoria' },
