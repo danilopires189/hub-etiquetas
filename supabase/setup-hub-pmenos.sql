@@ -1209,10 +1209,7 @@ CREATE TABLE IF NOT EXISTS alocacoes_fraldas (
     matricula VARCHAR(100),
     ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    
-    -- Máximo de 2 produtos por endereço (verificado via trigger)
-    CONSTRAINT unique_produto_endereco UNIQUE (endereco_id, coddv)
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Índices para alocações
@@ -1223,6 +1220,11 @@ CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_endereco_id ON alocacoes_fralda
 CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_ativo ON alocacoes_fraldas(ativo);
 CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_cd ON alocacoes_fraldas(cd);
 CREATE INDEX IF NOT EXISTS idx_alocacoes_fraldas_validade ON alocacoes_fraldas(validade);
+
+-- Garante unicidade apenas das alocações ativas, permitindo realocar após desalocação
+CREATE UNIQUE INDEX IF NOT EXISTS unique_produto_endereco_ativo
+ON alocacoes_fraldas (endereco_id, coddv)
+WHERE ativo = TRUE;
 
 -- =========================================================
 -- TABELA: historico_enderecamento_fraldas

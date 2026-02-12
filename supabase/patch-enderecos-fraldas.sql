@@ -73,9 +73,7 @@ CREATE TABLE alocacoes_fraldas (
     matricula VARCHAR(20),
     ativo BOOLEAN DEFAULT TRUE,
     created_at TEXT DEFAULT TO_CHAR(NOW() AT TIME ZONE 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI:SS'),
-    updated_at TEXT DEFAULT TO_CHAR(NOW() AT TIME ZONE 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI:SS'),
-    
-    CONSTRAINT unique_produto_endereco UNIQUE (endereco_id, coddv)
+    updated_at TEXT DEFAULT TO_CHAR(NOW() AT TIME ZONE 'America/Sao_Paulo', 'DD/MM/YYYY HH24:MI:SS')
 );
 
 -- Índices
@@ -84,6 +82,11 @@ CREATE INDEX idx_alocacoes_fraldas_coddv ON alocacoes_fraldas(coddv);
 CREATE INDEX idx_alocacoes_fraldas_endereco_id ON alocacoes_fraldas(endereco_id);
 CREATE INDEX idx_alocacoes_fraldas_ativo ON alocacoes_fraldas(ativo);
 CREATE INDEX idx_alocacoes_fraldas_cd ON alocacoes_fraldas(cd);
+
+-- Garante unicidade apenas das alocações ativas, permitindo realocar após desalocação
+CREATE UNIQUE INDEX unique_produto_endereco_ativo
+ON alocacoes_fraldas (endereco_id, coddv)
+WHERE ativo = TRUE;
 
 -- =========================================================
 -- 5. Criar tabela historico_enderecamento_fraldas
