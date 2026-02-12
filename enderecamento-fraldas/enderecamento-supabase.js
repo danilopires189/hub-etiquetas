@@ -521,6 +521,57 @@ class SistemaEnderecamentoSupabase {
     /**
      * Alocar produto em endereço
      */
+    isErroDuplicidadeProdutoEndereco(error) {
+        if (!error) return false;
+
+        const textoErro = `${error.message || ''} ${error.details || ''} ${error.hint || ''}`.toLowerCase();
+        return error.code === '23505' ||
+            textoErro.includes('unique_produto_endereco') ||
+            textoErro.includes('duplicate key value');
+    }
+
+    /**
+     * Compatibilidade com bancos que ainda usam constraint UNIQUE (endereco_id, coddv)
+     * Em vez de inserir de novo, reativa o registro inativo existente.
+     */
+    async reativarAlocacaoInativa(endereco, coddv, descricaoProduto, validade, sessao) {
+        const { data: alocacaoInativa, error: erroBusca } = await this.client
+            .from('alocacoes_fraldas')
+            .select('id')
+            .eq('endereco', endereco)
+            .eq('coddv', coddv)
+            .eq('cd', this.cd)
+            .eq('ativo', false)
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (erroBusca) throw erroBusca;
+        if (!alocacaoInativa?.id) return false;
+
+        const payload = {
+            ativo: true,
+            descricao_produto: descricaoProduto,
+            usuario: sessao.usuario,
+            matricula: sessao.matricula,
+            data_alocacao: new Date().toISOString()
+        };
+
+        if (validade !== null && validade !== undefined && validade !== '') {
+            payload.validade = validade;
+        }
+
+        const { error: erroUpdate } = await this.client
+            .from('alocacoes_fraldas')
+            .update(payload)
+            .eq('id', alocacaoInativa.id);
+
+        if (erroUpdate) throw erroUpdate;
+
+        console.log(`♻️ Alocação reativada para ${coddv} em ${endereco}.`);
+        return true;
+    }
+
     async alocarProduto(endereco, coddv, descricaoProduto, permitirMultiplos = false, validade = null) {
         const enderecoUpper = endereco.toUpperCase();
         const sessao = this.obterDadosSessao();
@@ -591,6 +642,24 @@ class SistemaEnderecamentoSupabase {
                 return enderecoUpper;
 
             } catch (error) {
+                if (this.isErroDuplicidadeProdutoEndereco(error)) {
+                    console.warn('⚠️ Constraint antiga detectada; tentando reativar alocação inativa...');
+
+                    const reativado = await this.reativarAlocacaoInativa(
+                        enderecoUpper,
+                        coddv,
+                        descricaoProduto,
+                        validade,
+                        sessao
+                    );
+
+                    if (reativado) {
+                        await this.carregarCache();
+                        this.salvarDadosLocais();
+                        return enderecoUpper;
+                    }
+                }
+
                 console.error('❌ Erro ao alocar no banco:', error);
                 throw error;
             }
