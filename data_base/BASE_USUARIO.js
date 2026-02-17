@@ -1,5 +1,5 @@
 // BASE_USUARIO.js - Auto-convertido de BASE_USUARIO.xlsx
-// 16/02/2026, 20:05:18
+// 17/02/2026, 08:05:21
 
 window.DB_USUARIO = {"BASE_USUARIO":     [
         {
