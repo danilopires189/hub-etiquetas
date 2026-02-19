@@ -1,5 +1,5 @@
 // BASE_ID.js - Auto-convertido de BASE_ID.xlsx
-// 18/02/2026, 20:07:07
+// 19/02/2026, 08:07:47
 
 window.DB_BASE_ID = {"BASE_BASE_ID":     [
         {
