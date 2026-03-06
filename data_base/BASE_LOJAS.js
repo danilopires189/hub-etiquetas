@@ -1,5 +1,5 @@
 // BASE_LOJAS.js - Auto-convertido de BASE_LOJAS.xlsx
-// 05/03/2026, 20:07:49
+// 06/03/2026, 12:09:00
 
 window.DB_LOJAS = {
   BASE_LOJAS:   {
@@ -1768,7 +1768,8 @@ window.DB_LOJAS = {
               "212": "MATO GROSSO-MS 01",
               "213": "DISTRITO FEDERAL-DF",
               "214": "RONDONIA-RO",
-              "215": "ACRE-AC"
+              "215": "ACRE-AC",
+              "217": "LOJA NOVA"
           },
           "3": {
               "301": "PIEDADE-PE",
