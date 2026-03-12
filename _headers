@@ -1,4 +1,7 @@
 # Headers for GitHub Pages optimization
+/shared/maintenance-config.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
 /*
   Cache-Control: public, max-age=31536000
   X-Content-Type-Options: nosniff

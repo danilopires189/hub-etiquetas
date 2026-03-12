@@ -1,0 +1,304 @@
+:root {
+  --maintenance-bg: #f4f7fb;
+  --maintenance-surface: rgba(255, 255, 255, 0.9);
+  --maintenance-surface-border: rgba(15, 42, 84, 0.1);
+  --maintenance-text: #11294d;
+  --maintenance-muted: #5b6f91;
+  --maintenance-accent: #0b63ce;
+  --maintenance-accent-dark: #083b88;
+  --maintenance-danger: #d92d20;
+  --maintenance-shadow: 0 24px 60px rgba(17, 41, 77, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  color: var(--maintenance-text);
+  background:
+    radial-gradient(circle at top left, rgba(11, 99, 206, 0.14), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(0, 164, 120, 0.12), transparent 28%),
+    linear-gradient(180deg, #f8fbff 0%, var(--maintenance-bg) 100%);
+}
+
+.maintenance-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+}
+
+.maintenance-card {
+  width: min(1040px, 100%);
+  background: var(--maintenance-surface);
+  border: 1px solid var(--maintenance-surface-border);
+  border-radius: 28px;
+  box-shadow: var(--maintenance-shadow);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.maintenance-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+}
+
+.maintenance-copy {
+  padding: 40px;
+}
+
+.maintenance-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.maintenance-logo {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  border-radius: 18px;
+  background: #fff;
+  padding: 8px;
+  box-shadow: 0 12px 24px rgba(17, 41, 77, 0.12);
+}
+
+.maintenance-app-name {
+  margin: 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--maintenance-muted);
+}
+
+.maintenance-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(217, 45, 32, 0.1);
+  color: var(--maintenance-danger);
+  font-weight: 800;
+  font-size: 0.84rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.maintenance-pill::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 6px rgba(217, 45, 32, 0.12);
+}
+
+.maintenance-title {
+  margin: 20px 0 14px;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+}
+
+.maintenance-message {
+  margin: 0 0 14px;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: var(--maintenance-text);
+}
+
+.maintenance-details {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--maintenance-muted);
+}
+
+.maintenance-origin {
+  margin-top: 28px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(17, 41, 77, 0.05);
+  border: 1px solid rgba(17, 41, 77, 0.08);
+}
+
+.maintenance-origin-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--maintenance-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.maintenance-origin code {
+  display: block;
+  font-family: 'IBM Plex Mono', 'Consolas', monospace;
+  font-size: 0.95rem;
+  word-break: break-word;
+  color: var(--maintenance-accent-dark);
+}
+
+.maintenance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+.maintenance-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 14px;
+  text-decoration: none;
+  font-weight: 800;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.maintenance-button:hover {
+  transform: translateY(-2px);
+}
+
+.maintenance-button.primary {
+  color: #fff;
+  background: linear-gradient(135deg, var(--maintenance-accent) 0%, var(--maintenance-accent-dark) 100%);
+  box-shadow: 0 14px 28px rgba(8, 59, 136, 0.28);
+}
+
+.maintenance-button.secondary {
+  color: var(--maintenance-accent-dark);
+  background: rgba(11, 99, 206, 0.08);
+  border: 1px solid rgba(11, 99, 206, 0.14);
+}
+
+.maintenance-aside {
+  position: relative;
+  padding: 40px;
+  background:
+    linear-gradient(180deg, rgba(6, 46, 111, 0.96) 0%, rgba(8, 59, 136, 0.92) 100%),
+    linear-gradient(140deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+  color: #fff;
+  overflow: hidden;
+}
+
+.maintenance-aside::before,
+.maintenance-aside::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.maintenance-aside::before {
+  width: 220px;
+  height: 220px;
+  top: -60px;
+  right: -40px;
+}
+
+.maintenance-aside::after {
+  width: 180px;
+  height: 180px;
+  bottom: -70px;
+  left: -50px;
+}
+
+.maintenance-aside-content {
+  position: relative;
+  z-index: 1;
+}
+
+.maintenance-illustration {
+  display: grid;
+  place-items: center;
+  margin-bottom: 28px;
+}
+
+.maintenance-illustration svg {
+  width: min(100%, 320px);
+  height: auto;
+}
+
+.maintenance-checklist {
+  display: grid;
+  gap: 12px;
+}
+
+.maintenance-checklist-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.maintenance-checklist-item::before {
+  content: '';
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  margin-top: 0.5em;
+  border-radius: 50%;
+  background: #7dd3fc;
+  box-shadow: 0 0 0 6px rgba(125, 211, 252, 0.16);
+}
+
+.maintenance-footer {
+  margin-top: 32px;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 900px) {
+  .maintenance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .maintenance-copy,
+  .maintenance-aside {
+    padding: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .maintenance-page {
+    padding: 18px;
+  }
+
+  .maintenance-copy,
+  .maintenance-aside {
+    padding: 22px;
+  }
+
+  .maintenance-top {
+    flex-wrap: wrap;
+  }
+
+  .maintenance-logo {
+    width: 58px;
+    height: 58px;
+  }
+
+  .maintenance-actions {
+    flex-direction: column;
+  }
+
+  .maintenance-button {
+    width: 100%;
+  }
+}

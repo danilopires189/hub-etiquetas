@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hub de Etiquetas • Manutencao</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#062e6f" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="./assets/pm.png" />
+  <link rel="stylesheet" href="./shared/maintenance.css" />
+  <script src="./shared/maintenance-config.js"></script>
+  <script defer src="./shared/maintenance-page.js"></script>
+</head>
+
+<body>
+  <main class="maintenance-page">
+    <section class="maintenance-card" aria-labelledby="maintenance-title">
+      <div class="maintenance-grid">
+        <div class="maintenance-copy">
+          <div class="maintenance-top">
+            <img class="maintenance-logo" src="./assets/pm.png" alt="Pague Menos" />
+            <img class="maintenance-logo" src="./assets/logo.png" alt="Hub de Etiquetas" />
+            <p id="maintenance-app-name" class="maintenance-app-name">Hub de Etiquetas</p>
+          </div>
+
+          <span id="maintenance-badge" class="maintenance-pill">Sistema indisponivel</span>
+          <h1 id="maintenance-title" class="maintenance-title">Aplicacao temporariamente desabilitada</h1>
+          <p id="maintenance-message" class="maintenance-message">
+            O acesso aos modulos foi interrompido por algum tempo para manutencao interna.
+          </p>
+          <p id="maintenance-details" class="maintenance-details">
+            Todos os links do sistema redirecionam para esta pagina ate a liberacao do acesso.
+          </p>
+
+          <div id="maintenance-origin" class="maintenance-origin" hidden>
+            <span class="maintenance-origin-label">Ultima rota solicitada</span>
+            <code id="maintenance-origin-value"></code>
+          </div>
+
+          <div class="maintenance-actions">
+            <a id="maintenance-support-link" class="maintenance-button primary" href="https://wa.me/5562981020272" target="_blank" rel="noopener">
+              <span id="maintenance-support-label">Falar com o suporte</span>
+            </a>
+            <a id="maintenance-back-link" class="maintenance-button secondary" href="./index.html" hidden>
+              Voltar ao hub
+            </a>
+          </div>
+        </div>
+
+        <aside class="maintenance-aside">
+          <div class="maintenance-aside-content">
+            <div class="maintenance-illustration" aria-hidden="true">
+              <svg viewBox="0 0 360 260" role="presentation" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="maintenance-panel" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.26" />
+                    <stop offset="100%" stop-color="#7dd3fc" stop-opacity="0.18" />
+                  </linearGradient>
+                </defs>
+                <rect x="44" y="34" width="272" height="192" rx="28" fill="url(#maintenance-panel)" stroke="rgba(255,255,255,0.16)" />
+                <circle cx="180" cy="120" r="56" fill="rgba(255,255,255,0.96)" />
+                <path d="M180 86V126" stroke="#062e6f" stroke-width="12" stroke-linecap="round" />
+                <circle cx="180" cy="154" r="8" fill="#062e6f" />
+                <path d="M142 98C153 86 166 80 180 80C194 80 207 86 218 98" stroke="#9bd9ff" stroke-width="8" stroke-linecap="round" fill="none" />
+                <path d="M128 82C144 64 160 56 180 56C200 56 216 64 232 82" stroke="#d9f2ff" stroke-width="8" stroke-linecap="round" fill="none" />
+                <path d="M220 76L140 156" stroke="#ff6b6b" stroke-width="12" stroke-linecap="round" />
+                <rect x="102" y="194" width="156" height="10" rx="5" fill="rgba(255,255,255,0.28)" />
+              </svg>
+            </div>
+
+            <div class="maintenance-checklist" aria-label="Informacoes da pausa">
+              <div class="maintenance-checklist-item">Bloqueio centralizado para evitar acesso parcial aos modulos.</div>
+              <div class="maintenance-checklist-item">Pagina unica para informar indisponibilidade enquanto o sistema estiver pausado.</div>
+              <div class="maintenance-checklist-item">Reativacao simples alterando apenas o arquivo de configuracao.</div>
+            </div>
+
+            <p id="maintenance-footer-note" class="maintenance-footer">Pague Menos • Hub de Etiquetas</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+
+</html>

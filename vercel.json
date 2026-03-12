@@ -3,5 +3,16 @@
     "buildCommand": "",
     "outputDirectory": ".",
     "installCommand": "echo 'Skipping install'",
-    "framework": null
+    "framework": null,
+    "headers": [
+        {
+            "source": "/shared/maintenance-config.js",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "no-store, no-cache, must-revalidate"
+                }
+            ]
+        }
+    ]
 }
