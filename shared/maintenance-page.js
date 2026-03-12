@@ -3,7 +3,7 @@
     enabled: true,
     appName: 'Hub de Etiquetas',
     badge: 'Sistema indisponivel',
-    title: 'Aplicacao temporariamente desabilitada',
+    title: 'Aplicação desabilitada por tempo indeterminado',
     message: 'O acesso ao sistema esta temporariamente indisponivel.',
     details: 'Tente novamente mais tarde.',
     footerNote: 'Pague Menos • Hub de Etiquetas'
