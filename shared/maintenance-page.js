@@ -6,8 +6,6 @@
     title: 'Aplicacao temporariamente desabilitada',
     message: 'O acesso ao sistema esta temporariamente indisponivel.',
     details: 'Tente novamente mais tarde.',
-    supportLabel: 'Falar com o suporte',
-    supportHref: 'https://wa.me/5562981020272',
     footerNote: 'Pague Menos • Hub de Etiquetas'
   };
 
@@ -22,7 +20,6 @@
     ['maintenance-title', config.enabled ? config.title : 'Aplicacao liberada novamente'],
     ['maintenance-message', config.enabled ? config.message : 'O modo de manutencao esta desligado.'],
     ['maintenance-details', config.enabled ? config.details : 'Voce ja pode voltar ao Hub de Etiquetas.'],
-    ['maintenance-support-label', config.supportLabel],
     ['maintenance-footer-note', config.footerNote]
   ];
 
@@ -32,11 +29,6 @@
       element.textContent = entry[1];
     }
   });
-
-  const supportLink = document.getElementById('maintenance-support-link');
-  if (supportLink) {
-    supportLink.href = config.supportHref;
-  }
 
   const routeBox = document.getElementById('maintenance-origin');
   const routeValue = document.getElementById('maintenance-origin-value');
