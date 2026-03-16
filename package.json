@@ -21,7 +21,10 @@
   "scripts": {
     "dev": "npx serve -l 3000",
     "start": "npx serve -l 3000",
-    "preview": "npx serve -l 8080"
+    "preview": "npx serve -l 8080",
+    "maintenance:on": "node scripts/toggle-maintenance.js on",
+    "maintenance:off": "node scripts/toggle-maintenance.js off",
+    "maintenance:status": "node scripts/toggle-maintenance.js status"
   },
   "engines": {
     "node": ">=18.0.0"
