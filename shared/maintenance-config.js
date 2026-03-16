@@ -1,5 +1,5 @@
 window.HUB_MAINTENANCE = {
-  enabled: false,
+  enabled: true,
   appName: 'Hub de Etiquetas',
   badge: 'Sistema indisponivel',
   title: 'Aplicação desabilitada por tempo indeterminado',
